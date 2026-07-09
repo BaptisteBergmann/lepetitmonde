@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/src/utils/supabase/client"; // Ajustez selon votre chemin d'accès
+import { createClient } from "@utils/supabase/client"; // Ajustez selon votre chemin d'accès
 import CalendarPicker from "./picker/date";
-import { Tables } from "@/src/utils/supabase/database.types";
+import { Tables } from "@utils/supabase/database.types";
 import TextPicker from "./picker/text";
 import NumberPicker from "./picker/number";
-import { getIsAdmin } from "@/src/utils/projects/project";
 
 type GuessQuestion = Tables<'guess_questions'>;
 

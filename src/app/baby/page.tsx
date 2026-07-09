@@ -1,4 +1,4 @@
-import { createClient } from "@/src/utils/supabase/server"
+import { createClient } from "@utils/supabase/server"
 
 // app/dashboard/page.tsx (Serveur)
 export default async function DashboardPage({ searchParams }) {

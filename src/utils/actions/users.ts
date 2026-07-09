@@ -1,14 +1,14 @@
 'use server'
 
-import { createClient } from '../supabase/server'
+import { createClient } from '@utils/supabase/server'
 
-export async function getUsers(projectId: string) {
+export async function getUsers(babyId: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('project_access')
+    .from('baby_access')
     .select('*')
-    .eq('project_id', projectId);
+    .eq('baby_id', babyId);
 
   if (error) { console.log("Error get users", error); return [] }
 

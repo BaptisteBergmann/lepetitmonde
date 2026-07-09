@@ -1,7 +1,7 @@
-import { getQuestions } from "@/src/utils/actions/guesses/guesses_questions";
+import { getQuestions } from "@utils/actions/guesses_questions";
 import Modal from "./_components/modal";
 import RealtimeQuestionsList from "./_components/question_list";
-import { getIsAdmin } from "@/src/utils/projects/project";
+import { getIsAdmin } from "@utils/actions/project";
 
 export default async function GuessesPage({ searchParams }: { searchParams: { projectId: string } }) {
   const projectId = (await searchParams).projectId;

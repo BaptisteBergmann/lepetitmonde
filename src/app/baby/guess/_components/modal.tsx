@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { addQuestion } from '@/src/utils/actions/guesses/guesses_questions';
+import { addQuestion } from '@utils/actions/guesses_questions';
 import { useSearchParams } from 'next/navigation' // <-- Importez ceci
 
 export default function Modal() {

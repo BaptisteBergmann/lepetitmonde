@@ -3,8 +3,7 @@ import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Header from "./components/header";
-import { createClient } from "../utils/supabase/server";
-import { getProjectsList } from "../utils/projects/project";
+import { getProjectsList } from "@utils/actions/project";
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 

@@ -9,7 +9,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { login } from "../login/actions"
+import { login } from "@utils/actions/login"
 
 export function LoginForm({
   className,

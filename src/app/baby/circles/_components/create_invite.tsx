@@ -1,6 +1,6 @@
 "use client"
 
-import { generateShortLivedLink } from "@/src/utils/actions/invite";
+import { generateShortLivedLink } from "@utils/actions/invite";
 
 export default function CreateInvite({ projectId }: { projectId: string }) {
   return (

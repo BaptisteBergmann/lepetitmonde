@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/src/utils/supabase/server'
+import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -33,16 +33,16 @@ export async function signup(formData: FormData) {
   const user = await supabase
     .from('invitations')
     .insert({
-      project_id: projectId,
+      baby_id: babyId,
       expires_at: expiresAt.toISOString(),
     })
     .select('id')
     .single();
 
-  const project = await supabase
+  const baby = await supabase
     .from('invitations')
     .insert({
-      project_id: projectId,
+      baby_id: babyId,
       expires_at: expiresAt.toISOString(),
     })
     .select('id')

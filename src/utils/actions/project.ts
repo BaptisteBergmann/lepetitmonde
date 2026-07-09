@@ -1,5 +1,5 @@
 "use server"
-import { createClient } from "@/src/utils/supabase/server"
+import { createClient } from "@utils/supabase/server"
 
 
 export async function getProjectsList() {
@@ -8,8 +8,8 @@ export async function getProjectsList() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data: projects, error } = await supabase
-    .from('projects')
+  const { data: babies, error } = await supabase
+    .from('babies')
     .select('*')
 
   if (error) {
@@ -18,27 +18,27 @@ export async function getProjectsList() {
   }
 
 
-  const projectsWithAdminStatus = projects.map((project) => ({
-    ...project,
-    isAdmin: project.owner_id === user.id // Calcule true ou false pour chaque ligne
+  const babiesWithAdminStatus = babies.map((baby) => ({
+    ...baby,
+    isAdmin: baby.owner_id === user.id // Calcule true ou false pour chaque ligne
   }))
 
-  console.log("aa", projectsWithAdminStatus)
+  console.log("aa", babiesWithAdminStatus)
 
-  return projectsWithAdminStatus
+  return babiesWithAdminStatus
 }
 
-export async function getIsAdmin(projectId: string) {
+export async function getIsAdmin(babyId: string) {
   const supabase = await createClient()
   // 1. Récupérer l'ID de l'utilisateur connecté
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return false
 
-  // 2. Demander à Supabase si la ligne combinant le projectId et l'user_id existe
+  // 2. Demander à Supabase si la ligne combinant le babyId et l'user_id existe
   const { error, count } = await supabase
-    .from('projects')
+    .from('babies')
     .select('*', { count: 'exact', head: true }) // head: true n'extrait pas la donnée, optimisant la vitesse
-    .eq('id', projectId)
+    .eq('id', babyId)
     .eq('owner_id', user.id) // Le check se fait ici, au niveau de la requête
 
   if (error) {

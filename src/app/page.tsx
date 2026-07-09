@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { getProjectsList } from "../utils/projects/project";
+import { getProjectsList } from "@utils/actions/project";
 
 export default async function Home() {
   const projects = await getProjectsList();

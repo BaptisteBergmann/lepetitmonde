@@ -1,24 +1,24 @@
 'use server'
 
-import { createClient } from '../supabase/server'
+import { createClient } from '@utils/supabase/server'
 
 export async function sendInvite(formData: FormData) {
   const email = formData.get('email') as string
-  const projectId = formData.get('projectId') as string
+  const babyId = formData.get('babyId') as string
 
   const supabase = await createClient()
 
   // Insertion dans la table invitations
   const rep = await supabase
     .from('invitations')
-    .insert([{ email, project_id: projectId, role }])
+    .insert([{ email, baby_id: babyId, role }])
 
   if (rep.error) throw new Error("Erreur lors de l'invitation")
 
 }
 
 
-export async function generateShortLivedLink(projectId: string, hoursValid: number = 24) {
+export async function generateShortLivedLink(babyId: string, hoursValid: number = 24) {
   const supabase = await createClient();
 
   const expiresAt = new Date();
@@ -27,7 +27,7 @@ export async function generateShortLivedLink(projectId: string, hoursValid: numb
   const { data, error } = await supabase
     .from('invitations')
     .insert({
-      project_id: projectId,
+      baby_id: babyId,
       expires_at: expiresAt.toISOString(),
     })
     .select('id')

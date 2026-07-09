@@ -1,7 +1,6 @@
-// app/login/actions.ts
 'use server'
 
-import { createClient } from '@/src/utils/supabase/server'
+import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 

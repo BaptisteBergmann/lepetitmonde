@@ -1,7 +1,7 @@
-import { sendInvite } from "@/src/utils/actions/invite";
+import { sendInvite } from "@utils/actions/invite";
 import CreateCircle from "./_components/create_circle";
 import RealtimeCirclesList from "./_components/display_circles";
-import { getCircles } from "@/src/utils/actions/circles/circles";
+import { getCircles } from "@utils/actions/circles";
 import CreateInvite from "./_components/create_invite";
 
 export default async function InviteForm({

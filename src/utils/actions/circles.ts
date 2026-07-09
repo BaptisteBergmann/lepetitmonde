@@ -1,8 +1,8 @@
 'use server' // Obligatoire pour définir que ce fichier contient des Server Actions
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '../../supabase/server'
-import { Tables, TablesInsert } from '../../supabase/database.types'
+import { createClient } from '@utils/supabase/server'
+import { Tables, TablesInsert } from '@utils/supabase/database.types'
 
 export async function addUserToCircle() {
   // 1. Initialiser le client Supabase côté serveur
@@ -42,7 +42,7 @@ export async function createCircle(circle: FormData) {
     .from('circles')
     .insert([{
       name: circle.get("name"),
-      project_id: circle.get("projectId"),
+      baby_id: circle.get("babyId"),
     }])
 
   if (rep.error) throw rep.error
@@ -50,7 +50,7 @@ export async function createCircle(circle: FormData) {
 
 type Circle = Tables<'circles'>;
 
-export async function getCircles(projectId: string) {
+export async function getCircles(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -59,7 +59,7 @@ export async function getCircles(projectId: string) {
   const rep = await supabase
     .from('circles')
     .select("*")
-    .eq('project_id', projectId);
+    .eq('baby_id', babyId);
 
 
   if (rep.error) throw rep.error

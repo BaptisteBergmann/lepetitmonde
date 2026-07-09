@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/src/utils/supabase/client"; // Ajustez selon votre chemin d'accès
-import { Tables } from "@/src/utils/supabase/database.types";
+import { createClient } from "@utils/supabase/client"; // Ajustez selon votre chemin d'accès
+import { Tables } from "@utils/supabase/database.types";
 
 type Circle = Tables<'circles'>;
 

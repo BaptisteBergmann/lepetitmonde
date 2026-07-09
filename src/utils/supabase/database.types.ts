@@ -14,26 +14,26 @@ export type Database = {
           created_at: string
           id: string
           name: string | null
-          project_id: string | null
+          baby_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string | null
-          project_id?: string | null
+          baby_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string | null
-          project_id?: string | null
+          baby_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "circles_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "circles_baby_id_fkey"
+            columns: ["baby_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
         ]
@@ -43,21 +43,21 @@ export type Database = {
           circle_id: string
           created_at: string
           id: number
-          project_id: string | null
+          baby_id: string | null
           user_id: string
         }
         Insert: {
           circle_id: string
           created_at?: string
           id?: number
-          project_id?: string | null
+          baby_id?: string | null
           user_id?: string
         }
         Update: {
           circle_id?: string
           created_at?: string
           id?: number
-          project_id?: string | null
+          baby_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -69,10 +69,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "circles_access_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "circles_access_baby_id_fkey"
+            columns: ["baby_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
         ]
@@ -84,7 +84,7 @@ export type Database = {
           id: string
           is_active: boolean
           options: Json | null
-          project_id: string
+          baby_id: string
           title: string | null
           type: string
         }
@@ -94,7 +94,7 @@ export type Database = {
           id?: string
           is_active: boolean
           options?: Json | null
-          project_id: string
+          baby_id: string
           title?: string | null
           type: string
         }
@@ -104,16 +104,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           options?: Json | null
-          project_id?: string
+          baby_id?: string
           title?: string | null
           type?: string
         }
         Relationships: [
           {
-            foreignKeyName: "guess_questions_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "guess_questions_baby_id_fkey"
+            columns: ["baby_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
         ]
@@ -123,7 +123,7 @@ export type Database = {
           answer: Json | null
           created_at: string
           id: string
-          project_id: string
+          baby_id: string
           question_id: string
           user_id: string
         }
@@ -131,7 +131,7 @@ export type Database = {
           answer?: Json | null
           created_at?: string
           id?: string
-          project_id: string
+          baby_id: string
           question_id?: string
           user_id?: string
         }
@@ -139,17 +139,17 @@ export type Database = {
           answer?: Json | null
           created_at?: string
           id?: string
-          project_id?: string
+          baby_id?: string
           question_id?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "guesses_question_id_project_id_fkey"
-            columns: ["question_id", "project_id"]
+            foreignKeyName: "guesses_question_id_baby_id_fkey"
+            columns: ["question_id", "baby_id"]
             isOneToOne: false
             referencedRelation: "guess_questions"
-            referencedColumns: ["id", "project_id"]
+            referencedColumns: ["id", "baby_id"]
           },
         ]
       }
@@ -158,36 +158,36 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          project_id: string
+          baby_id: string
         }
         Insert: {
           created_at?: string
           expires_at: string
           id?: string
-          project_id: string
+          baby_id: string
         }
         Update: {
           created_at?: string
           expires_at?: string
           id?: string
-          project_id?: string
+          baby_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "invitations_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "invitations_baby_id_fkey"
+            columns: ["baby_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
         ]
       }
-      project_access: {
+      baby_access: {
         Row: {
           access_level: string
           created_at: string
           id: string
-          project_id: string
+          baby_id: string
           relation_to_baby: string
           user_id: string
         }
@@ -195,7 +195,7 @@ export type Database = {
           access_level?: string
           created_at?: string
           id?: string
-          project_id: string
+          baby_id: string
           relation_to_baby?: string
           user_id?: string
         }
@@ -203,38 +203,38 @@ export type Database = {
           access_level?: string
           created_at?: string
           id?: string
-          project_id?: string
+          baby_id?: string
           relation_to_baby?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "project_access_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "baby_access_baby_id_fkey"
+            columns: ["baby_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
         ]
       }
-      projects: {
+      babies: {
         Row: {
           created_at: string
           id: string
           owner_id: string | null
-          project_name: string
+          baby_name: string
         }
         Insert: {
           created_at?: string
           id?: string
           owner_id?: string | null
-          project_name: string
+          baby_name: string
         }
         Update: {
           created_at?: string
           id?: string
           owner_id?: string | null
-          project_name?: string
+          baby_name?: string
         }
         Relationships: []
       }

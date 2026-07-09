@@ -1,4 +1,4 @@
-import { createCircle } from "@/src/utils/actions/circles/circles";
+import { createCircle } from "@utils/actions/circles";
 
 export default async function CreateCircle({ projectId }: { projectId: string }) {
   return (

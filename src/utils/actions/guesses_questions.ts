@@ -1,9 +1,9 @@
 'use server' // Obligatoire pour définir que ce fichier contient des Server Actions
 
-import { createClient } from '../../supabase/server'
-import { TablesInsert } from '../../supabase/database.types'
+import { createClient } from '@utils/supabase/server'
+import { TablesInsert } from '@utils/supabase/database.types'
 
-export async function getQuestions(projectId: string) {
+export async function getQuestions(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -12,7 +12,7 @@ export async function getQuestions(projectId: string) {
   const { data, error } = await supabase
     .from('guess_questions')
     .select("*")
-    .eq('project_id', projectId);
+    .eq('baby_id', babyId);
 
   if (error) { console.error(error); return [] }
   console.log(data)

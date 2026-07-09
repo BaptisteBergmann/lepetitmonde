@@ -1,7 +1,7 @@
 'use server' // Obligatoire pour définir que ce fichier contient des Server Actions
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '../../supabase/server'
+import { createClient } from '@utils/supabase/server'
 
 export async function submitGuess(formData: FormData) {
   // 1. Initialiser le client Supabase côté serveur
