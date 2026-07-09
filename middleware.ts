@@ -4,9 +4,6 @@ import { createClient } from './src/utils/supabase/server'
 
 export async function middleware(request: NextRequest) {
   // On crée le client Supabase serveur pour lire les cookies de session
-  if (request.nextUrl.pathname === '/') {
-    return NextResponse.next()
-  }
   const supabase = await createClient()
 
   // On récupère l'utilisateur actuel
@@ -35,5 +32,6 @@ export const config = {
      * - les images (svg, png, jpg, etc.)
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '!/',
   ],
 }
