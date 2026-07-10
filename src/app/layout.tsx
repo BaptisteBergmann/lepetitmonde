@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
-import Header from "./components/header";
-import { getProjectsList } from "@utils/actions/project";
+import { cn } from "@utils/utils";
+import Header from "@components/header";
+import { getBabiesList } from "@utils/actions/baby";
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -38,7 +38,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const projects = await getProjectsList() || []; // Requête serveur rapide
+  const babies = await getBabiesList() || []; // Requête serveur rapide
 
   return (
     <html
@@ -46,14 +46,14 @@ export default async function RootLayout({
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", dmSans.variable)}
     >
       <body className="min-h-screen flex flex-col">
-        <Header projects={projects} />
+        <Header babies={babies} />
 
         {/* Le main permet de bien séparer le header du contenu */}
         <main className="flex-grow pt-20"> {/* pt-20 = padding-top pour compenser le header fixed */}
           {children}
         </main>
       </body>
-      {/* <Header projects={projects}></Header> */}
+      {/* <Header babies={babies}></Header> */}
       {/* <body className="flex flex-col">{children}</body> */}
     </html>
   );

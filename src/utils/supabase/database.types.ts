@@ -9,24 +9,83 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      babies: {
+        Row: {
+          baby_surname: string
+          created_at: string
+          id: string
+          owner_id: string | null
+        }
+        Insert: {
+          baby_surname: string
+          created_at?: string
+          id?: string
+          owner_id?: string | null
+        }
+        Update: {
+          baby_surname?: string
+          created_at?: string
+          id?: string
+          owner_id?: string | null
+        }
+        Relationships: []
+      }
+      baby_access: {
+        Row: {
+          access_level: string
+          baby_id: string
+          created_at: string
+          id: string
+          relation_to_baby: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          baby_id: string
+          created_at?: string
+          id?: string
+          relation_to_baby?: string
+          user_id?: string
+        }
+        Update: {
+          access_level?: string
+          baby_id?: string
+          created_at?: string
+          id?: string
+          relation_to_baby?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "baby_access_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       circles: {
         Row: {
+          baby_id: string | null
           created_at: string
           id: string
           name: string | null
-          baby_id: string | null
+          parent_circle: string | null
         }
         Insert: {
+          baby_id?: string | null
           created_at?: string
           id?: string
           name?: string | null
-          baby_id?: string | null
+          parent_circle?: string | null
         }
         Update: {
+          baby_id?: string | null
           created_at?: string
           id?: string
           name?: string | null
-          baby_id?: string | null
+          parent_circle?: string | null
         }
         Relationships: [
           {
@@ -36,38 +95,38 @@ export type Database = {
             referencedRelation: "babies"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      circles_access: {
-        Row: {
-          circle_id: string
-          created_at: string
-          id: number
-          baby_id: string | null
-          user_id: string
-        }
-        Insert: {
-          circle_id: string
-          created_at?: string
-          id?: number
-          baby_id?: string | null
-          user_id?: string
-        }
-        Update: {
-          circle_id?: string
-          created_at?: string
-          id?: number
-          baby_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "circles_access_circle_id_fkey"
-            columns: ["circle_id"]
+            foreignKeyName: "circles_parent_circle_fkey"
+            columns: ["parent_circle"]
             isOneToOne: false
             referencedRelation: "circles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      circles_access: {
+        Row: {
+          baby_id: string | null
+          circle_id: string
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          baby_id?: string | null
+          circle_id: string
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Update: {
+          baby_id?: string | null
+          circle_id?: string
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
           {
             foreignKeyName: "circles_access_baby_id_fkey"
             columns: ["baby_id"]
@@ -75,36 +134,43 @@ export type Database = {
             referencedRelation: "babies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "circles_access_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       guess_questions: {
         Row: {
+          baby_id: string
           created_at: string
           description: string | null
           id: string
           is_active: boolean
           options: Json | null
-          baby_id: string
           title: string | null
           type: string
         }
         Insert: {
+          baby_id: string
           created_at?: string
           description?: string | null
           id?: string
           is_active: boolean
           options?: Json | null
-          baby_id: string
           title?: string | null
           type: string
         }
         Update: {
+          baby_id?: string
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
           options?: Json | null
-          baby_id?: string
           title?: string | null
           type?: string
         }
@@ -121,25 +187,25 @@ export type Database = {
       guesses: {
         Row: {
           answer: Json | null
+          baby_id: string
           created_at: string
           id: string
-          baby_id: string
           question_id: string
           user_id: string
         }
         Insert: {
           answer?: Json | null
+          baby_id: string
           created_at?: string
           id?: string
-          baby_id: string
           question_id?: string
           user_id?: string
         }
         Update: {
           answer?: Json | null
+          baby_id?: string
           created_at?: string
           id?: string
-          baby_id?: string
           question_id?: string
           user_id?: string
         }
@@ -155,22 +221,22 @@ export type Database = {
       }
       invitations: {
         Row: {
+          baby_id: string
           created_at: string
           expires_at: string
           id: string
-          baby_id: string
         }
         Insert: {
+          baby_id: string
           created_at?: string
           expires_at: string
           id?: string
-          baby_id: string
         }
         Update: {
+          baby_id?: string
           created_at?: string
           expires_at?: string
           id?: string
-          baby_id?: string
         }
         Relationships: [
           {
@@ -182,79 +248,23 @@ export type Database = {
           },
         ]
       }
-      baby_access: {
-        Row: {
-          access_level: string
-          created_at: string
-          id: string
-          baby_id: string
-          relation_to_baby: string
-          user_id: string
-        }
-        Insert: {
-          access_level?: string
-          created_at?: string
-          id?: string
-          baby_id: string
-          relation_to_baby?: string
-          user_id?: string
-        }
-        Update: {
-          access_level?: string
-          created_at?: string
-          id?: string
-          baby_id?: string
-          relation_to_baby?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "baby_access_baby_id_fkey"
-            columns: ["baby_id"]
-            isOneToOne: false
-            referencedRelation: "babies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      babies: {
-        Row: {
-          created_at: string
-          id: string
-          owner_id: string | null
-          baby_name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          owner_id?: string | null
-          baby_name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          owner_id?: string | null
-          baby_name?: string
-        }
-        Relationships: []
-      }
       users: {
         Row: {
           created_at: string
           first_name: string | null
-          id: number
+          id: string
           last_name: string | null
         }
         Insert: {
           created_at?: string
           first_name?: string | null
-          id?: number
+          id?: string
           last_name?: string | null
         }
         Update: {
           created_at?: string
           first_name?: string | null
-          id?: number
+          id?: string
           last_name?: string | null
         }
         Relationships: []
