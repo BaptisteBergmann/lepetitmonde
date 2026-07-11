@@ -27,3 +27,24 @@ export const getBabiesList = cache(async () => {
 
   return babiesWithAdminStatus
 })
+
+export const getBaby = cache(async (babyId: string) => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: baby, error } = await supabase
+    .from('babies')
+    .select('*')
+    .eq("id", babyId)
+    .single()
+
+  if (error) {
+    console.error("Erreur de récupération :", error)
+    return []
+  }
+
+  return { ...baby, isAdmin: baby.owner_id === user.id }
+})
+

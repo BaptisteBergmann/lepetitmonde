@@ -1,24 +1,35 @@
 "use client";
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 
-export default function BabySelector({ babies }) {
+// J'ajoute une interface typée (Optionnelle mais recommandée)
+interface Baby {
+  id: string;
+  baby_name: string;
+}
+
+export default function BabySelector({ babies }: { babies: Baby[] }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentBabyId = searchParams.get('babyId');
+  const params = useParams();
+  const pathname = usePathname(); // Permet de savoir sur quelle sous-page on est (ex: /baby/123/timeline)
 
-  const handleSelect = (id: string) => {
-    // Création d'un nouvel objet URLSearchParams pour préserver les autres paramètres
-    const params = new URLSearchParams(searchParams.toString());
+  // On récupère l'ID depuis l'URL dynamique (ex: app/baby/[babyId]/...)
+  // Assure-toi que le nom de ton dossier correspond bien à 'babyId'
+  const currentBabyId = params?.babyId as string;
 
-    if (id) {
-      params.set('babyId', id);
-    } else {
-      params.delete('babyId');
+  const handleSelect = (newId: string) => {
+    if (!newId) {
+      // Si l'utilisateur sélectionne "Choisir un bébé", on le renvoie à la racine de l'app
+      router.push('/');
+      return;
     }
 
-    // On met à jour l'URL : Next.js va recharger la page serveur avec ces nouveaux paramètres
-    router.push(`?${params.toString()}`);
+    if (currentBabyId && pathname.includes(`/baby/${currentBabyId}`)) {
+      const newPath = pathname.replace(`/baby/${currentBabyId}`, `/baby/${newId}`);
+      router.push(newPath);
+    } else {
+      router.push(`/baby/${newId}`);
+    }
   };
 
   return (
@@ -29,7 +40,9 @@ export default function BabySelector({ babies }) {
     >
       <option value="">Choisir un bébé</option>
       {babies.map((p) => (
-        <option key={p.id} value={p.id}>{p.baby_name}</option>
+        <option key={p.id} value={p.id}>
+          {p.baby_name}
+        </option>
       ))}
     </select>
   );

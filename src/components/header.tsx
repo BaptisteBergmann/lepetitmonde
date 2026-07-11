@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'; // Importez aussi usePathname
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import BabySelector from './baby-selector';
 
 interface HeaderProps {
@@ -12,21 +12,28 @@ interface HeaderProps {
 export default function Header({
   babies,
   activeTab,
-  setActiveTab,
 }: HeaderProps) {
-
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const navigateTo = (tab: string, baby: boolean = true) => {
-    const params = new URLSearchParams(searchParams.toString());
-    router.push(`${baby ? "/baby" : ""}/${tab}?${params.toString()}`);
-  };
+  const params = useParams();
 
+  const currentBabyId = params?.babyId as string;
+  console.log(currentBabyId)
+  console.log(params)
+  const navigateTo = (tab: string, isBabyRoute: boolean = true) => {
+    console.log(isBabyRoute, currentBabyId)
+    if (isBabyRoute && currentBabyId) {
+      router.push(`/baby/${currentBabyId}/${tab}`);
+    } else if (isBabyRoute && !currentBabyId) {
+      router.push('/');
+    } else {
+      router.push(`/${tab}`);
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
       <div
-        onClick={() => setActiveTab('bets')}
+        onClick={() => router.push('/')} // Le logo ramène à l'accueil global
         className="text-xl font-black text-primary cursor-pointer hover:opacity-80 transition-opacity"
       >
         Babynew
@@ -48,7 +55,10 @@ export default function Header({
       </nav>
 
       <div className="flex items-center gap-2">
-        <div onClick={() => navigateTo("login", false)} className="w-9 h-9 rounded-full bg-gray-200 ml-2 border border-gray-300" />
+        <div
+          onClick={() => navigateTo("login", false)}
+          className="w-9 h-9 rounded-full bg-gray-200 ml-2 border border-gray-300 cursor-pointer hover:bg-gray-300 transition-colors"
+        />
       </div>
     </header>
   );

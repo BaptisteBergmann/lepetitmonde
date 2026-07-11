@@ -1,19 +1,22 @@
-import { getQuestions } from "@utils/actions/guesses_questions";
 import Modal from "./_components/modal";
-import RealtimeQuestionsList from "./_components/question_list";
+import { Suspense } from "react";
+import QuestionsListWrapper from "./questions_list_wrapper";
 
-export default async function GuessesPage({ searchParams }: { searchParams: { babyId: string } }) {
-  const babyId = (await searchParams).babyId;
+export default async function GuessesPage({
+  params,
+}: {
+  params: Promise<{ babyId: string }>
+}) {
+  const { babyId } = await params
 
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold">Pronostics de la famille</h1>
 
-      {/* Formulaire pour ajouter un pronostic */}
-
-      {/* Liste des pronostics */}
-      <RealtimeQuestionsList babyId={babyId} initialQuestions={await getQuestions(babyId)}></RealtimeQuestionsList>
+      <Suspense>
+        <QuestionsListWrapper babyId={babyId} />
+      </Suspense>
       <Modal></Modal>
     </div >
   );

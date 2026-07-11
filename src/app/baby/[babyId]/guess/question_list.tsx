@@ -2,24 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@utils/supabase/client"; // Ajustez selon votre chemin d'accès
-import CalendarPicker from "./picker/date";
+import CalendarPicker from "./_components/picker/date";
 import { Tables } from "@utils/supabase/database.types";
-import TextPicker from "./picker/text";
-import NumberPicker from "./picker/number";
+import TextPicker from "./_components/picker/text";
+import NumberPicker from "./_components/picker/number";
+import { useParams } from "next/navigation";
 
 type GuessQuestion = Tables<'guess_questions'>;
 
-interface RealtimeQuestionsListProps {
-  initialQuestions: GuessQuestion[];
-  babyId: string;
-  isAdmin: boolean;
-}
 
-export default function RealtimeQuestionsList({
-  initialQuestions,
-  babyId,
-  isAdmin,
-}: RealtimeQuestionsListProps) {
+export default function QuestionsList({ initialQuestions, isAdmin }) {
+  const params = useParams();
+
+  const babyId = params?.babyId as string;
   const [questions, setQuestions] = useState<GuessQuestion[]>(initialQuestions);
   const supabase = createClient();
 

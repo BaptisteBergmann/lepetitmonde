@@ -2,12 +2,20 @@
 
 import { createClient } from '@utils/supabase/server'
 import { TablesInsert } from '@utils/supabase/database.types'
+import { logger } from '../logger'
 
 export async function getQuestions(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
+  const contextLogger = logger.child({
+    module: 'guess-action',
+    babyId,
+    user: user.id
+  });
+
+  contextLogger.info({ babyId }, "babyId: ")
 
   const { data, error } = await supabase
     .from('guess_questions')
