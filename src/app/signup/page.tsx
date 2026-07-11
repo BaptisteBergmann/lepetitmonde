@@ -1,4 +1,4 @@
-import { SignupForm } from "../components/signup-form"
+import { SignupForm } from "@components/signup-form"
 
 export default async function SignupPage({
   searchParams,

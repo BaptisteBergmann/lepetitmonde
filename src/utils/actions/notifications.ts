@@ -35,39 +35,107 @@ export async function notifyFamily(title: string, body: string, url: string) {
 
 
 
-let subscription: PushSubscription | null = null
-
 export async function subscribeUser(sub: PushSubscription) {
-  subscription = sub
-  // In a production environment, you would want to store the subscription in a database
-  // For example: await db.subscriptions.create({ data: sub })
+  const supabase = await createClient()
+
+  // 1. Récupérer l'utilisateur connecté
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Non authentifié')
+
+  // 2. Sauvegarder dans Supabase (Upsert si l'abonnement existe déjà pour cet utilisateur)
+  const { error } = await supabase
+    .from('push_subscriptions')
+    .upsert({
+      user_id: user.id,
+      subscription: sub,
+    })
+
+  if (error) throw error
   return { success: true }
 }
 
 export async function unsubscribeUser() {
-  subscription = null
-  // In a production environment, you would want to remove the subscription from the database
-  // For example: await db.subscriptions.delete({ where: { ... } })
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  // Supprimer l'abonnement en base
+  await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('user_id', user.id)
+
   return { success: true }
 }
 
-export async function sendNotification(message: string) {
-  if (!subscription) {
-    throw new Error('No subscription available')
+export async function sendNotification(message: string, targetUserId: string = undefined) {
+  // 1. Récupérer l'abonnement depuis la base de données
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  if (!targetUserId) targetUserId = user.id
+
+
+  const { data: subData } = await supabase
+    .from('push_subscriptions')
+    .select('subscription')
+    .eq('user_id', targetUserId)
+    .single()
+
+  if (!subData) {
+    throw new Error('Aucun abonnement trouvé pour cet utilisateur')
   }
 
+  // 2. Envoyer la notification via web-push
   try {
     await webpush.sendNotification(
-      subscription,
+      subData.subscription,
       JSON.stringify({
-        title: 'Test Notification',
+        title: 'Journal de Bébé',
         body: message,
         icon: '/icon.png',
       })
     )
     return { success: true }
   } catch (error) {
-    console.error('Error sending push notification:', error)
-    return { success: false, error: 'Failed to send notification' }
+    console.error('Erreur notification:', error)
+    return { success: false }
   }
 }
+
+// export async function subscribeUser(sub: PushSubscription) {
+//   subscription = sub
+//   // In a production environment, you would want to store the subscription in a database
+//   // For example: await db.subscriptions.create({ data: sub })
+//   return { success: true }
+// }
+//
+// export async function unsubscribeUser() {
+//   subscription = null
+//   // In a production environment, you would want to remove the subscription from the database
+//   // For example: await db.subscriptions.delete({ where: { ... } })
+//   return { success: true }
+// }
+//
+// export async function sendNotification(message: string) {
+//   if (!subscription) {
+//     throw new Error('No subscription available')
+//   }
+//
+//   try {
+//     await webpush.sendNotification(
+//       subscription,
+//       JSON.stringify({
+//         title: 'Test Notification',
+//         body: message,
+//         icon: '/icon.png',
+//       })
+//     )
+//     return { success: true }
+//   } catch (error) {
+//     console.error('Error sending push notification:', error)
+//     return { success: false, error: 'Failed to send notification' }
+//   }
+// }

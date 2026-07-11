@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@components/ui/button"
+import { Card, CardContent } from "@components/ui/card"
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@components/ui/field"
+import { Input } from "@components/ui/input"
 // Assurez-vous d'avoir une action `signup` exportée depuis ce fichier ou un autre
-import { signup } from "../../utils/actions/logout"
+import { signup } from "@utils/actions/logout"
 
 // On ajoute 'token' aux props attendues
 interface SignupFormProps extends React.ComponentProps<"div"> {
@@ -39,6 +39,10 @@ export function SignupForm({
               </div>
 
               {/* Ajout d'un champ Nom pour l'inscription */}
+              <Field hidden>
+                <FieldLabel htmlFor="token">Token</FieldLabel>
+                <Input name="token" id="token" type="text" required value={token} />
+              </Field>
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
                 <Input
