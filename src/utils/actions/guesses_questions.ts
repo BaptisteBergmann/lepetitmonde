@@ -86,11 +86,20 @@ export async function getQuestionsWithoutGuess(babyId: string) {
 
   contextLogger.info({ babyId }, "babyId: ")
 
-  const { data, error } = await supabase
+  const guessedQuestionIds = (await getQuestionsWithGuess(babyId)).map((q) => q.id)
+
+
+  let query = supabase
     .from('guess_questions')
-    .select("*, guesses (*)")
-    .eq('baby_id', babyId)
-    .is('guesses.user_id', null);
+    .select("*")
+    .eq('baby_id', babyId);
+
+  if (guessedQuestionIds.length > 0) {
+    query = query.not('id', 'in', `(${guessedQuestionIds.join(',')})`);
+  }
+
+  const { data, error } = await query;
+
 
   if (error) { console.error(error); return [] }
   contextLogger.debug(data, "Received questions with guess")

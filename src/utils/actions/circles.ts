@@ -66,3 +66,22 @@ export async function getCircles(babyId: string) {
   return rep.data
 }
 
+export async function getCirclesAccess(babyId: string, userId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const rep = await supabase
+    .from('circles_access')
+    .select("*")
+    .eq('baby_id', babyId)
+    .eq('user_id', userId)
+    ;
+
+
+  if (rep.error) throw rep.error
+  return rep.data
+}
+
+

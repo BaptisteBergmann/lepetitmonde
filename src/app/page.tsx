@@ -10,7 +10,7 @@ export default async function Home() {
       hello
       {babies.map((p) => (
         <div key={p.id}> {/* Toujours ajouter une clé unique ! */}
-          {p.baby_name}
+          {p.baby_surname}
         </div>
       ))}
     </div>

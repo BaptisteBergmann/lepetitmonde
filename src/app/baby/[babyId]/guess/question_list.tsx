@@ -1,9 +1,6 @@
-"use client";
 
-import CalendarPicker from "./_components/picker/date";
-import TextPicker from "./_components/picker/text";
-import NumberPicker from "./_components/picker/number";
 import { logger } from "@/utils/logger";
+import QuestionWrapper from "./question_wrapper";
 
 
 
@@ -18,10 +15,7 @@ export default function QuestionsList({ init }) {
 
         return (
           <li key={question.id} className="border-b py-2 text-black dark:text-white">
-            <span className="font-medium">Question :</span> {question.title}
-            {question.type === "date" && <CalendarPicker questionWithGuess={question} />}
-            {question.type === "number" && <NumberPicker options={question.options} />}
-            {question.type === "text" && <TextPicker />}
+            <QuestionWrapper questionWithGuess={question} />
           </li>
         )
       })}

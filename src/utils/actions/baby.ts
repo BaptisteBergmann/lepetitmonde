@@ -10,22 +10,15 @@ export const getBabiesList = cache(async () => {
 
   const { data: babies, error } = await supabase
     .from('babies')
-    .select('*')
+    .select('*, baby_access!inner (*)')
+    .eq('baby_access.user_id', user.id)
 
   if (error) {
     console.error("Erreur de récupération :", error)
     return []
   }
 
-
-  const babiesWithAdminStatus = babies.map((baby) => ({
-    ...baby,
-    isAdmin: baby.owner_id === user.id // Calcule true ou false pour chaque ligne
-  }))
-
-  console.log("aa", babiesWithAdminStatus)
-
-  return babiesWithAdminStatus
+  return babies
 })
 
 export const getBaby = cache(async (babyId: string) => {

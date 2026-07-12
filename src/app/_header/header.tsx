@@ -2,11 +2,8 @@
 
 import BabySelector from '@/components/baby-selector';
 import { logger } from '@/utils/logger';
-import { Constants, Enums } from '@/utils/supabase/database.types';
-import { Database } from 'lucide-react';
-import { useRouter, useParams, usePathname } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
-type Role = Enums<"role">;
 
 interface HeaderProps {
   babies: any[];

@@ -1,23 +1,18 @@
 "use client";
 
-interface TextPickerProps {
-  selected: string;
-  onChange: (date: string) => void;
-}
+import { PickerProps } from "../../question_wrapper";
 
-export default function TextPicker({ selected, onChange }: TextPickerProps) {
+export default function TextPicker({ value, options, onChange, id }: PickerProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-gray-700">
-      </label>
-      <input
-        type="text"
-        value={selected}
-        onChange={(e) => onChange(e.target.value)}
-        className="border border-gray-300 rounded-md p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-        required
-      />
-    </div>
+    <input
+      type="text"
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="border border-gray-300 rounded-md p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+      disabled={!onChange}
+    />
   );
 }
 

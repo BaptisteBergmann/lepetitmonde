@@ -22,8 +22,11 @@ export default async function QuestionsListWrapper({
 
   return (
     <ul className="mt-6 space-y-2">
+      QUESTIONS a repondre:
       <QuestionsList init={questionWithoutGuess} />
-      <QuestionsListAnswered init={questionWithGuess} />
+      Questions repondu:
+      <QuestionsList init={questionWithGuess} />
+      {/* <QuestionsListAnswered init={questionWithGuess} /> */}
     </ul>
   );
 }
