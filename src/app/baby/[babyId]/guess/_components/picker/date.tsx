@@ -1,19 +1,19 @@
 "use client";
 
 import { PickerProps } from "../../question_wrapper";
-
+import { Input } from "@/components/ui/input";
 
 export default function CalendarPicker({ value, options, onChange, id }: PickerProps) {
   return (
-    <input
+    <Input
       type="date"
       id={id}
       name="CalendarPicker"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="border border-gray-300 rounded-md p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+      onChange={(e) => onChange?.(e.target.value)}
       required
       disabled={!onChange}
+      className="w-full cursor-pointer"
     />
   );
 }

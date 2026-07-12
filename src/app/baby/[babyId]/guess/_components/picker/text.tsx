@@ -1,17 +1,18 @@
 "use client";
 
 import { PickerProps } from "../../question_wrapper";
+import { Input } from "@/components/ui/input";
 
 export default function TextPicker({ value, options, onChange, id }: PickerProps) {
   return (
-    <input
+    <Input
       type="text"
       id={id}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="border border-gray-300 rounded-md p-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+      onChange={(e) => onChange?.(e.target.value)}
       required
       disabled={!onChange}
+      className="w-full"
     />
   );
 }

@@ -1,8 +1,7 @@
 
 import { getQuestionsWithGuess, getQuestionsWithoutGuess } from "@/utils/actions/guesses_questions";
-import QuestionsList from "./question_list";
+import GuessesTabs from "./guesses_tabs";
 import { logger } from "@/utils/logger";
-import QuestionsListAnswered from "./question_list_answered";
 
 export default async function QuestionsListWrapper({
   babyId,
@@ -17,16 +16,15 @@ export default async function QuestionsListWrapper({
 
 
   if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0) {
-    return <p className="text-gray-500 mt-4 text-sm">Aucun pronostic créé pour le moment.</p>;
+    return (
+      <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/10">
+        <p className="text-sm font-medium">Aucun pronostic créé pour le moment.</p>
+        <p className="text-xs text-muted-foreground mt-1">Cliquez sur &quot;Nouveau pronostic&quot; pour en ajouter un.</p>
+      </div>
+    );
   }
 
   return (
-    <ul className="mt-6 space-y-2">
-      QUESTIONS a repondre:
-      <QuestionsList init={questionWithoutGuess} />
-      Questions repondu:
-      <QuestionsList init={questionWithGuess} />
-      {/* <QuestionsListAnswered init={questionWithGuess} /> */}
-    </ul>
+    <GuessesTabs unanswered={questionWithoutGuess} answered={questionWithGuess} />
   );
 }
