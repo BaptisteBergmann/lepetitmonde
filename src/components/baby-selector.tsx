@@ -1,25 +1,27 @@
 "use client";
 
+import { Tables } from '@/utils/supabase/database.types';
 import { useRouter, useParams, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
-// J'ajoute une interface typée (Optionnelle mais recommandée)
-interface Baby {
-  id: string;
-  baby_name: string;
-}
+
+type Baby = Tables<'babies'>;
 
 export default function BabySelector({ babies }: { babies: Baby[] }) {
   const router = useRouter();
   const params = useParams();
-  const pathname = usePathname(); // Permet de savoir sur quelle sous-page on est (ex: /baby/123/timeline)
+  const pathname = usePathname();
 
-  // On récupère l'ID depuis l'URL dynamique (ex: app/baby/[babyId]/...)
-  // Assure-toi que le nom de ton dossier correspond bien à 'babyId'
   const currentBabyId = params?.babyId as string;
+
+  useEffect(() => {
+    if (!currentBabyId && babies && babies.length > 0) {
+      router.push(`/baby/${babies[0].id}`);
+    }
+  }, [currentBabyId, babies, router]);
 
   const handleSelect = (newId: string) => {
     if (!newId) {
-      // Si l'utilisateur sélectionne "Choisir un bébé", on le renvoie à la racine de l'app
       router.push('/');
       return;
     }
@@ -38,10 +40,9 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
       onChange={(e) => handleSelect(e.target.value)}
       className="p-2 border rounded-md"
     >
-      <option value="">Choisir un bébé</option>
       {babies.map((p) => (
         <option key={p.id} value={p.id}>
-          {p.baby_name}
+          {p.baby_surname}
         </option>
       ))}
     </select>

@@ -32,7 +32,7 @@ export type Database = {
       }
       baby_access: {
         Row: {
-          access_level: string
+          access_level: Database["public"]["Enums"]["role"]
           baby_id: string
           created_at: string
           id: string
@@ -40,7 +40,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          access_level?: string
+          access_level?: Database["public"]["Enums"]["role"]
           baby_id: string
           created_at?: string
           id?: string
@@ -48,7 +48,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
-          access_level?: string
+          access_level?: Database["public"]["Enums"]["role"]
           baby_id?: string
           created_at?: string
           id?: string
@@ -57,7 +57,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "baby_access_baby_id_fkey"
+            foreignKeyName: "baby_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_access_project_id_fkey"
             columns: ["baby_id"]
             isOneToOne: false
             referencedRelation: "babies"
@@ -211,7 +218,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "guesses_question_id_baby_id_fkey"
+            foreignKeyName: "guesses_question_id_project_id_fkey"
             columns: ["question_id", "baby_id"]
             isOneToOne: false
             referencedRelation: "guess_questions"
@@ -248,6 +255,35 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          id: number
+          subscription: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          subscription: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          subscription?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
@@ -277,7 +313,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      role: "admin" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -404,7 +440,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      role: ["admin", "viewer"],
+    },
   },
 } as const
 

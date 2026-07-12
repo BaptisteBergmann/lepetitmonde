@@ -23,7 +23,7 @@ export async function getQuestions(babyId: string) {
     .eq('baby_id', babyId);
 
   if (error) { console.error(error); return [] }
-  console.log(data)
+  contextLogger.debug(data, "Received questions")
   return data
 }
 
@@ -48,3 +48,53 @@ export async function addQuestion(formData: NewGuess) {
   return rep
 
 }
+
+export async function getQuestionsWithGuess(babyId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+  const contextLogger = logger.child({
+    function: getQuestionsWithGuess.name,
+    babyId,
+    user: user.id
+  });
+
+  contextLogger.info({ babyId }, "babyId: ")
+
+  const { data, error } = await supabase
+    .from('guess_questions')
+    .select("*, guesses!inner (*)")
+    .eq('baby_id', babyId)
+    .eq('guesses.user_id', user.id);;
+
+  if (error) { console.error(error); return [] }
+  contextLogger.debug(data, "Received questions with guess")
+  return data
+}
+
+export async function getQuestionsWithoutGuess(babyId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+  const contextLogger = logger.child({
+    function: getQuestionsWithoutGuess.name,
+    babyId,
+    user: user.id
+  });
+
+  contextLogger.info({ babyId }, "babyId: ")
+
+  const { data, error } = await supabase
+    .from('guess_questions')
+    .select("*, guesses (*)")
+    .eq('baby_id', babyId)
+    .is('guesses.user_id', null);
+
+  if (error) { console.error(error); return [] }
+  contextLogger.debug(data, "Received questions with guess")
+  return data
+}
+
+

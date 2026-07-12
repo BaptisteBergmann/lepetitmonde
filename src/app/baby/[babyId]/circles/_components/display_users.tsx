@@ -77,8 +77,8 @@ export default function RealtimeUsersList({
     <ul className="mt-6 space-y-2">
       {users.map((user) => (
         <li key={user.id} className="border-b py-2 text-black dark:text-white">
-          <span className="font-medium">User :</span> {user.user_id}
-          <Button onClick={() => sendNotification("hello", user.user_id)}>
+          <span className="font-medium">User :</span> {user.id} {user.first_name} {user.last_name}
+          <Button onClick={() => sendNotification("hello", user.id)}>
             Send notif
           </Button>
         </li>

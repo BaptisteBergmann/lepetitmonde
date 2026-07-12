@@ -1,7 +1,12 @@
 "use client"
 
+import BabySelector from '@/components/baby-selector';
+import { logger } from '@/utils/logger';
+import { Constants, Enums } from '@/utils/supabase/database.types';
+import { Database } from 'lucide-react';
 import { useRouter, useParams, usePathname } from 'next/navigation';
-import BabySelector from './baby-selector';
+
+type Role = Enums<"role">;
 
 interface HeaderProps {
   babies: any[];
@@ -13,12 +18,22 @@ export default function Header({
   babies,
   activeTab,
 }: HeaderProps) {
+  const contextLogger = logger.child({ function: Header.name })
+  contextLogger.debug(babies)
   const router = useRouter();
   const params = useParams();
 
   const currentBabyId = params?.babyId as string;
-  console.log(currentBabyId)
-  console.log(params)
+
+  const pages = [
+    { id: "guess", name: "Pronostique", role: "viewer" },
+    { id: "circles", name: "Groupes", role: "admin" },
+    { id: "calendar", name: "Calendrie", role: "viewer" },
+    { id: "news", name: "Newsletter", role: "viewer" },
+  ]
+
+  contextLogger.debug(currentBabyId)
+  contextLogger.debug(params)
   const navigateTo = (tab: string, isBabyRoute: boolean = true) => {
     console.log(isBabyRoute, currentBabyId)
     if (isBabyRoute && currentBabyId) {
@@ -42,14 +57,14 @@ export default function Header({
       <BabySelector babies={babies}></BabySelector>
 
       <nav className="hidden md:flex items-center gap-6">
-        {['newsletter', 'calendar', 'guess', 'circles'].map((tab) => (
+        {pages.map((tab) => (
           <button
-            key={tab}
-            onClick={() => navigateTo(tab)}
-            className={`text-sm font-semibold transition-colors ${activeTab === tab ? 'text-primary' : 'text-gray-500 hover:text-gray-900'
+            key={tab.id}
+            onClick={() => navigateTo(tab.id)}
+            className={`text-sm font-semibold transition-colors ${activeTab === tab.id ? 'text-primary' : 'text-gray-500 hover:text-gray-900'
               }`}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
           </button>
         ))}
       </nav>

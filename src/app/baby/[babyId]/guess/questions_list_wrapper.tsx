@@ -1,25 +1,29 @@
 
-import { getQuestions } from "@/utils/actions/guesses_questions";
+import { getQuestionsWithGuess, getQuestionsWithoutGuess } from "@/utils/actions/guesses_questions";
 import QuestionsList from "./question_list";
-import { getBaby } from "@/utils/actions/baby";
-
+import { logger } from "@/utils/logger";
+import QuestionsListAnswered from "./question_list_answered";
 
 export default async function QuestionsListWrapper({
   babyId,
 }: {
   babyId: string
 }) {
-  const questions = await getQuestions(babyId);
-  const baby = await getBaby(babyId)
+  const contextLogger = logger.child({ function: QuestionsListWrapper.name, babyId })
+  const questionWithGuess = await getQuestionsWithGuess(babyId)
+  contextLogger.debug(questionWithGuess, "Questions with guess")
+  const questionWithoutGuess = await getQuestionsWithoutGuess(babyId)
+  contextLogger.debug(questionWithoutGuess, "Questions without guess")
 
 
-  if (questions.length === 0) {
+  if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0) {
     return <p className="text-gray-500 mt-4 text-sm">Aucun pronostic créé pour le moment.</p>;
   }
 
   return (
     <ul className="mt-6 space-y-2">
-      <QuestionsList initialQuestions={questions} isAdmin={baby.isAdmin} />
+      <QuestionsList init={questionWithoutGuess} />
+      <QuestionsListAnswered init={questionWithGuess} />
     </ul>
   );
 }
