@@ -2,6 +2,8 @@ import Modal from "./_components/modal";
 import { Suspense } from "react";
 import QuestionsListWrapper from "./questions_list_wrapper";
 import { Loader2 } from "lucide-react";
+import { getUserAccess, getUsers } from "@/utils/actions/users";
+import { logger } from "@/utils/logger";
 
 export default async function GuessesPage({
   params,
@@ -9,6 +11,9 @@ export default async function GuessesPage({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
+  const access = await getUserAccess(babyId)
+  const contextLogger = logger.child({ function: GuessesPage.name, params })
+  contextLogger.debug(access, "User Access")
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -22,9 +27,12 @@ export default async function GuessesPage({
             Qui verra juste ? Participez aux pronostics ou créez-en de nouveaux pour animer l&apos;attente en famille !
           </p>
         </div>
-        <div className="flex shrink-0">
-          <Modal babyId={babyId} />
-        </div>
+        {access.access_level === "admin" &&
+
+          <div className="flex shrink-0">
+            <Modal babyId={babyId} />
+          </div>
+        }
       </div>
 
       <Suspense
