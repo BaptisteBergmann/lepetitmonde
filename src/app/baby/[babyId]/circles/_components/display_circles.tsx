@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@utils/supabase/client"; // Ajustez selon votre chemin d'accès
 import { Tables } from "@utils/supabase/database.types";
+import { CircleDot } from "lucide-react";
 
 type Circle = Tables<'circles'>;
 
@@ -63,16 +64,32 @@ export default function RealtimeCirclesList({
   }, [babyId, supabase]);
 
   if (circles.length === 0) {
-    return <p className="text-gray-500 mt-4 text-sm">Aucun pronostic créé pour le moment.</p>;
+    return (
+      <div className="text-center py-10 text-muted-foreground px-4">
+        <p className="text-sm font-medium">Aucun cercle de partage créé pour le moment.</p>
+        <p className="text-xs text-muted-foreground mt-1">Utilisez le formulaire ci-contre pour créer votre premier groupe.</p>
+      </div>
+    );
   }
 
   return (
-    <ul className="mt-6 space-y-2">
+    <div className="divide-y divide-border">
       {circles.map((circle) => (
-        <li key={circle.id} className="border-b py-2 text-black dark:text-white">
-          <span className="font-medium">Circle :</span> {circle.name}
-        </li>
+        <div
+          key={circle.id}
+          className="flex items-center justify-between py-3.5 px-6 hover:bg-muted/30 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-2 rounded-xl">
+              <CircleDot className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-foreground">{circle.name}</p>
+              <p className="text-[10px] text-muted-foreground font-mono">ID: {circle.id.substring(0, 8)}...</p>
+            </div>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
