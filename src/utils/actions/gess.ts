@@ -46,3 +46,22 @@ export async function getGuesses() {
   return rep.data
 }
 
+export async function getAllGuesses(babyId: string) {
+  const contextLogger = logger.child({ function: getAllGuesses.name, babyId })
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const { data, error } = await supabase
+    .from('guesses')
+    .select("*")
+    .eq("baby_id", babyId);
+
+  if (error) {
+    contextLogger.error(error, "Error fetching all guesses")
+    return []
+  }
+  return data
+}
+

@@ -1,76 +1,51 @@
-"use client"
-
 import BabySelector from '@/components/baby-selector';
+import { getAllUserAccess } from '@/utils/actions/users';
 import { logger } from '@/utils/logger';
-import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
+import PageSelector from './page_selector';
 
 
-interface HeaderProps {
-  babies: any[];
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
 
-export default function Header({
+export default async function Header({
   babies,
-  activeTab,
-}: HeaderProps) {
+  params }) {
   const contextLogger = logger.child({ function: Header.name })
   contextLogger.debug(babies)
-  const router = useRouter();
-  const params = useParams();
 
-  const currentBabyId = params?.babyId as string;
+  const allUserAccess = await getAllUserAccess()
 
   const pages = [
-    { id: "guess", name: "Pronostique", role: "viewer" },
-    { id: "circles", name: "Groupes", role: "admin" },
-    { id: "calendar", name: "Calendrie", role: "viewer" },
-    { id: "news", name: "Newsletter", role: "viewer" },
+    { id: "guess", name: "Pronostics", role: "viewer", enabled: true },
+    { id: "circles", name: "Groupes", role: "admin", enabled: true },
+    { id: "calendar", name: "Calendrie", role: "viewer", enabled: false },
+    { id: "news", name: "Newsletter", role: "viewer", enabled: false },
   ]
+  contextLogger.debug(allUserAccess, "User access")
+  const accesses = allUserAccess.map((acc) => ({
+    ...acc,
+    allowedPages: pages.filter((page) =>
+      acc.access_level === "admin" || (acc.access_level === page.role && page.enabled)
+    )
+  }
+  ))
 
-  contextLogger.debug(currentBabyId)
-  contextLogger.debug(params)
-  const navigateTo = (tab: string, isBabyRoute: boolean = true) => {
-    console.log(isBabyRoute, currentBabyId)
-    if (isBabyRoute && currentBabyId) {
-      router.push(`/baby/${currentBabyId}/${tab}`);
-    } else if (isBabyRoute && !currentBabyId) {
-      router.push('/');
-    } else {
-      router.push(`/${tab}`);
-    }
-  };
+  contextLogger.debug(accesses, "User accesses")
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
-      <div
-        onClick={() => router.push('/')} // Le logo ramène à l'accueil global
-        className="text-xl font-black text-primary cursor-pointer hover:opacity-80 transition-opacity"
-      >
-        Babynew
-      </div>
+      <Link href="/" className="text-xl font-black text-primary cursor-pointer hover:opacity-80 transition-opacity">
+        Le petit Monde
+      </Link>
 
       <BabySelector babies={babies}></BabySelector>
 
-      <nav className="hidden md:flex items-center gap-6">
-        {pages.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => navigateTo(tab.id)}
-            className={`text-sm font-semibold transition-colors ${activeTab === tab.id ? 'text-primary' : 'text-gray-500 hover:text-gray-900'
-              }`}
-          >
-            {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
-          </button>
-        ))}
-      </nav>
+      <PageSelector access={accesses} />
 
       <div className="flex items-center gap-2">
-        <div
-          onClick={() => navigateTo("login", false)}
+        <Link href="/"
           className="w-9 h-9 rounded-full bg-gray-200 ml-2 border border-gray-300 cursor-pointer hover:bg-gray-300 transition-colors"
-        />
+        >
+        </Link>
       </div>
     </header>
   );

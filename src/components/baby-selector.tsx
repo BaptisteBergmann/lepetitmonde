@@ -15,7 +15,7 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
   const currentBabyId = params?.babyId as string;
 
   useEffect(() => {
-    if (!currentBabyId && babies && babies.length > 0) {
+    if ((!currentBabyId && babies && babies.length > 0) || (currentBabyId && !pathname.includes(`/baby/${currentBabyId}`))) {
       router.push(`/baby/${babies[0].id}`);
     }
   }, [currentBabyId, babies, router]);
