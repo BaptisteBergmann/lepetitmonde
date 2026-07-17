@@ -41,7 +41,9 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
       onChange={(e) => handleSelect(e.target.value)}
       className="p-2 border rounded-md"
     >
-      <option disabled selected value={"default"}> -- select an option -- </option>
+      {currentBabyId === "default" &&
+        <option disabled selected value={"default"}> -- select an option -- </option>
+      }
       {babies.map((p) => (
         <option key={p.id} value={p.id}>
           {p.baby_surname}
