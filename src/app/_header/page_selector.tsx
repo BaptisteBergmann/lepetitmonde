@@ -13,7 +13,7 @@ export default function PageSelector({ access }) {
 
   const currentBabyId = params?.babyId as string;
 
-  const babyAccess = access.find((acc) => acc.baby_id === currentBabyId)
+  const babyAccess = access.find((acc) => acc.baby_id === currentBabyId) || {}
 
 
   contextLogger.debug(currentBabyId)
@@ -22,7 +22,7 @@ export default function PageSelector({ access }) {
   return (
     <div>
       {
-        babyAccess.allowedPages.map((page) => (
+        babyAccess?.allowedPages?.map((page) => (
 
           <Link
             key={page.id}

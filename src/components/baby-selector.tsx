@@ -12,9 +12,10 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
   const params = useParams();
   const pathname = usePathname();
 
-  const currentBabyId = params?.babyId as string;
+  const currentBabyId = params?.babyId || "default" as string;
 
   useEffect(() => {
+    if (pathname === '/') { return }
     if ((!currentBabyId && babies && babies.length > 0) || (currentBabyId && !pathname.includes(`/baby/${currentBabyId}`))) {
       router.push(`/baby/${babies[0].id}`);
     }
@@ -40,6 +41,7 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
       onChange={(e) => handleSelect(e.target.value)}
       className="p-2 border rounded-md"
     >
+      <option disabled selected value={"default"}> -- select an option -- </option>
       {babies.map((p) => (
         <option key={p.id} value={p.id}>
           {p.baby_surname}

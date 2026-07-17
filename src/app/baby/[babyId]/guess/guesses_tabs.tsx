@@ -32,38 +32,34 @@ export default function GuessesTabs({
         <div className="flex gap-1.5 p-1 bg-muted/40 dark:bg-muted/10 rounded-2xl w-fit">
           <button
             onClick={() => setActiveTab("pending")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
-              activeTab === "pending"
-                ? "bg-card text-foreground shadow-sm ring-1 ring-foreground/5 dark:ring-foreground/10"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer ${activeTab === "pending"
+              ? "bg-card text-foreground shadow-sm ring-1 ring-foreground/5 dark:ring-foreground/10"
+              : "text-muted-foreground hover:text-foreground"
+              }`}
           >
             <HelpCircle className="h-4 w-4" />
             <span>À deviner</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${
-              activeTab === "pending"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "pending"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground"
+              }`}>
               {unanswered.length}
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab("completed")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
-              activeTab === "completed"
-                ? "bg-card text-foreground shadow-sm ring-1 ring-foreground/5 dark:ring-foreground/10"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer ${activeTab === "completed"
+              ? "bg-card text-foreground shadow-sm ring-1 ring-foreground/5 dark:ring-foreground/10"
+              : "text-muted-foreground hover:text-foreground"
+              }`}
           >
             <CheckCircle2 className="h-4 w-4" />
             <span>Mes pronostics</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${
-              activeTab === "completed"
-                ? "bg-emerald-500 text-white"
-                : "bg-muted text-muted-foreground"
-            }`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "completed"
+              ? "bg-emerald-500 text-white"
+              : "bg-muted text-muted-foreground"
+              }`}>
               {answered.length}
             </span>
           </button>

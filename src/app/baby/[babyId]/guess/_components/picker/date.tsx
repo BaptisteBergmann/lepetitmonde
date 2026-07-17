@@ -1,19 +1,22 @@
 "use client";
 
+import { Calendar } from "@/components/ui/calendar";
 import { PickerProps } from "../../question_wrapper";
-import { Input } from "@/components/ui/input";
 
 export default function CalendarPicker({ value, options, onChange, id }: PickerProps) {
   return (
-    <Input
-      type="date"
+    <Calendar
+      mode="single"
       id={id}
-      name="CalendarPicker"
-      value={value}
-      onChange={(e) => onChange?.(e.target.value)}
+      selected={value}
+      onSelect={onChange}
+      className="w-full rounded-lg border"
+      captionLayout="dropdown"
       required
       disabled={!onChange}
-      className="w-full cursor-pointer"
+      endMonth={new Date(2026, 11)}
+      startMonth={new Date(2026, 7)}
+      defaultMonth={new Date(2026, 8)}
     />
   );
 }

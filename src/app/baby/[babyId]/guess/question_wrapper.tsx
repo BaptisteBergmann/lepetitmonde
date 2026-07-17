@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import CalendarPicker from "./_components/picker/date";
 import NumberPicker from "./_components/picker/number";
 import TextPicker from "./_components/picker/text";
+import TimePicker from "./_components/picker/time";
 
 export interface PickerProps {
   value: number | string;
@@ -21,7 +22,7 @@ export interface PickerProps {
 export default function QuestionWrapper({ questionWithGuess }) {
   const contextLogger = logger.child({ function: QuestionWrapper.name });
   contextLogger.info(questionWithGuess, "Display question");
-  
+
   const router = useRouter();
   const [value, setValue] = useState(
     questionWithGuess.guesses?.at(0)?.answer || "" // Pré-remplir avec la valeur existante
@@ -82,17 +83,16 @@ export default function QuestionWrapper({ questionWithGuess }) {
             year: "numeric",
           });
         }
-      } catch (_) {}
+      } catch (_) { }
     }
     return String(val);
   };
 
   return (
-    <Card className={`relative overflow-hidden transition-all duration-200 border ${
-      hasAnswered 
-        ? "border-emerald-100 dark:border-emerald-950 bg-emerald-500/5 dark:bg-emerald-500/[0.02]" 
-        : "border-border"
-    }`}>
+    <Card className={`relative overflow-hidden transition-all duration-200 border ${hasAnswered
+      ? "border-emerald-100 dark:border-emerald-950 bg-emerald-500/5 dark:bg-emerald-500/[0.02]"
+      : "border-border"
+      }`}>
       {/* Visual type tab indicator */}
       <div className="absolute top-0 right-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl border-l border-b border-border bg-muted/40">
         {getIcon()}
@@ -152,6 +152,14 @@ export default function QuestionWrapper({ questionWithGuess }) {
                   onChange={setValue}
                 />
               )}
+              {questionWithGuess.type === "time" && (
+                <TimePicker
+                  id={questionWithGuess.id}
+                  options={questionWithGuess.options}
+                  value={value}
+                  onChange={setValue}
+                />
+              )}
             </div>
           </div>
         )}
@@ -159,8 +167,8 @@ export default function QuestionWrapper({ questionWithGuess }) {
 
       {!hasAnswered && (
         <CardFooter className="pt-0 pb-4 flex justify-end">
-          <Button 
-            onClick={handleSend} 
+          <Button
+            onClick={handleSend}
             disabled={value === "" || isSubmitting}
             className="w-full gap-2 rounded-2xl cursor-pointer"
           >
