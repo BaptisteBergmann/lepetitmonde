@@ -1,0 +1,12 @@
+node_modules
+docker
+.next
+out
+build
+.git
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+README.md

@@ -16,7 +16,8 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
 
   useEffect(() => {
     if (pathname === '/') { return }
-    if ((!currentBabyId && babies && babies.length > 0) || (currentBabyId && !pathname.includes(`/baby/${currentBabyId}`))) {
+    if (currentBabyId && !pathname.includes(`/baby/${currentBabyId}`)) {
+      console.log(babies)
       router.push(`/baby/${babies[0].id}`);
     }
   }, [currentBabyId, babies, router]);
@@ -42,7 +43,7 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
       className="p-2 border rounded-md"
     >
       {currentBabyId === "default" &&
-        <option disabled selected value={"default"}> -- select an option -- </option>
+        <option disabled value={"default"}> -- select an option -- </option>
       }
       {babies.map((p) => (
         <option key={p.id} value={p.id}>

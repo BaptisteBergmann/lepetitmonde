@@ -8,8 +8,7 @@ import {
   FieldSeparator,
 } from "@components/ui/field"
 import { Input } from "@components/ui/input"
-// Assurez-vous d'avoir une action `signup` exportée depuis ce fichier ou un autre
-import { signup } from "@utils/actions/logout"
+import { signup } from "@utils/actions/signup"
 
 // On ajoute 'token' aux props attendues
 interface SignupFormProps extends React.ComponentProps<"div"> {

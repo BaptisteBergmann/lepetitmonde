@@ -14,19 +14,16 @@ export type Database = {
           baby_surname: string
           created_at: string
           id: string
-          owner_id: string | null
         }
         Insert: {
           baby_surname: string
           created_at?: string
           id?: string
-          owner_id?: string | null
         }
         Update: {
           baby_surname?: string
           created_at?: string
           id?: string
-          owner_id?: string | null
         }
         Relationships: []
       }
