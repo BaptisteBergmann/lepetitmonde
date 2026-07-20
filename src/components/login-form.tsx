@@ -11,10 +11,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { login } from "@utils/actions/login"
 
+interface LoginFormProps extends React.ComponentProps<"div"> {
+  message?: string
+}
+
 export function LoginForm({
+  message,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: LoginFormProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -27,6 +32,9 @@ export function LoginForm({
                   Login
                 </p>
               </div>
+              {message && (
+                <p className="text-sm text-center text-muted-foreground">{message}</p>
+              )}
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -41,7 +49,7 @@ export function LoginForm({
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                   <a
-                    href="#"
+                    href="/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
