@@ -39,6 +39,16 @@ The application is built for total data sovereignty (Self-Hosted):
 3. Configure environment variables in `.env.local` (Supabase URL, API keys).
 4. Start the development server: `pnpm dev`
 
+## 🗃️ Database Migrations
+
+Schema changes are tracked as SQL files in `supabase/migrations/` using the Supabase CLI (already a devDependency). The remote Postgres (self-hosted, reached via the Supavisor pooler at `192.168.2.177:${POSTGRES_PORT}`) tracks which migrations it has applied in a `supabase_migrations.schema_migrations` table, so `db_push` is idempotent: on a fresh database it runs every migration (acting as init), on an existing one it only runs what's new.
+
+- **Create a migration**: `mise run db_migration_new <name>` — scaffolds an empty, timestamped file in `supabase/migrations/`. Write the `ALTER TABLE` / `CREATE TABLE` / etc. SQL by hand.
+- **Apply pending migrations**: `mise run db_push` — connects with `sslmode=disable` (the pooler doesn't negotiate TLS on this connection type; occasionally flaky on the first attempt over the LAN — just retry).
+- **Check status**: `mise run db_migration_status` — shows which migrations are applied locally vs. on the remote database.
+
+The first migration (`..._baseline.sql`) is a schema-only dump of the database as it existed before this workflow was introduced, and was marked as already-applied via `supabase migration repair` rather than executed — so it never touched existing tables or data.
+
 ## 🐳 Docker Build & Deploy
 
 The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private self-hosted registry, then run via a Portainer stack.
