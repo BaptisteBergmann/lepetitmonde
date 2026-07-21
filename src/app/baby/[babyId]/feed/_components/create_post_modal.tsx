@@ -42,6 +42,7 @@ export default function CreatePostModal({
     bucketName: babyId,
     path: `posts/${postId}`,
     maxFiles: 10,
+    maxFileSize: 15 * 1024 * 1024,
     allowedMimeTypes: ['image/*'],
   })
 
