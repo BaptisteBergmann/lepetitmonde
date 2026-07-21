@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Hash, Type, User, CircleDot } from "lucide-react";
+import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { getPendingQuestions, getQuestions } from "@/utils/actions/guesses_questions";
 import { getAllGuesses } from "@/utils/actions/guesses";
@@ -9,6 +9,7 @@ import Modal from "../_components/modal";
 import PendingQuestions from "./_components/pending_questions";
 import DeleteQuestionButton from "./_components/delete_question_button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 function getTypeMeta(type: string) {
   switch (type) {
@@ -23,12 +24,21 @@ function getTypeMeta(type: string) {
   }
 }
 
-function formatAnswer(value: unknown, type: string) {
+function formatAnswer(value: unknown, type: string, options?: unknown) {
   if (value === undefined || value === null || value === "") return "-";
   if (type === "date") {
     const d = new Date(value as string);
     if (!isNaN(d.getTime())) {
       return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    }
+  }
+  if (type === "number") {
+    const num = Number(value);
+    if (!isNaN(num)) {
+      const precision = (options as { precision?: number } | null)?.precision;
+      if (typeof precision === "number") {
+        return num.toLocaleString("fr-FR", { minimumFractionDigits: precision, maximumFractionDigits: precision });
+      }
     }
   }
   return String(value);
@@ -119,7 +129,25 @@ export default async function GuessAdminPage({
                   {questionGuesses.length === 0 ? (
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-xs text-muted-foreground italic">Aucune réponse pour le moment.</p>
-                      <DeleteQuestionButton babyId={babyId} questionId={question.id} />
+                      <div className="flex items-center gap-2">
+                        <Modal
+                          babyId={babyId}
+                          isAdmin
+                          question={question}
+                          trigger={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 rounded-2xl cursor-pointer"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              Modifier
+                            </Button>
+                          }
+                        />
+                        <DeleteQuestionButton babyId={babyId} questionId={question.id} />
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-1.5">
@@ -133,7 +161,7 @@ export default async function GuessAdminPage({
                             {userNameById.get(guess.user_id) ?? "Utilisateur"}
                           </span>
                           <span className="font-semibold text-foreground">
-                            {formatAnswer(guess.answer, question.type)}
+                            {formatAnswer(guess.answer, question.type, question.options)}
                           </span>
                         </div>
                       ))}

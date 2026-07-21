@@ -56,7 +56,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
     }
   };
 
-  const formatDisplayValue = (val: any, type: string) => {
+  const formatDisplayValue = (val: any, type: string, options: any) => {
     if (val === undefined || val === null || val === "") return "-";
     if (type === "date") {
       try {
@@ -69,6 +69,15 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
           });
         }
       } catch (_) { }
+    }
+    if (type === "number") {
+      const num = Number(val);
+      if (!isNaN(num) && typeof options?.precision === "number") {
+        return num.toLocaleString("fr-FR", {
+          minimumFractionDigits: options.precision,
+          maximumFractionDigits: options.precision,
+        });
+      }
     }
     return String(val);
   };
@@ -97,7 +106,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
                 Votre réponse
               </span>
               <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
-                {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type)}
+                {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type, questionWithGuess.options)}
               </p>
             </div>
             <div className="bg-emerald-500 text-white rounded-full p-1.5 shadow-xs">

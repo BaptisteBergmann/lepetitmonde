@@ -10,53 +10,101 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { addQuestion } from '@utils/actions/guesses_questions';
+import { addQuestion, updateQuestion } from '@utils/actions/guesses_questions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Loader2, Calendar, Hash, Type, CircleDot, HelpCircle, X } from 'lucide-react';
+import { Tables } from '@utils/supabase/database.types';
 
-export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?: string; isAdmin?: boolean }) {
+type GuessQuestion = Tables<'guess_questions'>;
+
+export default function Modal({
+  babyId: propBabyId,
+  isAdmin = false,
+  question,
+  trigger,
+}: {
+  babyId?: string;
+  isAdmin?: boolean;
+  question?: GuessQuestion;
+  trigger?: React.ReactNode;
+}) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const babyId = propBabyId || searchParams.get('babyId') || "XXX"
+  const babyId = propBabyId || question?.baby_id || searchParams.get('babyId') || "XXX"
+  const isEditMode = !!question
   const [open, setOpen] = useState(false)
-  const [selectValue, setSelectValue] = useState("");
+  const [selectValue, setSelectValue] = useState(question?.type ?? "");
 
   // Nouveaux états pour la question de pronostic
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [choices, setChoices] = useState<string[]>(["", ""]);
+  const [title, setTitle] = useState(question?.title ?? "");
+  const [description, setDescription] = useState(question?.description ?? "");
+  const initialOptions = (question?.options as { choices?: string[]; min?: number; max?: number; precision?: number } | null) ?? null;
+  const [choices, setChoices] = useState<string[]>(
+    initialOptions?.choices && initialOptions.choices.length > 0 ? initialOptions.choices : ["", ""]
+  );
+  const [minValue, setMinValue] = useState<string>(
+    initialOptions?.min !== undefined && initialOptions?.min !== null ? String(initialOptions.min) : ""
+  );
+  const [maxValue, setMaxValue] = useState<string>(
+    initialOptions?.max !== undefined && initialOptions?.max !== null ? String(initialOptions.max) : ""
+  );
+  const [precision, setPrecision] = useState<string>(
+    initialOptions?.precision !== undefined && initialOptions?.precision !== null ? String(initialOptions.precision) : "2"
+  );
 
   const [isPending, setIsPending] = useState(false)
 
   const validChoices = choices.map((c) => c.trim()).filter(Boolean);
   const isOptionType = selectValue === "option";
+  const isNumberType = selectValue === "number";
+
+  const buildOptions = () => {
+    if (isOptionType) return { choices: validChoices }
+    if (isNumberType) {
+      return {
+        min: minValue === "" ? null : Number(minValue),
+        max: maxValue === "" ? null : Number(maxValue),
+        precision: Number(precision),
+      }
+    }
+    return null
+  }
 
   const handleConfirm = async () => {
     setIsPending(true)
     try {
-      const result = await addQuestion({
+      const payload = {
         title,
         description,
         type: selectValue,
-        options: isOptionType ? { choices: validChoices } : null,
-        is_active: true,
+        options: buildOptions(),
+        is_active: question?.is_active ?? true,
         baby_id: babyId,
-      })
+      }
 
-      if (!result.error) {
-        setOpen(false) // Fermer le modal si tout est OK
+      if (isEditMode) {
+        await updateQuestion(babyId, question.id, payload)
+      } else {
+        const result = await addQuestion(payload)
+        if (result.error) throw result.error
+      }
+
+      setOpen(false) // Fermer le modal si tout est OK
+      if (!isEditMode) {
         setTitle("")
         setDescription("")
         setSelectValue("")
         setChoices(["", ""])
-        router.refresh()
-      } else {
-        alert("Une erreur est survenue lors de la sauvegarde.")
+        setMinValue("")
+        setMaxValue("")
+        setPrecision("2")
       }
+      router.refresh()
     } catch (err) {
       console.error(err)
+      alert(err instanceof Error ? err.message : "Une erreur est survenue lors de la sauvegarde.")
     } finally {
       setIsPending(false)
     }
@@ -88,13 +136,19 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
 
   return (
     <div>
-      <Button
-        onClick={() => setOpen(true)}
-        className="gap-2 rounded-2xl cursor-pointer"
-      >
-        <Plus className="h-4 w-4" />
-        <span>{isAdmin ? "Nouveau pronostic" : "Proposer un pronostic"}</span>
-      </Button>
+      {trigger ? (
+        <span onClick={() => setOpen(true)} className="inline-flex">
+          {trigger}
+        </span>
+      ) : (
+        <Button
+          onClick={() => setOpen(true)}
+          className="gap-2 rounded-2xl cursor-pointer"
+        >
+          <Plus className="h-4 w-4" />
+          <span>{isAdmin ? "Nouveau pronostic" : "Proposer un pronostic"}</span>
+        </Button>
+      )}
 
       {open && (
         <div className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200">
@@ -104,7 +158,7 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
             <div className="flex justify-between items-center border-b border-border py-4 px-5">
               <h2 className="text-base font-bold text-foreground flex items-center gap-2">
                 <HelpCircle className="h-4.5 w-4.5 text-primary" />
-                {isAdmin ? "Créer un nouveau pronostic" : "Proposer un pronostic"}
+                {isEditMode ? "Modifier le pronostic" : isAdmin ? "Créer un nouveau pronostic" : "Proposer un pronostic"}
               </h2>
               <button 
                 onClick={() => setOpen(false)}
@@ -219,6 +273,55 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
                 </div>
               )}
 
+              {/* Étalonnage (uniquement pour le type "Nombre") */}
+              {isNumberType && (
+                <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="min" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Minimum
+                      </Label>
+                      <Input
+                        type="number"
+                        id="min"
+                        value={minValue}
+                        onChange={(e) => setMinValue(e.target.value)}
+                        placeholder="Ex: 2000"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="max" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Maximum
+                      </Label>
+                      <Input
+                        type="number"
+                        id="max"
+                        value={maxValue}
+                        onChange={(e) => setMaxValue(e.target.value)}
+                        placeholder="Ex: 5000"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Chiffres après la virgule
+                    </Label>
+                    <Select value={precision} onValueChange={(v) => v && setPrecision(v)}>
+                      <SelectTrigger className="w-full text-foreground bg-input/50">
+                        <SelectValue placeholder="Précision" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="0">0 (Ex: 3200)</SelectItem>
+                          <SelectItem value="1">0,0 (Ex: 3200,5)</SelectItem>
+                          <SelectItem value="2">0,00 (Ex: 3200,50)</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
             </div>
 
             {/* Modal Footer */}
@@ -231,17 +334,23 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
                 Annuler
               </Button>
               <Button
-                disabled={!title.trim() || !selectValue || (isOptionType && validChoices.length < 2) || isPending}
+                disabled={
+                  !title.trim() ||
+                  !selectValue ||
+                  (isOptionType && validChoices.length < 2) ||
+                  (isNumberType && (minValue === "" || maxValue === "" || Number(minValue) >= Number(maxValue))) ||
+                  isPending
+                }
                 className="rounded-2xl cursor-pointer"
                 onClick={handleConfirm}
               >
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Création...</span>
+                    <span>{isEditMode ? "Enregistrement..." : "Création..."}</span>
                   </>
                 ) : (
-                  <span>Confirmer</span>
+                  <span>{isEditMode ? "Enregistrer" : "Confirmer"}</span>
                 )}
               </Button>
             </div>

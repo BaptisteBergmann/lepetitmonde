@@ -126,6 +126,42 @@ export async function deleteQuestion(babyId: string, questionId: string) {
 }
 
 type NewGuess = TablesInsert<'guess_questions'>;
+type QuestionUpdate = Omit<NewGuess, 'baby_id'>;
+
+export async function updateQuestion(babyId: string, questionId: string, formData: QuestionUpdate) {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: updateQuestion.name, babyId, questionId })
+
+  const { count, error: countError } = await supabase
+    .from('guesses')
+    .select('id', { count: 'exact', head: true })
+    .eq('question_id', questionId)
+
+  if (countError) { contextLogger.error(countError, "Error checking guesses before update"); throw countError }
+  if (count && count > 0) {
+    throw new Error("Impossible de modifier un pronostic ayant déjà des réponses")
+  }
+
+  const { error } = await supabase
+    .from('guess_questions')
+    .update({
+      title: formData.title,
+      description: formData.description,
+      type: formData.type,
+      options: formData.options,
+      is_active: formData.is_active,
+    })
+    .eq('id', questionId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error updating question"); throw error }
+  contextLogger.info("Question updated")
+
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
+}
 
 export async function addQuestion(formData: NewGuess) {
   const supabase = await createClient()
