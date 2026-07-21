@@ -1,6 +1,7 @@
 
-import { getQuestionsWithGuess, getQuestionsWithoutGuess } from "@/utils/actions/guesses_questions";
+import { getMyProposals, getQuestionsWithGuess, getQuestionsWithoutGuess } from "@/utils/actions/guesses_questions";
 import GuessesTabs from "./guesses_tabs";
+import MyProposals from "./_components/my_proposals";
 import { logger } from "@/utils/logger";
 
 export default async function QuestionsListWrapper({
@@ -13,18 +14,22 @@ export default async function QuestionsListWrapper({
   contextLogger.debug(questionWithGuess, "Questions with guess")
   const questionWithoutGuess = await getQuestionsWithoutGuess(babyId)
   contextLogger.debug(questionWithoutGuess, "Questions without guess")
+  const myProposals = await getMyProposals(babyId)
+  contextLogger.debug(myProposals, "My pending/rejected proposals")
 
-
-  if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0) {
+  if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0 && myProposals.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/10">
         <p className="text-sm font-medium">Aucun pronostic créé pour le moment.</p>
-        <p className="text-xs text-muted-foreground mt-1">Cliquez sur &quot;Nouveau pronostic&quot; pour en ajouter un.</p>
+        <p className="text-xs text-muted-foreground mt-1">Cliquez sur &quot;Proposer un pronostic&quot; pour en ajouter un.</p>
       </div>
     );
   }
 
   return (
-    <GuessesTabs unanswered={questionWithoutGuess} answered={questionWithGuess} />
+    <div className="space-y-6">
+      <MyProposals proposals={myProposals} />
+      <GuessesTabs unanswered={questionWithoutGuess} answered={questionWithGuess} />
+    </div>
   );
 }

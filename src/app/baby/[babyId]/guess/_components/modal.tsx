@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Loader2, Calendar, Hash, Type, ListChecks, HelpCircle, X } from 'lucide-react';
 
-export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
+export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?: string; isAdmin?: boolean }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const babyId = propBabyId || searchParams.get('babyId') || "XXX"
@@ -93,7 +93,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
         className="gap-2 rounded-2xl cursor-pointer"
       >
         <Plus className="h-4 w-4" />
-        <span>Nouveau pronostic</span>
+        <span>{isAdmin ? "Nouveau pronostic" : "Proposer un pronostic"}</span>
       </Button>
 
       {open && (
@@ -104,7 +104,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
             <div className="flex justify-between items-center border-b border-border py-4 px-5">
               <h2 className="text-base font-bold text-foreground flex items-center gap-2">
                 <HelpCircle className="h-4.5 w-4.5 text-primary" />
-                Créer un nouveau pronostic
+                {isAdmin ? "Créer un nouveau pronostic" : "Proposer un pronostic"}
               </h2>
               <button 
                 onClick={() => setOpen(false)}
@@ -116,6 +116,12 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
 
             {/* Modal Content */}
             <div className="p-5 space-y-4 flex-1 overflow-y-auto text-card-foreground">
+
+              {!isAdmin && (
+                <p className="text-xs text-muted-foreground bg-muted/40 rounded-2xl px-3 py-2">
+                  Votre proposition sera soumise à un administrateur avant d&apos;être visible par la famille.
+                </p>
+              )}
 
               {/* Champ Titre */}
               <div className="flex flex-col gap-1.5">

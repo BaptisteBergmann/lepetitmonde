@@ -151,30 +151,36 @@ export type Database = {
         Row: {
           baby_id: string
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           is_active: boolean
           options: Json | null
+          status: string
           title: string | null
           type: string
         }
         Insert: {
           baby_id: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           is_active: boolean
           options?: Json | null
+          status?: string
           title?: string | null
           type: string
         }
         Update: {
           baby_id?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
           options?: Json | null
+          status?: string
           title?: string | null
           type?: string
         }
@@ -184,6 +190,13 @@ export type Database = {
             columns: ["baby_id"]
             isOneToOne: false
             referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guess_questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

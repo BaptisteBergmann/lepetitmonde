@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Hash, Type, User, ListChecks } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
-import { getQuestions } from "@/utils/actions/guesses_questions";
+import { getPendingQuestions, getQuestions } from "@/utils/actions/guesses_questions";
 import { getAllGuesses } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
 import Modal from "../_components/modal";
+import PendingQuestions from "./_components/pending_questions";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 function getTypeMeta(type: string) {
@@ -46,8 +47,9 @@ export default async function GuessAdminPage({
     redirect(`/baby/${babyId}/guess`);
   }
 
-  const [questions, guesses, users] = await Promise.all([
+  const [questions, pendingQuestions, guesses, users] = await Promise.all([
     getQuestions(babyId),
+    getPendingQuestions(babyId),
     getAllGuesses(babyId),
     getUsers(babyId),
   ]);
@@ -79,10 +81,12 @@ export default async function GuessAdminPage({
             </p>
           </div>
           <div className="flex shrink-0">
-            <Modal babyId={babyId} />
+            <Modal babyId={babyId} isAdmin />
           </div>
         </div>
       </div>
+
+      <PendingQuestions babyId={babyId} questions={pendingQuestions} userNameById={userNameById} />
 
       {questions.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/10">

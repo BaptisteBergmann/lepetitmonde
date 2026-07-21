@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import QuestionsListWrapper from "./questions_list_wrapper";
 import { Loader2, Settings, Sparkles } from "lucide-react";
-import { getUserAccess, getUsers } from "@/utils/actions/users";
+import { getUserAccess } from "@/utils/actions/users";
 import { logger } from "@/utils/logger";
 import { Button } from "@/components/ui/button";
+import Modal from "./_components/modal";
 
 export default async function GuessesPage({
   params,
@@ -23,14 +24,17 @@ export default async function GuessesPage({
         className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
       />
 
-      {access.access_level === "admin" && (
-        <div className="relative flex justify-end">
-          <Link href={`/baby/${babyId}/guess/admin`}>
-            <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
-              <Settings className="h-4 w-4" />
-              <span>Administrer</span>
-            </Button>
-          </Link>
+      {!Array.isArray(access) && (
+        <div className="relative flex justify-end gap-2">
+          <Modal babyId={babyId} isAdmin={access.access_level === "admin"} />
+          {access.access_level === "admin" && (
+            <Link href={`/baby/${babyId}/guess/admin`}>
+              <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
+                <Settings className="h-4 w-4" />
+                <span>Administrer</span>
+              </Button>
+            </Link>
+          )}
         </div>
       )}
 
