@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Hash, Type, User } from "lucide-react";
+import { ArrowLeft, Calendar, Hash, Type, User, ListChecks } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { getQuestions } from "@/utils/actions/guesses_questions";
 import { getAllGuesses } from "@/utils/actions/guesses";
@@ -14,6 +14,8 @@ function getTypeMeta(type: string) {
       return { icon: <Calendar className="h-3.5 w-3.5 text-primary" />, label: "Date" };
     case "number":
       return { icon: <Hash className="h-3.5 w-3.5 text-rose" />, label: "Nombre" };
+    case "option":
+      return { icon: <ListChecks className="h-3.5 w-3.5 text-violet-500" />, label: "Choix multiple" };
     default:
       return { icon: <Type className="h-3.5 w-3.5 text-emerald-500" />, label: "Texte" };
   }

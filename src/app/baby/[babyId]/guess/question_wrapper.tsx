@@ -12,6 +12,7 @@ import CalendarPicker from "./_components/picker/date";
 import NumberPicker from "./_components/picker/number";
 import TextPicker from "./_components/picker/text";
 import TimePicker from "./_components/picker/time";
+import OptionPicker from "./_components/picker/option";
 
 export interface PickerProps {
   value: number | string | Date | undefined;
@@ -132,6 +133,14 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
               )}
               {questionWithGuess.type === "time" && (
                 <TimePicker
+                  id={questionWithGuess.id}
+                  options={questionWithGuess.options}
+                  value={value}
+                  onChange={setValue}
+                />
+              )}
+              {questionWithGuess.type === "option" && (
+                <OptionPicker
                   id={questionWithGuess.id}
                   options={questionWithGuess.options}
                   value={value}

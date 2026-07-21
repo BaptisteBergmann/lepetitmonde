@@ -14,7 +14,7 @@ import { addQuestion } from '@utils/actions/guesses_questions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Loader2, Calendar, Hash, Type, HelpCircle, X } from 'lucide-react';
+import { Plus, Loader2, Calendar, Hash, Type, ListChecks, HelpCircle, X } from 'lucide-react';
 
 export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
   const searchParams = useSearchParams()
@@ -26,8 +26,12 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
   // Nouveaux états pour la question de pronostic
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [choices, setChoices] = useState<string[]>(["", ""]);
 
   const [isPending, setIsPending] = useState(false)
+
+  const validChoices = choices.map((c) => c.trim()).filter(Boolean);
+  const isOptionType = selectValue === "option";
 
   const handleConfirm = async () => {
     setIsPending(true)
@@ -36,6 +40,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
         title,
         description,
         type: selectValue,
+        options: isOptionType ? { choices: validChoices } : null,
         is_active: true,
         baby_id: babyId,
       })
@@ -45,6 +50,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
         setTitle("")
         setDescription("")
         setSelectValue("")
+        setChoices(["", ""])
         router.refresh()
       } else {
         alert("Une erreur est survenue lors de la sauvegarde.")
@@ -60,11 +66,24 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
     { label: "Texte", value: "text" },
     { label: "Date", value: "date" },
     { label: "Nombre", value: "number" },
+    { label: "Choix multiple", value: "option" },
   ]
 
   // Fonction de nettoyage lors du changement de type
   const handleTypeChange = (value: string | null) => {
     if (value) setSelectValue(value);
+  };
+
+  const handleChoiceChange = (index: number, value: string) => {
+    setChoices((prev) => prev.map((c, i) => (i === index ? value : c)));
+  };
+
+  const handleAddChoice = () => {
+    setChoices((prev) => [...prev, ""]);
+  };
+
+  const handleRemoveChoice = (index: number) => {
+    setChoices((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -145,6 +164,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
                             {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
                             {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
                             {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
+                            {item.value === "option" && <ListChecks className="h-3.5 w-3.5 text-violet-500" />}
                             <span>{item.label}</span>
                           </div>
                         </SelectItem>
@@ -153,6 +173,45 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Options prédéfinies (uniquement pour le type "Choix multiple") */}
+              {isOptionType && (
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Options proposées
+                  </Label>
+                  <div className="flex flex-col gap-2">
+                    {choices.map((choice, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          value={choice}
+                          onChange={(e) => handleChoiceChange(index, e.target.value)}
+                          placeholder={`Option ${index + 1}`}
+                          className="flex-1"
+                        />
+                        <button
+                          onClick={() => handleRemoveChoice(index)}
+                          disabled={choices.length <= 2}
+                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="self-start gap-1.5 rounded-2xl cursor-pointer mt-1"
+                    onClick={handleAddChoice}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Ajouter une option</span>
+                  </Button>
+                </div>
+              )}
 
             </div>
 
@@ -166,7 +225,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
                 Annuler
               </Button>
               <Button
-                disabled={!title.trim() || !selectValue || isPending}
+                disabled={!title.trim() || !selectValue || (isOptionType && validChoices.length < 2) || isPending}
                 className="rounded-2xl cursor-pointer"
                 onClick={handleConfirm}
               >
