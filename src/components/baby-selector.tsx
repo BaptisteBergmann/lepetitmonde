@@ -40,7 +40,7 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
     <select
       value={currentBabyId || ''}
       onChange={(e) => handleSelect(e.target.value)}
-      className="p-2 border border-input rounded-md bg-background text-foreground text-sm"
+      className="max-w-[8rem] sm:max-w-none p-2 border border-input rounded-md bg-background text-foreground text-sm truncate"
     >
       {currentBabyId === "default" &&
         <option disabled value={"default"}> -- select an option -- </option>

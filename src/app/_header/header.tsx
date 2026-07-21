@@ -3,8 +3,9 @@ import { getAllUserAccess } from '@/utils/actions/users';
 import { logger } from '@/utils/logger';
 import Link from 'next/link';
 import PageSelector from './page_selector';
+import UserMenu from './user_menu';
+import MobileMenu from './mobile_menu';
 import { createClient } from '@/utils/supabase/server';
-// Optionnel : import { User } from 'lucide-react'; pour une jolie icône de profil
 
 export default async function Header({ babies, params }: { babies: any[], params?: any }) {
   const contextLogger = logger.child({ function: Header.name });
@@ -34,14 +35,22 @@ export default async function Header({ babies, params }: { babies: any[], params
 
   contextLogger.debug(accesses, "User accesses");
 
+  const fullName = user?.user_metadata?.full_name || user?.email || 'Utilisateur';
+  const initials = fullName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part: string) => part.charAt(0).toUpperCase())
+    .join('') || 'U';
+
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
+    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between gap-2 px-3 sm:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
 
       {/* 1. ZONE GAUCHE : Logo et Sélecteur */}
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         <Link
           href="/"
-          className="text-lg sm:text-xl font-black text-blue-500 tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+          className="shrink-0 text-lg sm:text-xl font-black text-blue-500 tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
         >
           Le petit Monde
         </Link>
@@ -49,29 +58,29 @@ export default async function Header({ babies, params }: { babies: any[], params
         {/* Petit séparateur vertical discret, caché sur tout petit écran */}
         <div className="hidden sm:block border-l border-border h-6 mx-1"></div>
 
-        <BabySelector babies={babies} />
+        <div className="min-w-0">
+          <BabySelector babies={babies} />
+        </div>
       </div>
 
-      {/* 2. ZONE CENTRALE : La navigation (PageSelector) */}
-      {/* Sur grand écran elle est au centre, sur mobile on pourrait la mettre dans un menu hamburger plus tard */}
+      {/* 2. ZONE CENTRALE : La navigation (PageSelector), visible uniquement sur grand écran */}
       <div className="hidden md:flex flex-1 justify-center">
         <PageSelector access={accesses} />
       </div>
 
       {/* 3. ZONE DROITE : Profil / Bouton de connexion */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 shrink-0">
         {user ? (
-          // Si l'utilisateur est connecté : Bulle de profil
-          <Link
-            href="/profile"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-muted border border-border cursor-pointer hover:bg-accent transition-colors shadow-sm"
-            title="Mon profil"
-          >
-            <span className="text-muted-foreground font-semibold text-sm">
-              {/* Affiche la 1ère lettre de son email en majuscule, ou 'U' par défaut */}
-              {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
-            </span>
-          </Link>
+          <>
+            {/* Sur mobile : menu hamburger regroupant navigation + compte */}
+            <div className="md:hidden">
+              <MobileMenu initials={initials} fullName={fullName} email={user.email} accesses={accesses} />
+            </div>
+            {/* Sur grand écran : bulle de profil avec menu déroulant */}
+            <div className="hidden md:block">
+              <UserMenu initials={initials} fullName={fullName} email={user.email} />
+            </div>
+          </>
         ) : (
           // Si l'utilisateur n'est PAS connecté : Bouton Login
           <Link

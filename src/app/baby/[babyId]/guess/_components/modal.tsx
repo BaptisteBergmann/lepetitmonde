@@ -79,7 +79,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
 
       {open && (
         <div className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200">
-          <div className="w-full max-w-[460px] bg-card text-card-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-[460px] max-h-[90vh] bg-card text-card-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
             <div className="flex justify-between items-center border-b border-border py-4 px-5">
@@ -96,7 +96,7 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
             </div>
 
             {/* Modal Content */}
-            <div className="p-5 space-y-4 flex-1 text-card-foreground">
+            <div className="p-5 space-y-4 flex-1 overflow-y-auto text-card-foreground">
 
               {/* Champ Titre */}
               <div className="flex flex-col gap-1.5">
