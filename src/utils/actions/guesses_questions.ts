@@ -96,6 +96,35 @@ export async function reviewQuestion(babyId: string, questionId: string, decisio
   revalidatePath(`/baby/${babyId}/guess/admin`)
 }
 
+export async function deleteQuestion(babyId: string, questionId: string) {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: deleteQuestion.name, babyId, questionId })
+
+  const { count, error: countError } = await supabase
+    .from('guesses')
+    .select('id', { count: 'exact', head: true })
+    .eq('question_id', questionId)
+
+  if (countError) { contextLogger.error(countError, "Error checking guesses before deletion"); throw countError }
+  if (count && count > 0) {
+    throw new Error("Impossible de supprimer un pronostic ayant déjà des réponses")
+  }
+
+  const { error } = await supabase
+    .from('guess_questions')
+    .delete()
+    .eq('id', questionId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error deleting question"); throw error }
+  contextLogger.info("Question deleted")
+
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
+}
+
 type NewGuess = TablesInsert<'guess_questions'>;
 
 export async function addQuestion(formData: NewGuess) {

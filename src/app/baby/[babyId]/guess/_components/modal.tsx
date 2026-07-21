@@ -14,7 +14,7 @@ import { addQuestion } from '@utils/actions/guesses_questions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Loader2, Calendar, Hash, Type, ListChecks, HelpCircle, X } from 'lucide-react';
+import { Plus, Loader2, Calendar, Hash, Type, CircleDot, HelpCircle, X } from 'lucide-react';
 
 export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?: string; isAdmin?: boolean }) {
   const searchParams = useSearchParams()
@@ -66,7 +66,7 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
     { label: "Texte", value: "text" },
     { label: "Date", value: "date" },
     { label: "Nombre", value: "number" },
-    { label: "Choix multiple", value: "option" },
+    { label: "Choix unique", value: "option" },
   ]
 
   // Fonction de nettoyage lors du changement de type
@@ -170,7 +170,7 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
                             {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
                             {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
                             {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
-                            {item.value === "option" && <ListChecks className="h-3.5 w-3.5 text-violet-500" />}
+                            {item.value === "option" && <CircleDot className="h-3.5 w-3.5 text-violet-500" />}
                             <span>{item.label}</span>
                           </div>
                         </SelectItem>
@@ -180,7 +180,7 @@ export default function Modal({ babyId: propBabyId, isAdmin = false }: { babyId?
                 </Select>
               </div>
 
-              {/* Options prédéfinies (uniquement pour le type "Choix multiple") */}
+              {/* Options prédéfinies (uniquement pour le type "Choix unique") */}
               {isOptionType && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Hash, Type, User, ListChecks } from "lucide-react";
+import { ArrowLeft, Calendar, Hash, Type, User, CircleDot } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { getPendingQuestions, getQuestions } from "@/utils/actions/guesses_questions";
 import { getAllGuesses } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
 import Modal from "../_components/modal";
 import PendingQuestions from "./_components/pending_questions";
+import DeleteQuestionButton from "./_components/delete_question_button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 function getTypeMeta(type: string) {
@@ -16,7 +17,7 @@ function getTypeMeta(type: string) {
     case "number":
       return { icon: <Hash className="h-3.5 w-3.5 text-rose" />, label: "Nombre" };
     case "option":
-      return { icon: <ListChecks className="h-3.5 w-3.5 text-violet-500" />, label: "Choix multiple" };
+      return { icon: <CircleDot className="h-3.5 w-3.5 text-violet-500" />, label: "Choix unique" };
     default:
       return { icon: <Type className="h-3.5 w-3.5 text-emerald-500" />, label: "Texte" };
   }
@@ -116,7 +117,10 @@ export default async function GuessAdminPage({
                 </CardHeader>
                 <CardContent className="pt-0 pb-4">
                   {questionGuesses.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">Aucune réponse pour le moment.</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs text-muted-foreground italic">Aucune réponse pour le moment.</p>
+                      <DeleteQuestionButton babyId={babyId} questionId={question.id} />
+                    </div>
                   ) : (
                     <div className="flex flex-col gap-1.5">
                       {questionGuesses.map((guess) => (
