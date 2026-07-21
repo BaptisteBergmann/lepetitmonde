@@ -18,13 +18,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Journal de Bébé',
+  title: 'Le petit monde',
   description: 'Un espace privé pour la famille',
   manifest: '/manifest.webmanifest', // Note: Next.js génère le lien si vous utilisez manifest.ts
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Journal de Bébé',
+    title: 'Le petit monde',
   },
 }
 
