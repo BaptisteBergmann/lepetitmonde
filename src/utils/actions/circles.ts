@@ -81,6 +81,11 @@ export async function getCirclesAccess(babyId: string, userId: string) {
   return rep.data
 }
 
+export async function getUserCircleIds(babyId: string, userId: string) {
+  const access = await getCirclesAccess(babyId, userId)
+  return access.map((a) => a.circle_id)
+}
+
 export async function getAllCirclesAccess(babyId: string) {
   const supabase = await createClient()
 
