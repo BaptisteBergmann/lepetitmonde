@@ -38,3 +38,34 @@ The application is built for total data sovereignty (Self-Hosted):
 2. Install dependencies: `pnpm install` (or `npm install`)
 3. Configure environment variables in `.env.local` (Supabase URL, API keys).
 4. Start the development server: `pnpm dev`
+
+## 🐳 Docker Build & Deploy
+
+The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private self-hosted registry, then run via a Portainer stack.
+
+1. Build and push in one step with `docker buildx` (requires `docker login 192.168.2.177:5000` once beforehand):
+
+   ```bash
+   docker buildx build \
+     --platform linux/amd64,linux/arm64 \
+     --build-arg NEXT_PUBLIC_SITE_URL="https://lepetitmonde.baptistebergmann.com" \
+     --build-arg NEXT_PUBLIC_SUPABASE_URL="http://192.168.2.177:8000" \
+     --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="<value>" \
+     --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="<value>" \
+     -t 192.168.2.177:5000/lepetitmonde:latest \
+     --push .
+   ```
+
+   `NEXT_PUBLIC_*` values are inlined into the client bundle at build time — changing them later requires rebuilding and repushing. Real values live in `mise.toml`.
+
+2. Deploy/update the stack in Portainer using `docker-compose.portainer.yml`, which pulls `192.168.2.177:5000/lepetitmonde:latest` (`pull_policy: always`) and sets the runtime-only env vars (`VAPID_PRIVATE_KEY`, etc.).
+
+3. If the registry serves plain HTTP, the Docker host running Portainer needs it allow-listed in `/etc/docker/daemon.json`:
+
+   ```json
+   { "insecure-registries": ["192.168.2.177:5000"] }
+   ```
+
+   then `sudo systemctl restart docker`. Registry credentials (if auth is enabled) are added under Portainer → **Registries** → **Add registry**.
+
+For local-only testing without the registry, `docker compose build && docker compose up` (root `docker-compose.yml`) builds and runs the image directly — see `.env.docker.example` for the required vars.

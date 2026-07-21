@@ -51,6 +51,12 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 
 - Tool versions (Node, etc.) and environment variables are managed with **mise**. Do not suggest nvm, direnv, or manually exporting env vars — use `mise.toml` / `mise` commands instead.
 
+## 🐳 Docker Build & Deploy
+
+- Production image is multi-arch (amd64 + arm64) built with `docker buildx` and pushed to the private registry at `192.168.2.177:5000/lepetitmonde:latest`. `NEXT_PUBLIC_*` vars must be passed as `--build-arg` (they're inlined into the client bundle at build time, not read at container runtime).
+- Deployment target is a Portainer stack (`docker-compose.portainer.yml`) that pulls the image — Portainer does not build from source. Do not suggest wiring Portainer to build directly from the Dockerfile.
+- The registry is plain HTTP; do not suggest `docker login` fixes for TLS errors — the actual fix is `insecure-registries` in the Docker host's `daemon.json`. See README.md "Docker Build & Deploy" for the full command and troubleshooting steps.
+
 ## ✅ Git Workflow
 
 - Commit as soon as each subtask/fix in a multi-step task is done and verified (e.g. typechecks pass) — do not batch unrelated fixes into a single commit. Each commit should be small and scoped to one subtask.

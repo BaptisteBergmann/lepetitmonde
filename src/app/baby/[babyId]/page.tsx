@@ -1,7 +1,11 @@
 import { createClient } from "@utils/supabase/server"
 
 // app/dashboard/page.tsx (Serveur)
-export default async function DashboardPage({ searchParams }) {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ babyId?: string }>;
+}) {
   // On récupère le paramètre directement
   const { babyId } = await searchParams;
   const supabase = await createClient()

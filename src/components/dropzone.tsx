@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, type PropsWithChildren } from '
 import { cn } from "@utils/utils"
 
 import { type UseSupabaseUploadReturn } from '@utils/actions/use-supabase-upload'
-import { Button } from '@/app/components/ui/button'
+import { Button } from '@/components/ui/button'
 
 export const formatBytes = (
   bytes: number,

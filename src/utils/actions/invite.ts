@@ -3,15 +3,16 @@
 import { createClient } from '@utils/supabase/server'
 
 export async function sendInvite(formData: FormData) {
-  const email = formData.get('email') as string
   const babyId = formData.get('babyId') as string
 
   const supabase = await createClient()
 
-  // Insertion dans la table invitations
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 24);
+
   const rep = await supabase
     .from('invitations')
-    .insert([{ email, baby_id: babyId, role }])
+    .insert([{ baby_id: babyId, expires_at: expiresAt.toISOString() }])
 
   if (rep.error) throw new Error("Erreur lors de l'invitation")
 

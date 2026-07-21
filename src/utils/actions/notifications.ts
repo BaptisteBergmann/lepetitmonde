@@ -68,7 +68,7 @@ export async function unsubscribeUser() {
   return { success: true }
 }
 
-export async function sendNotification(message: string, targetUserId: string = undefined) {
+export async function sendNotification(message: string, targetUserId?: string) {
   // 1. Récupérer l'abonnement depuis la base de données
   const supabase = await createClient()
 
