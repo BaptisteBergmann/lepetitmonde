@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDropzone, type FileError, type FileRejection } from 'react-dropzone'
 
-import { createClient } from '@utils/supabase/client'
-
-const supabase = createClient()
+import { uploadFile } from '@utils/actions/upload'
 
 interface FileWithPreview extends File {
   preview?: string
@@ -127,14 +125,14 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
-        const { error } = await supabase.storage
-          .from(bucketName)
-          .upload(!!path ? `${path}/${file.name}` : file.name, file, {
-            cacheControl: cacheControl.toString(),
-            upsert,
-          })
+        const { error } = await uploadFile(
+          bucketName,
+          !!path ? `${path}/${file.name}` : file.name,
+          file,
+          { cacheControl: cacheControl.toString(), upsert }
+        )
         if (error) {
-          return { name: file.name, message: error.message }
+          return { name: file.name, message: error }
         } else {
           return { name: file.name, message: undefined }
         }
