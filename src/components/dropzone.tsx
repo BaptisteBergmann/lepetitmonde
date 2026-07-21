@@ -88,7 +88,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
       <div className={cn('flex flex-row items-center gap-x-2 justify-center', className)}>
         <CheckCircle size={16} className="text-primary" />
         <p className="text-primary text-sm">
-          Successfully uploaded {files.length} file{files.length > 1 ? 's' : ''}
+          {files.length} fichier{files.length > 1 ? 's' : ''} téléversé{files.length > 1 ? 's' : ''} avec succès
         </p>
       </div>
     )
@@ -124,17 +124,17 @@ const DropzoneContent = ({ className }: { className?: string }) => {
                   {file.errors
                     .map((e) =>
                       e.message.startsWith('File is larger than')
-                        ? `File is larger than ${formatBytes(maxFileSize, 2)} (Size: ${formatBytes(file.size, 2)})`
+                        ? `Le fichier est plus volumineux que ${formatBytes(maxFileSize, 2)} (taille : ${formatBytes(file.size, 2)})`
                         : e.message
                     )
                     .join(', ')}
                 </p>
               ) : loading && !isSuccessfullyUploaded ? (
-                <p className="text-xs text-muted-foreground">Uploading file...</p>
+                <p className="text-xs text-muted-foreground">Téléversement du fichier...</p>
               ) : !!fileError ? (
-                <p className="text-xs text-destructive">Failed to upload: {fileError.message}</p>
+                <p className="text-xs text-destructive">Échec du téléversement : {fileError.message}</p>
               ) : isSuccessfullyUploaded ? (
-                <p className="text-xs text-primary">Successfully uploaded file</p>
+                <p className="text-xs text-primary">Fichier téléversé avec succès</p>
               ) : (
                 <p className="text-xs text-muted-foreground">{formatBytes(file.size, 2)}</p>
               )}
@@ -155,8 +155,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
       })}
       {exceedMaxFiles && (
         <p className="text-sm text-left mt-2 text-destructive">
-          You may upload only up to {maxFiles} files, please remove {files.length - maxFiles} file
-          {files.length - maxFiles > 1 ? 's' : ''}.
+          Vous ne pouvez téléverser que {maxFiles} fichier{maxFiles > 1 ? 's' : ''} maximum, veuillez en retirer {files.length - maxFiles}.
         </p>
       )}
       {files.length > 0 && !exceedMaxFiles && (
@@ -169,10 +168,10 @@ const DropzoneContent = ({ className }: { className?: string }) => {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
+                Téléversement...
               </>
             ) : (
-              <>Upload files</>
+              <>Téléverser les fichiers</>
             )}
           </Button>
         </div>
@@ -192,23 +191,23 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
     <div className={cn('flex flex-col items-center gap-y-2', className)}>
       <Upload size={20} className="text-muted-foreground" />
       <p className="text-sm">
-        Upload{!!maxFiles && maxFiles > 1 ? ` ${maxFiles}` : ''} file
+        Téléverser{!!maxFiles && maxFiles > 1 ? ` ${maxFiles}` : ''} fichier
         {!maxFiles || maxFiles > 1 ? 's' : ''}
       </p>
       <div className="flex flex-col items-center gap-y-1">
         <p className="text-xs text-muted-foreground">
-          Drag and drop or{' '}
+          Glissez-déposez ou{' '}
           <a
             onClick={() => inputRef.current?.click()}
             className="underline cursor-pointer transition hover:text-foreground"
           >
-            select {maxFiles === 1 ? `file` : 'files'}
+            sélectionnez {maxFiles === 1 ? `un fichier` : 'des fichiers'}
           </a>{' '}
-          to upload
+          à téléverser
         </p>
         {maxFileSize !== Number.POSITIVE_INFINITY && (
           <p className="text-xs text-muted-foreground">
-            Maximum file size: {formatBytes(maxFileSize, 2)}
+            Taille maximale du fichier : {formatBytes(maxFileSize, 2)}
           </p>
         )}
       </div>

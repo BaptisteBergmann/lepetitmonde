@@ -55,7 +55,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang="fr"
       suppressHydrationWarning
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", dmSans.variable)}
     >

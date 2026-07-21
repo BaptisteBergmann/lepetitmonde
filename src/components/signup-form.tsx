@@ -31,9 +31,9 @@ export function SignupForm({
           <form action={signup} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Create an account</h1>
+                <h1 className="text-2xl font-bold">Créer un compte</h1>
                 <p className="text-balance text-muted-foreground">
-                  Sign up to get started
+                  Inscrivez-vous pour commencer
                 </p>
               </div>
 
@@ -43,12 +43,12 @@ export function SignupForm({
                 <Input name="token" id="token" type="text" required value={token} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                <FieldLabel htmlFor="name">Nom complet</FieldLabel>
                 <Input
                   name="name"
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Jean Dupont"
                   required
                 />
               </Field>
@@ -65,23 +65,23 @@ export function SignupForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                {/* Le lien "Forgot password" a été retiré pour l'inscription */}
+                <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+                {/* Le lien "Mot de passe oublié" a été retiré pour l'inscription */}
                 <Input
                   name="password"
                   id="password"
                   type="password"
-                  placeholder="Create a password"
+                  placeholder="Créez un mot de passe"
                   required
                 />
               </Field>
 
               <Field>
-                <Button type="submit">Sign up</Button>
+                <Button type="submit">S&apos;inscrire</Button>
               </Field>
 
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Or continue with
+                Ou continuer avec
               </FieldSeparator>
 
               <Field className="grid grid-cols-3 gap-4">
@@ -92,7 +92,7 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Continue with Apple</span>
+                  <span className="sr-only">Continuer avec Apple</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Continue with Google</span>
+                  <span className="sr-only">Continuer avec Google</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -110,27 +110,27 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Continue with Meta</span>
+                  <span className="sr-only">Continuer avec Meta</span>
                 </Button>
               </Field>
 
               <FieldDescription className="text-center">
-                Already have an account? <a href="/login">Log in</a>
+                Vous avez déjà un compte ? <a href="/login">Connectez-vous</a>
               </FieldDescription>
             </FieldGroup>
           </form>
           <div className="relative hidden bg-muted md:block">
             <img
               src="/placeholder.svg"
-              alt="Image"
+              alt="Illustration"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        En continuant, vous acceptez nos <a href="#">Conditions d&apos;utilisation</a>{" "}
+        et notre <a href="#">Politique de confidentialité</a>.
       </FieldDescription>
     </div>
   )
