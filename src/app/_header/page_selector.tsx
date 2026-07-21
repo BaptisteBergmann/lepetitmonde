@@ -21,7 +21,7 @@ export default function PageSelector({ access }: { access: any[] }) {
   if (!babyAccess?.allowedPages?.length) return null;
 
   return (
-    <nav className="mx-auto flex max-w-fit items-center justify-center gap-1 sm:gap-2 rounded-full border border-slate-200/50 bg-white/70 p-1.5 shadow-md backdrop-blur-md">
+    <nav className="mx-auto flex max-w-fit items-center justify-center gap-1 sm:gap-2 rounded-full border border-border/50 bg-card/70 p-1.5 shadow-md backdrop-blur-md">
       {
         babyAccess?.allowedPages?.map((page: any) => {
           const href = `/baby/${currentBabyId}/${page.id}`;
@@ -36,7 +36,7 @@ export default function PageSelector({ access }: { access: any[] }) {
                   px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ease-in-out
                   ${isActive
                   ? 'bg-blue-500 text-white shadow-sm' // Style quand la page est active
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' // Style inactif
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground' // Style inactif
                 }
                 `}
             >

@@ -35,7 +35,7 @@ export default async function Header({ babies, params }: { babies: any[], params
   contextLogger.debug(accesses, "User accesses");
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-6 py-3 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm">
+    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
 
       {/* 1. ZONE GAUCHE : Logo et Sélecteur */}
       <div className="flex items-center gap-2 sm:gap-4">
@@ -47,7 +47,7 @@ export default async function Header({ babies, params }: { babies: any[], params
         </Link>
 
         {/* Petit séparateur vertical discret, caché sur tout petit écran */}
-        <div className="hidden sm:block border-l border-slate-300 h-6 mx-1"></div>
+        <div className="hidden sm:block border-l border-border h-6 mx-1"></div>
 
         <BabySelector babies={babies} />
       </div>
@@ -64,10 +64,10 @@ export default async function Header({ babies, params }: { babies: any[], params
           // Si l'utilisateur est connecté : Bulle de profil
           <Link
             href="/profile"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 border border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors shadow-sm"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-muted border border-border cursor-pointer hover:bg-accent transition-colors shadow-sm"
             title="Mon profil"
           >
-            <span className="text-slate-600 font-semibold text-sm">
+            <span className="text-muted-foreground font-semibold text-sm">
               {/* Affiche la 1ère lettre de son email en majuscule, ou 'U' par défaut */}
               {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
             </span>

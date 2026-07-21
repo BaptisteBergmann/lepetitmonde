@@ -29,8 +29,22 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
 }
+
+const themeInitScript = `
+  (function () {
+    var m = window.matchMedia('(prefers-color-scheme: dark)');
+    var apply = function () {
+      document.documentElement.classList.toggle('dark', m.matches);
+    };
+    apply();
+    m.addEventListener('change', apply);
+  })();
+`
 
 export default async function RootLayout({
   children,
@@ -42,8 +56,12 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", dmSans.variable)}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen flex flex-col">
         <HeaderWrapper />
 
