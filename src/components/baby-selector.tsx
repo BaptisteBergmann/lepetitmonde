@@ -15,12 +15,11 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
   const currentBabyId = params?.babyId || "default" as string;
 
   useEffect(() => {
-    if (pathname === '/') { return }
+    if (!pathname.startsWith('/baby/')) { return }
     if (currentBabyId && !pathname.includes(`/baby/${currentBabyId}`)) {
-      console.log(babies)
       router.push(`/baby/${babies[0].id}`);
     }
-  }, [currentBabyId, babies, router]);
+  }, [pathname, currentBabyId, babies, router]);
 
   const handleSelect = (newId: string) => {
     if (!newId) {
