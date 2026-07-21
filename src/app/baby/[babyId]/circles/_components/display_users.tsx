@@ -2,11 +2,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@utils/supabase/client"; // Ajustez selon votre chemin d'accès
 import { Tables } from "@utils/supabase/database.types";
 import { logger } from "@/utils/logger";
 import { Button } from "@/components/ui/button";
 import { sendNotification } from "@/utils/actions/notifications";
+import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
 import { Bell } from "lucide-react";
 
 type User = Tables<'users'>;
@@ -22,7 +22,6 @@ export default function RealtimeUsersList({
   babyId,
 }: RealtimeUsersListProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const supabase = createClient();
 
   const contextLogger = logger.child({
     module: 'RealtimeUsersList',
@@ -34,39 +33,21 @@ export default function RealtimeUsersList({
     setUsers(initialUsers);
   }, [initialUsers]);
 
-  useEffect(() => {
-    // Écoute en temps réel uniquement les changements sur la table guess_users
-    const channel = supabase
-      .channel(`realtime-users-${babyId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*", // Écoute INSERT, UPDATE, DELETE
-          schema: "public",
-          table: "users", // Remplacez par le nom exact de votre table
-          filter: `baby_id=eq.${babyId}`, // Filtre uniquement pour ce bébé/projet
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            const newUser = payload.new as User;
-            setUsers((prev) => [...prev, newUser]);
-          } else if (payload.eventType === "DELETE") {
-            setUsers((prev) => prev.filter((q) => q.id !== payload.old.id));
-          } else if (payload.eventType === "UPDATE") {
-            const updatedUser = payload.new as User;
-            setUsers((prev) =>
-              prev.map((q) => (q.id === updatedUser.id ? updatedUser : q))
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    // Nettoyage de la connexion WebSocket quand l'utilisateur quitte la page
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [babyId, supabase]);
+  useBabyRealtime(babyId, (event) => {
+    if (event.table !== "users") return;
+    if (event.eventType === "INSERT") {
+      const newUser = event.new as User;
+      setUsers((prev) => [...prev, newUser]);
+    } else if (event.eventType === "DELETE") {
+      const oldUser = event.old as User;
+      setUsers((prev) => prev.filter((q) => q.id !== oldUser.id));
+    } else if (event.eventType === "UPDATE") {
+      const updatedUser = event.new as User;
+      setUsers((prev) =>
+        prev.map((q) => (q.id === updatedUser.id ? updatedUser : q))
+      );
+    }
+  });
 
   contextLogger.info(users, "Get user")
   if (users.length === 0) {
