@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { logger } from '../logger'
 import { TablesInsert } from '../supabase/database.types'
+import { getUserAccess } from './users'
 
 type InsertGuess = TablesInsert<"guesses">
 
@@ -13,6 +14,10 @@ export async function submitGuess(guess: InsertGuess) {
   // 3. Récupérer l'utilisateur courant pour la sécurité
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(guess.baby_id)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
   contextLogger.debug(guess, "User sending guess")
   // 4. Insérer dans la base de données
   const { error } = await supabase
@@ -52,6 +57,9 @@ export async function getAllGuesses(babyId: string) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
 
   const { data, error } = await supabase
     .from('guesses')

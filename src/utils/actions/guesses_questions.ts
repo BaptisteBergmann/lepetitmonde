@@ -3,12 +3,17 @@
 import { createClient } from '@utils/supabase/server'
 import { TablesInsert } from '@utils/supabase/database.types'
 import { logger } from '../logger'
+import { getUserAccess } from './users'
 
 export async function getQuestions(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
   const contextLogger = logger.child({
     module: 'guess-action',
     babyId,
@@ -33,18 +38,23 @@ type NewGuess = TablesInsert<'guess_questions'>;
 
 export async function addQuestion(formData: NewGuess) {
   const supabase = await createClient()
+  const contextLogger = logger.child({ function: addQuestion.name, babyId: formData.baby_id })
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
 
-  // 4. Insérer dans la base de données
-  console.log("ADD question", formData)
+  const access = await getUserAccess(formData.baby_id)
+  if (Array.isArray(access) || access.access_level !== "admin") {
+    contextLogger.warn({ user: user.id }, "Non-admin attempted to create a question")
+    throw new Error("Non autorisé")
+  }
+
   const rep = await supabase
     .from('guess_questions')
     .insert(formData)
 
-  if (rep.error) { console.error(rep.error); return rep }
-  console.log("ADDED question")
+  if (rep.error) { contextLogger.error(rep.error, "Error inserting question"); return rep }
+  contextLogger.info("Question created")
   return rep
 
 }
@@ -54,6 +64,10 @@ export async function getQuestionsWithGuess(babyId: string) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
   const contextLogger = logger.child({
     function: getQuestionsWithGuess.name,
     babyId,
@@ -78,6 +92,10 @@ export async function getQuestionsWithoutGuess(babyId: string) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
   const contextLogger = logger.child({
     function: getQuestionsWithoutGuess.name,
     babyId,
