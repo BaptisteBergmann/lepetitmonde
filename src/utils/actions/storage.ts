@@ -18,24 +18,6 @@ export async function ensureBabyBucket(babyId: string) {
   }
 }
 
-export async function getSignedUrl(babyId: string, path: string, expiresIn: number = 3600) {
-  const contextLogger = logger.child({ function: getSignedUrl.name, babyId, path })
-  const supabaseAdmin = createAdminClient()
-
-  const rep = await supabaseAdmin.storage.from(babyId).createSignedUrl(path, expiresIn)
-
-  if (rep.error) {
-    contextLogger.error(rep.error, "Error getting signed image URL")
-    return null
-  }
-
-  return rep.data
-}
-
-export async function getImage(babyId: string, imageId: string) {
-  return getSignedUrl(babyId, `images/${imageId}`)
-}
-
 export async function removeStorageObjects(babyId: string, paths: string[]) {
   const contextLogger = logger.child({ function: removeStorageObjects.name, babyId })
   const supabaseAdmin = createAdminClient()

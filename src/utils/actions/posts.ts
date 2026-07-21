@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
-import { ensureBabyBucket, getSignedUrl, removeStorageObjects } from './storage'
+import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { logger } from '../logger'
 
 type NewPost = TablesInsert<'posts'>
@@ -90,12 +90,10 @@ async function toPostWithDetails(row: {
 }): Promise<PostWithDetails> {
   const { posts_circles, post_photos, ...post } = row
   const sortedPhotos = [...post_photos].sort((a, b) => a.position - b.position)
-  const photos = await Promise.all(
-    sortedPhotos.map(async (photo) => ({
-      ...photo,
-      url: (await getSignedUrl(row.baby_id, photo.storage_path))?.signedUrl ?? null,
-    }))
-  )
+  const photos = sortedPhotos.map((photo) => ({
+    ...photo,
+    url: `/api/storage/${row.baby_id}/${photo.storage_path.split('/').map(encodeURIComponent).join('/')}`,
+  }))
 
   return {
     ...(post as Tables<'posts'>),
