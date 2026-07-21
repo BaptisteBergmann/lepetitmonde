@@ -43,6 +43,8 @@ export async function getAllUserAccess() {
 export async function getUsers(babyId: string) {
   const supabase = await createClient();
   const contextLogger = logger.child({ function: getUsers.name, babyId })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table
     .select(`

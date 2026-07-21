@@ -24,7 +24,6 @@ export default function RealtimeUsersList({
   const [users, setUsers] = useState<User[]>(initialUsers);
   const supabase = createClient();
 
-  console.log(users)
   const contextLogger = logger.child({
     module: 'RealtimeUsersList',
   });

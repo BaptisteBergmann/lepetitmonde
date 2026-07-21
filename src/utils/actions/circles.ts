@@ -2,6 +2,7 @@
 
 import { createClient } from '@utils/supabase/server'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
+import { revalidatePath } from 'next/cache'
 
 type NewCircle = TablesInsert<'circles'>;
 
@@ -11,15 +12,16 @@ export async function createCircle(circle: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
 
-  console.log("circle", circle)
+  const babyId = circle.get("babyId") as string
+  const name = circle.get("name") as string
+
   const rep = await supabase
     .from('circles')
-    .insert([{
-      name: circle.get("name"),
-      baby_id: circle.get("babyId"),
-    }])
+    .insert([{ name, baby_id: babyId }])
 
   if (rep.error) throw rep.error
+
+  revalidatePath(`/baby/${babyId}/circles`)
 }
 
 type Circle = Tables<'circles'>;

@@ -1,12 +1,13 @@
-import { sendInvite } from "@utils/actions/invite";
+import { sendInvite, getInvitations } from "@utils/actions/invite";
 import CreateCircle from "./_components/create_circle";
 import RealtimeCirclesList from "./_components/display_circles";
 import { getCircles } from "@utils/actions/circles";
 import CreateInvite from "./_components/create_invite";
 import RealtimeUsersList from "./_components/display_users";
-import { getUsers } from "@/utils/actions/users";
+import InvitationsList from "./_components/display_invitations";
+import { getUsers, getUserAccess } from "@/utils/actions/users";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Mail } from "lucide-react";
+import { Users, UserPlus, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -16,6 +17,8 @@ export default async function InviteForm({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
+  const access = await getUserAccess(babyId);
+  const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -32,42 +35,46 @@ export default async function InviteForm({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Forms and Invites (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Form: Invite by Email */}
-          <Card className="border border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <UserPlus className="h-4.5 w-4.5 text-primary" />
-                Inviter par e-mail
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Envoyez un e-mail d&apos;invitation pour rejoindre ce journal.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form action={sendInvite} className="space-y-3.5">
-                <input type="hidden" name="babyId" value={babyId} />
-                <div className="flex flex-col gap-1.5">
-                  <Input
-                    name="email"
-                    type="email"
-                    placeholder="email@famille.com"
-                    required
-                    className="w-full bg-input/40"
-                  />
-                </div>
-                <Button type="submit" className="w-full rounded-2xl cursor-pointer gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>Envoyer l&apos;invitation</span>
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          {isAdmin && (
+            <>
+              {/* Form: Invite by Email */}
+              <Card className="border border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-bold flex items-center gap-2">
+                    <UserPlus className="h-4.5 w-4.5 text-primary" />
+                    Inviter par e-mail
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Envoyez un e-mail d&apos;invitation pour rejoindre ce journal.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form action={sendInvite} className="space-y-3.5">
+                    <input type="hidden" name="babyId" value={babyId} />
+                    <div className="flex flex-col gap-1.5">
+                      <Input
+                        name="email"
+                        type="email"
+                        placeholder="email@famille.com"
+                        required
+                        className="w-full bg-input/40"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full rounded-2xl cursor-pointer gap-2">
+                      <Mail className="h-4 w-4" />
+                      <span>Envoyer l&apos;invitation</span>
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
 
-          {/* Card: Shareable Link */}
-          <CreateInvite babyId={babyId} />
+              {/* Card: Shareable Link */}
+              <CreateInvite babyId={babyId} />
 
-          {/* Form: Create Circle */}
-          <CreateCircle babyId={babyId} />
+              {/* Form: Create Circle */}
+              <CreateCircle babyId={babyId} />
+            </>
+          )}
         </div>
 
         {/* Right Column: Lists of Members and Circles (7 cols) */}
@@ -84,7 +91,7 @@ export default async function InviteForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0 pb-2">
-              <RealtimeUsersList babyId={babyId} initialUsers={await getUsers(babyId)} isAdmin={true} />
+              <RealtimeUsersList babyId={babyId} initialUsers={await getUsers(babyId)} isAdmin={isAdmin} />
             </CardContent>
           </Card>
 
@@ -100,9 +107,27 @@ export default async function InviteForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0 pb-2">
-              <RealtimeCirclesList babyId={babyId} initialCircles={await getCircles(babyId)} isAdmin={true} />
+              <RealtimeCirclesList babyId={babyId} initialCircles={await getCircles(babyId)} isAdmin={isAdmin} />
             </CardContent>
           </Card>
+
+          {/* Invitations List Card (admin only) */}
+          {isAdmin && (
+            <Card className="border border-border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-bold flex items-center gap-2">
+                  <ShieldCheck className="h-4.5 w-4.5 text-blue-500" />
+                  Liens d&apos;invitation
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Historique des liens générés, actifs et expirés.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0 pb-2">
+                <InvitationsList invitations={await getInvitations(babyId)} />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

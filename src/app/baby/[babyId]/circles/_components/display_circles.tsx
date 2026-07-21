@@ -21,9 +21,6 @@ export default function RealtimeCirclesList({
   const [circles, setCircles] = useState<Circle[]>(initialCircles);
   const supabase = createClient();
 
-  console.log(circles)
-
-
   // Permet de synchroniser l'état si les props serveur changent (ex: navigation)
   useEffect(() => {
     setCircles(initialCircles);
