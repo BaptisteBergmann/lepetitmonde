@@ -1,9 +1,10 @@
-import Modal from "./_components/modal";
+import Link from "next/link";
 import { Suspense } from "react";
 import QuestionsListWrapper from "./questions_list_wrapper";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { logger } from "@/utils/logger";
+import { Button } from "@/components/ui/button";
 
 export default async function GuessesPage({
   params,
@@ -28,9 +29,13 @@ export default async function GuessesPage({
           </p>
         </div>
         {access.access_level === "admin" &&
-
           <div className="flex shrink-0">
-            <Modal babyId={babyId} />
+            <Link href={`/baby/${babyId}/guess/admin`}>
+              <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
+                <Settings className="h-4 w-4" />
+                <span>Administrer</span>
+              </Button>
+            </Link>
           </div>
         }
       </div>
