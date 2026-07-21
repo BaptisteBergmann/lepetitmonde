@@ -13,7 +13,7 @@ import TextPicker from "./_components/picker/text";
 import TimePicker from "./_components/picker/time";
 
 export interface PickerProps {
-  value: number | string;
+  value: number | string | Date | undefined;
   options: any;
   onChange: Dispatch<any> | undefined;
   id: string;
@@ -25,7 +25,8 @@ export default function QuestionWrapper({ questionWithGuess }) {
 
   const router = useRouter();
   const [value, setValue] = useState(
-    questionWithGuess.guesses?.at(0)?.answer || "" // Pré-remplir avec la valeur existante
+    // Non pré-rempli pour "date" : le Calendar attend un `Date | undefined`, jamais une chaîne vide.
+    questionWithGuess.type === "date" ? undefined : ""
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -169,7 +170,7 @@ export default function QuestionWrapper({ questionWithGuess }) {
         <CardFooter className="pt-0 pb-4 flex justify-end">
           <Button
             onClick={handleSend}
-            disabled={value === "" || isSubmitting}
+            disabled={value === "" || value === undefined || value === null || isSubmitting}
             className="w-full gap-2 rounded-2xl cursor-pointer"
           >
             {isSubmitting ? (

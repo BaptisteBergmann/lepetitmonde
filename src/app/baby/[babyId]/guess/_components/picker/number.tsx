@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function NumberPicker({ value, options, onChange, id }: PickerProps) {
+  const numericValue = typeof value === "string" || typeof value === "number" ? value : "";
+  const sliderValue: number[] = numericValue === "" ? [options?.min ?? 0] : [Number(numericValue)];
+
   return (
     <div className="mx-auto grid w-full max-w-xs gap-3">
       <Input
         type="number"
         id={id}
-        value={value}
+        value={numericValue}
         min={options?.min ?? undefined}
         max={options?.max ?? undefined}
         onChange={(e) => onChange?.(e.target.value)}
@@ -21,8 +24,8 @@ export default function NumberPicker({ value, options, onChange, id }: PickerPro
       />
       <Slider
         id="slider-demo-temperature"
-        value={value}
-        onValueChange={onChange}
+        value={sliderValue}
+        onValueChange={(v) => onChange?.(Array.isArray(v) ? v[0] : v)}
         min={options?.min ?? undefined}
         max={options?.max ?? undefined}
         step={0.001}
