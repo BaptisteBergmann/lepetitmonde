@@ -1,7 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDropzone, type FileError, type FileRejection } from 'react-dropzone'
 
-import { uploadFile } from '@utils/actions/upload'
+async function uploadFile(
+  bucketName: string,
+  path: string,
+  file: File,
+  options: { cacheControl: string; upsert: boolean }
+) {
+  const params = new URLSearchParams({
+    bucket: bucketName,
+    path,
+    cacheControl: options.cacheControl,
+    upsert: String(options.upsert),
+  })
+
+  const response = await fetch(`/api/upload?${params.toString()}`, {
+    method: 'POST',
+    headers: { 'content-type': file.type || 'application/octet-stream' },
+    body: file,
+  })
+
+  try {
+    const { error } = await response.json()
+    return { error: error ?? undefined }
+  } catch {
+    return { error: `Échec de l'envoi (${response.status})` }
+  }
+}
 
 interface FileWithPreview extends File {
   preview?: string
