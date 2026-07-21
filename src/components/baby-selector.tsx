@@ -69,10 +69,8 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
       onValueChange={handleSelect}
       disabled={isPending}
     >
-      <SelectTrigger className="max-w-[8rem] sm:max-w-none text-sm">
-        <SelectValue placeholder="-- select an option --">
-          {(value: string | null) => babies.find((baby) => baby.id === value)?.baby_surname ?? value}
-        </SelectValue>
+      <SelectTrigger aria-label="Changer de bébé" className="px-2.5">
+        <SelectValue placeholder="">{() => ""}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {babies.map((baby) => (

@@ -1,4 +1,5 @@
 import BabySelector from '@/components/baby-selector';
+import SiteTitle from './site_title';
 import { getAllUserAccess } from '@/utils/actions/users';
 import { logger } from '@/utils/logger';
 import Link from 'next/link';
@@ -48,12 +49,7 @@ export default async function Header({ babies, params }: { babies: any[], params
 
       {/* 1. ZONE GAUCHE : Logo et Sélecteur */}
       <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-        <Link
-          href="/"
-          className="shrink-0 text-lg sm:text-xl font-black text-primary tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
-        >
-          Le petit Monde
-        </Link>
+        <SiteTitle babies={babies} />
 
         {/* Petit séparateur vertical discret, caché sur tout petit écran */}
         <div className="hidden sm:block border-l border-border h-6 mx-1"></div>
