@@ -147,6 +147,87 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          baby_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          event_date: string
+          id: string
+          kind: Database["public"]["Enums"]["event_kind"]
+          milestone_type: Database["public"]["Enums"]["milestone_type"] | null
+          title: string
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date: string
+          id?: string
+          kind?: Database["public"]["Enums"]["event_kind"]
+          milestone_type?: Database["public"]["Enums"]["milestone_type"] | null
+          title: string
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["event_kind"]
+          milestone_type?: Database["public"]["Enums"]["milestone_type"] | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events_circles: {
+        Row: {
+          circle_id: string
+          event_id: string
+        }
+        Insert: {
+          circle_id: string
+          event_id: string
+        }
+        Update: {
+          circle_id?: string
+          event_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_circles_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_circles_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guess_questions: {
         Row: {
           baby_id: string
@@ -323,6 +404,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      event_kind: "custom" | "milestone"
+      milestone_type:
+        | "first_steps"
+        | "first_tooth"
+        | "first_word"
+        | "first_smile"
+        | "first_laugh"
+        | "birthday"
+        | "other"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -451,6 +541,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_kind: ["custom", "milestone"],
+      milestone_type: [
+        "first_steps",
+        "first_tooth",
+        "first_word",
+        "first_smile",
+        "first_laugh",
+        "birthday",
+        "other",
+      ],
       role: ["admin", "viewer"],
     },
   },
