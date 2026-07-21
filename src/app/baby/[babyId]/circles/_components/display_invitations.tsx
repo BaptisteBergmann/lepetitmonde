@@ -44,7 +44,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
             className="flex items-center justify-between py-3.5 px-6 hover:bg-muted/30 transition-colors gap-4"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="bg-blue-500/10 text-blue-600 dark:text-blue-400 p-2 rounded-xl shrink-0">
+              <div className="bg-primary/10 text-primary p-2 rounded-xl shrink-0">
                 <Link2 className="h-4 w-4" />
               </div>
               <div className="min-w-0">

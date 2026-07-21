@@ -77,7 +77,7 @@ export default function RealtimeCirclesList({
           className="flex items-center justify-between py-3.5 px-6 hover:bg-muted/30 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="bg-purple-500/10 text-purple-600 dark:text-purple-400 p-2 rounded-xl">
+            <div className="bg-rose/10 text-rose p-2 rounded-xl">
               <CircleDot className="h-4 w-4" />
             </div>
             <div>

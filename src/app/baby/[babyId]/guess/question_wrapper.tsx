@@ -58,9 +58,9 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
   const getIcon = () => {
     switch (questionWithGuess.type) {
       case "date":
-        return <Calendar className="h-3.5 w-3.5 text-blue-500" />;
+        return <Calendar className="h-3.5 w-3.5 text-primary" />;
       case "number":
-        return <Hash className="h-3.5 w-3.5 text-purple-500" />;
+        return <Hash className="h-3.5 w-3.5 text-rose" />;
       default:
         return <Type className="h-3.5 w-3.5 text-emerald-500" />;
     }

@@ -24,7 +24,7 @@ export default async function InviteForm({
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       {/* Header Section */}
       <div className="border-b border-border pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+        <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-rose bg-clip-text text-transparent flex items-center gap-2">
           👥 Cercles & Accès
         </h1>
         <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
@@ -99,7 +99,7 @@ export default async function InviteForm({
           <Card className="border border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Users className="h-4.5 w-4.5 text-purple-500" />
+                <Users className="h-4.5 w-4.5 text-rose" />
                 Cercles de partage
               </CardTitle>
               <CardDescription className="text-xs">
@@ -116,7 +116,7 @@ export default async function InviteForm({
             <Card className="border border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <ShieldCheck className="h-4.5 w-4.5 text-blue-500" />
+                  <ShieldCheck className="h-4.5 w-4.5 text-primary" />
                   Liens d&apos;invitation
                 </CardTitle>
                 <CardDescription className="text-xs">

@@ -20,7 +20,7 @@ export default async function GuessesPage({
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-rose bg-clip-text text-transparent flex items-center gap-2">
             🍼 Pronostics de la Famille
           </h1>
           <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">

@@ -50,7 +50,7 @@ export default async function Header({ babies, params }: { babies: any[], params
       <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         <Link
           href="/"
-          className="shrink-0 text-lg sm:text-xl font-black text-blue-500 tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+          className="shrink-0 text-lg sm:text-xl font-black text-primary tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
         >
           Le petit Monde
         </Link>
@@ -85,7 +85,7 @@ export default async function Header({ babies, params }: { babies: any[], params
           // Si l'utilisateur n'est PAS connecté : Bouton Login
           <Link
             href="/login"
-            className="px-4 py-1.5 text-sm font-semibold text-white bg-blue-500 rounded-full hover:bg-blue-600 transition-colors shadow-sm"
+            className="px-4 py-1.5 text-sm font-semibold text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-sm"
           >
             Se connecter
           </Link>

@@ -42,7 +42,7 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
     <Card className="border border-border">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-bold flex items-center gap-2">
-          <Link2 className="h-4.5 w-4.5 text-blue-500" />
+          <Link2 className="h-4.5 w-4.5 text-primary" />
           Lien d&apos;invitation unique
         </CardTitle>
         <CardDescription className="text-xs">

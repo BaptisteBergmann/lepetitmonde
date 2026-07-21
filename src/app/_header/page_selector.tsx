@@ -35,7 +35,7 @@ export default function PageSelector({ access }: { access: any[] }) {
               className={`
                   px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ease-in-out
                   ${isActive
-                  ? 'bg-blue-500 text-white shadow-sm' // Style quand la page est active
+                  ? 'bg-primary text-primary-foreground shadow-sm' // Style quand la page est active
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground' // Style inactif
                 }
                 `}

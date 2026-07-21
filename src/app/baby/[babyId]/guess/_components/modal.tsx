@@ -142,8 +142,8 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
                       {items.map((item) => (
                         <SelectItem key={item.value} value={item.value}>
                           <div className="flex items-center gap-2">
-                            {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-blue-500" />}
-                            {item.value === "number" && <Hash className="h-3.5 w-3.5 text-purple-500" />}
+                            {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
+                            {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
                             {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
                             <span>{item.label}</span>
                           </div>

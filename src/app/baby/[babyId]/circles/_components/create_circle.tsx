@@ -9,7 +9,7 @@ export default async function CreateCircle({ babyId }: { babyId: string }) {
     <Card className="border border-border">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-bold flex items-center gap-2">
-          <CircleDot className="h-4.5 w-4.5 text-purple-500" />
+          <CircleDot className="h-4.5 w-4.5 text-rose" />
           Créer un cercle de partage
         </CardTitle>
         <CardDescription className="text-xs">
