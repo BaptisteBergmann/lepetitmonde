@@ -1,7 +1,7 @@
 import { getBaby } from "@utils/actions/baby";
 import { getUserAccess } from "@utils/actions/users";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sparkles, Users } from "lucide-react";
+import { Sparkles, Users, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -13,6 +13,14 @@ const SECTIONS = [
     role: "viewer" as const,
     icon: Sparkles,
     tone: "bg-primary",
+  },
+  {
+    id: "calendar",
+    name: "Calendrier",
+    description: "Consultez les événements et jalons de bébé, passés et à venir.",
+    role: "viewer" as const,
+    icon: CalendarDays,
+    tone: "bg-sage",
   },
   {
     id: "admin",
