@@ -59,7 +59,7 @@ export default function BabySelector({ babies }: { babies: Baby[] }) {
     });
   };
 
-  if (babies.length === 0) {
+  if (babies.length === 0 || pathname === '/') {
     return null;
   }
 
