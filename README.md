@@ -43,7 +43,7 @@ The application is built for total data sovereignty (Self-Hosted):
 
 The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private self-hosted registry, then run via a Portainer stack.
 
-1. Build and push in one step with `docker buildx` (requires `docker login 192.168.2.177:5000` once beforehand):
+1. Build and push in one step with `mise run docker_build_push` (requires `docker login 192.168.2.177:5000` once beforehand), which runs:
 
    ```bash
    docker buildx build \

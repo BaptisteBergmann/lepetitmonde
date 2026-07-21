@@ -53,7 +53,7 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 
 ## 🐳 Docker Build & Deploy
 
-- Production image is multi-arch (amd64 + arm64) built with `docker buildx` and pushed to the private registry at `192.168.2.177:5000/lepetitmonde:latest`. `NEXT_PUBLIC_*` vars must be passed as `--build-arg` (they're inlined into the client bundle at build time, not read at container runtime).
+- Production image is multi-arch (amd64 + arm64) built with `docker buildx` and pushed to the private registry at `192.168.2.177:5000/lepetitmonde:latest`. `NEXT_PUBLIC_*` vars must be passed as `--build-arg` (they're inlined into the client bundle at build time, not read at container runtime). Run `mise run docker_build_push` — it wires the `--build-arg`s from `mise.toml`'s `[env]` block, plus `NEXT_PUBLIC_COMMIT_SHA` from `git rev-parse --short HEAD`, which is shown in the app footer.
 - Deployment target is a Portainer stack (`docker-compose.portainer.yml`) that pulls the image — Portainer does not build from source. Do not suggest wiring Portainer to build directly from the Dockerfile.
 - The registry is plain HTTP; do not suggest `docker login` fixes for TLS errors — the actual fix is `insecure-registries` in the Docker host's `daemon.json`. See README.md "Docker Build & Deploy" for the full command and troubleshooting steps.
 

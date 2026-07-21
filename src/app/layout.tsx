@@ -69,6 +69,9 @@ export default async function RootLayout({
         <main className="flex-grow pt-20"> {/* pt-20 = padding-top pour compenser le header fixed */}
           {children}
         </main>
+        <footer className="py-4 text-center text-xs text-muted-foreground">
+          v{process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'dev'}
+        </footer>
         <PwaRegistry />
       </body>
       {/* <Header babies={babies}></Header> */}
