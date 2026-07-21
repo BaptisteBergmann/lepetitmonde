@@ -1,7 +1,7 @@
 import { getBaby } from "@utils/actions/baby";
 import { getUserAccess } from "@utils/actions/users";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sparkles, Users, CalendarDays } from "lucide-react";
+import { Sparkles, Users, CalendarDays, Images } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -21,6 +21,14 @@ const SECTIONS = [
     role: "viewer" as const,
     icon: CalendarDays,
     tone: "bg-sage",
+  },
+  {
+    id: "feed",
+    name: "Journal",
+    description: "Photos, réactions et commentaires partagés en famille.",
+    role: "viewer" as const,
+    icon: Images,
+    tone: "bg-amber-400",
   },
   {
     id: "admin",
