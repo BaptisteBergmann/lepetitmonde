@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import QuestionsListWrapper from "./questions_list_wrapper";
-import { Loader2, Settings } from "lucide-react";
+import { Loader2, Settings, Sparkles } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { logger } from "@/utils/logger";
 import { Button } from "@/components/ui/button";
@@ -17,27 +17,33 @@ export default async function GuessesPage({
   contextLogger.debug(access, "User Access")
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6 mb-8">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-rose bg-clip-text text-transparent flex items-center gap-2">
-            🍼 Pronostics de la Famille
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
-            Qui verra juste ? Participez aux pronostics ou créez-en de nouveaux pour animer l&apos;attente en famille !
-          </p>
+    <div className="relative w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
+      />
+
+      {access.access_level === "admin" && (
+        <div className="relative flex justify-end">
+          <Link href={`/baby/${babyId}/guess/admin`}>
+            <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
+              <Settings className="h-4 w-4" />
+              <span>Administrer</span>
+            </Button>
+          </Link>
         </div>
-        {access.access_level === "admin" &&
-          <div className="flex shrink-0">
-            <Link href={`/baby/${babyId}/guess/admin`}>
-              <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
-                <Settings className="h-4 w-4" />
-                <span>Administrer</span>
-              </Button>
-            </Link>
-          </div>
-        }
+      )}
+
+      <div className="relative flex flex-col items-center text-center gap-2 pb-2">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Sparkles className="h-5 w-5" />
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+          Pronostics de la famille
+        </h1>
+        <p className="text-muted-foreground text-sm sm:text-base max-w-xs">
+          Qui verra juste ? Participez aux pronostics ou créez-en de nouveaux pour animer l&apos;attente !
+        </p>
       </div>
 
       <Suspense
