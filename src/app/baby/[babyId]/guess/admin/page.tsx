@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Hash, Type } from "lucide-react";
-import { getUserAccess } from "@/utils/actions/users";
+import { ArrowLeft, Calendar, Hash, Type, User } from "lucide-react";
+import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { getQuestions } from "@/utils/actions/guesses_questions";
+import { getAllGuesses } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
 import Modal from "../_components/modal";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 function getTypeMeta(type: string) {
   switch (type) {
@@ -16,6 +17,17 @@ function getTypeMeta(type: string) {
     default:
       return { icon: <Type className="h-3.5 w-3.5 text-emerald-500" />, label: "Texte" };
   }
+}
+
+function formatAnswer(value: unknown, type: string) {
+  if (value === undefined || value === null || value === "") return "-";
+  if (type === "date") {
+    const d = new Date(value as string);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    }
+  }
+  return String(value);
 }
 
 export default async function GuessAdminPage({
@@ -32,8 +44,18 @@ export default async function GuessAdminPage({
     redirect(`/baby/${babyId}/guess`);
   }
 
-  const questions = await getQuestions(babyId);
+  const [questions, guesses, users] = await Promise.all([
+    getQuestions(babyId),
+    getAllGuesses(babyId),
+    getUsers(babyId),
+  ]);
   contextLogger.debug(questions, "Questions loaded for admin page");
+
+  const userNameById = new Map(
+    users
+      .filter((u): u is NonNullable<typeof u> => !!u)
+      .map((u) => [u.id, [u.first_name, u.last_name].filter(Boolean).join(" ") || "Utilisateur"])
+  );
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -69,6 +91,7 @@ export default async function GuessAdminPage({
         <div className="space-y-3">
           {questions.map((question) => {
             const { icon, label } = getTypeMeta(question.type);
+            const questionGuesses = guesses.filter((g) => g.question_id === question.id);
             return (
               <Card key={question.id} className="relative overflow-hidden border-border">
                 <div className="absolute top-0 right-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl border-l border-b border-border bg-muted/40">
@@ -85,6 +108,28 @@ export default async function GuessAdminPage({
                     </CardDescription>
                   )}
                 </CardHeader>
+                <CardContent className="pt-0 pb-4">
+                  {questionGuesses.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">Aucune réponse pour le moment.</p>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      {questionGuesses.map((guess) => (
+                        <div
+                          key={guess.id}
+                          className="flex items-center justify-between gap-3 rounded-xl bg-muted/30 px-3 py-2 text-sm"
+                        >
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <User className="h-3.5 w-3.5" />
+                            {userNameById.get(guess.user_id) ?? "Utilisateur"}
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {formatAnswer(guess.answer, question.type)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             );
           })}
