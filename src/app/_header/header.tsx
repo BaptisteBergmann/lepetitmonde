@@ -29,7 +29,7 @@ export default async function Header({ babies, params }: { babies: any[], params
   const accesses = allUserAccess.map((acc) => ({
     ...acc,
     allowedPages: pages.filter((page) =>
-      acc.access_level === "admin" || (acc.access_level === page.role && page.enabled)
+      page.enabled && (acc.access_level === "admin" || acc.access_level === page.role)
     )
   }));
 
