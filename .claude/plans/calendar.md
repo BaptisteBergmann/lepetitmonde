@@ -13,6 +13,21 @@ Nothing currently exists for this — the header already has a **disabled placeh
 
 Key architectural fact from exploration: **this app does not use Postgres RLS** (`row_security = off`, no `CREATE POLICY` anywhere in `supabase/migrations/20260721132707_baseline.sql`). Every table is `GRANT ALL`'d to `authenticated`, and all authorization happens in Server Actions via `assertIsAdmin()` (`src/utils/actions/access.ts`) and manual `.eq('user_id', ...)` filtering (see `src/utils/actions/circles.ts`, `src/utils/actions/users.ts`). The calendar feature must follow this same pattern — no RLS policies, enforce everything in the server action layer.
 
+## Prerequisites (verify/do before starting)
+
+Checked against the current codebase state:
+
+- ✅ **Migration workflow** — `mise run db_migration_new`, `db_push`, `update_types` already exist in `mise.toml` and their required env vars (`POOLER_TENANT_ID`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`) are already provided via `docker/.env`. No setup needed.
+- ✅ **Auth/authorization helpers** — `assertIsAdmin` (`src/utils/actions/access.ts`) and `getAuthUser` (`src/utils/supabase/auth.ts`) already exist and match the pattern this plan relies on.
+- ✅ **Circle helpers to extract `getUserCircleIds` from** — `getCirclesAccess` already exists in `src/utils/actions/circles.ts`; no need to build circle membership querying from scratch, just extract/generalize.
+- ✅ **`date-fns`** — already a dependency (`^4.4.0`), no install needed.
+- ✅ **Modal pattern to copy** — `src/app/baby/[babyId]/guess/_components/modal.tsx` exists and is a valid reference for `create_event_modal.tsx`.
+- ✅ **Nav stub** — `calendar` entry already present (disabled) in `src/app/_header/header.tsx`; just flip `enabled: true` when the page is ready, no new entry to author.
+- ⚠️ **No typecheck script** — `package.json`'s `scripts` only has `dev`/`build`/`start`/`lint`, no `typecheck`. `typescript` is a devDependency, so `npx tsc --noEmit` works ad hoc, but the plan's Verification step assumes a `pnpm typecheck` command that doesn't exist yet. Either add a `"typecheck": "tsc --noEmit"` script to `package.json` before starting, or just run `npx tsc --noEmit` directly during verification — pick one so step isn't blocked mid-implementation.
+- ⚠️ **`mise.toml` has uncommitted local changes** (`git status` shows it modified — adds `[settings] env_shell_expand` and `CLAUDE_CONFIG_DIR`, unrelated to this feature). Commit or stash those separately before starting so the calendar work lands in its own clean commits per the repo's git workflow rule (small commits scoped to one subtask).
+
+No other blockers found — unlike the feed plan (which has an open Storage-bucket-provisioning gap), calendar has no unresolved infrastructure dependency.
+
 ## Data model
 
 New migration (via `mise run db_migration_new create_events`):
