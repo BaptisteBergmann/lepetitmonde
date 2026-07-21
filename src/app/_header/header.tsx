@@ -1,4 +1,3 @@
-import BabySelector from '@/components/baby-selector';
 import SiteTitle from './site_title';
 import { getAllUserAccess } from '@/utils/actions/users';
 import { logger } from '@/utils/logger';
@@ -50,13 +49,6 @@ export default async function Header({ babies, params }: { babies: any[], params
       {/* 1. ZONE GAUCHE : Logo et Sélecteur */}
       <div className="flex items-center gap-2 sm:gap-4 min-w-0">
         <SiteTitle babies={babies} />
-
-        {/* Petit séparateur vertical discret, caché sur tout petit écran */}
-        <div className="hidden sm:block border-l border-border h-6 mx-1"></div>
-
-        <div className="min-w-0">
-          <BabySelector babies={babies} />
-        </div>
       </div>
 
       {/* 2. ZONE CENTRALE : La navigation (PageSelector), visible uniquement sur grand écran */}
