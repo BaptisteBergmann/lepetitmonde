@@ -60,3 +60,7 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 ## ✅ Git Workflow
 
 - Commit as soon as each subtask/fix in a multi-step task is done and verified (e.g. typechecks pass) — do not batch unrelated fixes into a single commit. Each commit should be small and scoped to one subtask.
+
+## 📋 Planning
+
+- Save all feature/implementation plans as Markdown files in `.claude/plans/` (one file per feature, e.g. `.claude/plans/calendar.md`), not in a personal/global plans directory. This keeps plans versioned with the code and visible to the whole family/team working on this repo.
