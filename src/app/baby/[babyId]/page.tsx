@@ -15,8 +15,8 @@ const SECTIONS = [
     tone: "bg-primary",
   },
   {
-    id: "circles",
-    name: "Groupes",
+    id: "admin",
+    name: "Administration",
     description: "Gérez qui a accès au journal et organisez les cercles de partage.",
     role: "admin" as const,
     icon: Users,

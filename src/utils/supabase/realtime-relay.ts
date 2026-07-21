@@ -2,7 +2,7 @@ import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
 type RealtimeEvent = {
-  table: 'users' | 'circles'
+  table: 'users' | 'circles' | 'circles_access'
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: unknown
   old: unknown
@@ -43,6 +43,15 @@ function openChannel(babyId: string): Entry {
       (payload) => {
         for (const listener of listeners) {
           listener({ table: 'circles', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'circles_access', filter: `baby_id=eq.${babyId}` },
+      (payload) => {
+        for (const listener of listeners) {
+          listener({ table: 'circles_access', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
         }
       }
     )

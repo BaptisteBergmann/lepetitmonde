@@ -1,7 +1,7 @@
 import { sendInvite, getInvitations } from "@utils/actions/invite";
 import CreateCircle from "./_components/create_circle";
 import RealtimeCirclesList from "./_components/display_circles";
-import { getCircles } from "@utils/actions/circles";
+import { getCircles, getAllCirclesAccess } from "@utils/actions/circles";
 import CreateInvite from "./_components/create_invite";
 import RealtimeUsersList from "./_components/display_users";
 import InvitationsList from "./_components/display_invitations";
@@ -19,6 +19,7 @@ export default async function InviteForm({
   const { babyId } = await params;
   const access = await getUserAccess(babyId);
   const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
+  const users = await getUsers(babyId);
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -91,7 +92,7 @@ export default async function InviteForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0 pb-2">
-              <RealtimeUsersList babyId={babyId} initialUsers={await getUsers(babyId)} isAdmin={isAdmin} />
+              <RealtimeUsersList babyId={babyId} initialUsers={users} isAdmin={isAdmin} />
             </CardContent>
           </Card>
 
@@ -107,7 +108,13 @@ export default async function InviteForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0 pb-2">
-              <RealtimeCirclesList babyId={babyId} initialCircles={await getCircles(babyId)} isAdmin={isAdmin} />
+              <RealtimeCirclesList
+                babyId={babyId}
+                initialCircles={await getCircles(babyId)}
+                initialCirclesAccess={await getAllCirclesAccess(babyId)}
+                users={users}
+                isAdmin={isAdmin}
+              />
             </CardContent>
           </Card>
 
