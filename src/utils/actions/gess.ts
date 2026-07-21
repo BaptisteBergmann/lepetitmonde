@@ -18,6 +18,18 @@ export async function submitGuess(guess: InsertGuess) {
   const access = await getUserAccess(guess.baby_id)
   if (Array.isArray(access)) throw new Error("Non autorisé")
 
+  // Un pronostic est définitif : on vérifie qu'aucune réponse n'existe déjà
+  // pour empêcher un utilisateur de changer son pronostic après coup.
+  const { data: existing, error: existingError } = await supabase
+    .from('guesses')
+    .select('id')
+    .eq('question_id', guess.question_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (existingError) throw existingError
+  if (existing) throw new Error("Vous avez déjà répondu à cette question")
+
   contextLogger.debug(guess, "User sending guess")
   // 4. Insérer dans la base de données
   const { error } = await supabase
