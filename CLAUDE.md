@@ -50,6 +50,7 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 ## 🧰 Tooling & Environment
 
 - Tool versions (Node, etc.) and environment variables are managed with **mise**. Do not suggest nvm, direnv, or manually exporting env vars — use `mise.toml` / `mise` commands instead.
+- When running one-off commands that talk to the database (e.g. `supabase db push`, `supabase gen types`) outside of a predefined `mise run` task, use `mise exec -- <command>` so the `[env]` block (`POOLER_TENANT_ID`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`, etc.) is actually injected — running the raw command directly silently drops these and produces a confusing TLS/connection error instead of an auth error.
 
 ## 🐳 Docker Build & Deploy
 
