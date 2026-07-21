@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
-import { ensureBabyBucket, getSignedUrl } from './storage'
+import { ensureBabyBucket, getSignedUrl, removeStorageObjects } from './storage'
 import { logger } from '../logger'
 
 type NewPost = TablesInsert<'posts'>
@@ -168,11 +168,7 @@ export async function deletePost(postId: string, babyId: string) {
   if (photosError) { contextLogger.error(photosError, "Error fetching post photos before delete"); throw photosError }
 
   if (photos.length > 0) {
-    const { error: removeError } = await supabase.storage
-      .from(babyId)
-      .remove(photos.map((p) => p.storage_path))
-
-    if (removeError) { contextLogger.error(removeError, "Error removing post photos from storage"); throw removeError }
+    await removeStorageObjects(babyId, photos.map((p) => p.storage_path))
   }
 
   const { error } = await supabase

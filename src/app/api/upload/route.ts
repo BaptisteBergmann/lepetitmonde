@@ -1,5 +1,7 @@
 import { createClient } from '@utils/supabase/server'
+import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
+import { assertIsAdmin } from '@utils/actions/access'
 import { logger } from '@/utils/logger'
 
 export const dynamic = 'force-dynamic'
@@ -7,6 +9,10 @@ export const dynamic = 'force-dynamic'
 // Streams the request body straight into Supabase Storage instead of
 // buffering it (Server Actions parse the whole payload into memory first,
 // which OOMs the app container on large video uploads).
+//
+// The bucket is always named after the baby it belongs to, so `bucket` doubles
+// as the babyId for authorization. Upload runs via the service role since this
+// project defines no storage.objects RLS policies.
 export async function POST(request: Request) {
   const contextLogger = logger.child({ function: 'POST', route: '/api/upload' })
 
@@ -26,10 +32,18 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Requête invalide' }, { status: 400 })
   }
 
-  const contextLoggerWithPath = contextLogger.child({ bucketName, path })
-  const supabase = await createClient()
+  const contextLoggerWithPath = contextLogger.child({ bucketName, path, userId: user.id })
 
-  const { error } = await supabase.storage.from(bucketName).upload(path, request.body, {
+  try {
+    const supabase = await createClient()
+    await assertIsAdmin(supabase, bucketName)
+  } catch {
+    contextLoggerWithPath.warn('Rejected upload: not admin for baby')
+    return Response.json({ error: 'Non autorisé' }, { status: 403 })
+  }
+
+  const supabaseAdmin = createAdminClient()
+  const { error } = await supabaseAdmin.storage.from(bucketName).upload(path, request.body, {
     contentType,
     cacheControl,
     upsert,

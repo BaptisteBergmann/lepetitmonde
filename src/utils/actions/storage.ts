@@ -1,16 +1,14 @@
 'use server'
 
-import { createClient } from '@utils/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@/utils/logger'
 
-// Bucket creation is an admin-only operation under Supabase Storage's RLS model
-// (storage.buckets has no INSERT policy for authenticated users), so it requires
-// the service role key. Callers must verify the user is authorized for babyId
-// (e.g. via assertIsAdmin) before calling this.
+// Every storage operation here runs via the service role since this project
+// defines no storage.buckets / storage.objects RLS policies. Callers must
+// verify the user is authorized for babyId (e.g. via assertIsAdmin) first.
 export async function ensureBabyBucket(babyId: string) {
   const contextLogger = logger.child({ function: ensureBabyBucket.name, babyId })
-  const supabaseAdmin = createAdminClient(process.env.SUPABASE_URL!, process.env.SERVICE_ROLE_KEY!)
+  const supabaseAdmin = createAdminClient()
 
   const { error } = await supabaseAdmin.storage.createBucket(babyId, { public: false })
 
@@ -21,15 +19,31 @@ export async function ensureBabyBucket(babyId: string) {
 }
 
 export async function getSignedUrl(babyId: string, path: string, expiresIn: number = 3600) {
-  const supabase = await createClient()
+  const contextLogger = logger.child({ function: getSignedUrl.name, babyId, path })
+  const supabaseAdmin = createAdminClient()
 
-  const rep = await supabase.storage.from(babyId).createSignedUrl(path, expiresIn)
+  const rep = await supabaseAdmin.storage.from(babyId).createSignedUrl(path, expiresIn)
 
-  if (rep.error) { console.log("Error geting the image", rep.error); return null }
+  if (rep.error) {
+    contextLogger.error(rep.error, "Error getting signed image URL")
+    return null
+  }
 
   return rep.data
 }
 
 export async function getImage(babyId: string, imageId: string) {
   return getSignedUrl(babyId, `images/${imageId}`)
+}
+
+export async function removeStorageObjects(babyId: string, paths: string[]) {
+  const contextLogger = logger.child({ function: removeStorageObjects.name, babyId })
+  const supabaseAdmin = createAdminClient()
+
+  const { error } = await supabaseAdmin.storage.from(babyId).remove(paths)
+
+  if (error) {
+    contextLogger.error(error, "Error removing storage objects")
+    throw error
+  }
 }
