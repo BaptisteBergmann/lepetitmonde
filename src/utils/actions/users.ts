@@ -1,12 +1,14 @@
 'use server'
 
+import { cache } from 'react'
 import { createClient } from '@utils/supabase/server'
+import { getAuthUser } from '@utils/supabase/auth'
 import { logger } from '../logger';
 
-export async function getUserAccess(babyId: string) {
+export const getUserAccess = cache(async (babyId: string) => {
   const supabase = await createClient();
-  const contextLogger = logger.child({ function: getUserAccess.name, babyId })
-  const { data: { user } } = await supabase.auth.getUser()
+  const contextLogger = logger.child({ function: 'getUserAccess', babyId })
+  const { data: { user } } = await getAuthUser()
   if (!user) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table
@@ -20,12 +22,12 @@ export async function getUserAccess(babyId: string) {
   contextLogger.debug(data, "User access received")
 
   return data;
-}
+})
 
 export async function getAllUserAccess() {
   const supabase = await createClient();
   const contextLogger = logger.child({ function: getAllUserAccess.name })
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table
@@ -43,7 +45,7 @@ export async function getAllUserAccess() {
 export async function getUsers(babyId: string) {
   const supabase = await createClient();
   const contextLogger = logger.child({ function: getUsers.name, babyId })
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table
@@ -63,7 +65,7 @@ export async function getUsers(babyId: string) {
 export async function getUser(babyId: string) {
   const supabase = await createClient();
   const contextLogger = logger.child({ function: getUser.name, babyId })
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table

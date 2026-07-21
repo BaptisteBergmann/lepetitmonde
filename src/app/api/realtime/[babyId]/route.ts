@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { getAuthUser } from '@/utils/supabase/auth'
 import { getUserAccess } from '@/utils/actions/users'
 import { subscribe } from '@/utils/supabase/realtime-relay'
 import { logger } from '@/utils/logger'
@@ -14,8 +14,7 @@ export async function GET(
   const { babyId } = await params
   const contextLogger = logger.child({ function: 'GET', route: '/api/realtime/[babyId]', babyId })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) {
     contextLogger.warn('Rejected realtime subscription: no authenticated user')
     return new Response('Unauthorized', { status: 401 })
