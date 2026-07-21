@@ -2,53 +2,85 @@
 
 import { Tables } from '@/utils/supabase/database.types';
 import { useRouter, useParams, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
-
+import { useEffect, useTransition } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type Baby = Tables<'babies'>;
+
+function replaceBabyIdSegment(pathname: string, currentBabyId: string, newId: string) {
+  const segments = pathname.split('/');
+  const babyIndex = segments.indexOf('baby');
+  if (babyIndex !== -1 && segments[babyIndex + 1] === currentBabyId) {
+    segments[babyIndex + 1] = newId;
+    return segments.join('/');
+  }
+  return `/baby/${newId}`;
+}
 
 export default function BabySelector({ babies }: { babies: Baby[] }) {
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
 
-  const currentBabyId = params?.babyId || "default" as string;
+  const rawBabyId = params?.babyId;
+  const currentBabyId = (Array.isArray(rawBabyId) ? rawBabyId[0] : rawBabyId) || "default";
 
   useEffect(() => {
     if (!pathname.startsWith('/baby/')) { return }
+    if (babies.length === 0) { return }
     if (currentBabyId && !pathname.includes(`/baby/${currentBabyId}`)) {
-      router.push(`/baby/${babies[0].id}`);
+      startTransition(() => {
+        router.push(`/baby/${babies[0].id}`);
+      });
     }
   }, [pathname, currentBabyId, babies, router]);
 
-  const handleSelect = (newId: string) => {
+  const handleSelect = (newId: string | null) => {
     if (!newId) {
-      router.push('/');
+      startTransition(() => {
+        router.push('/');
+      });
       return;
     }
 
-    if (currentBabyId && pathname.includes(`/baby/${currentBabyId}`)) {
-      const newPath = pathname.replace(`/baby/${currentBabyId}`, `/baby/${newId}`);
-      router.push(newPath);
-    } else {
-      router.push(`/baby/${newId}`);
-    }
+    startTransition(() => {
+      if (currentBabyId && pathname.includes(`/baby/${currentBabyId}`)) {
+        router.push(replaceBabyIdSegment(pathname, currentBabyId, newId));
+      } else {
+        router.push(`/baby/${newId}`);
+      }
+    });
   };
 
+  if (babies.length === 0) {
+    return null;
+  }
+
   return (
-    <select
-      value={currentBabyId || ''}
-      onChange={(e) => handleSelect(e.target.value)}
-      className="max-w-[8rem] sm:max-w-none p-2 border border-input rounded-md bg-background text-foreground text-sm truncate"
+    <Select
+      value={currentBabyId}
+      onValueChange={handleSelect}
+      disabled={isPending}
     >
-      {currentBabyId === "default" &&
-        <option disabled value={"default"}> -- select an option -- </option>
-      }
-      {babies.map((p) => (
-        <option key={p.id} value={p.id}>
-          {p.baby_surname}
-        </option>
-      ))}
-    </select>
+      <SelectTrigger className="max-w-[8rem] sm:max-w-none text-sm">
+        <SelectValue placeholder="-- select an option --">
+          {(value: string | null) => babies.find((baby) => baby.id === value)?.baby_surname ?? value}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {babies.map((baby) => (
+          <SelectItem key={baby.id} value={baby.id}>
+            {baby.baby_surname}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
