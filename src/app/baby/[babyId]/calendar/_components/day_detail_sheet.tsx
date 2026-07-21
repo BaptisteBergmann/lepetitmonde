@@ -41,10 +41,15 @@ export default function DayDetailSheet({
       : "Masqué — administrateurs uniquement"
 
   const handleDelete = async (eventId: string) => {
+    if (!confirm("Supprimer cet événement ? Cette action est irréversible.")) return
+
     setDeletingId(eventId)
     try {
       await deleteEvent(eventId, babyId)
       router.refresh()
+    } catch (err) {
+      console.error(err)
+      alert("Une erreur est survenue lors de la suppression.")
     } finally {
       setDeletingId(null)
     }

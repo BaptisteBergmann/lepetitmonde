@@ -80,6 +80,9 @@ export default function CreateEventModal({
       }
       onClose()
       router.refresh()
+    } catch (err) {
+      console.error(err)
+      alert("Une erreur est survenue lors de la sauvegarde.")
     } finally {
       setIsPending(false)
     }
