@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
-import { LogOut, Settings, Menu, HelpCircle, ShieldCheck, Users } from 'lucide-react'
+import { LogOut, Settings, Menu, HelpCircle, ShieldCheck, Users, CalendarDays } from 'lucide-react'
 
 interface MobileMenuProps {
   initials: string
@@ -64,7 +64,7 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
               Navigation
             </DropdownMenuLabel>
             {allowedPages.map((page: any) => {
-              const Icon = page.id === 'guess' ? HelpCircle : page.id === 'admin' ? ShieldCheck : Users
+              const Icon = page.id === 'guess' ? HelpCircle : page.id === 'admin' ? ShieldCheck : page.id === 'calendar' ? CalendarDays : Users
               const active = isPageActive(page.id)
               return (
                 <DropdownMenuItem

@@ -22,7 +22,7 @@ export default async function Header({ babies, params }: { babies: any[], params
   const pages = [
     { id: "guess", name: "Pronostics", role: "viewer", enabled: true },
     { id: "admin", name: "Administration", role: "admin", enabled: true },
-    { id: "calendar", name: "Calendrier", role: "viewer", enabled: false }, // Coquille corrigée
+    { id: "calendar", name: "Calendrier", role: "viewer", enabled: true },
     { id: "news", name: "Newsletter", role: "viewer", enabled: false },
   ];
 
