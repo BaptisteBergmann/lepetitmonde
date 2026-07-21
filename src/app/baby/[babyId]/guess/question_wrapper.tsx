@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { submitGuess } from "@/utils/actions/gess";
+import { submitGuess } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
+import { Tables } from "@/utils/supabase/database.types";
 import { useState, Dispatch } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Calendar, Hash, Type, CheckCircle2, Send, Loader2 } from "lucide-react";
@@ -19,7 +20,11 @@ export interface PickerProps {
   id: string;
 }
 
-export default function QuestionWrapper({ questionWithGuess }) {
+export type QuestionWithGuess = Tables<"guess_questions"> & {
+  guesses?: Tables<"guesses">[];
+};
+
+export default function QuestionWrapper({ questionWithGuess }: { questionWithGuess: QuestionWithGuess }) {
   const contextLogger = logger.child({ function: QuestionWrapper.name });
   contextLogger.info(questionWithGuess, "Display question");
 
@@ -119,7 +124,7 @@ export default function QuestionWrapper({ questionWithGuess }) {
                 Votre réponse
               </span>
               <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
-                {formatDisplayValue(questionWithGuess.guesses.at(0).answer, questionWithGuess.type)}
+                {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type)}
               </p>
             </div>
             <div className="bg-emerald-500 text-white rounded-full p-1.5 shadow-xs">

@@ -63,8 +63,8 @@ export default function Modal({ babyId: propBabyId }: { babyId?: string }) {
   ]
 
   // Fonction de nettoyage lors du changement de type
-  const handleTypeChange = (value: string) => {
-    setSelectValue(value);
+  const handleTypeChange = (value: string | null) => {
+    if (value) setSelectValue(value);
   };
 
   return (
