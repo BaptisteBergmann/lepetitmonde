@@ -1,5 +1,42 @@
 # Calendar feature — plan
 
+## Status: implemented (2026-07-21)
+
+Shipped and deployed. Six scoped commits on `main`: plan prerequisites doc,
+`CLAUDE.md` `mise exec` note, `typecheck` script, `events`/`events_circles`
+migrations, event server actions, calendar page/components + nav enablement.
+Multi-arch image built and pushed to `192.168.2.177:5000/lepetitmonde:latest`
+via `mise run docker_build_push` (Portainer stack still needs a manual
+pull/restart to go live — the push alone doesn't redeploy).
+
+Two deviations from the original data model below, both made after manual
+testing surfaced issues:
+
+- **Multi-circle visibility, not single-circle.** The original schema used
+  one nullable `events.circle_id`. The user asked for the circle picker to
+  be a multiselect, so `circle_id` was replaced with a join table,
+  `events_circles(event_id, circle_id)` — mirrors the existing
+  `circles_access` pattern rather than a `uuid[]` column (chosen over the
+  array column so it stays queryable/joinable the same way `circles_access`
+  already is, and leaves room for per-row metadata later). See
+  `supabase/migrations/20260721193025_create_events_circles.sql`.
+- **Hidden by default, not visible by default.** The plan's original rule
+  was "null circle = visible to everyone with baby access." The user
+  reversed this: an event with **no** circle assigned is now visible only
+  to admins, until an admin explicitly assigns at least one circle. Regular
+  viewers never see an unassigned event. Implemented in
+  `getEvents` (`src/utils/actions/events.ts`) by checking `isAdmin` first
+  and dropping the old "empty circle_ids = visible to all" branch entirely.
+
+The "Data model" and "Server actions" sections below are the **original
+plan** and are left as-is for history; read them alongside the deviations
+above rather than as the final shape. Current source of truth is the code:
+`src/utils/actions/events.ts`, `src/utils/actions/circles.ts`
+(`getUserCircleIds`), and `src/app/baby/[babyId]/calendar/`.
+
+Not done yet (still applies, see "Not building now" below): merging feed
+posts into the calendar, and reminders/notifications.
+
 ## Context
 
 The app already has "Pronostics" (guess) as its one real feature beyond admin/auth. The user wants a calendar page next, showing baby-related events (past and upcoming), as the first of two big additions (the second being a photo/comment feed, planned separately). The calendar must respect the existing **circles** mechanism (`circles` / `circles_access`), so a "Family" circle and a "Friends" circle can each see different events — e.g. a family-only doctor's appointment shouldn't show up for friends, but a birthday party might be visible to everyone.
