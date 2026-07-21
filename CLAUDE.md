@@ -45,3 +45,12 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
   import { logger } from '@/utils/logger';
   const contextLogger = logger.child({ function: myFunction.name, babyId: '...' });
   contextLogger.info("Action performed");
+  ```
+
+## 🧰 Tooling & Environment
+
+- Tool versions (Node, etc.) and environment variables are managed with **mise**. Do not suggest nvm, direnv, or manually exporting env vars — use `mise.toml` / `mise` commands instead.
+
+## ✅ Git Workflow
+
+- Commit as soon as each subtask/fix in a multi-step task is done and verified (e.g. typechecks pass) — do not batch unrelated fixes into a single commit. Each commit should be small and scoped to one subtask.
