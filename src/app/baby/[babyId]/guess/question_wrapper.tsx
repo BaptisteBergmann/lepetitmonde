@@ -6,7 +6,7 @@ import { logger } from "@/utils/logger";
 import { Tables } from "@/utils/supabase/database.types";
 import { useState, Dispatch } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Calendar, Hash, Type, CheckCircle2, Send, Loader2 } from "lucide-react";
+import { CheckCircle2, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import CalendarPicker from "./_components/picker/date";
 import NumberPicker from "./_components/picker/number";
@@ -55,28 +55,6 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
     }
   };
 
-  const getIcon = () => {
-    switch (questionWithGuess.type) {
-      case "date":
-        return <Calendar className="h-3.5 w-3.5 text-primary" />;
-      case "number":
-        return <Hash className="h-3.5 w-3.5 text-rose" />;
-      default:
-        return <Type className="h-3.5 w-3.5 text-emerald-500" />;
-    }
-  };
-
-  const getTypeLabel = () => {
-    switch (questionWithGuess.type) {
-      case "date":
-        return "Date";
-      case "number":
-        return "Nombre";
-      default:
-        return "Texte";
-    }
-  };
-
   const formatDisplayValue = (val: any, type: string) => {
     if (val === undefined || val === null || val === "") return "-";
     if (type === "date") {
@@ -99,14 +77,8 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
       ? "border-emerald-100 dark:border-emerald-950 bg-emerald-500/5 dark:bg-emerald-500/[0.02]"
       : "border-border"
       }`}>
-      {/* Visual type tab indicator */}
-      <div className="absolute top-0 right-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl border-l border-b border-border bg-muted/40">
-        {getIcon()}
-        <span className="text-muted-foreground">{getTypeLabel()}</span>
-      </div>
-
       <CardHeader className="pb-3 pt-5">
-        <CardTitle className="pr-16 text-base font-bold text-foreground">
+        <CardTitle className="text-base font-bold text-foreground">
           {questionWithGuess.title}
         </CardTitle>
         {questionWithGuess.description && (
