@@ -32,7 +32,8 @@ export default function FeedView({
     if (posts.length === 0) return
     setLoadingMore(true)
     try {
-      const before = posts[posts.length - 1].created_at
+      const last = posts[posts.length - 1]
+      const before = { takenAt: last.taken_at, createdAt: last.created_at }
       const next = await getPosts(babyId, { limit: pageSize, before })
       setPosts((prev) => [...prev, ...next])
       setHasMore(next.length === pageSize)

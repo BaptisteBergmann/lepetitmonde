@@ -107,7 +107,10 @@ async function toPostWithDetails(row: {
   }
 }
 
-export async function getPosts(babyId: string, { limit, before }: { limit: number; before?: string }): Promise<PostWithDetails[]> {
+export async function getPosts(
+  babyId: string,
+  { limit, before }: { limit: number; before?: { takenAt: string; createdAt: string } }
+): Promise<PostWithDetails[]> {
   const contextLogger = logger.child({ function: getPosts.name, babyId, limit, before })
   const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
 
@@ -115,10 +118,15 @@ export async function getPosts(babyId: string, { limit, before }: { limit: numbe
     .from('posts')
     .select('*, posts_circles (circle_id), post_photos (*)')
     .eq('baby_id', babyId)
+    .order('taken_at', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (before) query = query.lt('created_at', before)
+  if (before) {
+    query = query.or(
+      `taken_at.lt.${before.takenAt},and(taken_at.eq.${before.takenAt},created_at.lt.${before.createdAt})`
+    )
+  }
 
   const { data, error } = await query
 
