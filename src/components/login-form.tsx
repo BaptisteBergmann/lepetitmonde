@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { cn } from "@utils/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -97,12 +98,11 @@ export function LoginForm({
               </FieldDescription>
             </FieldGroup>
           </form>
-          <div className="relative hidden bg-muted md:block">
-            <img
-              src="/placeholder.svg"
-              alt="Illustration"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            />
+          <div className="hidden flex-col items-center justify-center gap-4 bg-landing-background p-8 md:flex">
+            <Image src="/logo_mark.png" alt="" width={900} height={620} className="h-20 w-auto" />
+            <p className="text-balance text-center font-display text-lg italic text-landing-foreground">
+              Le journal de bébé, à partager en famille
+            </p>
           </div>
         </CardContent>
       </Card>
