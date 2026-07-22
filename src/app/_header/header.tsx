@@ -20,10 +20,10 @@ export default async function Header({ babies, params }: { babies: any[], params
   const allUserAccess = await getAllUserAccess();
 
   const pages = [
+    { id: "feed", name: "Journal", role: "viewer", enabled: true },
+    { id: "calendar", name: "Calendrier", role: "viewer", enabled: true },
     { id: "guess", name: "Pronostics", role: "viewer", enabled: true },
     { id: "admin", name: "Administration", role: "admin", enabled: true },
-    { id: "calendar", name: "Calendrier", role: "viewer", enabled: true },
-    { id: "feed", name: "Journal", role: "viewer", enabled: true },
     { id: "news", name: "Newsletter", role: "viewer", enabled: false },
   ];
 
