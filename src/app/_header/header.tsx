@@ -52,9 +52,14 @@ export default async function Header({ babies, params }: { babies: any[], params
         <SiteTitle babies={babies} />
       </div>
 
-      {/* 2. ZONE CENTRALE : La navigation (PageSelector), visible uniquement sur grand écran */}
-      <div className="hidden md:flex flex-1 justify-center">
-        <PageSelector access={accesses} />
+      {/* 2. ZONE CENTRALE : La navigation (PageSelector), visible uniquement sur grand écran.
+          Positionnée en absolute (centrée sur tout le header) plutôt qu'en flex-1, car les
+          zones gauche/droite n'ont pas la même largeur (logo vs bouton de connexion/avatar) —
+          un flex-1 centrerait la nav dans l'espace restant, pas sur le header entier. */}
+      <div className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex">
+        <div className="pointer-events-auto">
+          <PageSelector access={accesses} />
+        </div>
       </div>
 
       {/* 3. ZONE DROITE : Profil / Bouton de connexion */}
