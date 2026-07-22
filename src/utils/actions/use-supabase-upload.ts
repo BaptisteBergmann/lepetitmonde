@@ -21,10 +21,10 @@ async function uploadFile(
   })
 
   try {
-    const { error } = await response.json()
-    return { error: error ?? undefined }
+    const { error, filename } = await response.json()
+    return { error: error ?? undefined, filename: filename ?? file.name }
   } catch {
-    return { error: `Échec de l'envoi (${response.status})` }
+    return { error: `Échec de l'envoi (${response.status})`, filename: file.name }
   }
 }
 
@@ -91,6 +91,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [errors, setErrors] = useState<{ name: string; message: string }[]>([])
   const [successes, setSuccesses] = useState<string[]>([])
+  const [finalNames, setFinalNames] = useState<Record<string, string>>({})
 
   const isSuccess = useMemo(() => {
     if (errors.length === 0 && successes.length === 0) {
@@ -150,29 +151,38 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
-        const { error } = await uploadFile(
+        const { error, filename } = await uploadFile(
           bucketName,
           !!path ? `${path}/${file.name}` : file.name,
           file,
           { cacheControl: cacheControl.toString(), upsert }
         )
         if (error) {
-          return { name: file.name, message: error }
+          return { name: file.name, message: error, filename: undefined }
         } else {
-          return { name: file.name, message: undefined }
+          return { name: file.name, message: undefined, filename }
         }
       })
     )
 
-    const responseErrors = responses.filter((x) => x.message !== undefined)
+    const responseErrors = responses.filter(
+      (x): x is { name: string; message: string; filename: undefined } => x.message !== undefined
+    )
     // if there were errors previously, this function tried to upload the files again so we should clear/overwrite the existing errors.
     setErrors(responseErrors)
 
-    const responseSuccesses = responses.filter((x) => x.message === undefined)
+    const responseSuccesses = responses.filter(
+      (x): x is { name: string; message: undefined; filename: string } => x.message === undefined
+    )
     const newSuccesses = Array.from(
       new Set([...successes, ...responseSuccesses.map((x) => x.name)])
     )
     setSuccesses(newSuccesses)
+
+    setFinalNames((prev) => ({
+      ...prev,
+      ...Object.fromEntries(responseSuccesses.map((x) => [x.name, x.filename ?? x.name])),
+    }))
 
     setLoading(false)
   }, [files, path, bucketName, errors, successes])
@@ -202,6 +212,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     files,
     setFiles,
     successes,
+    finalNames,
     isSuccess,
     loading,
     errors,

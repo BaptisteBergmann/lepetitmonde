@@ -1,3 +1,4 @@
+import convertHeic from 'heic-convert'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
@@ -5,6 +6,16 @@ import { assertIsAdmin } from '@utils/actions/access'
 import { logger } from '@/utils/logger'
 
 export const dynamic = 'force-dynamic'
+
+const HEIC_EXTENSION_RE = /\.hei[cf]$/i
+
+function isHeicUpload(contentType: string, path: string) {
+  return contentType === 'image/heic' || contentType === 'image/heif' || HEIC_EXTENSION_RE.test(path)
+}
+
+function withJpegExtension(path: string) {
+  return HEIC_EXTENSION_RE.test(path) ? path.replace(HEIC_EXTENSION_RE, '.jpg') : `${path}.jpg`
+}
 
 // Streams the request body straight into Supabase Storage instead of
 // buffering it (Server Actions parse the whole payload into memory first,
@@ -43,8 +54,26 @@ export async function POST(request: Request) {
   }
 
   const supabaseAdmin = createAdminClient()
-  const { error } = await supabaseAdmin.storage.from(bucketName).upload(path, request.body, {
-    contentType,
+
+  let uploadPath = path
+  let uploadBody: ReadableStream<Uint8Array> | Buffer = request.body
+  let uploadContentType = contentType
+
+  if (isHeicUpload(contentType, path)) {
+    try {
+      const heicBuffer = Buffer.from(await request.arrayBuffer())
+      const jpegBuffer = await convertHeic({ buffer: heicBuffer, format: 'JPEG', quality: 0.92 })
+      uploadPath = withJpegExtension(path)
+      uploadBody = Buffer.from(jpegBuffer)
+      uploadContentType = 'image/jpeg'
+    } catch (err) {
+      contextLoggerWithPath.error(err, 'Error converting HEIC/HEIF file to JPEG')
+      return Response.json({ error: "Impossible de convertir l'image HEIC" }, { status: 400 })
+    }
+  }
+
+  const { error } = await supabaseAdmin.storage.from(bucketName).upload(uploadPath, uploadBody, {
+    contentType: uploadContentType,
     cacheControl,
     upsert,
   })
@@ -54,5 +83,5 @@ export async function POST(request: Request) {
     return Response.json({ error: error.message }, { status: 400 })
   }
 
-  return Response.json({ error: null })
+  return Response.json({ error: null, filename: uploadPath.split('/').pop() })
 }

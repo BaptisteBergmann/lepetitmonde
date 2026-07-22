@@ -58,7 +58,12 @@ export default function CreatePostModal({
 
       if (upload.files.length > 0) {
         await upload.onUpload()
-        await attachPostPhotos(postId, babyId, upload.files.map((f) => f.name))
+        const uploadedFilenames = upload.files
+          .filter((f) => upload.successes.includes(f.name))
+          .map((f) => upload.finalNames[f.name] ?? f.name)
+        if (uploadedFilenames.length > 0) {
+          await attachPostPhotos(postId, babyId, uploadedFilenames)
+        }
       }
 
       onClose()
