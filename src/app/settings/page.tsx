@@ -22,20 +22,22 @@ export default async function SettingsPage() {
     .join('') || 'U'
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <div className="border-b border-border pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-rose bg-clip-text text-transparent flex items-center gap-2">
-          ⚙️ Paramètres
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
-          Gérez votre compte et les préférences de l&apos;application.
-        </p>
-      </div>
+    <div className="bg-landing-background text-landing-foreground">
+      <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
+        <div className="border-b border-landing-border pb-6">
+          <h1 className="font-display text-3xl font-semibold">
+            Paramètres
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
+            Gérez votre compte et les préférences de l&apos;application.
+          </p>
+        </div>
 
-      <div className="space-y-6">
-        <AccountCard initials={initials} fullName={fullName} email={user?.email} />
-        <NotificationsCard />
-        <InstallCard />
+        <div className="space-y-6">
+          <AccountCard initials={initials} fullName={fullName} email={user?.email} />
+          <NotificationsCard />
+          <InstallCard />
+        </div>
       </div>
     </div>
   )

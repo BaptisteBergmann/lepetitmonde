@@ -83,25 +83,25 @@ export default function NotificationsCard() {
   }
 
   return (
-    <Card className="border border-border">
+    <Card className="border-landing-border bg-landing-surface">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2">
+        <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Bell className="h-4.5 w-4.5 text-primary" />
           Notifications
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs text-landing-muted">
           Recevez une alerte sur cet appareil pour les évènements importants.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3.5">
         {!isSupported ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-landing-muted">
             Les notifications ne sont pas prises en charge par ce navigateur.
           </p>
         ) : subscription ? (
           <>
-            <div className="flex items-center justify-between gap-2 rounded-2xl border border-border bg-input/40 px-3.5 py-2.5">
-              <p className="text-sm text-foreground">Notifications activées sur cet appareil.</p>
+            <div className="flex items-center justify-between gap-2 rounded-2xl border border-landing-border bg-landing-background px-3.5 py-2.5">
+              <p className="text-sm text-landing-foreground">Notifications activées sur cet appareil.</p>
               <Button
                 type="button"
                 variant="outline"
@@ -115,7 +115,7 @@ export default function NotificationsCard() {
               </Button>
             </div>
             <div className="flex flex-col gap-1.5 pt-1">
-              <p className="text-xs font-semibold text-muted-foreground">Notification de test</p>
+              <p className="text-xs font-semibold text-landing-muted">Notification de test</p>
               <div className="flex gap-2">
                 <Input
                   value={message}

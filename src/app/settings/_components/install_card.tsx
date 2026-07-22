@@ -48,13 +48,13 @@ export default function InstallCard() {
   }
 
   return (
-    <Card className="border border-border">
+    <Card className="border-landing-border bg-landing-surface">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2">
+        <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Smartphone className="h-4.5 w-4.5 text-rose" />
           Installer l&apos;application
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs text-landing-muted">
           Ajoutez le journal à votre écran d&apos;accueil pour un accès rapide.
         </CardDescription>
       </CardHeader>
@@ -70,12 +70,12 @@ export default function InstallCard() {
             <span>Installer</span>
           </Button>
         ) : isIOS ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-landing-muted">
             Sur iOS, appuyez sur le bouton de partage <span aria-hidden>⎋</span> puis
             &laquo;&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;&raquo; <span aria-hidden>➕</span>.
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-landing-muted">
             Depuis le menu de votre navigateur, choisissez &laquo;&nbsp;Installer l&apos;application&nbsp;&raquo;
             ou &laquo;&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;&raquo;.
           </p>

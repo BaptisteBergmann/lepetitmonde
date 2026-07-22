@@ -13,13 +13,13 @@ interface AccountCardProps {
 
 export default function AccountCard({ initials, fullName, email }: AccountCardProps) {
   return (
-    <Card className="border border-border">
+    <Card className="border-landing-border bg-landing-surface">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2">
+        <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <UserCircle className="h-4.5 w-4.5 text-primary" />
           Compte
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs text-landing-muted">
           Vos informations personnelles.
         </CardDescription>
       </CardHeader>
@@ -29,9 +29,9 @@ export default function AccountCard({ initials, fullName, email }: AccountCardPr
             {initials}
           </div>
           <div className="flex flex-col min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
+            <p className="text-sm font-semibold text-landing-foreground truncate">{fullName}</p>
             {email && (
-              <p className="text-xs text-muted-foreground truncate">{email}</p>
+              <p className="text-xs text-landing-muted truncate">{email}</p>
             )}
           </div>
         </div>
