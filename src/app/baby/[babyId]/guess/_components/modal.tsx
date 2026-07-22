@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Select,
@@ -150,7 +151,7 @@ export default function Modal({
         </Button>
       )}
 
-      {open && (
+      {open && createPortal(
         <div className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200">
           <div className="w-full max-w-[460px] max-h-[90vh] bg-landing-surface text-landing-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-landing-border animate-in zoom-in-95 duration-200">
 
@@ -356,7 +357,8 @@ export default function Modal({
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
