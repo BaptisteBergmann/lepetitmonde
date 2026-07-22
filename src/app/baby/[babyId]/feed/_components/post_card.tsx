@@ -12,6 +12,7 @@ import { Heart, Trash2, Loader2 } from 'lucide-react'
 import { cn } from '@utils/utils'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
+import PhotoLightbox from './photo_lightbox'
 
 export type Comment = Awaited<ReturnType<typeof getComments>>[number]
 
@@ -33,6 +34,7 @@ export default function PostCard({
   const [reacting, setReacting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   useEffect(() => {
     getReactions(post.id).then(setReactions)
@@ -96,18 +98,28 @@ export default function PostCard({
           "grid gap-0.5",
           post.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"
         )}>
-          {post.photos.map((photo) => (
+          {post.photos.map((photo, index) => (
             photo.url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={photo.id}
                 src={photo.url}
                 alt={post.caption ?? ""}
-                className="w-full aspect-square object-cover"
+                onClick={() => setLightboxIndex(index)}
+                className="w-full aspect-square object-cover cursor-pointer"
               />
             )
           ))}
         </div>
+      )}
+
+      {lightboxIndex !== null && (
+        <PhotoLightbox
+          photos={post.photos}
+          initialIndex={lightboxIndex}
+          alt={post.caption ?? ""}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
 
       <div className="p-4 space-y-3">
