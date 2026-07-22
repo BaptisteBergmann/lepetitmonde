@@ -91,6 +91,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  overscroll-behavior-y: none;
 }
 
 .dark {

@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@utils/utils";
 import { PwaRegistry } from './settings/pwaRegistry';
 import HeaderWrapper from './_header/header_wrapper';
+import PullToRefresh from '@/components/pull_to_refresh';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -71,7 +72,7 @@ export default async function RootLayout({
 
         {/* Le main permet de bien séparer le header du contenu */}
         <main className="flex-grow pt-20"> {/* pt-20 = padding-top pour compenser le header fixed */}
-          {children}
+          <PullToRefresh>{children}</PullToRefresh>
         </main>
         <footer className="py-4 text-center text-xs text-muted-foreground">
           v{process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'dev'}
