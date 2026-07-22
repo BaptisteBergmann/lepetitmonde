@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { reviewQuestion } from "@/utils/actions/guesses_questions";
 import { Tables } from "@/utils/supabase/database.types";
+import Modal from "../../_components/modal";
 
 export default function PendingQuestions({
   babyId,
@@ -59,6 +60,23 @@ export default function PendingQuestions({
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 flex gap-2 justify-end">
+                <Modal
+                  babyId={babyId}
+                  isAdmin
+                  question={question}
+                  trigger={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isProcessing}
+                      className="gap-1.5 rounded-2xl cursor-pointer"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Modifier
+                    </Button>
+                  }
+                />
                 <Button
                   variant="outline"
                   size="sm"

@@ -36,7 +36,8 @@ export default function Modal({
   const babyId = propBabyId || question?.baby_id || searchParams.get('babyId') || "XXX"
   const isEditMode = !!question
   const [open, setOpen] = useState(false)
-  const [selectValue, setSelectValue] = useState(question?.type ?? "");
+  // Non-admins only propose a question; the answer type is picked later by an admin.
+  const [selectValue, setSelectValue] = useState(question?.type ?? (isAdmin ? "" : "text"));
 
   // Nouveaux états pour la question de pronostic
   const [title, setTitle] = useState(question?.title ?? "");
@@ -96,7 +97,7 @@ export default function Modal({
       if (!isEditMode) {
         setTitle("")
         setDescription("")
-        setSelectValue("")
+        setSelectValue(isAdmin ? "" : "text")
         setChoices(["", ""])
         setMinValue("")
         setMaxValue("")
@@ -180,7 +181,7 @@ export default function Modal({
 
               {!isAdmin && (
                 <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
-                  Votre proposition sera soumise à un administrateur avant d&apos;être visible par la famille.
+                  Un administrateur choisira le type de réponse attendu et validera votre proposition avant qu&apos;elle soit visible par la famille.
                 </p>
               )}
 
@@ -214,35 +215,37 @@ export default function Modal({
                 />
               </div>
 
-              {/* Sélecteur du Type de Réponse attendu */}
-              <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Type de réponse attendu
-                </Label>
-                <Select value={selectValue} onValueChange={handleTypeChange}>
-                  <SelectTrigger className="w-full text-foreground bg-input/50">
-                    <SelectValue placeholder="Sélectionner le type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {items.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          <div className="flex items-center gap-2">
-                            {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
-                            {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
-                            {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
-                            {item.value === "option" && <CircleDot className="h-3.5 w-3.5 text-violet-500" />}
-                            <span>{item.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Sélecteur du Type de Réponse attendu (réservé à l'admin : les propositions sont typées lors de la validation) */}
+              {isAdmin && (
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Type de réponse attendu
+                  </Label>
+                  <Select value={selectValue} onValueChange={handleTypeChange}>
+                    <SelectTrigger className="w-full text-foreground bg-input/50">
+                      <SelectValue placeholder="Sélectionner le type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {items.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            <div className="flex items-center gap-2">
+                              {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
+                              {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
+                              {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
+                              {item.value === "option" && <CircleDot className="h-3.5 w-3.5 text-violet-500" />}
+                              <span>{item.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Options prédéfinies (uniquement pour le type "Choix unique") */}
-              {isOptionType && (
+              {isAdmin && isOptionType && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Options proposées
@@ -281,7 +284,7 @@ export default function Modal({
               )}
 
               {/* Étalonnage (uniquement pour le type "Nombre") */}
-              {isNumberType && (
+              {isAdmin && isNumberType && (
                 <div className="flex flex-col gap-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
@@ -343,9 +346,9 @@ export default function Modal({
               <Button
                 disabled={
                   !title.trim() ||
-                  !selectValue ||
-                  (isOptionType && validChoices.length < 2) ||
-                  (isNumberType && (minValue === "" || maxValue === "" || Number(minValue) >= Number(maxValue))) ||
+                  (isAdmin && !selectValue) ||
+                  (isAdmin && isOptionType && validChoices.length < 2) ||
+                  (isAdmin && isNumberType && (minValue === "" || maxValue === "" || Number(minValue) >= Number(maxValue))) ||
                   isPending
                 }
                 className="rounded-2xl cursor-pointer"
