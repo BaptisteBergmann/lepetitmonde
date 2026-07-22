@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Button } from "@components/ui/button"
 import { Card, CardContent } from "@components/ui/card"
 import {
@@ -26,12 +27,12 @@ export function SignupForm({
 
   return (
     <div className="flex flex-col gap-6" >
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden border-landing-border bg-landing-surface p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form action={signup} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Créer un compte</h1>
+                <h1 className="font-display text-2xl font-semibold">Créer un compte</h1>
                 <p className="text-balance text-muted-foreground">
                   Inscrivez-vous pour commencer
                 </p>
@@ -80,7 +81,7 @@ export function SignupForm({
                 <Button type="submit">S&apos;inscrire</Button>
               </Field>
 
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-landing-surface">
                 Ou continuer avec
               </FieldSeparator>
 
@@ -119,12 +120,11 @@ export function SignupForm({
               </FieldDescription>
             </FieldGroup>
           </form>
-          <div className="relative hidden bg-muted md:block">
-            <img
-              src="/placeholder.svg"
-              alt="Illustration"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            />
+          <div className="hidden flex-col items-center justify-center gap-4 bg-landing-background p-8 md:flex">
+            <Image src="/logo_mark.png" alt="" width={900} height={620} className="h-20 w-auto" unoptimized />
+            <p className="text-balance text-center font-display text-lg italic text-landing-foreground">
+              Le journal de bébé, à partager en famille
+            </p>
           </div>
         </CardContent>
       </Card>
