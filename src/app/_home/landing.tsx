@@ -5,28 +5,28 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@utils/utils";
 import { Reveal } from "@components/reveal";
 
-const CHAPTERS = [
+const PAGES = [
   {
     icon: BookOpen,
-    eyebrow: "Chapitre — Le quotidien",
+    eyebrow: "Page — Le quotidien",
     title: "Une page par jour",
     text: "Une sieste, un sourire, un premier mot : notez-les avec des photos et des vidéos, classées toutes seules par date.",
   },
   {
     icon: CalendarDays,
-    eyebrow: "Chapitre — Les grandes étapes",
+    eyebrow: "Page — Les grandes étapes",
     title: "Un calendrier qui grandit",
     text: "Rendez-vous, poussées de croissance, premières fois : tout ce qui compte, à l'endroit où l'on pense à le regarder.",
   },
   {
     icon: Dices,
-    eyebrow: "Chapitre — Les paris de famille",
+    eyebrow: "Page — Les paris de famille",
     title: "Le jeu des pronostics",
     text: "Prénom, poids, date de naissance : papis, mamies et parrains tentent leur chance, parfois avant même le premier jour.",
   },
   {
     icon: Users,
-    eyebrow: "Chapitre — Le cercle",
+    eyebrow: "Page — Le cercle",
     title: "Toute la famille, à sa place",
     text: "Invitez qui vous voulez, à votre rythme. Chaque page reste privée : jamais publique, jamais partagée ailleurs.",
   },
@@ -70,7 +70,7 @@ export default function Landing() {
                 <ArrowRight className="size-4" />
               </Link>
               <Link
-                href="#chapitres"
+                href="#pages"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
                   "h-11 rounded-full border-landing-border px-6 text-base text-landing-foreground hover:bg-landing-surface"
@@ -109,11 +109,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ---------- chapters ---------- */}
-      <section id="chapitres" className="mx-auto max-w-[1180px] px-4 py-14 sm:px-6 sm:py-20 lg:px-12">
+      {/* ---------- pages ---------- */}
+      <section id="pages" className="mx-auto max-w-[1180px] px-4 py-14 sm:px-6 sm:py-20 lg:px-12">
         <Reveal className="mb-10 max-w-[52ch] sm:mb-14">
           <h2 className="text-balance font-display text-[clamp(1.9rem,2vw+1.3rem,2.6rem)] leading-[1.12] font-semibold">
-            Un carnet, quatre chapitres
+            Un carnet, quatre pages
           </h2>
           <p className="mt-3 text-lg text-landing-muted">
             Pas de fonctionnalités à apprendre — juste les moments qu&apos;une famille a envie de garder.
@@ -121,9 +121,9 @@ export default function Landing() {
         </Reveal>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          {CHAPTERS.map(({ icon: Icon, eyebrow, title, text }, i) => (
+          {PAGES.map(({ icon: Icon, eyebrow, title, text }, i) => (
             <Reveal key={title} delay={i * 90}>
-              <article className="landing-chapter-card group relative h-full overflow-hidden rounded-[20px] border border-landing-border bg-landing-surface p-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]">
+              <article className="landing-page-card group relative h-full overflow-hidden rounded-[20px] border border-landing-border bg-landing-surface p-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]">
                 <div className="mb-5 flex size-11 items-center justify-center rounded-xl bg-landing-background text-primary">
                   <Icon className="size-[22px]" strokeWidth={1.8} />
                 </div>

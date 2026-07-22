@@ -13,7 +13,7 @@ const SECTIONS = [
   {
     id: "feed",
     name: "Journal",
-    eyebrow: "Chapitre — Le quotidien",
+    eyebrow: "Page — Le quotidien",
     description: "Photos, vidéos et petits mots du jour, partagés en famille.",
     role: "viewer" as const,
     icon: BookOpen,
@@ -21,7 +21,7 @@ const SECTIONS = [
   {
     id: "calendar",
     name: "Calendrier",
-    eyebrow: "Chapitre — Les grandes étapes",
+    eyebrow: "Page — Les grandes étapes",
     description: "Rendez-vous, poussées de croissance et jalons à venir.",
     role: "viewer" as const,
     icon: CalendarDays,
@@ -29,7 +29,7 @@ const SECTIONS = [
   {
     id: "guess",
     name: "Pronostics",
-    eyebrow: "Chapitre — Les paris de famille",
+    eyebrow: "Page — Les paris de famille",
     description: "Prénom, poids, date de naissance : les paris de toute la famille.",
     role: "viewer" as const,
     icon: Dices,
@@ -37,7 +37,7 @@ const SECTIONS = [
   {
     id: "admin",
     name: "Administration",
-    eyebrow: "Chapitre — Le cercle",
+    eyebrow: "Page — Le cercle",
     description: "Gérez qui a accès au journal et organisez le cercle de partage.",
     role: "admin" as const,
     icon: Users,
@@ -88,7 +88,7 @@ export default async function BabyPage({
           <p className="mt-4 text-sm text-landing-muted">
             Membre depuis le {format(new Date(baby.created_at), "d MMMM yyyy", { locale: fr })}
           </p>
-          <p className="mt-2 text-landing-muted">Choisissez un chapitre à consulter.</p>
+          <p className="mt-2 text-landing-muted">Choisissez une page à consulter.</p>
         </Reveal>
 
         {sections.length === 0 ? (
@@ -108,7 +108,7 @@ export default async function BabyPage({
               <Reveal key={id} delay={i * 80}>
                 <Link
                   href={`/baby/${babyId}/${id}`}
-                  className="landing-chapter-card group flex h-full items-start gap-4 rounded-[20px] border border-landing-border bg-landing-surface p-6 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]"
+                  className="landing-page-card group flex h-full items-start gap-4 rounded-[20px] border border-landing-border bg-landing-surface p-6 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]"
                 >
                   <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-landing-background text-primary">
                     <Icon className="size-[22px]" strokeWidth={1.8} />

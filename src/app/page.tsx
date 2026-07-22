@@ -63,7 +63,7 @@ export default async function Home() {
               <Reveal key={baby.id} delay={index * 80}>
                 <Link
                   href={`/baby/${baby.id}`}
-                  className="landing-chapter-card group flex items-center gap-4 rounded-[20px] border border-landing-border bg-landing-surface px-5 py-4 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]"
+                  className="landing-page-card group flex items-center gap-4 rounded-[20px] border border-landing-border bg-landing-surface px-5 py-4 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]"
                 >
                   <span
                     className={cn(
