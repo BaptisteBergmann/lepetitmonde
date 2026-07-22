@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Un espace privé pour la famille',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#ffffff',
+    background_color: '#fbf4ec',
+    theme_color: '#fbf4ec',
     icons: [
       {
         "src": "/web-app-manifest-192x192.png",
