@@ -88,9 +88,9 @@ export default function RealtimeUsersList({
   contextLogger.info(users, "Get user")
   if (users.length === 0) {
     return (
-      <div className="text-center py-10 text-muted-foreground px-4">
+      <div className="text-center py-10 text-landing-muted px-4">
         <p className="text-sm font-medium">Aucun membre dans ce journal pour le moment.</p>
-        <p className="text-xs text-muted-foreground mt-1">Invitez des proches à rejoindre l&apos;aventure.</p>
+        <p className="text-xs text-landing-muted mt-1">Invitez des proches à rejoindre l&apos;aventure.</p>
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function RealtimeUsersList({
   const adminCount = users.filter((u) => u.access_level === "admin").length;
 
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-landing-border">
       {users.map((user) => {
         const initials = getInitials(user.first_name, user.last_name);
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
@@ -113,17 +113,17 @@ export default function RealtimeUsersList({
         return (
           <div
             key={user.id}
-            className="flex items-center justify-between py-3.5 px-6 hover:bg-muted/30 transition-colors gap-4"
+            className="flex items-center justify-between py-3.5 px-6 hover:bg-landing-background/60 transition-colors gap-4"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 select-none">
                 {initials}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-sm text-foreground truncate">
+                <p className="font-semibold text-sm text-landing-foreground truncate">
                   {fullName || `Membre (${user.id.substring(0, 8)})`}
                 </p>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-[10px] text-landing-muted truncate">
                   ID: {user.id}
                 </p>
               </div>
@@ -152,7 +152,7 @@ export default function RealtimeUsersList({
                   </Select>
                 </div>
               ) : (
-                <span className="text-xs font-medium text-muted-foreground">
+                <span className="text-xs font-medium text-landing-muted">
                   {ACCESS_LEVEL_LABELS[user.access_level]}
                 </span>
               )}

@@ -121,15 +121,15 @@ export default function RealtimeCirclesList({
 
   if (circles.length === 0) {
     return (
-      <div className="text-center py-10 text-muted-foreground px-4">
+      <div className="text-center py-10 text-landing-muted px-4">
         <p className="text-sm font-medium">Aucun cercle de partage créé pour le moment.</p>
-        <p className="text-xs text-muted-foreground mt-1">Utilisez le formulaire ci-contre pour créer votre premier groupe.</p>
+        <p className="text-xs text-landing-muted mt-1">Utilisez le formulaire ci-contre pour créer votre premier groupe.</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-landing-border">
       {circles.map((circle) => {
         const memberIds = new Set(
           circlesAccess.filter((a) => a.circle_id === circle.id).map((a) => a.user_id)
@@ -146,8 +146,8 @@ export default function RealtimeCirclesList({
                   <CircleDot className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-foreground">{circle.name}</p>
-                  <p className="text-[10px] text-muted-foreground font-mono">ID: {circle.id.substring(0, 8)}...</p>
+                  <p className="font-semibold text-sm text-landing-foreground">{circle.name}</p>
+                  <p className="text-[10px] text-landing-muted font-mono">ID: {circle.id.substring(0, 8)}...</p>
                 </div>
               </div>
 
@@ -170,7 +170,7 @@ export default function RealtimeCirclesList({
                 {members.map((member) => (
                   <span
                     key={member.id}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 pl-2.5 pr-1 py-1 text-xs font-medium text-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-landing-background pl-2.5 pr-1 py-1 text-xs font-medium text-landing-foreground"
                   >
                     {getMemberLabel(member)}
                     {isAdmin && (

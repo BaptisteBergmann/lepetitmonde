@@ -39,13 +39,13 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
   };
 
   return (
-    <Card className="border border-border">
+    <Card className="border-landing-border bg-landing-surface">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2">
+        <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Link2 className="h-4.5 w-4.5 text-primary" />
           Lien d&apos;invitation unique
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs text-landing-muted">
           Générez un lien d&apos;accès temporaire valable 24h à envoyer par SMS ou messagerie.
         </CardDescription>
       </CardHeader>

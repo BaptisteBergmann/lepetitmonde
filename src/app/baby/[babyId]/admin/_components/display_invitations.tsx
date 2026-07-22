@@ -27,21 +27,21 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
 
   if (invitations.length === 0) {
     return (
-      <div className="text-center py-10 text-muted-foreground px-4">
+      <div className="text-center py-10 text-landing-muted px-4">
         <p className="text-sm font-medium">Aucun lien d&apos;invitation généré pour le moment.</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-landing-border">
       {invitations.map((invitation) => {
         const isExpired = new Date(invitation.expires_at) <= new Date();
 
         return (
           <div
             key={invitation.id}
-            className="flex items-center justify-between py-3.5 px-6 hover:bg-muted/30 transition-colors gap-4"
+            className="flex items-center justify-between py-3.5 px-6 hover:bg-landing-background/60 transition-colors gap-4"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="bg-primary/10 text-primary p-2 rounded-xl shrink-0">
@@ -49,20 +49,20 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-sm text-foreground truncate">
+                  <p className="font-semibold text-sm text-landing-foreground truncate">
                     ID: {invitation.id.substring(0, 8)}...
                   </p>
                   <span
                     className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${
                       isExpired
-                        ? "bg-muted text-muted-foreground"
+                        ? "bg-landing-background text-landing-muted"
                         : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
                     {isExpired ? "Expiré" : "Actif"}
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-[10px] text-landing-muted truncate">
                   Expire le {new Date(invitation.expires_at).toLocaleString("fr-FR")}
                 </p>
               </div>

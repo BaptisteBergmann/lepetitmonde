@@ -6,13 +6,13 @@ import { Plus, CircleDot } from "lucide-react";
 
 export default async function CreateCircle({ babyId }: { babyId: string }) {
   return (
-    <Card className="border border-border">
+    <Card className="border-landing-border bg-landing-surface">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2">
+        <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <CircleDot className="h-4.5 w-4.5 text-rose" />
           Créer un cercle de partage
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs text-landing-muted">
           Regroupez vos proches (ex: Famille proche, Amis) pour organiser les partages.
         </CardDescription>
       </CardHeader>
