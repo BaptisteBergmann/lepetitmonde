@@ -69,6 +69,44 @@ export type Database = {
           },
         ]
       }
+      bug_reports: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          page_url: string | null
+          screenshot_path: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description: string
+          id?: string
+          page_url?: string | null
+          screenshot_path?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          page_url?: string | null
+          screenshot_path?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bug_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       circles: {
         Row: {
           baby_id: string | null

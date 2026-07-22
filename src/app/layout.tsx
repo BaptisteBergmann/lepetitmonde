@@ -5,6 +5,8 @@ import { cn } from "@utils/utils";
 import { PwaRegistry } from './settings/pwaRegistry';
 import HeaderWrapper from './_header/header_wrapper';
 import PullToRefresh from '@/components/pull_to_refresh';
+import BugReportButton from '@/components/bug_report_button';
+import { getAuthUser } from '@utils/supabase/auth';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -65,7 +67,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+  const { data: { user } } = await getAuthUser()
 
   return (
     <html
@@ -87,6 +89,7 @@ export default async function RootLayout({
           v{process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'dev'}
         </footer>
         <PwaRegistry />
+        {user && <BugReportButton />}
       </body>
       {/* <Header babies={babies}></Header> */}
       {/* <body className="flex flex-col">{children}</body> */}

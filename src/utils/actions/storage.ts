@@ -18,6 +18,24 @@ export async function ensureBabyBucket(babyId: string) {
   }
 }
 
+const BUG_REPORTS_BUCKET = 'bug-reports'
+
+// Returns the bucket name after making sure it exists, so callers never
+// need a separate non-async export (illegal in a "use server" file).
+export async function ensureBugReportsBucket() {
+  const contextLogger = logger.child({ function: ensureBugReportsBucket.name })
+  const supabaseAdmin = createAdminClient()
+
+  const { error } = await supabaseAdmin.storage.createBucket(BUG_REPORTS_BUCKET, { public: false })
+
+  if (error && !error.message.toLowerCase().includes('already exists')) {
+    contextLogger.error(error, "Error creating bug reports bucket")
+    throw error
+  }
+
+  return BUG_REPORTS_BUCKET
+}
+
 export async function removeStorageObjects(babyId: string, paths: string[]) {
   const contextLogger = logger.child({ function: removeStorageObjects.name, babyId })
   const supabaseAdmin = createAdminClient()
