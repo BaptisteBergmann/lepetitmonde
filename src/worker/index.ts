@@ -2,10 +2,10 @@ self.addEventListener('push', function (event) {
   const data = event.data ? event.data.json() : {};
 
   event.waitUntil(
-    self.registration.showNotification(data.title || "Journal de Bébé", {
+    self.registration.showNotification(data.title || "Le petit monde", {
       body: data.body || "Il y a du nouveau !",
-      icon: '/icon-192x192.png', // The PWA icon of your baby journal
-      badge: '/icon-192x192.png',
+      icon: '/web-app-manifest-192x192.png',
+      badge: '/web-app-manifest-192x192.png',
       data: { url: data.url || '/' }
     })
   );

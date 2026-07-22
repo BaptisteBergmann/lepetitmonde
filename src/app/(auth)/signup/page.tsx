@@ -14,7 +14,7 @@ export default async function SignupPage({
       <div className="max-w-md space-y-4 text-center mx-auto">
         <h1 className="font-display text-2xl font-semibold text-destructive">Lien d'invitation invalide</h1>
         <p className="text-muted-foreground">
-          Vous devez utiliser un lien d'invitation valide contenant un jeton sécurisé pour pouvoir créer un compte et rejoindre le Journal de Bébé.
+          Vous devez utiliser un lien d'invitation valide contenant un jeton sécurisé pour pouvoir créer un compte et rejoindre Le petit monde.
         </p>
       </div>
     )

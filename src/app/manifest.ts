@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Journal de Bébé',
-    short_name: 'Journal Bébé',
-    description: 'Le journal privé de notre bébé',
+    name: 'Le petit monde',
+    short_name: 'Le petit monde',
+    description: 'Un espace privé pour la famille',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

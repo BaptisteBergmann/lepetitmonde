@@ -93,7 +93,7 @@ export async function sendNotification(message: string, targetUserId?: string) {
     await webpush.sendNotification(
       subData.subscription,
       JSON.stringify({
-        title: 'Journal de Bébé',
+        title: 'Le petit monde',
         body: message,
         icon: '/favicon-96x96.png',
       })
