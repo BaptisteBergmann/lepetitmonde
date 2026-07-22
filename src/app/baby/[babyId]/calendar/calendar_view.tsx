@@ -145,12 +145,19 @@ export default function CalendarView({
             >
               <span className="text-sm font-medium text-landing-foreground">{format(day, 'd')}</span>
               {thumbnailUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={thumbnailUrl}
-                  alt=""
-                  className="h-6 w-6 rounded-md object-cover"
-                />
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={thumbnailUrl}
+                    alt=""
+                    className="h-6 w-6 rounded-md object-cover"
+                  />
+                  {dayPosts.length > 1 && (
+                    <span className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-semibold leading-none text-primary-foreground">
+                      {dayPosts.length}
+                    </span>
+                  )}
+                </div>
               )}
               {MilestoneIcon && <MilestoneIcon className="h-3.5 w-3.5 text-primary" />}
               {dayEvents.length > 0 && (
