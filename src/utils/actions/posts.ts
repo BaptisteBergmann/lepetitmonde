@@ -50,7 +50,11 @@ export async function createPost(post: NewPost, circleIds: string[]) {
   return data.id
 }
 
-export async function attachPostPhotos(postId: string, babyId: string, filenames: string[]) {
+export async function attachPostPhotos(
+  postId: string,
+  babyId: string,
+  files: { filename: string; mimeType: string }[]
+) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: attachPostPhotos.name, postId, babyId })
 
@@ -58,15 +62,16 @@ export async function attachPostPhotos(postId: string, babyId: string, filenames
 
   const { error } = await supabase
     .from('post_photos')
-    .insert(filenames.map((filename, index) => ({
+    .insert(files.map(({ filename, mimeType }, index) => ({
       post_id: postId,
       storage_path: `posts/${postId}/${filename}`,
       position: index,
+      mime_type: mimeType,
     })))
 
   if (error) { contextLogger.error(error, "Error attaching post photos"); throw error }
 
-  contextLogger.info({ count: filenames.length }, "Post photos attached")
+  contextLogger.info({ count: files.length }, "Post photos attached")
 
   revalidatePath(`/baby/${babyId}/feed`)
 }

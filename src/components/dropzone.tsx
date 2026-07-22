@@ -1,4 +1,4 @@
-import { CheckCircle, File, Loader2, Upload, X } from 'lucide-react'
+import { CheckCircle, File, Loader2, Upload, Video, X } from 'lucide-react'
 import { createContext, useCallback, useContext, type PropsWithChildren } from 'react'
 
 import { cn } from "@utils/utils"
@@ -108,6 +108,10 @@ const DropzoneContent = ({ className }: { className?: string }) => {
             {file.type.startsWith('image/') ? (
               <div className="h-10 w-10 rounded-sm border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
                 <img src={file.preview} alt={file.name} className="object-cover" />
+              </div>
+            ) : file.type.startsWith('video/') ? (
+              <div className="h-10 w-10 rounded-sm border bg-muted flex items-center justify-center shrink-0">
+                <Video size={18} />
               </div>
             ) : (
               <div className="h-10 w-10 rounded-sm border bg-muted flex items-center justify-center">

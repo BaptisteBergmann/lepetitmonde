@@ -8,7 +8,7 @@ import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { addReaction, getReactions, removeReaction } from '@utils/actions/reactions'
 import { getComments } from '@utils/actions/comments'
-import { Heart, Trash2, Loader2 } from 'lucide-react'
+import { Heart, Trash2, Loader2, Play } from 'lucide-react'
 import { cn } from '@utils/utils'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
@@ -100,14 +100,35 @@ export default function PostCard({
         )}>
           {post.photos.map((photo, index) => (
             photo.url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={photo.id}
-                src={photo.url}
-                alt={post.caption ?? ""}
-                onClick={() => setLightboxIndex(index)}
-                className="w-full aspect-square object-cover cursor-pointer"
-              />
+              photo.mime_type?.startsWith('video/') ? (
+                <div
+                  key={photo.id}
+                  onClick={() => setLightboxIndex(index)}
+                  className="relative w-full aspect-square cursor-pointer"
+                >
+                  <video
+                    src={photo.url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                    <div className="rounded-full bg-black/50 p-2.5">
+                      <Play className="h-5 w-5 text-white fill-white" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={photo.id}
+                  src={photo.url}
+                  alt={post.caption ?? ""}
+                  onClick={() => setLightboxIndex(index)}
+                  className="w-full aspect-square object-cover cursor-pointer"
+                />
+              )
             )
           ))}
         </div>

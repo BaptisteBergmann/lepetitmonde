@@ -77,13 +77,22 @@ export default function PhotoLightbox({
           {photos.map((photo) => (
             <div key={photo.id} className="w-full h-full shrink-0 flex items-center justify-center">
               {photo.url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={photo.url}
-                  alt={alt}
-                  className="max-w-full max-h-full object-contain select-none"
-                  draggable={false}
-                />
+                photo.mime_type?.startsWith('video/') ? (
+                  <video
+                    src={photo.url}
+                    controls
+                    playsInline
+                    className="max-w-full max-h-full object-contain select-none"
+                  />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={photo.url}
+                    alt={alt}
+                    className="max-w-full max-h-full object-contain select-none"
+                    draggable={false}
+                  />
+                )
               )}
             </div>
           ))}

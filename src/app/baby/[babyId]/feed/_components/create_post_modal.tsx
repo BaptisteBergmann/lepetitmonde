@@ -60,11 +60,14 @@ export default function CreatePostModal({
         const newlyUploaded = await upload.onUpload()
         const finalNames = { ...upload.finalNames, ...newlyUploaded }
         const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
-        const uploadedFilenames = upload.files
+        const uploadedFiles = upload.files
           .filter((f) => successNames.has(f.name))
-          .map((f) => finalNames[f.name] ?? f.name)
-        if (uploadedFilenames.length > 0) {
-          await attachPostPhotos(postId, babyId, uploadedFilenames)
+          .map((f) => ({
+            filename: finalNames[f.name] ?? f.name,
+            mimeType: f.type || 'application/octet-stream',
+          }))
+        if (uploadedFiles.length > 0) {
+          await attachPostPhotos(postId, babyId, uploadedFiles)
         }
       }
 
@@ -101,7 +104,7 @@ export default function CreatePostModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Photos
+              Photos / vidéos
             </Label>
             <Dropzone {...upload}>
               <DropzoneEmptyState />
