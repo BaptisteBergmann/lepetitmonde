@@ -40,6 +40,22 @@
   --sidebar-accent-foreground: oklch(0.27 0.03 55);
   --sidebar-border: oklch(0.27 0.03 55 / 12%);
   --sidebar-ring: oklch(0.58 0.12 55 / 50%);
+
+  /* Landing page — sampled from the book/leaf logo, kept separate from the
+     app's warm-brown chrome so the marketing surface can read as its own
+     editorial moment. */
+  --landing-background: oklch(0.97 0.013 71.3);
+  --landing-surface: oklch(0.994 0.007 88.6);
+  --landing-foreground: oklch(0.325 0.027 255.1);
+  --landing-muted: oklch(0.509 0.021 70);
+  --landing-camel: oklch(0.736 0.037 63);
+  --landing-dusk: oklch(0.838 0.018 234.5);
+  --landing-border: oklch(0.325 0.027 255.1 / 12%);
+  --landing-night-bg: oklch(0.25 0.022 257.3);
+  --landing-night-bg-2: oklch(0.215 0.018 255.7);
+  --landing-night-foreground: oklch(0.932 0.02 74.7);
+  --landing-night-muted: oklch(0.719 0.025 69.5);
+  --landing-night-accent: oklch(0.756 0.097 67.5);
 }
 
 @theme inline {
@@ -79,6 +95,19 @@
   --color-card: var(--card);
   --color-rose: var(--rose);
   --color-sage: var(--sage);
+  --font-display: var(--font-fraunces);
+  --color-landing-background: var(--landing-background);
+  --color-landing-surface: var(--landing-surface);
+  --color-landing-foreground: var(--landing-foreground);
+  --color-landing-muted: var(--landing-muted);
+  --color-landing-camel: var(--landing-camel);
+  --color-landing-dusk: var(--landing-dusk);
+  --color-landing-border: var(--landing-border);
+  --color-landing-night-bg: var(--landing-night-bg);
+  --color-landing-night-bg-2: var(--landing-night-bg-2);
+  --color-landing-night-foreground: var(--landing-night-foreground);
+  --color-landing-night-muted: var(--landing-night-muted);
+  --color-landing-night-accent: var(--landing-night-accent);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -129,6 +158,38 @@ body {
   --sidebar-accent-foreground: oklch(0.94 0.02 75);
   --sidebar-border: oklch(0.94 0.02 75 / 10%);
   --sidebar-ring: oklch(0.75 0.11 60 / 50%);
+
+  --landing-background: oklch(0.249 0.02 254.9);
+  --landing-surface: oklch(0.302 0.025 255.7);
+  --landing-foreground: oklch(0.932 0.02 74.7);
+  --landing-muted: oklch(0.751 0.027 73.1);
+  --landing-camel: oklch(0.784 0.039 64.6);
+  --landing-dusk: oklch(0.75 0.026 237);
+  --landing-border: oklch(0.932 0.02 74.7 / 12%);
+  /* night-* stays fixed across themes on purpose — it's a deliberate dark
+     interlude ("the notebook you close at night"), not a theme surface. */
+}
+
+.landing-chapter-card::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 26px 26px;
+  border-color: transparent transparent var(--landing-background) transparent;
+  filter: drop-shadow(-2px -2px 3px rgba(0, 0, 0, 0.08));
+  transition: border-width 0.3s ease;
+}
+.landing-chapter-card:hover::after {
+  border-width: 0 0 40px 40px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-chapter-card::after {
+    transition: none;
+  }
 }
 
 @layer base {

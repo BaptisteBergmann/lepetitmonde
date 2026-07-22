@@ -1,19 +1,18 @@
 import { getBabiesList } from "@utils/actions/baby";
 import { createClient } from "@utils/supabase/server";
-import { logger } from "@/utils/logger";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@utils/utils";
+import Landing from "./_home/landing";
 
 const AVATAR_TONES = ["bg-primary", "bg-rose", "bg-sage"];
 
 export default async function Home() {
-  const contextLogger = logger.child({ function: Home.name });
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    contextLogger.warn("No authenticated user on home page");
+    return <Landing />;
   }
 
   const firstName = user?.user_metadata?.full_name?.split(/\s+/)[0] || "";

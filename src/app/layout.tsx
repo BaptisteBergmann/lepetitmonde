@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
+import { Geist, Geist_Mono, DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import { cn } from "@utils/utils";
 import { PwaRegistry } from './settings/pwaRegistry';
@@ -16,6 +16,15 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Serif used only on the public landing page (headlines) — kept out of --font-sans
+// so the rest of the app keeps its existing DM Sans voice.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -62,7 +71,7 @@ export default async function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", dmSans.variable)}
+      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", dmSans.variable, fraunces.variable)}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
