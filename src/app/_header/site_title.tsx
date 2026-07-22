@@ -1,6 +1,7 @@
 "use client";
 
 import { Tables } from '@/utils/supabase/database.types';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
@@ -18,9 +19,12 @@ export default function SiteTitle({ babies }: { babies: Baby[] }) {
   return (
     <Link
       href="/"
-      className="shrink-0 text-lg sm:text-xl font-black text-primary tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+      className="flex shrink-0 items-center gap-2 cursor-pointer transition-opacity hover:opacity-80"
     >
-      Le petit Monde{babyName ? ` de ${babyName}` : ''}
+      <Image src="/logo_mark.png" alt="" width={900} height={620} className="h-7 w-auto sm:h-8" priority />
+      <span className="font-display text-lg sm:text-xl font-semibold text-primary tracking-tight truncate">
+        Le petit Monde{babyName ? ` de ${babyName}` : ''}
+      </span>
     </Link>
   );
 }
