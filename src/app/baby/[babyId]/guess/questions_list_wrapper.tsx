@@ -1,5 +1,6 @@
 
 import { getMyProposals, getQuestionsWithGuess, getQuestionsWithoutGuess } from "@/utils/actions/guesses_questions";
+import { getUserAccess } from "@/utils/actions/users";
 import GuessesTabs from "./guesses_tabs";
 import MyProposals from "./_components/my_proposals";
 import { logger } from "@/utils/logger";
@@ -16,6 +17,8 @@ export default async function QuestionsListWrapper({
   contextLogger.debug(questionWithoutGuess, "Questions without guess")
   const myProposals = await getMyProposals(babyId)
   contextLogger.debug(myProposals, "My pending/rejected proposals")
+  const access = await getUserAccess(babyId)
+  const isAdmin = !Array.isArray(access) && access.access_level === "admin"
 
   if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0 && myProposals.length === 0) {
     return (
@@ -29,7 +32,7 @@ export default async function QuestionsListWrapper({
   return (
     <div className="space-y-6">
       <MyProposals proposals={myProposals} />
-      <GuessesTabs unanswered={questionWithoutGuess} answered={questionWithGuess} />
+      <GuessesTabs unanswered={questionWithoutGuess} answered={questionWithGuess} babyId={babyId} isAdmin={isAdmin} />
     </div>
   );
 }

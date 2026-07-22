@@ -5,13 +5,18 @@ import QuestionWrapper from "./question_wrapper";
 import { HelpCircle, CheckCircle2, ClipboardList, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import Modal from "./_components/modal";
 
 export default function GuessesTabs({
   unanswered,
   answered,
+  babyId,
+  isAdmin = false,
 }: {
   unanswered: any[];
   answered: any[];
+  babyId: string;
+  isAdmin?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<"pending" | "completed">("pending");
   const router = useRouter();
@@ -96,6 +101,9 @@ export default function GuessesTabs({
                   : "Vous n'avez pas encore validé de pronostic. Allez dans l'onglet 'À deviner' pour commencer !"}
               </p>
             </div>
+            {activeTab === "pending" && (
+              <Modal babyId={babyId} isAdmin={isAdmin} />
+            )}
           </CardContent>
         </Card>
       ) : (
