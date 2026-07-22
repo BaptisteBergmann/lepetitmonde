@@ -1,7 +1,8 @@
 import { getBabiesList } from "@utils/actions/baby";
 import { createClient } from "@utils/supabase/server";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Moon, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@utils/utils";
 import { Reveal } from "@components/reveal";
@@ -29,12 +30,19 @@ export default async function Home() {
         />
 
         <Reveal className="relative text-center">
-          <Moon className="mx-auto mb-4 size-7 text-primary" strokeWidth={1.8} />
+          <Image
+            src="/logo_mark.png"
+            alt=""
+            width={900}
+            height={620}
+            className="mx-auto mb-4 h-12 w-auto"
+            unoptimized
+          />
           <h1 className="font-display text-[clamp(1.9rem,4vw+1rem,2.75rem)] font-semibold">
-            {firstName ? `Tout va bien, ${firstName}.` : "Tout va bien."}
+            {firstName ? `Bonjour, ${firstName}.` : "Bonjour."}
           </h1>
           <p className="mx-auto mt-3 max-w-xs text-landing-muted">
-            Un écran doux pour ne réveiller personne. Choisissez qui consulter.
+            Choisissez le carnet que vous souhaitez consulter.
           </p>
         </Reveal>
 
@@ -77,7 +85,7 @@ export default async function Home() {
         )}
 
         <p className="relative mt-10 text-center text-xs text-landing-muted">
-          Bonne nuit, à tout à l&apos;heure 🌙
+          Chaque enfant a son propre carnet, partagé en famille.
         </p>
       </div>
     </div>
