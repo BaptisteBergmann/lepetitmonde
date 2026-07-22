@@ -1,5 +1,12 @@
 # Feed feature — plan
 
+## Status: implemented
+
+Shipped: `posts.ts`, `reactions.ts`, `comments.ts` server actions; feed page
+and `_components/` (`post_card.tsx`, `comment_list.tsx`, `comment_input.tsx`,
+`create_post_modal.tsx`, `photo_lightbox.tsx`); `posts`/`post_photos`/
+`post_reactions`/`post_comments` migrations applied.
+
 ## Context
 
 Second of the two big additions (after the calendar, see `.claude/plans/calendar.md`). The whole premise of this app is not posting the baby's photos/info on a public platform — the feed is where that actually happens: admins post photos (baby + trips), everyone with access can react and comment, but **comments must stay siloed by circle** (family never sees friends' comments, and vice versa) even though they're commenting on the same shared post.

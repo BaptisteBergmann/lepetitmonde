@@ -65,3 +65,4 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 ## 📋 Planning
 
 - Save all feature/implementation plans as Markdown files in `.claude/plans/` (one file per feature, e.g. `.claude/plans/calendar.md`), not in a personal/global plans directory. This keeps plans versioned with the code and visible to the whole family/team working on this repo.
+- Once a plan is fully implemented and verified, add a `## Status: implemented` section at the top (briefly note what shipped and any deviations from the original plan), then move the file into `.claude/plans/done/`. This keeps the top-level `.claude/plans/` directory showing only what's still outstanding.

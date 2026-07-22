@@ -1,5 +1,10 @@
 # V1: Convert HEIC/HEIF photo uploads to JPEG
 
+## Status: implemented
+
+Shipped: `heic-convert` + `@types/heic-convert` added, `src/app/api/upload/route.ts`
+detects HEIC/HEIF by content-type or extension and converts to JPEG before upload.
+
 ## Context
 
 When someone posts a photo taken on an iPhone, it's often saved as HEIC/HEIF, a format many browsers (Chrome, Firefox, etc.) can't render natively. The feed currently renders every attachment as a plain `<img src={photo.url}>` (`post_card.tsx:99-109`), so a HEIC photo just shows as a broken image for anyone not on Safari.
