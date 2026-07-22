@@ -68,5 +68,5 @@ export async function signup(formData: FormData) {
   contextLogger.info(access, "Add access")
 
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect(`/baby/${invitation.data.baby_id}/onboarding`)
 }
