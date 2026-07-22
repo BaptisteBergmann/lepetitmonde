@@ -131,7 +131,10 @@ export default function CalendarView({
           const dayPosts = postsByDay.get(dayKey) ?? []
           const milestone = dayEvents.find((e) => e.kind === 'milestone')
           const MilestoneIcon = milestone ? MILESTONE_ICONS[milestone.milestone_type ?? 'other'] : null
-          const thumbnailUrl = dayPosts.find((p) => p.photos[0]?.url)?.photos[0]?.url
+          const firstPhoto = dayPosts.find((p) => p.photos[0]?.url)?.photos[0]
+          const thumbnailUrl = firstPhoto && (
+            firstPhoto.mime_type?.startsWith('video/') ? firstPhoto.thumbnailUrl : firstPhoto.url
+          )
 
           return (
             <button
