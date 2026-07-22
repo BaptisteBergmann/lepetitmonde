@@ -392,6 +392,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          mime_type: string | null
           position: number
           post_id: string
           storage_path: string
@@ -399,6 +400,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          mime_type?: string | null
           position?: number
           post_id: string
           storage_path: string
@@ -406,6 +408,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          mime_type?: string | null
           position?: number
           post_id?: string
           storage_path?: string
