@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { Loader2, Images } from "lucide-react";
+import { Loader2, BookOpen } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { getCircles } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
 import { logger } from "@/utils/logger";
+import { Reveal } from "@components/reveal";
 import FeedView from "./feed_view";
 
 const PAGE_SIZE = 10;
@@ -24,34 +25,39 @@ export default async function FeedPage({
   const isAdmin = access.access_level === "admin"
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
-      />
+    <div className="bg-landing-background text-landing-foreground">
+      <div className="relative mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
+        />
 
-      <div className="relative flex flex-col items-center text-center gap-2 pb-2">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Images className="h-5 w-5" />
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-          Journal
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-xs">
-          Les photos et souvenirs de bébé, partagés en famille.
-        </p>
+        <Reveal className="relative flex flex-col items-center gap-2 pb-2 text-center">
+          <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <BookOpen className="h-5 w-5" />
+          </span>
+          <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
+            Page — Le quotidien
+          </p>
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
+            Journal
+          </h1>
+          <p className="max-w-xs text-sm text-landing-muted sm:text-base">
+            Les photos et souvenirs de bébé, partagés en famille.
+          </p>
+        </Reveal>
+
+        <Suspense
+          fallback={
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm">Chargement du journal...</p>
+            </div>
+          }
+        >
+          <FeedContent babyId={babyId} isAdmin={isAdmin} />
+        </Suspense>
       </div>
-
-      <Suspense
-        fallback={
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm">Chargement du journal...</p>
-          </div>
-        }
-      >
-        <FeedContent babyId={babyId} isAdmin={isAdmin} />
-      </Suspense>
     </div>
   );
 }

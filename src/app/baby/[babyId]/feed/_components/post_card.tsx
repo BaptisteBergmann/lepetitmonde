@@ -92,7 +92,7 @@ export default function PostCard({
     : "Masqué — administrateurs uniquement"
 
   return (
-    <div className="rounded-3xl bg-card text-card-foreground border border-border shadow-sm overflow-hidden">
+    <div className="rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden">
       {post.photos.length > 0 && (
         <div className={cn(
           "grid gap-0.5",
@@ -146,16 +146,16 @@ export default function PostCard({
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-sm font-semibold text-foreground capitalize">
+            <p className="text-sm font-semibold text-landing-foreground capitalize">
               {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: fr })}
             </p>
-            <p className="text-xs text-muted-foreground">{circleNames}</p>
+            <p className="text-xs text-landing-muted">{circleNames}</p>
           </div>
           {isAdmin && (
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+              className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 shrink-0"
             >
               {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
             </button>
@@ -163,7 +163,7 @@ export default function PostCard({
         </div>
 
         {post.caption && (
-          <p className="text-sm text-foreground whitespace-pre-wrap">{post.caption}</p>
+          <p className="text-sm text-landing-foreground whitespace-pre-wrap">{post.caption}</p>
         )}
 
         <button
@@ -171,14 +171,14 @@ export default function PostCard({
           disabled={!reactions || reacting}
           className={cn(
             "flex items-center gap-1.5 text-sm cursor-pointer transition-colors disabled:opacity-50",
-            reactions?.reactedByMe ? "text-rose-500" : "text-muted-foreground hover:text-foreground"
+            reactions?.reactedByMe ? "text-rose-500" : "text-landing-muted hover:text-landing-foreground"
           )}
         >
           <Heart className={cn("h-4 w-4", reactions?.reactedByMe && "fill-current")} />
           <span>{heartCount}</span>
         </button>
 
-        <div className="border-t border-border pt-3 space-y-3">
+        <div className="border-t border-landing-border pt-3 space-y-3">
           <CommentList comments={comments} />
           <CommentInput postId={post.id} babyId={babyId} onAdded={loadComments} />
         </div>

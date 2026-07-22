@@ -53,7 +53,7 @@ export default function FeedView({
       )}
 
       {posts.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-12">
+        <p className="text-sm text-landing-muted text-center py-12">
           Aucune publication pour l&apos;instant.
         </p>
       )}
