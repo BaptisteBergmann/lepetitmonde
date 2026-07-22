@@ -8,11 +8,12 @@ import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { addReaction, getReactions, removeReaction } from '@utils/actions/reactions'
 import { getComments } from '@utils/actions/comments'
-import { Heart, Trash2, Loader2, Play } from 'lucide-react'
+import { Heart, Trash2, Pencil, Loader2, Play } from 'lucide-react'
 import { cn } from '@utils/utils'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
 import PhotoLightbox from './photo_lightbox'
+import EditPostModal from './edit_post_modal'
 
 export type Comment = Awaited<ReturnType<typeof getComments>>[number]
 
@@ -33,6 +34,7 @@ export default function PostCard({
   const [reactions, setReactions] = useState<{ counts: Record<string, number>; reactedByMe: boolean } | null>(null)
   const [reacting, setReacting] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
@@ -143,6 +145,15 @@ export default function PostCard({
         />
       )}
 
+      {isEditing && (
+        <EditPostModal
+          babyId={babyId}
+          post={post}
+          circles={circles}
+          onClose={() => setIsEditing(false)}
+        />
+      )}
+
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -152,13 +163,21 @@ export default function PostCard({
             <p className="text-xs text-landing-muted">{circleNames}</p>
           </div>
           {isAdmin && (
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 shrink-0"
-            >
-              {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              </button>
+            </div>
           )}
         </div>
 

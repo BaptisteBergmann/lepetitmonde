@@ -50,6 +50,45 @@ export async function createPost(post: NewPost, circleIds: string[]) {
   return data.id
 }
 
+type PostUpdate = { caption: string | null; taken_at: string }
+
+export async function updatePost(postId: string, babyId: string, update: PostUpdate, circleIds: string[]) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: updatePost.name, postId, babyId })
+
+  await assertIsAdmin(supabase, babyId)
+
+  const { error } = await supabase
+    .from('posts')
+    .update({
+      taken_at: update.taken_at,
+      caption: update.caption || null,
+    })
+    .eq('id', postId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error updating post"); throw error }
+
+  const { error: deleteCirclesError } = await supabase
+    .from('posts_circles')
+    .delete()
+    .eq('post_id', postId)
+
+  if (deleteCirclesError) { contextLogger.error(deleteCirclesError, "Error clearing post circles"); throw deleteCirclesError }
+
+  if (circleIds.length > 0) {
+    const { error: circlesError } = await supabase
+      .from('posts_circles')
+      .insert(circleIds.map((circleId) => ({ post_id: postId, circle_id: circleId })))
+
+    if (circlesError) { contextLogger.error(circlesError, "Error linking post circles"); throw circlesError }
+  }
+
+  contextLogger.info("Post updated")
+
+  revalidatePath(`/baby/${babyId}/feed`)
+}
+
 export async function attachPostPhotos(
   postId: string,
   babyId: string,
