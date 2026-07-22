@@ -17,6 +17,7 @@ import {
 import { fr } from 'date-fns/locale'
 import { Tables } from '@utils/supabase/database.types'
 import { EventWithCircles } from '@utils/actions/events'
+import { PostWithDetails } from '@utils/actions/posts'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { cn } from '@utils/utils'
@@ -25,6 +26,7 @@ import CreateEventModal from './_components/create_event_modal'
 import { CIRCLE_COLORS, MILESTONE_ICONS } from './_components/constants'
 
 type Event = EventWithCircles
+type Post = PostWithDetails
 type Circle = Tables<'circles'>
 
 export default function CalendarView({
@@ -32,12 +34,14 @@ export default function CalendarView({
   isAdmin,
   month: monthKey,
   events,
+  posts,
   circles,
 }: {
   babyId: string
   isAdmin: boolean
   month: string
   events: Event[]
+  posts: Post[]
   circles: Circle[]
 }) {
   const router = useRouter()
@@ -69,6 +73,16 @@ export default function CalendarView({
     return map
   }, [events])
 
+  const postsByDay = useMemo(() => {
+    const map = new Map<string, Post[]>()
+    posts.forEach((post) => {
+      const list = map.get(post.taken_at) ?? []
+      list.push(post)
+      map.set(post.taken_at, list)
+    })
+    return map
+  }, [posts])
+
   const goToMonth = (target: Date) => {
     startTransition(() => {
       router.push(`/baby/${babyId}/calendar?month=${format(target, 'yyyy-MM')}`)
@@ -76,6 +90,7 @@ export default function CalendarView({
   }
 
   const selectedDayEvents = selectedDate ? (eventsByDay.get(selectedDate) ?? []) : []
+  const selectedDayPosts = selectedDate ? (postsByDay.get(selectedDate) ?? []) : []
 
   return (
     <div className="relative space-y-4">
@@ -113,8 +128,10 @@ export default function CalendarView({
         {days.map((day) => {
           const dayKey = format(day, 'yyyy-MM-dd')
           const dayEvents = eventsByDay.get(dayKey) ?? []
+          const dayPosts = postsByDay.get(dayKey) ?? []
           const milestone = dayEvents.find((e) => e.kind === 'milestone')
           const MilestoneIcon = milestone ? MILESTONE_ICONS[milestone.milestone_type ?? 'other'] : null
+          const thumbnailUrl = dayPosts.find((p) => p.photos[0]?.url)?.photos[0]?.url
 
           return (
             <button
@@ -127,6 +144,14 @@ export default function CalendarView({
               )}
             >
               <span className="text-sm font-medium text-landing-foreground">{format(day, 'd')}</span>
+              {thumbnailUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={thumbnailUrl}
+                  alt=""
+                  className="h-6 w-6 rounded-md object-cover"
+                />
+              )}
               {MilestoneIcon && <MilestoneIcon className="h-3.5 w-3.5 text-primary" />}
               {dayEvents.length > 0 && (
                 <div className="flex items-center gap-0.5 flex-wrap justify-center">
@@ -154,6 +179,7 @@ export default function CalendarView({
           babyId={babyId}
           date={selectedDate}
           events={selectedDayEvents}
+          posts={selectedDayPosts}
           circles={circles}
           isAdmin={isAdmin}
           onClose={() => setSelectedDate(null)}

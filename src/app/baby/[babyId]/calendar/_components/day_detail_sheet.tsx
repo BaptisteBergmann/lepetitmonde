@@ -7,16 +7,20 @@ import { fr } from 'date-fns/locale'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { deleteEvent, EventWithCircles } from '@utils/actions/events'
+import { PostWithDetails } from '@utils/actions/posts'
 import { Plus, Pencil, Trash2, X, Loader2 } from 'lucide-react'
 import { MILESTONE_ICONS, MILESTONE_LABELS } from './constants'
+import PostCard from '../../feed/_components/post_card'
 
 type Event = EventWithCircles
+type Post = PostWithDetails
 type Circle = Tables<'circles'>
 
 export default function DayDetailSheet({
   babyId,
   date,
   events,
+  posts,
   circles,
   isAdmin,
   onClose,
@@ -26,6 +30,7 @@ export default function DayDetailSheet({
   babyId: string
   date: string
   events: Event[]
+  posts: Post[]
   circles: Circle[]
   isAdmin: boolean
   onClose: () => void
@@ -72,11 +77,15 @@ export default function DayDetailSheet({
         </div>
 
         <div className="p-5 space-y-3 flex-1 overflow-y-auto">
-          {events.length === 0 && (
+          {events.length === 0 && posts.length === 0 && (
             <p className="text-sm text-landing-muted text-center py-6">
               Aucun événement ce jour-là.
             </p>
           )}
+
+          {posts.map((post) => (
+            <PostCard key={post.id} babyId={babyId} post={post} circles={circles} isAdmin={isAdmin} />
+          ))}
 
           {events.map((event) => {
             const MilestoneIcon = event.kind === 'milestone' ? MILESTONE_ICONS[event.milestone_type ?? 'other'] : null

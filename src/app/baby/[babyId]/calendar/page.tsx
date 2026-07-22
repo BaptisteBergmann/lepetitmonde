@@ -1,6 +1,7 @@
 import { getUserAccess } from "@/utils/actions/users";
 import { getCircles } from "@/utils/actions/circles";
 import { getEvents } from "@/utils/actions/events";
+import { getPostsForRange } from "@/utils/actions/posts";
 import { logger } from "@/utils/logger";
 import CalendarView from "./calendar_view";
 import { Reveal } from "@components/reveal";
@@ -30,12 +31,17 @@ export default async function CalendarPage({
   const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 })
   const gridEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 })
 
-  const [circles, events] = await Promise.all([
+  const [circles, events, posts] = await Promise.all([
     getCircles(babyId),
     getEvents(babyId, {
       from: formatISO(gridStart, { representation: "date" }),
       to: formatISO(gridEnd, { representation: "date" }),
     }),
+    getPostsForRange(
+      babyId,
+      formatISO(gridStart, { representation: "date" }),
+      formatISO(gridEnd, { representation: "date" }),
+    ),
   ])
 
   return (
@@ -63,6 +69,7 @@ export default async function CalendarPage({
           isAdmin={isAdmin}
           month={format(month, "yyyy-MM")}
           events={events}
+          posts={posts}
           circles={circles}
         />
       </div>
