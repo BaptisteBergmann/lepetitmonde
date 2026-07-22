@@ -23,12 +23,12 @@ export function LoginForm({
 }: LoginFormProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden border-landing-border bg-landing-surface p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form action={login} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Bon retour</h1>
+                <h1 className="font-display text-2xl font-semibold">Bon retour</h1>
                 <p className="text-balance text-muted-foreground">
                   Connectez-vous à votre compte
                 </p>
@@ -61,7 +61,7 @@ export function LoginForm({
               <Field>
                 <Button type="submit">Se connecter</Button>
               </Field>
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-landing-surface">
                 Ou continuer avec
               </FieldSeparator>
               <Field className="grid grid-cols-3 gap-4">
