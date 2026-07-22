@@ -57,10 +57,12 @@ export default function CreatePostModal({
       await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds)
 
       if (upload.files.length > 0) {
-        await upload.onUpload()
+        const newlyUploaded = await upload.onUpload()
+        const finalNames = { ...upload.finalNames, ...newlyUploaded }
+        const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
         const uploadedFilenames = upload.files
-          .filter((f) => upload.successes.includes(f.name))
-          .map((f) => upload.finalNames[f.name] ?? f.name)
+          .filter((f) => successNames.has(f.name))
+          .map((f) => finalNames[f.name] ?? f.name)
         if (uploadedFilenames.length > 0) {
           await attachPostPhotos(postId, babyId, uploadedFilenames)
         }

@@ -179,12 +179,14 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     )
     setSuccesses(newSuccesses)
 
-    setFinalNames((prev) => ({
-      ...prev,
-      ...Object.fromEntries(responseSuccesses.map((x) => [x.name, x.filename ?? x.name])),
-    }))
+    const newFinalNames = Object.fromEntries(responseSuccesses.map((x) => [x.name, x.filename ?? x.name]))
+    setFinalNames((prev) => ({ ...prev, ...newFinalNames }))
 
     setLoading(false)
+
+    // Returned directly (rather than relying on callers to read back `successes`/`finalNames`
+    // state after awaiting) since state updates above aren't visible in the caller's closure yet.
+    return newFinalNames
   }, [files, path, bucketName, errors, successes])
 
   useEffect(() => {
