@@ -37,7 +37,7 @@ export default function PendingQuestions({
 
   return (
     <div className="space-y-3 mb-8">
-      <h2 className="text-sm font-bold text-foreground px-1">
+      <h2 className="font-display text-sm font-semibold text-landing-foreground px-1">
         Propositions en attente de validation ({questions.length})
       </h2>
       <div className="space-y-3">
@@ -46,11 +46,11 @@ export default function PendingQuestions({
           return (
             <Card key={question.id} className="border-amber-500/30 bg-amber-500/5">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base font-bold text-foreground">
+                <CardTitle className="font-display text-base font-semibold text-landing-foreground">
                   {question.title}
                 </CardTitle>
                 {question.description && (
-                  <CardDescription className="text-xs text-muted-foreground mt-1">
+                  <CardDescription className="text-xs text-landing-muted mt-1">
                     {question.description}
                   </CardDescription>
                 )}
