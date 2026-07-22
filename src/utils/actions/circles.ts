@@ -1,6 +1,7 @@
 'use server' // Obligatoire pour définir que ce fichier contient des Server Actions
 
 import { createClient } from '@utils/supabase/server'
+import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
@@ -50,7 +51,7 @@ type Circle = Tables<'circles'>;
 export async function getCircles(babyId: string) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) throw new Error("Non autorisé")
 
   const rep = await supabase
@@ -66,7 +67,7 @@ export async function getCircles(babyId: string) {
 export async function getCirclesAccess(babyId: string, userId: string) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) throw new Error("Non autorisé")
 
   const rep = await supabase

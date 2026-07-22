@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   addMonths,
@@ -13,7 +13,6 @@ import {
   format,
   isSameMonth,
   isToday,
-  parseISO,
 } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Tables } from '@utils/supabase/database.types'
@@ -31,7 +30,7 @@ type Circle = Tables<'circles'>
 export default function CalendarView({
   babyId,
   isAdmin,
-  month: monthIso,
+  month: monthKey,
   events,
   circles,
 }: {
@@ -42,7 +41,9 @@ export default function CalendarView({
   circles: Circle[]
 }) {
   const router = useRouter()
-  const month = parseISO(monthIso)
+  const [isPending, startTransition] = useTransition()
+  const [monthYear, monthIndex] = monthKey.split('-').map(Number)
+  const month = new Date(monthYear, monthIndex - 1, 1)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [modalState, setModalState] = useState<{ date: string; event?: Event } | null>(null)
 
@@ -69,7 +70,9 @@ export default function CalendarView({
   }, [events])
 
   const goToMonth = (target: Date) => {
-    router.push(`/baby/${babyId}/calendar?month=${format(target, 'yyyy-MM')}`)
+    startTransition(() => {
+      router.push(`/baby/${babyId}/calendar?month=${format(target, 'yyyy-MM')}`)
+    })
   }
 
   const selectedDayEvents = selectedDate ? (eventsByDay.get(selectedDate) ?? []) : []
@@ -77,13 +80,13 @@ export default function CalendarView({
   return (
     <div className="relative space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" onClick={() => goToMonth(subMonths(month, 1))}>
+        <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" disabled={isPending} onClick={() => goToMonth(subMonths(month, 1))}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <h2 className="text-lg font-semibold capitalize text-foreground">
           {format(month, 'MMMM yyyy', { locale: fr })}
         </h2>
-        <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" onClick={() => goToMonth(addMonths(month, 1))}>
+        <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" disabled={isPending} onClick={() => goToMonth(addMonths(month, 1))}>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

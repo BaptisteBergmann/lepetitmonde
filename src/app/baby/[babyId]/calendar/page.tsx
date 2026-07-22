@@ -3,7 +3,7 @@ import { getCircles } from "@/utils/actions/circles";
 import { getEvents } from "@/utils/actions/events";
 import { logger } from "@/utils/logger";
 import CalendarView from "./calendar_view";
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, formatISO, parse, isValid } from "date-fns";
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, formatISO, format, parse, isValid } from "date-fns";
 
 export default async function CalendarPage({
   params,
@@ -56,7 +56,7 @@ export default async function CalendarPage({
       <CalendarView
         babyId={babyId}
         isAdmin={isAdmin}
-        month={month.toISOString()}
+        month={format(month, "yyyy-MM")}
         events={events}
         circles={circles}
       />
