@@ -20,12 +20,12 @@ export function ResetPasswordForm({
 }: ResetPasswordFormProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden border-landing-border bg-landing-surface p-0">
         <CardContent className="p-6 md:p-8">
           <form action={updatePassword}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Nouveau mot de passe</h1>
+                <h1 className="font-display text-2xl font-semibold">Nouveau mot de passe</h1>
                 <p className="text-balance text-muted-foreground">
                   Choisissez un nouveau mot de passe
                 </p>

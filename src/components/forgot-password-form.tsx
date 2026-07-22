@@ -21,12 +21,12 @@ export function ForgotPasswordForm({
 }: ForgotPasswordFormProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden border-landing-border bg-landing-surface p-0">
         <CardContent className="p-6 md:p-8">
           <form action={requestPasswordReset}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Mot de passe oublié</h1>
+                <h1 className="font-display text-2xl font-semibold">Mot de passe oublié</h1>
                 <p className="text-balance text-muted-foreground">
                   Entrez votre email pour recevoir un lien de réinitialisation
                 </p>
