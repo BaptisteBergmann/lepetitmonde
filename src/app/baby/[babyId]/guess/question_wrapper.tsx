@@ -85,14 +85,14 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
   return (
     <Card className={`relative overflow-hidden transition-all duration-200 border ${hasAnswered
       ? "border-emerald-100 dark:border-emerald-950 bg-emerald-500/5 dark:bg-emerald-500/[0.02]"
-      : "border-border"
+      : "border-landing-border bg-landing-surface"
       }`}>
       <CardHeader className="pb-3 pt-5">
-        <CardTitle className="text-base font-bold text-foreground">
+        <CardTitle className="font-display text-base font-semibold text-landing-foreground">
           {questionWithGuess.title}
         </CardTitle>
         {questionWithGuess.description && (
-          <CardDescription className="text-xs text-muted-foreground mt-1">
+          <CardDescription className="text-xs text-landing-muted mt-1">
             {questionWithGuess.description}
           </CardDescription>
         )}

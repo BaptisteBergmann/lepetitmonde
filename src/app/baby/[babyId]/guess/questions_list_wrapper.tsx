@@ -19,9 +19,9 @@ export default async function QuestionsListWrapper({
 
   if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0 && myProposals.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-2xl bg-muted/10">
+      <div className="text-center py-12 text-landing-muted border border-dashed border-landing-border rounded-2xl bg-landing-surface">
         <p className="text-sm font-medium">Aucun pronostic créé pour le moment.</p>
-        <p className="text-xs text-muted-foreground mt-1">Cliquez sur &quot;Proposer un pronostic&quot; pour en ajouter un.</p>
+        <p className="text-xs text-landing-muted mt-1">Cliquez sur &quot;Proposer un pronostic&quot; pour en ajouter un.</p>
       </div>
     );
   }
