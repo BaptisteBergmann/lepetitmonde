@@ -237,6 +237,7 @@ export type Database = {
           id: string
           is_active: boolean
           options: Json | null
+          position: number
           status: string
           title: string | null
           type: string
@@ -249,6 +250,7 @@ export type Database = {
           id?: string
           is_active: boolean
           options?: Json | null
+          position?: number
           status?: string
           title?: string | null
           type: string
@@ -261,6 +263,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           options?: Json | null
+          position?: number
           status?: string
           title?: string | null
           type?: string

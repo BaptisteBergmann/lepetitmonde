@@ -28,7 +28,8 @@ export async function getQuestions(babyId: string) {
     .from('guess_questions')
     .select("*")
     .eq('baby_id', babyId)
-    .eq('status', 'approved');
+    .eq('status', 'approved')
+    .order('position', { ascending: true });
 
   if (error) { console.error(error); return [] }
   contextLogger.debug(data, "Received questions")
@@ -125,6 +126,42 @@ export async function deleteQuestion(babyId: string, questionId: string) {
   revalidatePath(`/baby/${babyId}/guess/admin`)
 }
 
+export async function moveQuestion(babyId: string, questionId: string, direction: 'up' | 'down') {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: moveQuestion.name, babyId, questionId, direction })
+
+  const { data: questions, error } = await supabase
+    .from('guess_questions')
+    .select('id, position')
+    .eq('baby_id', babyId)
+    .eq('status', 'approved')
+    .order('position', { ascending: true })
+
+  if (error) { contextLogger.error(error, "Error fetching questions before reorder"); throw error }
+
+  const index = questions.findIndex((q) => q.id === questionId)
+  if (index === -1) throw new Error("Pronostic introuvable")
+
+  const swapIndex = direction === 'up' ? index - 1 : index + 1
+  if (swapIndex < 0 || swapIndex >= questions.length) return
+
+  const current = questions[index]
+  const swapWith = questions[swapIndex]
+
+  const [{ error: error1 }, { error: error2 }] = await Promise.all([
+    supabase.from('guess_questions').update({ position: swapWith.position }).eq('baby_id', babyId).eq('id', current.id),
+    supabase.from('guess_questions').update({ position: current.position }).eq('baby_id', babyId).eq('id', swapWith.id),
+  ])
+
+  if (error1 || error2) { contextLogger.error(error1 || error2, "Error swapping positions"); throw error1 || error2 }
+  contextLogger.info("Question moved")
+
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
+}
+
 type NewGuess = TablesInsert<'guess_questions'>;
 type QuestionUpdate = Omit<NewGuess, 'baby_id'>;
 
@@ -178,6 +215,14 @@ export async function addQuestion(formData: NewGuess) {
 
   const isAdmin = access.access_level === "admin"
 
+  const { data: lastQuestion } = await supabase
+    .from('guess_questions')
+    .select('position')
+    .eq('baby_id', formData.baby_id)
+    .order('position', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   const rep = await supabase
     .from('guess_questions')
     .insert({
@@ -189,6 +234,7 @@ export async function addQuestion(formData: NewGuess) {
       is_active: formData.is_active,
       created_by: user.id,
       status: isAdmin ? 'approved' : 'pending',
+      position: (lastQuestion?.position ?? 0) + 1,
     })
 
   if (rep.error) { contextLogger.error(rep.error, "Error inserting question"); return rep }
@@ -219,7 +265,8 @@ export async function getQuestionsWithGuess(babyId: string) {
     .select("*, guesses!inner (*)")
     .eq('baby_id', babyId)
     .eq('status', 'approved')
-    .eq('guesses.user_id', user.id);;
+    .eq('guesses.user_id', user.id)
+    .order('position', { ascending: true });
 
   if (error) { console.error(error); return [] }
   contextLogger.debug(data, "Received questions with guess")
@@ -250,7 +297,8 @@ export async function getQuestionsWithoutGuess(babyId: string) {
     .from('guess_questions')
     .select("*")
     .eq('baby_id', babyId)
-    .eq('status', 'approved');
+    .eq('status', 'approved')
+    .order('position', { ascending: true });
 
   if (guessedQuestionIds.length > 0) {
     query = query.not('id', 'in', `(${guessedQuestionIds.join(',')})`);

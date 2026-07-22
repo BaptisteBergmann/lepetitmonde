@@ -8,6 +8,7 @@ import { logger } from "@/utils/logger";
 import Modal from "../_components/modal";
 import PendingQuestions from "./_components/pending_questions";
 import DeleteQuestionButton from "./_components/delete_question_button";
+import ReorderQuestionButtons from "./_components/reorder_question_buttons";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@components/reveal";
@@ -111,7 +112,7 @@ export default async function GuessAdminPage({
           </div>
         ) : (
           <div className="space-y-3">
-            {questions.map((question) => {
+            {questions.map((question, index) => {
               const { icon, label } = getTypeMeta(question.type);
               const questionGuesses = guesses.filter((g) => g.question_id === question.id);
               return (
@@ -121,14 +122,24 @@ export default async function GuessAdminPage({
                     <span className="text-landing-muted">{label}</span>
                   </div>
                   <CardHeader className="pb-4 pt-5">
-                    <CardTitle className="pr-16 font-display text-base font-semibold">
-                      {question.title}
-                    </CardTitle>
-                    {question.description && (
-                      <CardDescription className="text-xs text-landing-muted mt-1">
-                        {question.description}
-                      </CardDescription>
-                    )}
+                    <div className="flex items-start gap-3">
+                      <ReorderQuestionButtons
+                        babyId={babyId}
+                        questionId={question.id}
+                        isFirst={index === 0}
+                        isLast={index === questions.length - 1}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="pr-10 font-display text-base font-semibold">
+                          {question.title}
+                        </CardTitle>
+                        {question.description && (
+                          <CardDescription className="text-xs text-landing-muted mt-1">
+                            {question.description}
+                          </CardDescription>
+                        )}
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent className="pt-0 pb-4">
                     {questionGuesses.length === 0 ? (
