@@ -21,7 +21,7 @@ export default function SiteTitle({ babies }: { babies: Baby[] }) {
       href="/"
       className="flex shrink-0 items-center gap-2 cursor-pointer transition-opacity hover:opacity-80"
     >
-      <Image src="/logo_mark.png" alt="" width={900} height={620} className="h-7 w-auto sm:h-8" priority />
+      <Image src="/logo_mark.png" alt="" width={900} height={620} className="h-7 w-auto sm:h-8" priority unoptimized />
       <span className="font-display text-lg sm:text-xl font-semibold text-primary tracking-tight truncate">
         Le petit Monde{babyName ? ` de ${babyName}` : ''}
       </span>

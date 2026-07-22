@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BookOpen, CalendarDays, Dices, Users, ShieldCheck, ArrowRight, Heart } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@utils/utils";
-import { Reveal } from "./reveal";
+import { Reveal } from "@components/reveal";
 
 const CHAPTERS = [
   {
@@ -46,6 +46,7 @@ export default function Landing() {
               height={620}
               className="mb-6 h-16 w-auto sm:h-20"
               priority
+              unoptimized
             />
             <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary uppercase before:inline-block before:h-px before:w-6 before:bg-primary before:content-['']">
               Le journal de bébé, à partager en famille
