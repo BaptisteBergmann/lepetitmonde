@@ -3,6 +3,7 @@ import { getCircles } from "@/utils/actions/circles";
 import { getEvents } from "@/utils/actions/events";
 import { logger } from "@/utils/logger";
 import CalendarView from "./calendar_view";
+import { Reveal } from "@components/reveal";
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, formatISO, format, parse, isValid } from "date-fns";
 
 export default async function CalendarPage({
@@ -38,28 +39,33 @@ export default async function CalendarPage({
   ])
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
-      />
+    <div className="bg-landing-background text-landing-foreground">
+      <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
+        />
 
-      <div className="relative flex flex-col items-center text-center gap-2 pb-2">
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-          Calendrier
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-xs">
-          Les événements et jalons de bébé, passés et à venir.
-        </p>
+        <Reveal className="relative flex flex-col items-center gap-2 pb-2 text-center">
+          <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
+            Page — Les grandes étapes
+          </p>
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
+            Calendrier
+          </h1>
+          <p className="max-w-xs text-sm text-landing-muted sm:text-base">
+            Les événements et jalons de bébé, passés et à venir.
+          </p>
+        </Reveal>
+
+        <CalendarView
+          babyId={babyId}
+          isAdmin={isAdmin}
+          month={format(month, "yyyy-MM")}
+          events={events}
+          circles={circles}
+        />
       </div>
-
-      <CalendarView
-        babyId={babyId}
-        isAdmin={isAdmin}
-        month={format(month, "yyyy-MM")}
-        events={events}
-        circles={circles}
-      />
     </div>
   );
 }

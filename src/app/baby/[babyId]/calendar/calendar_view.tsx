@@ -83,7 +83,7 @@ export default function CalendarView({
         <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" disabled={isPending} onClick={() => goToMonth(subMonths(month, 1))}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-lg font-semibold capitalize text-foreground">
+        <h2 className="font-display text-lg font-semibold capitalize">
           {format(month, 'MMMM yyyy', { locale: fr })}
         </h2>
         <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" disabled={isPending} onClick={() => goToMonth(addMonths(month, 1))}>
@@ -103,7 +103,7 @@ export default function CalendarView({
         </div>
       )}
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-landing-muted uppercase tracking-wider">
         {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
           <div key={day} className="py-1">{day}</div>
         ))}
@@ -126,7 +126,7 @@ export default function CalendarView({
                 isToday(day) && "border-primary"
               )}
             >
-              <span className="text-sm font-medium text-foreground">{format(day, 'd')}</span>
+              <span className="text-sm font-medium text-landing-foreground">{format(day, 'd')}</span>
               {MilestoneIcon && <MilestoneIcon className="h-3.5 w-3.5 text-primary" />}
               {dayEvents.length > 0 && (
                 <div className="flex items-center gap-0.5 flex-wrap justify-center">
@@ -135,11 +135,11 @@ export default function CalendarView({
                       event.circle_ids.map((circleId) => (
                         <span
                           key={`${event.id}-${circleId}`}
-                          className={cn("h-1.5 w-1.5 rounded-full", circleColor.get(circleId) ?? "bg-muted-foreground")}
+                          className={cn("h-1.5 w-1.5 rounded-full", circleColor.get(circleId) ?? "bg-landing-muted")}
                         />
                       ))
                     ) : (
-                      <span key={event.id} className="h-1.5 w-1.5 rounded-full border border-dashed border-muted-foreground" />
+                      <span key={event.id} className="h-1.5 w-1.5 rounded-full border border-dashed border-landing-muted" />
                     )
                   ))}
                 </div>

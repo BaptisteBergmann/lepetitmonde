@@ -90,22 +90,22 @@ export default function CreateEventModal({
 
   return (
     <div className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200">
-      <div className="w-full max-w-[460px] max-h-[90vh] bg-card text-card-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-200">
+      <div className="w-full max-w-[460px] max-h-[90vh] bg-landing-surface text-landing-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-landing-border animate-in zoom-in-95 duration-200">
 
-        <div className="flex justify-between items-center border-b border-border py-4 px-5">
-          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+        <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
+          <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <CalendarPlus className="h-4.5 w-4.5 text-primary" />
             {isEditing ? "Modifier l'événement" : "Nouvel événement"}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-5 space-y-4 flex-1 overflow-y-auto text-card-foreground">
+        <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -213,7 +213,7 @@ export default function CreateEventModal({
 
         </div>
 
-        <div className="border-t border-border bg-muted/20 flex justify-end gap-2 items-center px-5 py-3.5">
+        <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
           <Button
             variant="outline"
             className="rounded-2xl cursor-pointer"
