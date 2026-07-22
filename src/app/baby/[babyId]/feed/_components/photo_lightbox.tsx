@@ -217,6 +217,7 @@ export default function PhotoLightbox({
                 photo.mime_type?.startsWith('video/') ? (
                   <video
                     src={photo.url}
+                    poster={photo.thumbnailUrl ?? undefined}
                     controls
                     playsInline
                     className="max-w-full max-h-full object-contain select-none"

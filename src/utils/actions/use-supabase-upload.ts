@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDropzone, type FileError, type FileRejection } from 'react-dropzone'
 
-async function uploadFile(
+export async function uploadFile(
   bucketName: string,
   path: string,
-  file: File,
+  file: File | Blob,
   options: { cacheControl: string; upsert: boolean }
 ) {
   const params = new URLSearchParams({
@@ -20,11 +20,12 @@ async function uploadFile(
     body: file,
   })
 
+  const fallbackFilename = path.split('/').pop()
   try {
     const { error, filename } = await response.json()
-    return { error: error ?? undefined, filename: filename ?? file.name }
+    return { error: error ?? undefined, filename: filename ?? fallbackFilename }
   } catch {
-    return { error: `Échec de l'envoi (${response.status})`, filename: file.name }
+    return { error: `Échec de l'envoi (${response.status})`, filename: fallbackFilename }
   }
 }
 

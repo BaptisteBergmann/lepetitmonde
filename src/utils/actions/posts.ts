@@ -11,7 +11,7 @@ import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { logger } from '../logger'
 
 type NewPost = TablesInsert<'posts'>
-export type PostPhotoWithUrl = Tables<'post_photos'> & { url: string | null }
+export type PostPhotoWithUrl = Tables<'post_photos'> & { url: string | null; thumbnailUrl: string | null }
 export type PostWithDetails = Tables<'posts'> & {
   circle_ids: string[]
   photos: PostPhotoWithUrl[]
@@ -92,7 +92,7 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
 export async function attachPostPhotos(
   postId: string,
   babyId: string,
-  files: { filename: string; mimeType: string }[]
+  files: { filename: string; mimeType: string; thumbnailFilename?: string }[]
 ) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: attachPostPhotos.name, postId, babyId })
@@ -101,9 +101,10 @@ export async function attachPostPhotos(
 
   const { error } = await supabase
     .from('post_photos')
-    .insert(files.map(({ filename, mimeType }, index) => ({
+    .insert(files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
       post_id: postId,
       storage_path: `posts/${postId}/${filename}`,
+      thumbnail_path: thumbnailFilename ? `posts/${postId}/thumbnails/${thumbnailFilename}` : null,
       position: index,
       mime_type: mimeType,
     })))
@@ -137,6 +138,9 @@ async function toPostWithDetails(row: {
   const photos = sortedPhotos.map((photo) => ({
     ...photo,
     url: `/api/storage/${row.baby_id}/${photo.storage_path.split('/').map(encodeURIComponent).join('/')}`,
+    thumbnailUrl: photo.thumbnail_path
+      ? `/api/storage/${row.baby_id}/${photo.thumbnail_path.split('/').map(encodeURIComponent).join('/')}`
+      : null,
   }))
 
   return {
@@ -212,13 +216,14 @@ export async function deletePost(postId: string, babyId: string) {
 
   const { data: photos, error: photosError } = await supabase
     .from('post_photos')
-    .select('storage_path')
+    .select('storage_path, thumbnail_path')
     .eq('post_id', postId)
 
   if (photosError) { contextLogger.error(photosError, "Error fetching post photos before delete"); throw photosError }
 
   if (photos.length > 0) {
-    await removeStorageObjects(babyId, photos.map((p) => p.storage_path))
+    const paths = photos.flatMap((p) => p.thumbnail_path ? [p.storage_path, p.thumbnail_path] : [p.storage_path])
+    await removeStorageObjects(babyId, paths)
   }
 
   const { error } = await supabase

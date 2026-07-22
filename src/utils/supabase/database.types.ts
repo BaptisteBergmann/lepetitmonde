@@ -399,6 +399,7 @@ export type Database = {
           position: number
           post_id: string
           storage_path: string
+          thumbnail_path: string | null
         }
         Insert: {
           created_at?: string
@@ -407,6 +408,7 @@ export type Database = {
           position?: number
           post_id: string
           storage_path: string
+          thumbnail_path?: string | null
         }
         Update: {
           created_at?: string
@@ -415,6 +417,7 @@ export type Database = {
           position?: number
           post_id?: string
           storage_path?: string
+          thumbnail_path?: string | null
         }
         Relationships: [
           {

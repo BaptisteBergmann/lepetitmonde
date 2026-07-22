@@ -11,8 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
-import { useSupabaseUpload } from '@utils/actions/use-supabase-upload'
+import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
 import { createPost, attachPostPhotos } from '@utils/actions/posts'
+import { captureVideoThumbnail } from '@utils/video-thumbnail'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -60,12 +61,30 @@ export default function CreatePostModal({
         const newlyUploaded = await upload.onUpload()
         const finalNames = { ...upload.finalNames, ...newlyUploaded }
         const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
-        const uploadedFiles = upload.files
-          .filter((f) => successNames.has(f.name))
-          .map((f) => ({
-            filename: finalNames[f.name] ?? f.name,
-            mimeType: f.type || 'application/octet-stream',
-          }))
+        const successFiles = upload.files.filter((f) => successNames.has(f.name))
+
+        const uploadedFiles = await Promise.all(successFiles.map(async (f) => {
+          const filename = finalNames[f.name] ?? f.name
+          const mimeType = f.type || 'application/octet-stream'
+
+          let thumbnailFilename: string | undefined
+          if (mimeType.startsWith('video/')) {
+            const thumbnailBlob = await captureVideoThumbnail(f)
+            if (thumbnailBlob) {
+              const thumbName = `${filename}.jpg`
+              const { error } = await uploadFile(
+                babyId,
+                `posts/${postId}/thumbnails/${thumbName}`,
+                thumbnailBlob,
+                { cacheControl: '3600', upsert: false }
+              )
+              if (!error) thumbnailFilename = thumbName
+            }
+          }
+
+          return { filename, mimeType, thumbnailFilename }
+        }))
+
         if (uploadedFiles.length > 0) {
           await attachPostPhotos(postId, babyId, uploadedFiles)
         }

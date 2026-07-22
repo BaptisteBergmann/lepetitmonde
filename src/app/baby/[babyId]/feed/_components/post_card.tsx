@@ -110,6 +110,7 @@ export default function PostCard({
                 >
                   <video
                     src={photo.url}
+                    poster={photo.thumbnailUrl ?? undefined}
                     muted
                     playsInline
                     preload="metadata"
