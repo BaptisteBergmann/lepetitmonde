@@ -1,42 +1,46 @@
 import { getBaby } from "@utils/actions/baby";
 import { getUserAccess } from "@utils/actions/users";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sparkles, Users, CalendarDays, Images } from "lucide-react";
+import { BookOpen, CalendarDays, Dices, Users, ChevronRight, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Reveal } from "@components/reveal";
 
 const SECTIONS = [
   {
-    id: "guess",
-    name: "Pronostics",
-    description: "Devinez le prénom, la date, le poids... et comparez vos réponses.",
+    id: "feed",
+    name: "Journal",
+    eyebrow: "Chapitre — Le quotidien",
+    description: "Photos, vidéos et petits mots du jour, partagés en famille.",
     role: "viewer" as const,
-    icon: Sparkles,
-    tone: "bg-primary",
+    icon: BookOpen,
   },
   {
     id: "calendar",
     name: "Calendrier",
-    description: "Consultez les événements et jalons de bébé, passés et à venir.",
+    eyebrow: "Chapitre — Les grandes étapes",
+    description: "Rendez-vous, poussées de croissance et jalons à venir.",
     role: "viewer" as const,
     icon: CalendarDays,
-    tone: "bg-sage",
   },
   {
-    id: "feed",
-    name: "Journal",
-    description: "Photos, réactions et commentaires partagés en famille.",
+    id: "guess",
+    name: "Pronostics",
+    eyebrow: "Chapitre — Les paris de famille",
+    description: "Prénom, poids, date de naissance : les paris de toute la famille.",
     role: "viewer" as const,
-    icon: Images,
-    tone: "bg-amber-400",
+    icon: Dices,
   },
   {
     id: "admin",
     name: "Administration",
-    description: "Gérez qui a accès au journal et organisez les cercles de partage.",
+    eyebrow: "Chapitre — Le cercle",
+    description: "Gérez qui a accès au journal et organisez le cercle de partage.",
     role: "admin" as const,
     icon: Users,
-    tone: "bg-rose",
   },
 ];
 
@@ -59,53 +63,77 @@ export default async function BabyPage({
   );
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
-      />
+    <div className="bg-landing-background text-landing-foreground">
+      <div className="relative mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-10 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
+        />
 
-      <div className="relative flex flex-col items-center text-center gap-2 pb-2">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold">
-          {baby.baby_surname.charAt(0).toUpperCase()}
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-          Le journal de {baby.baby_surname}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-xs">
-          Doucement, sans bruit. Choisissez une section à consulter.
+        <Reveal className="relative text-center">
+          <Image
+            src="/logo_mark.png"
+            alt=""
+            width={900}
+            height={620}
+            className="mx-auto mb-5 h-14 w-auto"
+            unoptimized
+          />
+          <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+            Le journal de
+          </p>
+          <h1 className="mt-2 font-display text-[clamp(3rem,9vw,4.5rem)] leading-none font-medium italic">
+            {baby.baby_surname}
+          </h1>
+          <p className="mt-4 text-sm text-landing-muted">
+            Membre depuis le {format(new Date(baby.created_at), "d MMMM yyyy", { locale: fr })}
+          </p>
+          <p className="mt-2 text-landing-muted">Choisissez un chapitre à consulter.</p>
+        </Reveal>
+
+        {sections.length === 0 ? (
+          <Reveal delay={120} className="mt-10">
+            <Card>
+              <CardHeader>
+                <CardTitle>Rien à afficher pour l&apos;instant</CardTitle>
+                <CardDescription>
+                  Aucune section n&apos;est encore disponible avec votre niveau d&apos;accès.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Reveal>
+        ) : (
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            {sections.map(({ id, name, eyebrow, description, icon: Icon }, i) => (
+              <Reveal key={id} delay={i * 80}>
+                <Link
+                  href={`/baby/${babyId}/${id}`}
+                  className="landing-chapter-card group flex h-full items-start gap-4 rounded-[20px] border border-landing-border bg-landing-surface p-6 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]"
+                >
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-landing-background text-primary">
+                    <Icon className="size-[22px]" strokeWidth={1.8} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-xs font-semibold tracking-[0.06em] text-landing-camel uppercase">
+                      {eyebrow}
+                    </span>
+                    <span className="mt-1 block font-display text-lg font-semibold">{name}</span>
+                    <span className="mt-1 block text-sm leading-relaxed text-landing-muted">
+                      {description}
+                    </span>
+                  </span>
+                  <ChevronRight className="mt-1 size-[18px] shrink-0 text-landing-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        )}
+
+        <p className="mt-10 flex items-center justify-center gap-2 text-center text-sm text-landing-muted">
+          <ShieldCheck className="size-[14px] text-landing-camel" />
+          Un carnet privé, partagé uniquement avec votre famille
         </p>
       </div>
-
-      {sections.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Rien à afficher pour l&apos;instant</CardTitle>
-            <CardDescription>
-              Aucune section n&apos;est encore disponible avec votre niveau d&apos;accès.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {sections.map(({ id, name, description, icon: Icon, tone }) => (
-            <Link key={id} href={`/baby/${babyId}/${id}`}>
-              <Card className="flex-row items-center gap-4 px-5 transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-primary-foreground ${tone}`}>
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-base font-semibold">{name}</div>
-                  <div className="text-sm text-muted-foreground">{description}</div>
-                </div>
-                <span className="text-muted-foreground text-xl" aria-hidden>
-                  ›
-                </span>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
