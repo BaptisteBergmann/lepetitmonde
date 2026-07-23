@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { Bell, Settings2, ArrowLeft, Smartphone, Trash2, Moon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { TimePicker } from '@/components/ui/time-picker'
 import { cn } from '@utils/utils'
 import { usePushSubscription } from '@utils/hooks/use-push-subscription'
 import { Tables, Enums } from '@utils/supabase/database.types'
@@ -265,19 +265,9 @@ export default function NotificationBell() {
                 <Moon className="h-3.5 w-3.5" /> Heures silencieuses
               </p>
               <div className="flex items-center gap-2">
-                <Input
-                  type="time"
-                  value={quietStart}
-                  onChange={(e) => setQuietStart(e.target.value)}
-                  className="text-xs"
-                />
+                <TimePicker value={quietStart || undefined} onChange={setQuietStart} />
                 <span className="text-xs text-muted-foreground shrink-0">à</span>
-                <Input
-                  type="time"
-                  value={quietEnd}
-                  onChange={(e) => setQuietEnd(e.target.value)}
-                  className="text-xs"
-                />
+                <TimePicker value={quietEnd || undefined} onChange={setQuietEnd} />
                 <Button size="sm" variant="outline" className="shrink-0 cursor-pointer" onClick={handleSaveQuietHours}>
                   OK
                 </Button>
