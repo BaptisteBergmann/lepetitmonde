@@ -1,103 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { subscribeUser, unsubscribeUser, sendNotification } from '@utils/actions/notifications'
+import { useState } from 'react'
+import { sendNotification } from '@utils/actions/notifications'
+import { usePushSubscription } from '@utils/hooks/use-push-subscription'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Bell, BellOff, Send } from 'lucide-react'
 
-function deviceLabel() {
-  const ua = navigator.userAgent
-  const browser = /Edg\//.test(ua) ? 'Edge'
-    : /OPR\//.test(ua) ? 'Opera'
-    : /Firefox\//.test(ua) ? 'Firefox'
-    : /CriOS|Chrome\//.test(ua) ? 'Chrome'
-    : /Safari\//.test(ua) ? 'Safari'
-    : 'Navigateur'
-  const os = /iPhone|iPad/.test(ua) ? 'iOS'
-    : /Android/.test(ua) ? 'Android'
-    : /Mac OS X/.test(ua) ? 'Mac'
-    : /Windows/.test(ua) ? 'Windows'
-    : /Linux/.test(ua) ? 'Linux'
-    : ''
-  return os ? `${browser} · ${os}` : browser
-}
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-
-  const rawData = window.atob(base64)
-  const outputArray = new Uint8Array(rawData.length)
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i)
-  }
-  return outputArray
-}
-
 export default function NotificationsCard() {
-  const [isSupported, setIsSupported] = useState(false)
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null)
+  const { isSupported, subscription, isPending, subscribe, unsubscribe } = usePushSubscription()
   const [message, setMessage] = useState('')
-  const [isPending, setIsPending] = useState(false)
-
-  useEffect(() => {
-    if (!('serviceWorker' in navigator && 'PushManager' in window)) return
-    setIsSupported(true)
-
-    async function registerServiceWorker() {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-        updateViaCache: 'none',
-      })
-      const sub = await registration.pushManager.getSubscription()
-      setSubscription(sub)
-    }
-
-    registerServiceWorker()
-  }, [])
-
-  async function subscribeToPush() {
-    setIsPending(true)
-    try {
-      const registration = await navigator.serviceWorker.ready
-      const sub = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-        ),
-      })
-      setSubscription(sub)
-      const serializedSub = JSON.parse(JSON.stringify(sub))
-      await subscribeUser(serializedSub, deviceLabel())
-    } finally {
-      setIsPending(false)
-    }
-  }
-
-  async function unsubscribeFromPush() {
-    if (!subscription) return
-    setIsPending(true)
-    try {
-      const endpoint = subscription.endpoint
-      await subscription.unsubscribe()
-      setSubscription(null)
-      await unsubscribeUser(endpoint)
-    } finally {
-      setIsPending(false)
-    }
-  }
+  const [isSending, setIsSending] = useState(false)
 
   async function sendTestNotification() {
     if (!subscription || !message) return
-    setIsPending(true)
+    setIsSending(true)
     try {
       await sendNotification(message)
       setMessage('')
     } finally {
-      setIsPending(false)
+      setIsSending(false)
     }
   }
 
@@ -126,7 +49,7 @@ export default function NotificationsCard() {
                 variant="outline"
                 size="sm"
                 className="gap-1.5 cursor-pointer shrink-0"
-                onClick={unsubscribeFromPush}
+                onClick={unsubscribe}
                 disabled={isPending}
               >
                 <BellOff className="h-3.5 w-3.5" />
@@ -147,7 +70,7 @@ export default function NotificationsCard() {
                   size="icon"
                   className="shrink-0 cursor-pointer"
                   onClick={sendTestNotification}
-                  disabled={isPending || !message}
+                  disabled={isSending || !message}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -158,7 +81,7 @@ export default function NotificationsCard() {
           <Button
             type="button"
             className="w-full gap-2 cursor-pointer"
-            onClick={subscribeToPush}
+            onClick={subscribe}
             disabled={isPending}
           >
             <Bell className="h-4 w-4" />

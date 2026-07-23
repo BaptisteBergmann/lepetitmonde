@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PageSelector from './page_selector';
 import UserMenu from './user_menu';
 import MobileMenu from './mobile_menu';
+import NotificationBell from './notification_bell';
 import { createClient } from '@/utils/supabase/server';
 
 export default async function Header({ babies, params }: { babies: any[], params?: any }) {
@@ -66,6 +67,7 @@ export default async function Header({ babies, params }: { babies: any[], params
       <div className="flex items-center gap-3 shrink-0">
         {user ? (
           <>
+            <NotificationBell />
             {/* Sur mobile : menu hamburger regroupant navigation + compte */}
             <div className="md:hidden">
               <MobileMenu initials={initials} fullName={fullName} email={user.email} accesses={accesses} />
