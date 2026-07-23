@@ -54,12 +54,12 @@ export async function getReactions(postId: string) {
     .select('emoji, user_id')
     .eq('post_id', postId)
 
-  if (error) { contextLogger.error(error, "Error fetching reactions"); return { counts: {}, reactedByMe: false } }
+  if (error) { contextLogger.error(error, "Error fetching reactions"); return { counts: {}, myEmoji: null } }
 
   const counts: Record<string, number> = {}
   data.forEach(({ emoji }) => { counts[emoji] = (counts[emoji] ?? 0) + 1 })
 
-  const reactedByMe = !!user && data.some((r) => r.user_id === user.id)
+  const myEmoji = (user && data.find((r) => r.user_id === user.id)?.emoji) ?? null
 
-  return { counts, reactedByMe }
+  return { counts, myEmoji }
 }

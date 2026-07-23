@@ -6,14 +6,14 @@ import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
-import { addReaction, getReactions, removeReaction } from '@utils/actions/reactions'
 import { getComments } from '@utils/actions/comments'
-import { Heart, Trash2, Pencil, Loader2, Play } from 'lucide-react'
+import { Trash2, Pencil, Loader2, Play } from 'lucide-react'
 import { cn } from '@utils/utils'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
 import PhotoLightbox from './photo_lightbox'
 import EditPostModal from './edit_post_modal'
+import ReactionPicker from './reaction_picker'
 
 export type Comment = Awaited<ReturnType<typeof getComments>>[number]
 
@@ -33,16 +33,10 @@ export default function PostCard({
   currentUserId: string | null
 }) {
   const router = useRouter()
-  const [reactions, setReactions] = useState<{ counts: Record<string, number>; reactedByMe: boolean } | null>(null)
-  const [reacting, setReacting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
-
-  useEffect(() => {
-    getReactions(post.id).then(setReactions)
-  }, [post.id])
 
   const loadComments = useCallback(async () => {
     setComments(await getComments(post.id, babyId))
@@ -51,30 +45,6 @@ export default function PostCard({
   useEffect(() => {
     getComments(post.id, babyId).then(setComments)
   }, [post.id, babyId])
-
-  const heartCount = reactions?.counts['❤️'] ?? 0
-
-  const toggleReaction = async () => {
-    if (!reactions || reacting) return
-    setReacting(true)
-    const wasReacted = reactions.reactedByMe
-    setReactions({
-      reactedByMe: !wasReacted,
-      counts: { ...reactions.counts, '❤️': heartCount + (wasReacted ? -1 : 1) },
-    })
-    try {
-      if (wasReacted) {
-        await removeReaction(post.id, babyId)
-      } else {
-        await addReaction(post.id, babyId)
-      }
-    } catch (err) {
-      console.error(err)
-      setReactions(reactions)
-    } finally {
-      setReacting(false)
-    }
-  }
 
   const handleDelete = async () => {
     if (!confirm("Supprimer cette publication ? Cette action est irréversible.")) return
@@ -188,17 +158,7 @@ export default function PostCard({
           <p className="text-sm text-landing-foreground whitespace-pre-wrap">{post.caption}</p>
         )}
 
-        <button
-          onClick={toggleReaction}
-          disabled={!reactions || reacting}
-          className={cn(
-            "flex items-center gap-1.5 text-sm cursor-pointer transition-colors disabled:opacity-50",
-            reactions?.reactedByMe ? "text-rose-500" : "text-landing-muted hover:text-landing-foreground"
-          )}
-        >
-          <Heart className={cn("h-4 w-4", reactions?.reactedByMe && "fill-current")} />
-          <span>{heartCount}</span>
-        </button>
+        <ReactionPicker postId={post.id} babyId={babyId} />
 
         <div className="border-t border-landing-border pt-3 space-y-3">
           <CommentList
