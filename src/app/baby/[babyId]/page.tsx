@@ -131,7 +131,7 @@ export default async function BabyPage({
 
         <p className="mt-10 flex items-center justify-center gap-2 text-center text-sm text-landing-muted">
           <ShieldCheck className="size-[14px] text-landing-camel" />
-          Un carnet privé, partagé uniquement avec votre famille
+          Un journal privé, partagé uniquement avec votre famille
         </p>
       </div>
     </div>

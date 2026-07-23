@@ -42,7 +42,7 @@ export default async function Home() {
             {firstName ? `Bonjour, ${firstName}.` : "Bonjour."}
           </h1>
           <p className="mx-auto mt-3 max-w-xs text-landing-muted">
-            Choisissez le carnet que vous souhaitez consulter.
+            Choisissez le journal que vous souhaitez consulter.
           </p>
         </Reveal>
 
@@ -85,7 +85,7 @@ export default async function Home() {
         )}
 
         <p className="relative mt-10 text-center text-xs text-landing-muted">
-          Chaque enfant a son propre carnet, partagé en famille.
+          Chaque enfant a son propre journal, partagé en famille.
         </p>
       </div>
     </div>

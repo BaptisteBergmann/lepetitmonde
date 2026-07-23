@@ -57,7 +57,7 @@ export default function Landing() {
               mérite <em className="font-display italic font-medium text-primary">sa page</em>.
             </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-landing-muted">
-              Le petit monde est le carnet privé où vous notez les progrès, les photos et les vidéos
+              Le petit monde est le journal privé où vous notez les progrès, les photos et les vidéos
               de bébé — et où toute la famille peut venir tourner les pages, en douceur, sans jamais
               quitter la maison.
             </p>
@@ -113,7 +113,7 @@ export default function Landing() {
       <section id="pages" className="mx-auto max-w-[1180px] px-4 py-14 sm:px-6 sm:py-20 lg:px-12">
         <Reveal className="mb-10 max-w-[52ch] sm:mb-14">
           <h2 className="text-balance font-display text-[clamp(1.9rem,2vw+1.3rem,2.6rem)] leading-[1.12] font-semibold">
-            Un carnet, quatre pages
+            Un journal, quatre pages
           </h2>
           <p className="mt-3 text-lg text-landing-muted">
             Pas de fonctionnalités à apprendre — juste les moments qu&apos;une famille a envie de garder.
@@ -149,7 +149,7 @@ export default function Landing() {
             Pas un réseau social
           </p>
           <h2 className="text-balance font-display text-[clamp(1.9rem,2vw+1.3rem,2.7rem)] font-semibold text-landing-night-foreground">
-            Un carnet qu&apos;on referme, le soir.
+            Un journal qu&apos;on referme, le soir.
           </h2>
           <p className="mx-auto mt-5 max-w-[52ch] text-lg text-landing-night-muted">
             Pas de fil d&apos;actualité, pas d&apos;inconnus, pas de likes à collectionner.
@@ -170,7 +170,7 @@ export default function Landing() {
             La première page vous attend.
           </h2>
           <p className="mx-auto mt-4 max-w-[44ch] text-lg text-landing-muted">
-            Ajoutez votre bébé, invitez la famille, et laissez le carnet s&apos;écrire au fil des jours.
+            Ajoutez votre bébé, invitez la famille, et laissez le journal s&apos;écrire au fil des jours.
           </p>
           <div className="mt-8 flex justify-center">
             <Link
