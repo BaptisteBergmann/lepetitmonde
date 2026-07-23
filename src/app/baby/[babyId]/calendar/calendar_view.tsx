@@ -37,6 +37,8 @@ export default function CalendarView({
   events,
   posts,
   circles,
+  hasEarlierActivity,
+  hasLaterActivity,
 }: {
   babyId: string
   isAdmin: boolean
@@ -45,6 +47,8 @@ export default function CalendarView({
   events: Event[]
   posts: Post[]
   circles: Circle[]
+  hasEarlierActivity: boolean
+  hasLaterActivity: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -97,15 +101,39 @@ export default function CalendarView({
   return (
     <div className="relative space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" disabled={isPending} onClick={() => goToMonth(subMonths(month, 1))}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+        <div className="relative">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-2xl cursor-pointer"
+            disabled={isPending}
+            onClick={() => goToMonth(subMonths(month, 1))}
+            aria-label={hasEarlierActivity ? "Mois précédent (contient des événements)" : "Mois précédent"}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          {hasEarlierActivity && (
+            <span className="absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full bg-primary" aria-hidden />
+          )}
+        </div>
         <h2 className="font-display text-lg font-semibold capitalize">
           {format(month, 'MMMM yyyy', { locale: fr })}
         </h2>
-        <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" disabled={isPending} onClick={() => goToMonth(addMonths(month, 1))}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        <div className="relative">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-2xl cursor-pointer"
+            disabled={isPending}
+            onClick={() => goToMonth(addMonths(month, 1))}
+            aria-label={hasLaterActivity ? "Mois suivant (contient des événements)" : "Mois suivant"}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          {hasLaterActivity && (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-primary" aria-hidden />
+          )}
+        </div>
       </div>
 
       {isAdmin && (

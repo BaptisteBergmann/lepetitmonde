@@ -160,3 +160,29 @@ export async function getEvents(babyId: string, { from, to }: { from: string; to
 
   return visible
 }
+
+export async function getEventActivityBeyond(babyId: string, from: string, to: string): Promise<{ hasBefore: boolean; hasAfter: boolean }> {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: getEventActivityBeyond.name, babyId, from, to })
+
+  const { data: { user } } = await getAuthUser()
+  if (!user) return { hasBefore: false, hasAfter: false }
+
+  const access = await getUserAccess(babyId)
+  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
+  const userCircleIds = new Set(await getUserCircleIds(babyId, user.id))
+  const isVisible = (circleIds: string[]) => isAdmin || circleIds.some((id) => userCircleIds.has(id))
+
+  const [{ data: before, error: beforeError }, { data: after, error: afterError }] = await Promise.all([
+    supabase.from('events').select('events_circles (circle_id)').eq('baby_id', babyId).lt('event_date', from),
+    supabase.from('events').select('events_circles (circle_id)').eq('baby_id', babyId).gt('event_date', to),
+  ])
+
+  if (beforeError) contextLogger.error(beforeError, "Error checking earlier events")
+  if (afterError) contextLogger.error(afterError, "Error checking later events")
+
+  return {
+    hasBefore: (before ?? []).some((row) => isVisible(row.events_circles.map((ec) => ec.circle_id))),
+    hasAfter: (after ?? []).some((row) => isVisible(row.events_circles.map((ec) => ec.circle_id))),
+  }
+}

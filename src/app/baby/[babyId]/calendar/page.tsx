@@ -1,7 +1,7 @@
 import { getUserAccess } from "@/utils/actions/users";
 import { getCircles } from "@/utils/actions/circles";
-import { getEvents } from "@/utils/actions/events";
-import { getPostsForRange } from "@/utils/actions/posts";
+import { getEvents, getEventActivityBeyond } from "@/utils/actions/events";
+import { getPostsForRange, getPostActivityBeyond } from "@/utils/actions/posts";
 import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
 import CalendarView from "./calendar_view";
@@ -32,19 +32,20 @@ export default async function CalendarPage({
   const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 })
   const gridEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 })
 
-  const [{ data: { user } }, circles, events, posts] = await Promise.all([
+  const rangeFrom = formatISO(gridStart, { representation: "date" })
+  const rangeTo = formatISO(gridEnd, { representation: "date" })
+
+  const [{ data: { user } }, circles, events, posts, eventActivity, postActivity] = await Promise.all([
     getAuthUser(),
     getCircles(babyId),
-    getEvents(babyId, {
-      from: formatISO(gridStart, { representation: "date" }),
-      to: formatISO(gridEnd, { representation: "date" }),
-    }),
-    getPostsForRange(
-      babyId,
-      formatISO(gridStart, { representation: "date" }),
-      formatISO(gridEnd, { representation: "date" }),
-    ),
+    getEvents(babyId, { from: rangeFrom, to: rangeTo }),
+    getPostsForRange(babyId, rangeFrom, rangeTo),
+    getEventActivityBeyond(babyId, rangeFrom, rangeTo),
+    getPostActivityBeyond(babyId, rangeFrom, rangeTo),
   ])
+
+  const hasEarlierActivity = eventActivity.hasBefore || postActivity.hasBefore
+  const hasLaterActivity = eventActivity.hasAfter || postActivity.hasAfter
 
   return (
     <div className="bg-landing-background text-landing-foreground">
@@ -74,6 +75,8 @@ export default async function CalendarPage({
           events={events}
           posts={posts}
           circles={circles}
+          hasEarlierActivity={hasEarlierActivity}
+          hasLaterActivity={hasLaterActivity}
         />
       </div>
     </div>

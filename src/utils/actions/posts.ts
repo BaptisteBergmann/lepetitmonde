@@ -217,6 +217,25 @@ export async function getPostsForRange(babyId: string, from: string, to: string)
   return visible
 }
 
+export async function getPostActivityBeyond(babyId: string, from: string, to: string): Promise<{ hasBefore: boolean; hasAfter: boolean }> {
+  const contextLogger = logger.child({ function: getPostActivityBeyond.name, babyId, from, to })
+  const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
+  const isVisible = (circleIds: string[]) => isAdmin || circleIds.some((id) => userCircleIds.has(id))
+
+  const [{ data: before, error: beforeError }, { data: after, error: afterError }] = await Promise.all([
+    supabase.from('posts').select('posts_circles (circle_id)').eq('baby_id', babyId).lt('taken_at', from),
+    supabase.from('posts').select('posts_circles (circle_id)').eq('baby_id', babyId).gt('taken_at', to),
+  ])
+
+  if (beforeError) contextLogger.error(beforeError, "Error checking earlier posts")
+  if (afterError) contextLogger.error(afterError, "Error checking later posts")
+
+  return {
+    hasBefore: (before ?? []).some((row) => isVisible(row.posts_circles.map((pc) => pc.circle_id))),
+    hasAfter: (after ?? []).some((row) => isVisible(row.posts_circles.map((pc) => pc.circle_id))),
+  }
+}
+
 export async function deletePost(postId: string, babyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: deletePost.name, postId, babyId })
