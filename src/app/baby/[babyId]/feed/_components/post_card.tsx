@@ -9,6 +9,7 @@ import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { getComments } from '@utils/actions/comments'
 import { Trash2, Pencil, Loader2, Play } from 'lucide-react'
 import { cn } from '@utils/utils'
+import { Badge } from '@components/ui/badge'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
 import PhotoLightbox from './photo_lightbox'
@@ -61,9 +62,7 @@ export default function PostCard({
     }
   }
 
-  const circleNames = post.circle_ids.length > 0
-    ? post.circle_ids.map((id) => circles.find((c) => c.id === id)?.name ?? "Cercle").join(", ")
-    : "Masqué — administrateurs uniquement"
+  const postCircles = post.circle_ids.map((id) => circles.find((c) => c.id === id))
 
   return (
     <div className="rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden">
@@ -133,7 +132,19 @@ export default function PostCard({
             <p className="text-sm font-semibold text-landing-foreground capitalize">
               {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: fr })}
             </p>
-            <p className="text-xs text-landing-muted">{circleNames}</p>
+            {isAdmin && (
+              <div className="flex flex-wrap items-center gap-1 mt-1">
+                {postCircles.length > 0 ? (
+                  postCircles.map((circle, index) => (
+                    <Badge key={circle?.id ?? index} variant="secondary">
+                      {circle?.name ?? "Cercle"}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="destructive">Administrateurs uniquement</Badge>
+                )}
+              </div>
+            )}
           </div>
           {isAdmin && (
             <div className="flex items-center gap-1 shrink-0">
