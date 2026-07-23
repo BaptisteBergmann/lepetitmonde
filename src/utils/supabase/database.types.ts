@@ -581,19 +581,28 @@ export type Database = {
       push_subscriptions: {
         Row: {
           created_at: string
+          device_label: string | null
+          endpoint: string
           id: number
+          last_seen_at: string
           subscription: Json
           user_id: string
         }
         Insert: {
           created_at?: string
+          device_label?: string | null
+          endpoint: string
           id?: number
+          last_seen_at?: string
           subscription: Json
           user_id: string
         }
         Update: {
           created_at?: string
+          device_label?: string | null
+          endpoint?: string
           id?: number
+          last_seen_at?: string
           subscription?: Json
           user_id?: string
         }

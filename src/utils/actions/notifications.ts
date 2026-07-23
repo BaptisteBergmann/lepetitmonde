@@ -1,6 +1,7 @@
 "use server";
 import webpush from 'web-push';
 import { createClient } from '@utils/supabase/server';
+import { logger } from '../logger'
 
 webpush.setVapidDetails(
   'mailto:bergmann.baptiste@gmail.com', // Your admin email
@@ -8,99 +9,125 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 );
 
-export async function notifyFamily(title: string, body: string, url: string) {
-  const supabase = await createClient();
-
-  // Fetch all subscriptions for your family members
-  const { data: subscriptions } = await supabase
-    .from('push_subscriptions')
-    .select('subscription');
-
-  if (!subscriptions) return;
-
-  const payload = JSON.stringify({ title, body, url });
-
-  // Send the push notification to every saved device
-  const pushPromises = subscriptions.map((sub) =>
-    webpush.sendNotification(sub.subscription as webpush.PushSubscription, payload)
-      .catch((error) => {
-        // If a device is inactive, the push service returns an error
-        // You can handle deleting stale subscriptions here
-        console.error("Error sending push to device:", error);
-      })
-  );
-
-  await Promise.all(pushPromises);
-}
-
-
-
-export async function subscribeUser(sub: PushSubscription) {
+export async function subscribeUser(sub: PushSubscription, deviceLabel?: string) {
   const supabase = await createClient()
+  const contextLogger = logger.child({ function: subscribeUser.name })
 
-  // 1. Récupérer l'utilisateur connecté
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non authentifié')
 
-  // 2. Sauvegarder dans Supabase (Upsert si l'abonnement existe déjà pour cet utilisateur)
+  // onConflict on `endpoint` (not `user_id`): a user can have several
+  // devices, so re-subscribing the same browser must update its row in
+  // place instead of piling up duplicates.
   const { error } = await supabase
     .from('push_subscriptions')
     .upsert({
       user_id: user.id,
       subscription: sub,
-    })
+      endpoint: sub.endpoint,
+      device_label: deviceLabel ?? null,
+      last_seen_at: new Date().toISOString(),
+    }, { onConflict: 'endpoint' })
 
-  if (error) throw error
+  if (error) { contextLogger.error(error, "Error subscribing to push"); throw error }
   return { success: true }
 }
 
-export async function unsubscribeUser() {
+export async function unsubscribeUser(endpoint: string) {
   const supabase = await createClient()
+  const contextLogger = logger.child({ function: unsubscribeUser.name })
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  // Supprimer l'abonnement en base
-  await supabase
+  const { error } = await supabase
     .from('push_subscriptions')
     .delete()
+    .eq('endpoint', endpoint)
     .eq('user_id', user.id)
 
+  if (error) { contextLogger.error(error, "Error unsubscribing from push"); throw error }
+  return { success: true }
+}
+
+export async function getMyDevices() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('push_subscriptions')
+    .select('id, device_label, created_at, last_seen_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true })
+
+  if (error) { logger.child({ function: getMyDevices.name }).error(error, "Error fetching devices"); return [] }
+  return data
+}
+
+export async function removeDevice(subscriptionId: number) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: removeDevice.name, subscriptionId })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const { error } = await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('id', subscriptionId)
+    .eq('user_id', user.id)
+
+  if (error) { contextLogger.error(error, "Error removing device"); throw error }
+  return { success: true }
+}
+
+export async function renameDevice(subscriptionId: number, label: string) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: renameDevice.name, subscriptionId })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const { error } = await supabase
+    .from('push_subscriptions')
+    .update({ device_label: label })
+    .eq('id', subscriptionId)
+    .eq('user_id', user.id)
+
+  if (error) { contextLogger.error(error, "Error renaming device"); throw error }
   return { success: true }
 }
 
 export async function sendNotification(message: string, targetUserId?: string) {
-  // 1. Récupérer l'abonnement depuis la base de données
   const supabase = await createClient()
+  const contextLogger = logger.child({ function: sendNotification.name })
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Non autorisé")
 
   if (!targetUserId) targetUserId = user.id
 
-
-  const { data: subData } = await supabase
+  const { data: devices } = await supabase
     .from('push_subscriptions')
     .select('subscription')
     .eq('user_id', targetUserId)
-    .single()
 
-  if (!subData) {
+  if (!devices || devices.length === 0) {
     throw new Error('Aucun abonnement trouvé pour cet utilisateur')
   }
 
-  // 2. Envoyer la notification via web-push
-  try {
-    await webpush.sendNotification(
-      subData.subscription,
-      JSON.stringify({
-        title: 'Le petit monde',
-        body: message,
-        icon: '/favicon-96x96.png',
-      })
-    )
-    return { success: true }
-  } catch (error) {
-    console.error('Erreur notification:', error)
-    return { success: false }
+  const payload = JSON.stringify({
+    title: 'Le petit monde',
+    body: message,
+    icon: '/favicon-96x96.png',
+  })
+
+  const results = await Promise.allSettled(
+    devices.map((device) => webpush.sendNotification(device.subscription as webpush.PushSubscription, payload))
+  )
+
+  const failures = results.filter((r) => r.status === 'rejected')
+  if (failures.length > 0) {
+    contextLogger.error({ failures: failures.length, total: devices.length }, "Some devices failed to receive the push")
   }
+
+  return { success: failures.length < devices.length }
 }

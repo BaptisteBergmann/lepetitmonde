@@ -7,6 +7,23 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Bell, BellOff, Send } from 'lucide-react'
 
+function deviceLabel() {
+  const ua = navigator.userAgent
+  const browser = /Edg\//.test(ua) ? 'Edge'
+    : /OPR\//.test(ua) ? 'Opera'
+    : /Firefox\//.test(ua) ? 'Firefox'
+    : /CriOS|Chrome\//.test(ua) ? 'Chrome'
+    : /Safari\//.test(ua) ? 'Safari'
+    : 'Navigateur'
+  const os = /iPhone|iPad/.test(ua) ? 'iOS'
+    : /Android/.test(ua) ? 'Android'
+    : /Mac OS X/.test(ua) ? 'Mac'
+    : /Windows/.test(ua) ? 'Windows'
+    : /Linux/.test(ua) ? 'Linux'
+    : ''
+  return os ? `${browser} · ${os}` : browser
+}
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -54,18 +71,20 @@ export default function NotificationsCard() {
       })
       setSubscription(sub)
       const serializedSub = JSON.parse(JSON.stringify(sub))
-      await subscribeUser(serializedSub)
+      await subscribeUser(serializedSub, deviceLabel())
     } finally {
       setIsPending(false)
     }
   }
 
   async function unsubscribeFromPush() {
+    if (!subscription) return
     setIsPending(true)
     try {
-      await subscription?.unsubscribe()
+      const endpoint = subscription.endpoint
+      await subscription.unsubscribe()
       setSubscription(null)
-      await unsubscribeUser()
+      await unsubscribeUser(endpoint)
     } finally {
       setIsPending(false)
     }
