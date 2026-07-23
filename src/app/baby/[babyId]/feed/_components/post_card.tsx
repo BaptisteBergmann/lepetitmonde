@@ -77,7 +77,7 @@ export default function PostCard({
                 <div
                   key={photo.id}
                   onClick={() => setLightboxIndex(index)}
-                  className="relative w-full aspect-square cursor-pointer"
+                  className="relative w-full aspect-square cursor-pointer contain-paint"
                 >
                   <video
                     src={photo.url}
@@ -97,10 +97,12 @@ export default function PostCard({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={photo.id}
-                  src={photo.url}
+                  src={photo.thumbnailUrl ?? photo.url}
                   alt={post.caption ?? ""}
                   onClick={() => setLightboxIndex(index)}
-                  className="w-full aspect-square object-cover cursor-pointer"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full aspect-square object-cover cursor-pointer contain-paint"
                 />
               )
             )
