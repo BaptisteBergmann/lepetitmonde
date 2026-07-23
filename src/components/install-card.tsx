@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Smartphone, Download } from 'lucide-react'
+import { Smartphone, Download, Share } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -78,10 +78,24 @@ export default function InstallCard({
             <span>Installer</span>
           </Button>
         ) : isIOS ? (
-          <p className="text-sm text-landing-muted">
-            Sur iOS, appuyez sur le bouton de partage <span aria-hidden>⎋</span> puis
-            &laquo;&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;&raquo; <span aria-hidden>➕</span>.
-          </p>
+          <ol className="list-decimal space-y-1.5 pl-4 text-sm text-landing-muted">
+            <li>
+              Ouvrez cette page dans <span className="font-medium text-landing-foreground">Safari</span>, puis
+              appuyez sur le bouton{' '}
+              <span className="inline-flex items-center gap-1 font-medium text-landing-foreground">
+                <Share className="h-3.5 w-3.5" aria-hidden />
+                Partager
+              </span>{' '}
+              en bas de l&apos;écran.
+            </li>
+            <li>
+              Faites défiler le menu et appuyez sur{' '}
+              <span className="font-medium text-landing-foreground">
+                &laquo;&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;&raquo;
+              </span>
+              , puis confirmez avec <span className="font-medium text-landing-foreground">&laquo;&nbsp;Ajouter&nbsp;&raquo;</span>.
+            </li>
+          </ol>
         ) : (
           <p className="text-sm text-landing-muted">
             Depuis le menu de votre navigateur, choisissez &laquo;&nbsp;Installer l&apos;application&nbsp;&raquo;
