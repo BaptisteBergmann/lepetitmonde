@@ -32,6 +32,7 @@ type Circle = Tables<'circles'>
 export default function CalendarView({
   babyId,
   isAdmin,
+  currentUserId,
   month: monthKey,
   events,
   posts,
@@ -39,6 +40,7 @@ export default function CalendarView({
 }: {
   babyId: string
   isAdmin: boolean
+  currentUserId: string | null
   month: string
   events: Event[]
   posts: Post[]
@@ -192,6 +194,7 @@ export default function CalendarView({
           posts={selectedDayPosts}
           circles={circles}
           isAdmin={isAdmin}
+          currentUserId={currentUserId}
           onClose={() => setSelectedDate(null)}
           onCreate={() => setModalState({ date: selectedDate })}
           onEdit={(event) => setModalState({ date: event.event_date, event })}

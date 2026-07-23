@@ -3,6 +3,7 @@ import { Loader2, BookOpen } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { getCircles } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
+import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
 import { Reveal } from "@components/reveal";
 import FeedView from "./feed_view";
@@ -63,7 +64,8 @@ export default async function FeedPage({
 }
 
 async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boolean }) {
-  const [circles, posts] = await Promise.all([
+  const [{ data: { user } }, circles, posts] = await Promise.all([
+    getAuthUser(),
     getCircles(babyId),
     getPosts(babyId, { limit: PAGE_SIZE }),
   ])
@@ -72,6 +74,7 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
     <FeedView
       babyId={babyId}
       isAdmin={isAdmin}
+      currentUserId={user?.id ?? null}
       circles={circles}
       initialPosts={posts}
       pageSize={PAGE_SIZE}

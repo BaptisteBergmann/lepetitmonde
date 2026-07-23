@@ -24,11 +24,13 @@ export default function PostCard({
   post,
   circles,
   isAdmin,
+  currentUserId,
 }: {
   babyId: string
   post: PostWithDetails
   circles: Circle[]
   isAdmin: boolean
+  currentUserId: string | null
 }) {
   const router = useRouter()
   const [reactions, setReactions] = useState<{ counts: Record<string, number>; reactedByMe: boolean } | null>(null)
@@ -199,7 +201,13 @@ export default function PostCard({
         </button>
 
         <div className="border-t border-landing-border pt-3 space-y-3">
-          <CommentList comments={comments} />
+          <CommentList
+            comments={comments}
+            babyId={babyId}
+            currentUserId={currentUserId}
+            isAdmin={isAdmin}
+            onChanged={loadComments}
+          />
           <CommentInput postId={post.id} babyId={babyId} onAdded={loadComments} />
         </div>
       </div>

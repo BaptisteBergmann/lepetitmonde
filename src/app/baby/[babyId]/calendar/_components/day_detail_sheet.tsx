@@ -23,6 +23,7 @@ export default function DayDetailSheet({
   posts,
   circles,
   isAdmin,
+  currentUserId,
   onClose,
   onCreate,
   onEdit,
@@ -33,6 +34,7 @@ export default function DayDetailSheet({
   posts: Post[]
   circles: Circle[]
   isAdmin: boolean
+  currentUserId: string | null
   onClose: () => void
   onCreate: () => void
   onEdit: (event: Event) => void
@@ -84,7 +86,7 @@ export default function DayDetailSheet({
           )}
 
           {posts.map((post) => (
-            <PostCard key={post.id} babyId={babyId} post={post} circles={circles} isAdmin={isAdmin} />
+            <PostCard key={post.id} babyId={babyId} post={post} circles={circles} isAdmin={isAdmin} currentUserId={currentUserId} />
           ))}
 
           {events.map((event) => {

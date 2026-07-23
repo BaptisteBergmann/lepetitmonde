@@ -13,12 +13,14 @@ type Circle = Tables<'circles'>
 export default function FeedView({
   babyId,
   isAdmin,
+  currentUserId,
   circles,
   initialPosts,
   pageSize,
 }: {
   babyId: string
   isAdmin: boolean
+  currentUserId: string | null
   circles: Circle[]
   initialPosts: PostWithDetails[]
   pageSize: number
@@ -61,7 +63,7 @@ export default function FeedView({
 
       <div className="flex flex-col gap-4">
         {posts.map((post) => (
-          <PostCard key={post.id} babyId={babyId} post={post} circles={circles} isAdmin={isAdmin} />
+          <PostCard key={post.id} babyId={babyId} post={post} circles={circles} isAdmin={isAdmin} currentUserId={currentUserId} />
         ))}
       </div>
 
