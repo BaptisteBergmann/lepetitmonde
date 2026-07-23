@@ -265,10 +265,13 @@ export default function NotificationBell() {
                 <Moon className="h-3.5 w-3.5" /> Heures silencieuses
               </p>
               <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground shrink-0 w-3">De</span>
                 <TimePicker value={quietStart || undefined} onChange={setQuietStart} />
-                <span className="text-xs text-muted-foreground shrink-0">à</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground shrink-0 w-3">à</span>
                 <TimePicker value={quietEnd || undefined} onChange={setQuietEnd} />
-                <Button size="sm" variant="outline" className="shrink-0 cursor-pointer" onClick={handleSaveQuietHours}>
+                <Button size="sm" variant="outline" className="shrink-0 cursor-pointer ml-auto" onClick={handleSaveQuietHours}>
                   OK
                 </Button>
               </div>
