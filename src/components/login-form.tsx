@@ -10,6 +10,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { login } from "@utils/actions/login"
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
@@ -56,7 +57,7 @@ export function LoginForm({
                     Mot de passe oublié ?
                   </a>
                 </div>
-                <Input name="password" id="password" type="password" required />
+                <PasswordInput name="password" id="password" required />
               </Field>
               <Field>
                 <Button type="submit">Se connecter</Button>

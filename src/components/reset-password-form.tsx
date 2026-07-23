@@ -6,7 +6,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { updatePassword } from "@utils/actions/reset-password"
 
 interface ResetPasswordFormProps extends React.ComponentProps<"div"> {
@@ -35,11 +35,11 @@ export function ResetPasswordForm({
               )}
               <Field>
                 <FieldLabel htmlFor="password">Nouveau mot de passe</FieldLabel>
-                <Input name="password" id="password" type="password" required minLength={6} />
+                <PasswordInput name="password" id="password" required minLength={6} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="confirmPassword">Confirmer le mot de passe</FieldLabel>
-                <Input name="confirmPassword" id="confirmPassword" type="password" required minLength={6} />
+                <PasswordInput name="confirmPassword" id="confirmPassword" required minLength={6} />
               </Field>
               <Field>
                 <Button type="submit">Mettre à jour</Button>

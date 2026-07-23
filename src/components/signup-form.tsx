@@ -9,6 +9,7 @@ import {
   FieldSeparator,
 } from "@components/ui/field"
 import { Input } from "@components/ui/input"
+import { PasswordInput } from "@components/ui/password-input"
 import { signup } from "@utils/actions/signup"
 
 // On ajoute 'token' aux props attendues
@@ -68,10 +69,9 @@ export function SignupForm({
               <Field>
                 <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
                 {/* Le lien "Mot de passe oublié" a été retiré pour l'inscription */}
-                <Input
+                <PasswordInput
                   name="password"
                   id="password"
-                  type="password"
                   placeholder="Créez un mot de passe"
                   required
                 />
