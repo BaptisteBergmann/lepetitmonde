@@ -449,6 +449,57 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          baby_id: string
+          body: string
+          created_at: string
+          id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at: string | null
+          title: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          baby_id: string
+          body: string
+          created_at?: string
+          id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
+          title: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          baby_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
+          title?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           body: string

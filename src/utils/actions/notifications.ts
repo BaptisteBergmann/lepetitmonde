@@ -182,6 +182,74 @@ export async function setQuietHours(start: string | null, end: string | null) {
   return { success: true }
 }
 
+export async function getMyNotifications(limit: number = 20) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    logger.child({ function: getMyNotifications.name }).error(error, "Error fetching notifications")
+    return []
+  }
+  return data
+}
+
+export async function getUnreadNotificationCount() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .is('read_at', null)
+
+  if (error) {
+    logger.child({ function: getUnreadNotificationCount.name }).error(error, "Error counting unread notifications")
+    return 0
+  }
+  return count ?? 0
+}
+
+export async function markNotificationRead(notificationId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', notificationId)
+    .eq('user_id', user.id)
+
+  if (error) { logger.child({ function: markNotificationRead.name }).error(error, "Error marking notification read"); throw error }
+  return { success: true }
+}
+
+export async function markAllNotificationsRead(babyId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .eq('baby_id', babyId)
+    .is('read_at', null)
+
+  if (error) { logger.child({ function: markAllNotificationsRead.name }).error(error, "Error marking all notifications read"); throw error }
+  return { success: true }
+}
+
 export async function sendNotification(message: string, targetUserId?: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: sendNotification.name })
