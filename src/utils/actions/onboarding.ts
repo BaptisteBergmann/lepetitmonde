@@ -34,5 +34,4 @@ export async function completeOnboarding(formData: FormData) {
   contextLogger.info({ nickname, relationToBaby }, "Onboarding completed")
 
   revalidatePath('/', 'layout')
-  redirect(`/baby/${babyId}`)
 }
