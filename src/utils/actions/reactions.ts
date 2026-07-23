@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
+import { REACTIONS } from '@utils/reactions'
 import { logger } from '../logger'
 
 export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
@@ -43,7 +44,12 @@ export async function removeReaction(postId: string, babyId: string) {
   revalidatePath(`/baby/${babyId}/feed`)
 }
 
-export async function getReactions(postId: string) {
+export type ReactionsData = {
+  breakdown: { emoji: string; count: number; names: string[] }[]
+  myEmoji: string | null
+}
+
+export async function getReactions(postId: string): Promise<ReactionsData> {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getReactions.name, postId })
 
@@ -51,15 +57,23 @@ export async function getReactions(postId: string) {
 
   const { data, error } = await supabase
     .from('post_reactions')
-    .select('emoji, user_id')
+    .select('emoji, user_id, users (*)')
     .eq('post_id', postId)
 
-  if (error) { contextLogger.error(error, "Error fetching reactions"); return { counts: {}, myEmoji: null } }
+  if (error) { contextLogger.error(error, "Error fetching reactions"); return { breakdown: [], myEmoji: null } }
 
-  const counts: Record<string, number> = {}
-  data.forEach(({ emoji }) => { counts[emoji] = (counts[emoji] ?? 0) + 1 })
+  const namesByEmoji = new Map<string, string[]>()
+  data.forEach(({ emoji, users: reactorOrList }) => {
+    const reactor = Array.isArray(reactorOrList) ? reactorOrList[0] : reactorOrList
+    const name = (reactor && [reactor.first_name, reactor.last_name].filter(Boolean).join(' ')) || "Utilisateur"
+    namesByEmoji.set(emoji, [...(namesByEmoji.get(emoji) ?? []), name])
+  })
+
+  const breakdown = REACTIONS
+    .map(({ emoji }) => ({ emoji, count: namesByEmoji.get(emoji)?.length ?? 0, names: namesByEmoji.get(emoji) ?? [] }))
+    .filter((reaction) => reaction.count > 0)
 
   const myEmoji = (user && data.find((r) => r.user_id === user.id)?.emoji) ?? null
 
-  return { counts, myEmoji }
+  return { breakdown, myEmoji }
 }
