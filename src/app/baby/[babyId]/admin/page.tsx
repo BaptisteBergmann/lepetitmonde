@@ -6,6 +6,7 @@ import CreateInvite from "./_components/create_invite";
 import RealtimeUsersList from "./_components/display_users";
 import InvitationsList from "./_components/display_invitations";
 import { getUsers, getUserAccess } from "@/utils/actions/users";
+import { getMembersDevices } from "@/utils/actions/notifications";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserPlus, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export default async function InviteForm({
   const access = await getUserAccess(babyId);
   const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
   const users = await getUsers(babyId);
+  const devicesByUser = isAdmin ? await getMembersDevices(babyId) : {};
 
   return (
     <div className="bg-landing-background text-landing-foreground">
@@ -97,7 +99,12 @@ export default async function InviteForm({
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0 pb-2">
-                <RealtimeUsersList babyId={babyId} initialUsers={users} isAdmin={isAdmin} />
+                <RealtimeUsersList
+                  babyId={babyId}
+                  initialUsers={users}
+                  isAdmin={isAdmin}
+                  devicesByUser={devicesByUser}
+                />
               </CardContent>
             </Card>
 

@@ -2,10 +2,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { toast } from "sonner";
 import { Tables, Enums } from "@utils/supabase/database.types";
 import { logger } from "@/utils/logger";
-import { Button } from "@/components/ui/button";
-import { sendNotification } from "@/utils/actions/notifications";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { sendNotification, MemberDevice } from "@/utils/actions/notifications";
 import { updateUserAccessLevel } from "@/utils/actions/users";
 import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
 import {
@@ -15,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Bell } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Bell, Smartphone } from "lucide-react";
+import { cn } from "@utils/utils";
 
 type User = Tables<'users'> & { access_level: Enums<'role'> };
 
@@ -23,6 +28,7 @@ interface RealtimeUsersListProps {
   initialUsers: User[];
   babyId: string;
   isAdmin: boolean;
+  devicesByUser: Record<string, MemberDevice[]>;
 }
 
 const ACCESS_LEVEL_LABELS: Record<Enums<'role'>, string> = {
@@ -34,9 +40,11 @@ export default function RealtimeUsersList({
   initialUsers,
   babyId,
   isAdmin,
+  devicesByUser,
 }: RealtimeUsersListProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [sendingUserId, setSendingUserId] = useState<string | null>(null);
 
   const contextLogger = logger.child({
     module: 'RealtimeUsersList',
@@ -85,6 +93,19 @@ export default function RealtimeUsersList({
     }
   };
 
+  const handleNotify = async (userId: string) => {
+    setSendingUserId(userId);
+    try {
+      await sendNotification("hello", userId);
+      toast.success("Notification envoyée.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'envoi de la notification.");
+    } finally {
+      setSendingUserId(null);
+    }
+  };
+
   contextLogger.info(users, "Get user")
   if (users.length === 0) {
     return (
@@ -109,6 +130,11 @@ export default function RealtimeUsersList({
         const initials = getInitials(user.first_name, user.last_name);
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
         const isLastAdmin = user.access_level === "admin" && adminCount <= 1;
+        const joinedDate = user.created_at
+          ? format(new Date(user.created_at), "d MMM yyyy", { locale: fr })
+          : null;
+        const devices = devicesByUser[user.id] ?? [];
+        const hasPush = devices.length > 0;
 
         return (
           <div
@@ -122,9 +148,14 @@ export default function RealtimeUsersList({
               <div className="min-w-0">
                 <p className="font-semibold text-sm text-landing-foreground truncate">
                   {fullName || `Membre (${user.id.substring(0, 8)})`}
+                  {user.nickname && (
+                    <span className="ml-1.5 font-normal text-landing-muted">
+                      &laquo; {user.nickname} &raquo;
+                    </span>
+                  )}
                 </p>
                 <p className="text-[10px] text-landing-muted truncate">
-                  ID: {user.id}
+                  {joinedDate ? `Membre depuis le ${joinedDate}` : `ID: ${user.id}`}
                 </p>
               </div>
             </div>
@@ -157,15 +188,44 @@ export default function RealtimeUsersList({
                 </span>
               )}
 
-              <Button
-                onClick={() => sendNotification("hello", user.id)}
-                variant="outline"
-                size="xs"
-                className="rounded-xl flex items-center gap-1.5 cursor-pointer shrink-0"
-              >
-                <Bell className="h-3.5 w-3.5 text-primary" />
-                <span className="hidden sm:inline">Notifier</span>
-              </Button>
+              {isAdmin && hasPush && (
+                <Popover>
+                  <PopoverTrigger
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "xs" }),
+                      "flex items-center gap-1.5 cursor-pointer shrink-0"
+                    )}
+                  >
+                    <Bell className="h-3.5 w-3.5 text-primary" />
+                    <span className="hidden sm:inline">Notifier</span>
+                    <span className="text-[10px] text-landing-muted">({devices.length})</span>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        Appareils enregistrés
+                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        {devices.map((device) => (
+                          <div key={device.id} className="flex items-center gap-1.5 text-sm min-w-0">
+                            <Smartphone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="truncate">{device.device_label ?? "Appareil inconnu"}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        onClick={() => handleNotify(user.id)}
+                        size="sm"
+                        className="rounded-xl w-full cursor-pointer gap-1.5 mt-1"
+                        disabled={sendingUserId === user.id}
+                      >
+                        <Bell className="h-3.5 w-3.5" />
+                        {sendingUserId === user.id ? "Envoi..." : "Envoyer une notification"}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           </div>
         );

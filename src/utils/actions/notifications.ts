@@ -3,6 +3,9 @@ import webpush, { ensureVapidConfigured } from '@utils/webpush';
 import { createClient } from '@utils/supabase/server';
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
+import { assertIsAdmin } from './access'
+
+export type MemberDevice = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
 export async function subscribeUser(sub: PushSubscription, deviceLabel?: string) {
   const supabase = await createClient()
@@ -57,6 +60,41 @@ export async function getMyDevices() {
 
   if (error) { logger.child({ function: getMyDevices.name }).error(error, "Error fetching devices"); return [] }
   return data
+}
+
+// Admin-only: devices for every member of a baby, keyed by user_id — used
+// on the admin page to decide whether to show the "Notifier" control at all
+// (a member with no registered device can't receive a push) and to list
+// which devices would get it. getMyDevices() can't be reused here since it
+// hardcodes user_id = auth.uid().
+export async function getMembersDevices(babyId: string): Promise<Record<string, MemberDevice[]>> {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: getMembersDevices.name, babyId })
+  await assertIsAdmin(supabase, babyId)
+
+  const { data: members, error: membersError } = await supabase
+    .from('baby_access')
+    .select('user_id')
+    .eq('baby_id', babyId)
+
+  if (membersError) { contextLogger.error(membersError, "Error fetching baby members"); return {} }
+
+  const userIds = (members ?? []).map((row) => row.user_id)
+  if (userIds.length === 0) return {}
+
+  const { data, error } = await supabase
+    .from('push_subscriptions')
+    .select('id, user_id, device_label, created_at, last_seen_at')
+    .in('user_id', userIds)
+    .order('created_at', { ascending: true })
+
+  if (error) { contextLogger.error(error, "Error fetching members devices"); return {} }
+
+  const byUser: Record<string, MemberDevice[]> = {}
+  for (const { user_id, ...device } of data) {
+    (byUser[user_id] ??= []).push(device)
+  }
+  return byUser
 }
 
 export async function removeDevice(subscriptionId: number) {
