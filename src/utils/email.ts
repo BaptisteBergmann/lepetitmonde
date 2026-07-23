@@ -16,7 +16,7 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
-    from: 'Le petit monde <noreply@lepetitmonde.baptistebergmann.com>',
+    from: 'Le petit monde <lepetitmonde@baptistebergmann.com>',
     to,
     subject: 'Bienvenue sur Le petit monde',
     html,
