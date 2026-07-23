@@ -13,6 +13,7 @@ import {
   FieldLabel,
 } from "@components/ui/field"
 import { Input } from "@components/ui/input"
+import InstallCard from "@components/install-card"
 import { completeOnboarding } from "@utils/actions/onboarding"
 import { usePushSubscription } from "@utils/hooks/use-push-subscription"
 
@@ -106,9 +107,10 @@ export function OnboardingForm({
               </p>
               <FieldGroup className="w-full gap-2 pt-2">
                 {!isSupported ? (
-                  <p className="text-xs text-muted-foreground">
-                    Les notifications ne sont pas prises en charge par ce navigateur.
-                  </p>
+                  <InstallCard
+                    title="Installez l'application"
+                    description="Sur iPhone, les notifications ne sont disponibles qu'une fois le journal installé sur l'écran d'accueil."
+                  />
                 ) : subscription ? (
                   <Button type="button" disabled className="gap-2">
                     <Bell className="h-4 w-4" />

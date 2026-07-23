@@ -8,6 +8,7 @@ import { Bell, Settings2, ArrowLeft, Smartphone, Trash2, Moon } from 'lucide-rea
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { TimePicker } from '@/components/ui/time-picker'
+import InstallCard from '@/components/install-card'
 import { cn } from '@utils/utils'
 import { usePushSubscription } from '@utils/hooks/use-push-subscription'
 import { Tables, Enums } from '@utils/supabase/database.types'
@@ -206,7 +207,10 @@ export default function NotificationBell() {
             <div className="flex flex-col gap-1.5">
               <p className="text-xs font-semibold text-muted-foreground">Cet appareil</p>
               {!isSupported ? (
-                <p className="text-xs text-muted-foreground">Non pris en charge par ce navigateur.</p>
+                <InstallCard
+                  title="Installez l'application"
+                  description="Sur iPhone, les notifications ne sont disponibles qu'une fois le journal installé sur l'écran d'accueil."
+                />
               ) : (
                 <Button
                   type="button"

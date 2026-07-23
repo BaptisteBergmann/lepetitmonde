@@ -10,7 +10,15 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-export default function InstallCard() {
+interface InstallCardProps {
+  title?: string
+  description?: string
+}
+
+export default function InstallCard({
+  title = "Installer l'application",
+  description = "Ajoutez le journal à votre écran d'accueil pour un accès rapide.",
+}: InstallCardProps) {
   const [isIOS, setIsIOS] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
@@ -52,10 +60,10 @@ export default function InstallCard() {
       <CardHeader className="pb-3">
         <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Smartphone className="h-4.5 w-4.5 text-rose" />
-          Installer l&apos;application
+          {title}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          Ajoutez le journal à votre écran d&apos;accueil pour un accès rapide.
+          {description}
         </CardDescription>
       </CardHeader>
       <CardContent>

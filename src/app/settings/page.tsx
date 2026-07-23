@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { logger } from '@/utils/logger'
 import AccountCard from './_components/account_card'
 import NotificationsCard from './_components/notifications_card'
-import InstallCard from './_components/install_card'
+import InstallCard from '@/components/install-card'
 
 export default async function SettingsPage() {
   const contextLogger = logger.child({ function: SettingsPage.name })
