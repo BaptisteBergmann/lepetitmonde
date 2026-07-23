@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { Bell, Settings2, ArrowLeft, Smartphone, Trash2, Moon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ const NOTIFICATION_LABELS: Record<Enums<'notification_type'>, string> = {
 }
 const ADMIN_ONLY_TYPES: Enums<'notification_type'>[] = ['new_member']
 const ALL_TYPES = Object.keys(NOTIFICATION_LABELS) as Enums<'notification_type'>[]
+const ENABLE_PROMPT_DISMISSED_KEY = 'notif-enable-prompt-dismissed'
 
 type Device = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
@@ -57,6 +59,27 @@ export default function NotificationBell() {
   useEffect(() => {
     getUnreadNotificationCount().then(setUnreadCount)
   }, [])
+
+  // One-time soft nudge, not the native browser permission dialog: shown at
+  // most once per browser (localStorage flag set as soon as it's shown,
+  // regardless of what the user does with it) so it never nags. Skipped
+  // entirely if the user already said no at the OS/browser level.
+  useEffect(() => {
+    if (!isSupported || subscription) return
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') return
+    if (localStorage.getItem(ENABLE_PROMPT_DISMISSED_KEY)) return
+
+    const timeout = setTimeout(() => {
+      localStorage.setItem(ENABLE_PROMPT_DISMISSED_KEY, '1')
+      toast('Activez les notifications', {
+        description: 'Soyez averti des nouvelles publications, commentaires et pronostics.',
+        action: { label: 'Activer', onClick: () => subscribe() },
+        duration: 15000,
+      })
+    }, 2000)
+
+    return () => clearTimeout(timeout)
+  }, [isSupported, subscription, subscribe])
 
   // No baby switcher here: falls back to the caller's first baby when not
   // browsing a /baby/[babyId] route (e.g. from /settings). Fine for the

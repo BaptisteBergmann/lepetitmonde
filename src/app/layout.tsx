@@ -6,6 +6,7 @@ import { PwaRegistry } from './settings/pwaRegistry';
 import HeaderWrapper from './_header/header_wrapper';
 import PullToRefresh from '@/components/pull_to_refresh';
 import BugReportButton from '@/components/bug_report_button';
+import { Toaster } from '@/components/ui/sonner';
 import { getAuthUser } from '@utils/supabase/auth';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
@@ -90,6 +91,7 @@ export default async function RootLayout({
         </footer>
         <PwaRegistry />
         {user && <BugReportButton />}
+        <Toaster position="bottom-center" />
       </body>
       {/* <Header babies={babies}></Header> */}
       {/* <body className="flex flex-col">{children}</body> */}
