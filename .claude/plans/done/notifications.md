@@ -1,3 +1,35 @@
+## Status: implemented
+
+All six phases shipped as separate commits on `main`:
+1. `acf9454` — multi-device `push_subscriptions` fix (endpoint-based dedup,
+   per-device unsubscribe, `getMyDevices`/`removeDevice`/`renameDevice`).
+2. `9129329` — `notification_preferences` (sparse opt-out) + `notification_settings`
+   (quiet hours).
+3. `0be9d8f` — `notifications` inbox table + `notify.ts:notifyUsers()` central
+   send pipeline + `access.ts:getVisibleUserIds()`.
+4. `afe4e2c` — header `NotificationBell` popup (list/settings views) +
+   shared `use-push-subscription.ts` hook.
+5. `e277bdf` — trigger wiring into `createPost`/`addComment`/
+   `addQuestion`+`reviewQuestion`/`signup`/`addReaction`/`createEvent`, plus
+   `getAllBabyMemberIds`/`getBabyAdminIds` helpers and the `tag` field for
+   OS-level notification grouping.
+6. `910a34d` — closed the missing authz check on `sendNotification`'s
+   cross-user send path.
+
+Deviations from the plan as written below:
+- No live browser click-through was performed. This app has a single
+  environment (the production self-hosted Supabase at `192.168.2.177`, no
+  staging instance) and no test account was available, so verification was
+  limited to `tsc --noEmit`, `eslint`, and confirming each migration applied
+  cleanly against the real schema (including a real 4-row backfill in
+  migration 1). **Recommend a manual pass in the actual app** — subscribe
+  from two browsers, trigger each notification type, and check quiet
+  hours/preferences actually suppress delivery — before considering this
+  fully verified.
+- Everything else matches the plan as designed.
+
+---
+
 # Notification system
 
 Turn the current manual/test-only push setup into a real notification system:
