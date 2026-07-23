@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { updateComment, deleteComment } from '@utils/actions/comments'
+import { getDisplayName } from '@utils/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
@@ -76,9 +77,7 @@ export default function CommentList({
   return (
     <div className="flex flex-col gap-2">
       {comments.map((comment) => {
-        const author = comment.users
-          ? [comment.users.first_name, comment.users.last_name].filter(Boolean).join(" ")
-          : "Utilisateur"
+        const author = getDisplayName(comment.users) || "Utilisateur"
         const isOwner = currentUserId !== null && comment.user_id === currentUserId
         const isEditing = editingId === comment.id
 

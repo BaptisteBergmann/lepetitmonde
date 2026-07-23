@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { REACTIONS } from '@utils/reactions'
+import { getDisplayName } from '@utils/users'
 import { notifyUsers } from './notify'
 import { logger } from '../logger'
 
@@ -26,8 +27,8 @@ export async function addReaction(postId: string, babyId: string, emoji: string 
 
   const { data: post } = await supabase.from('posts').select('created_by').eq('id', postId).single()
   if (post?.created_by && post.created_by !== user.id) {
-    const { data: reactor } = await supabase.from('users').select('first_name, last_name').eq('id', user.id).single()
-    const name = (reactor && [reactor.first_name, reactor.last_name].filter(Boolean).join(' ')) || 'Quelqu\'un'
+    const { data: reactor } = await supabase.from('users').select('first_name, last_name, nickname').eq('id', user.id).single()
+    const name = getDisplayName(reactor) || 'Quelqu\'un'
     await notifyUsers(babyId, 'new_reaction', {
       title: 'Nouvelle réaction',
       body: `${name} a réagi ${emoji} à votre publication`,
@@ -77,7 +78,7 @@ export async function getReactions(postId: string): Promise<ReactionsData> {
   const namesByEmoji = new Map<string, string[]>()
   data.forEach(({ emoji, users: reactorOrList }) => {
     const reactor = Array.isArray(reactorOrList) ? reactorOrList[0] : reactorOrList
-    const name = (reactor && [reactor.first_name, reactor.last_name].filter(Boolean).join(' ')) || "Utilisateur"
+    const name = getDisplayName(reactor) || "Utilisateur"
     namesByEmoji.set(emoji, [...(namesByEmoji.get(emoji) ?? []), name])
   })
 
