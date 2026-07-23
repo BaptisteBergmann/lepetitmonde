@@ -259,6 +259,31 @@ export async function sendNotification(message: string, targetUserId?: string) {
 
   if (!targetUserId) targetUserId = user.id
 
+  if (targetUserId !== user.id) {
+    const { data: targetBabies } = await supabase
+      .from('baby_access')
+      .select('baby_id')
+      .eq('user_id', targetUserId)
+
+    const targetBabyIds = (targetBabies ?? []).map((row) => row.baby_id)
+
+    const { data: sharedAdminBaby } = targetBabyIds.length > 0
+      ? await supabase
+        .from('baby_access')
+        .select('baby_id')
+        .eq('user_id', user.id)
+        .eq('access_level', 'admin')
+        .in('baby_id', targetBabyIds)
+        .limit(1)
+        .maybeSingle()
+      : { data: null }
+
+    if (!sharedAdminBaby) {
+      contextLogger.warn({ targetUserId }, "Non-admin attempted to send a notification to another user")
+      throw new Error("Non autorisé")
+    }
+  }
+
   const { data: devices } = await supabase
     .from('push_subscriptions')
     .select('subscription')
