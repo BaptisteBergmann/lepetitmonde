@@ -40,10 +40,10 @@ export default function Landing() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
           <Reveal>
             <Image
-              src="/logo_mark.png"
+              src="/logo_mark.svg"
               alt=""
-              width={900}
-              height={620}
+              width={512}
+              height={512}
               className="mb-6 h-16 w-auto sm:h-20"
               priority
               unoptimized

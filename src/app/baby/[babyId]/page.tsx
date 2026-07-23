@@ -72,10 +72,10 @@ export default async function BabyPage({
 
         <Reveal className="relative text-center">
           <Image
-            src="/logo_mark.png"
+            src="/logo_mark.svg"
             alt=""
-            width={900}
-            height={620}
+            width={512}
+            height={512}
             className="mx-auto mb-5 h-14 w-auto"
             unoptimized
           />

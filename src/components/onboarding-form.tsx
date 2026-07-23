@@ -71,7 +71,7 @@ export function OnboardingForm({
             </FieldGroup>
           </form>
           <div className="hidden flex-col items-center justify-center gap-4 bg-landing-background p-8 md:flex">
-            <Image src="/logo_mark.png" alt="" width={900} height={620} className="h-20 w-auto" unoptimized />
+            <Image src="/logo_mark.svg" alt="" width={512} height={512} className="h-20 w-auto" unoptimized />
             <p className="text-balance text-center font-display text-lg italic text-landing-foreground">
               Le journal de bébé, à partager en famille
             </p>

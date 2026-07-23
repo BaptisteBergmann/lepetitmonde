@@ -31,10 +31,10 @@ export default async function Home() {
 
         <Reveal className="relative text-center">
           <Image
-            src="/logo_mark.png"
+            src="/logo_mark.svg"
             alt=""
-            width={900}
-            height={620}
+            width={512}
+            height={512}
             className="mx-auto mb-4 h-12 w-auto"
             unoptimized
           />
