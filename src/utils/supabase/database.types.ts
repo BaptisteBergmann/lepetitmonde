@@ -387,6 +387,68 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          baby_id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baby_id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baby_id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          user_id: string
+        }
+        Insert: {
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          user_id: string
+        }
+        Update: {
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           body: string
@@ -657,6 +719,13 @@ export type Database = {
         | "first_laugh"
         | "birthday"
         | "other"
+      notification_type:
+        | "new_post"
+        | "new_comment"
+        | "new_pronostic"
+        | "new_member"
+        | "new_reaction"
+        | "new_milestone"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -794,6 +863,14 @@ export const Constants = {
         "first_laugh",
         "birthday",
         "other",
+      ],
+      notification_type: [
+        "new_post",
+        "new_comment",
+        "new_pronostic",
+        "new_member",
+        "new_reaction",
+        "new_milestone",
       ],
       role: ["admin", "viewer"],
     },

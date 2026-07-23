@@ -1,6 +1,7 @@
 "use server";
 import webpush from 'web-push';
 import { createClient } from '@utils/supabase/server';
+import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 
 webpush.setVapidDetails(
@@ -93,6 +94,91 @@ export async function renameDevice(subscriptionId: number, label: string) {
     .eq('user_id', user.id)
 
   if (error) { contextLogger.error(error, "Error renaming device"); throw error }
+  return { success: true }
+}
+
+// Sparse opt-out model: a row present here means the type is disabled.
+// Absence of a row means enabled — so new notification types default to
+// "on" for everyone without a backfill migration.
+export async function getDisabledNotificationTypes(babyId: string): Promise<Enums<'notification_type'>[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('notification_preferences')
+    .select('notification_type')
+    .eq('user_id', user.id)
+    .eq('baby_id', babyId)
+
+  if (error) {
+    logger.child({ function: getDisabledNotificationTypes.name, babyId }).error(error, "Error fetching notification preferences")
+    return []
+  }
+  return data.map((row) => row.notification_type)
+}
+
+export async function setNotificationPreference(babyId: string, type: Enums<'notification_type'>, enabled: boolean) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: setNotificationPreference.name, babyId, type, enabled })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  if (enabled) {
+    const { error } = await supabase
+      .from('notification_preferences')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('baby_id', babyId)
+      .eq('notification_type', type)
+
+    if (error) { contextLogger.error(error, "Error enabling notification type"); throw error }
+  } else {
+    const { error } = await supabase
+      .from('notification_preferences')
+      .upsert(
+        { user_id: user.id, baby_id: babyId, notification_type: type },
+        { onConflict: 'user_id,baby_id,notification_type' }
+      )
+
+    if (error) { contextLogger.error(error, "Error disabling notification type"); throw error }
+  }
+
+  return { success: true }
+}
+
+export async function getQuietHours() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data, error } = await supabase
+    .from('notification_settings')
+    .select('quiet_hours_start, quiet_hours_end')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (error) {
+    logger.child({ function: getQuietHours.name }).error(error, "Error fetching quiet hours")
+    return null
+  }
+  return data
+}
+
+export async function setQuietHours(start: string | null, end: string | null) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: setQuietHours.name })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const { error } = await supabase
+    .from('notification_settings')
+    .upsert(
+      { user_id: user.id, quiet_hours_start: start, quiet_hours_end: end },
+      { onConflict: 'user_id' }
+    )
+
+  if (error) { contextLogger.error(error, "Error setting quiet hours"); throw error }
   return { success: true }
 }
 
