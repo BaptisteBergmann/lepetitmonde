@@ -4,10 +4,11 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
-import { assertIsAdmin } from './access'
+import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
+import { notifyUsers } from './notify'
 import { logger } from '../logger'
 
 type NewPost = TablesInsert<'posts'>
@@ -46,6 +47,14 @@ export async function createPost(post: NewPost, circleIds: string[]) {
   }
 
   contextLogger.info({ postId: data.id }, "Post created")
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const recipients = await getVisibleUserIds(post.baby_id, circleIds, user?.id)
+  await notifyUsers(post.baby_id, 'new_post', {
+    title: 'Nouvelle publication',
+    body: post.caption || 'Une nouvelle photo a été ajoutée au journal !',
+    url: `/baby/${post.baby_id}/feed`,
+  }, recipients)
 
   return data.id
 }

@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { logger } from '../logger'
 import { sendWelcomeEmail } from '@/utils/email'
+import { getBabyAdminIds } from './access'
+import { notifyUsers } from './notify'
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
@@ -69,6 +71,13 @@ export async function signup(formData: FormData) {
   contextLogger.info(access, "Add access")
 
   await sendWelcomeEmail(email, firstName)
+
+  const adminIds = await getBabyAdminIds(invitation.data.baby_id, user.user.id)
+  await notifyUsers(invitation.data.baby_id, 'new_member', {
+    title: 'Nouveau membre',
+    body: `${firstName} a rejoint la famille !`,
+    url: `/baby/${invitation.data.baby_id}/admin`,
+  }, adminIds)
 
   revalidatePath('/', 'layout')
   redirect(`/baby/${invitation.data.baby_id}/onboarding`)

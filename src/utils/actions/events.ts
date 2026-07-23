@@ -4,9 +4,10 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Enums, Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
-import { assertIsAdmin } from './access'
+import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
+import { notifyUsers } from './notify'
 import { logger } from '../logger'
 
 type NewEvent = TablesInsert<'events'>;
@@ -46,6 +47,16 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
   contextLogger.info("Event created")
 
   revalidatePath(`/baby/${event.baby_id}/calendar`)
+
+  if (kind === 'milestone') {
+    const { data: { user } } = await supabase.auth.getUser()
+    const recipients = await getVisibleUserIds(event.baby_id, circleIds, user?.id)
+    await notifyUsers(event.baby_id, 'new_milestone', {
+      title: 'Nouvelle étape !',
+      body: event.title,
+      url: `/baby/${event.baby_id}/calendar`,
+    }, recipients)
+  }
 }
 
 export async function updateEvent(eventId: string, babyId: string, patch: {

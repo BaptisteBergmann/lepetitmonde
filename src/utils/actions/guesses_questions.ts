@@ -5,7 +5,8 @@ import { createClient } from '@utils/supabase/server'
 import { TablesInsert } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { getUserAccess } from './users'
-import { assertIsAdmin } from './access'
+import { assertIsAdmin, getAllBabyMemberIds } from './access'
+import { notifyUsers } from './notify'
 
 export async function getQuestions(babyId: string) {
   const supabase = await createClient()
@@ -95,6 +96,16 @@ export async function reviewQuestion(babyId: string, questionId: string, decisio
 
   revalidatePath(`/baby/${babyId}/guess`)
   revalidatePath(`/baby/${babyId}/guess/admin`)
+
+  if (decision === 'approved') {
+    const { data: { user } } = await supabase.auth.getUser()
+    const recipients = await getAllBabyMemberIds(babyId, user?.id)
+    await notifyUsers(babyId, 'new_pronostic', {
+      title: 'Nouveau pronostic',
+      body: 'Un nouveau pronostic est disponible !',
+      url: `/baby/${babyId}/guess`,
+    }, recipients)
+  }
 }
 
 export async function deleteQuestion(babyId: string, questionId: string) {
@@ -239,6 +250,16 @@ export async function addQuestion(formData: NewGuess) {
 
   if (rep.error) { contextLogger.error(rep.error, "Error inserting question"); return rep }
   contextLogger.info({ isAdmin }, isAdmin ? "Question created" : "Question proposed, pending review")
+
+  if (isAdmin) {
+    const recipients = await getAllBabyMemberIds(formData.baby_id, user.id)
+    await notifyUsers(formData.baby_id, 'new_pronostic', {
+      title: 'Nouveau pronostic',
+      body: 'Un nouveau pronostic est disponible !',
+      url: `/baby/${formData.baby_id}/guess`,
+    }, recipients)
+  }
+
   return rep
 
 }

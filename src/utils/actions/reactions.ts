@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { REACTIONS } from '@utils/reactions'
+import { notifyUsers } from './notify'
 import { logger } from '../logger'
 
 export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
@@ -22,6 +23,17 @@ export async function addReaction(postId: string, babyId: string, emoji: string 
   contextLogger.info("Reaction added")
 
   revalidatePath(`/baby/${babyId}/feed`)
+
+  const { data: post } = await supabase.from('posts').select('created_by').eq('id', postId).single()
+  if (post?.created_by && post.created_by !== user.id) {
+    const { data: reactor } = await supabase.from('users').select('first_name, last_name').eq('id', user.id).single()
+    const name = (reactor && [reactor.first_name, reactor.last_name].filter(Boolean).join(' ')) || 'Quelqu\'un'
+    await notifyUsers(babyId, 'new_reaction', {
+      title: 'Nouvelle réaction',
+      body: `${name} a réagi ${emoji} à votre publication`,
+      url: `/baby/${babyId}/feed`,
+    }, [post.created_by])
+  }
 }
 
 export async function removeReaction(postId: string, babyId: string) {

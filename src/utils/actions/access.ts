@@ -52,3 +52,34 @@ export async function getVisibleUserIds(babyId: string, circleIds: string[], exc
 
   return Array.from(recipientIds)
 }
+
+// Every member of a baby (viewer + admin), for content that isn't
+// circle-scoped at all — e.g. guess_questions, which any member can see
+// once approved.
+export async function getAllBabyMemberIds(babyId: string, excludeUserId?: string): Promise<string[]> {
+  const supabase = await createClient()
+
+  const { data: access } = await supabase
+    .from('baby_access')
+    .select('user_id')
+    .eq('baby_id', babyId)
+
+  return (access ?? [])
+    .map((row) => row.user_id)
+    .filter((userId) => userId !== excludeUserId)
+}
+
+// Every admin of a baby — e.g. to notify about a new member joining.
+export async function getBabyAdminIds(babyId: string, excludeUserId?: string): Promise<string[]> {
+  const supabase = await createClient()
+
+  const { data: access } = await supabase
+    .from('baby_access')
+    .select('user_id')
+    .eq('baby_id', babyId)
+    .eq('access_level', 'admin')
+
+  return (access ?? [])
+    .map((row) => row.user_id)
+    .filter((userId) => userId !== excludeUserId)
+}

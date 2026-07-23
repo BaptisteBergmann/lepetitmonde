@@ -5,6 +5,8 @@ import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
+import { getVisibleUserIds } from './access'
+import { notifyUsers } from './notify'
 import { logger } from '../logger'
 
 export async function addComment(postId: string, babyId: string, body: string) {
@@ -25,6 +27,14 @@ export async function addComment(postId: string, babyId: string, body: string) {
   contextLogger.info("Comment added")
 
   revalidatePath(`/baby/${babyId}/feed`)
+
+  const { data: postCircles } = await supabase.from('posts_circles').select('circle_id').eq('post_id', postId)
+  const recipients = await getVisibleUserIds(babyId, (postCircles ?? []).map((row) => row.circle_id), user.id)
+  await notifyUsers(babyId, 'new_comment', {
+    title: 'Nouveau commentaire',
+    body,
+    url: `/baby/${babyId}/feed`,
+  }, recipients)
 }
 
 export async function updateComment(commentId: string, postId: string, babyId: string, body: string) {

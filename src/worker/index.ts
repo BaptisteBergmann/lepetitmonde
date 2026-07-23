@@ -6,6 +6,7 @@ self.addEventListener('push', function (event) {
       body: data.body || "Il y a du nouveau !",
       icon: '/web-app-manifest-192x192.png',
       badge: '/web-app-manifest-192x192.png',
+      tag: data.tag,
       data: { url: data.url || '/' }
     })
   );
