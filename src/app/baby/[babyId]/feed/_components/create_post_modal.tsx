@@ -13,11 +13,12 @@ import {
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
 import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
 import { createPost, attachPostPhotos } from '@utils/actions/posts'
+import { createPoll } from '@utils/actions/polls'
 import { captureVideoThumbnail } from '@utils/video-thumbnail'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Loader2, ImagePlus, X } from 'lucide-react'
+import { Loader2, ImagePlus, X, BarChart3, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 
 type Circle = Tables<'circles'>
@@ -39,6 +40,13 @@ export default function CreatePostModal({
   const [circleIds, setCircleIds] = useState<string[]>([])
   const [isPending, setIsPending] = useState(false)
 
+  const [pollEnabled, setPollEnabled] = useState(false)
+  const [pollQuestion, setPollQuestion] = useState("")
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""])
+
+  const validPollOptionsCount = pollOptions.filter((option) => option.trim()).length
+  const pollValid = !pollEnabled || (pollQuestion.trim().length > 0 && validPollOptionsCount >= 2)
+
   const upload = useSupabaseUpload({
     bucketName: babyId,
     path: `posts/${postId}`,
@@ -56,6 +64,10 @@ export default function CreatePostModal({
     setIsPending(true)
     try {
       await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds)
+
+      if (pollEnabled && pollValid) {
+        await createPoll(postId, babyId, pollQuestion, pollOptions)
+      }
 
       if (upload.files.length > 0) {
         const newlyUploaded = await upload.onUpload()
@@ -101,6 +113,18 @@ export default function CreatePostModal({
   }
 
   const hasFileErrors = upload.files.some((file) => file.errors.length !== 0)
+
+  const updatePollOption = (index: number, value: string) => {
+    setPollOptions((options) => options.map((option, i) => (i === index ? value : option)))
+  }
+
+  const addPollOption = () => {
+    setPollOptions((options) => (options.length < 6 ? [...options, ""] : options))
+  }
+
+  const removePollOption = (index: number) => {
+    setPollOptions((options) => (options.length > 2 ? options.filter((_, i) => i !== index) : options))
+  }
 
   return (
     <div
@@ -190,6 +214,59 @@ export default function CreatePostModal({
             </p>
           </div>
 
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => setPollEnabled((enabled) => !enabled)}
+              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+            >
+              <BarChart3 className="h-3.5 w-3.5" />
+              {pollEnabled ? "Retirer le sondage" : "Ajouter un sondage"}
+            </button>
+
+            {pollEnabled && (
+              <div className="flex flex-col gap-2 rounded-2xl border border-landing-border p-3">
+                <input
+                  type="text"
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  placeholder="Qui a mangé le plus de pommes ?"
+                  className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
+                />
+                <div className="flex flex-col gap-1.5">
+                  {pollOptions.map((option, index) => (
+                    <div key={index} className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={option}
+                        onChange={(e) => updatePollOption(index, e.target.value)}
+                        placeholder={`Option ${index + 1}`}
+                        className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePollOption(index)}
+                        disabled={pollOptions.length <= 2}
+                        className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addPollOption}
+                  disabled={pollOptions.length >= 6}
+                  className="flex items-center gap-1 self-start text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Ajouter une option
+                </button>
+              </div>
+            )}
+          </div>
+
         </div>
 
         <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
@@ -201,7 +278,7 @@ export default function CreatePostModal({
             Annuler
           </Button>
           <Button
-            disabled={!takenAt || hasFileErrors || isPending}
+            disabled={!takenAt || hasFileErrors || !pollValid || isPending}
             className="rounded-2xl cursor-pointer"
             onClick={handleConfirm}
           >

@@ -1,4 +1,3 @@
-Connecting to 192.168.2.177 54321
 export type Json =
   | string
   | number

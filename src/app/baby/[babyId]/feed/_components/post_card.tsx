@@ -15,6 +15,7 @@ import CommentInput from './comment_input'
 import PhotoLightbox from './photo_lightbox'
 import EditPostModal from './edit_post_modal'
 import ReactionPicker from './reaction_picker'
+import PollVoter from './poll_voter'
 
 export type Comment = Awaited<ReturnType<typeof getComments>>[number]
 
@@ -172,6 +173,8 @@ export default function PostCard({
         )}
 
         <ReactionPicker postId={post.id} babyId={babyId} />
+
+        <PollVoter postId={post.id} babyId={babyId} />
 
         <div className="border-t border-landing-border pt-3 space-y-3">
           <CommentList

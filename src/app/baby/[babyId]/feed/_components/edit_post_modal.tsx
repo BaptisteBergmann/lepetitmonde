@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Select,
@@ -11,10 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { updatePost, PostWithDetails } from '@utils/actions/posts'
+import { createPoll, updatePoll, deletePoll, getPollWithResults } from '@utils/actions/polls'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Loader2, Pencil, X } from 'lucide-react'
+import { Loader2, Pencil, X, BarChart3, Plus } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 
 type Circle = Tables<'circles'>
@@ -37,6 +38,26 @@ export default function EditPostModal({
   const [circleIds, setCircleIds] = useState<string[]>(post.circle_ids)
   const [isPending, setIsPending] = useState(false)
 
+  const [existingPollId, setExistingPollId] = useState<string | null>(null)
+  const [pollHasVotes, setPollHasVotes] = useState(false)
+  const [pollEnabled, setPollEnabled] = useState(false)
+  const [pollQuestion, setPollQuestion] = useState("")
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""])
+
+  useEffect(() => {
+    getPollWithResults(post.id).then((poll) => {
+      if (!poll) return
+      setExistingPollId(poll.id)
+      setPollHasVotes(poll.totalVotes > 0)
+      setPollEnabled(true)
+      setPollQuestion(poll.question)
+      setPollOptions(poll.options.map((option) => option.label))
+    })
+  }, [post.id])
+
+  const validPollOptionsCount = pollOptions.filter((option) => option.trim()).length
+  const pollValid = !pollEnabled || (pollQuestion.trim().length > 0 && validPollOptionsCount >= 2)
+
   const circleItems = useMemo(
     () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
     [circles]
@@ -46,6 +67,17 @@ export default function EditPostModal({
     setIsPending(true)
     try {
       await updatePost(post.id, babyId, { taken_at: takenAt, caption: caption || null }, circleIds)
+
+      if (pollEnabled && pollValid) {
+        if (existingPollId) {
+          if (!pollHasVotes) await updatePoll(existingPollId, post.id, babyId, pollQuestion, pollOptions)
+        } else {
+          await createPoll(post.id, babyId, pollQuestion, pollOptions)
+        }
+      } else if (existingPollId && !pollHasVotes) {
+        await deletePoll(existingPollId, post.id, babyId)
+      }
+
       onClose()
       router.refresh()
     } catch (err) {
@@ -54,6 +86,18 @@ export default function EditPostModal({
     } finally {
       setIsPending(false)
     }
+  }
+
+  const updatePollOption = (index: number, value: string) => {
+    setPollOptions((options) => options.map((option, i) => (i === index ? value : option)))
+  }
+
+  const addPollOption = () => {
+    setPollOptions((options) => (options.length < 6 ? [...options, ""] : options))
+  }
+
+  const removePollOption = (index: number) => {
+    setPollOptions((options) => (options.length > 2 ? options.filter((_, i) => i !== index) : options))
   }
 
   return (
@@ -134,6 +178,68 @@ export default function EditPostModal({
             </p>
           </div>
 
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => setPollEnabled((enabled) => !enabled)}
+              disabled={pollHasVotes}
+              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <BarChart3 className="h-3.5 w-3.5" />
+              {pollEnabled ? "Retirer le sondage" : "Ajouter un sondage"}
+            </button>
+
+            {pollHasVotes && (
+              <p className="text-xs text-muted-foreground">
+                Ce sondage a déjà des votes, il ne peut plus être modifié.
+              </p>
+            )}
+
+            {pollEnabled && (
+              <div className="flex flex-col gap-2 rounded-2xl border border-landing-border p-3">
+                <input
+                  type="text"
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  disabled={pollHasVotes}
+                  placeholder="Qui a mangé le plus de pommes ?"
+                  className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
+                />
+                <div className="flex flex-col gap-1.5">
+                  {pollOptions.map((option, index) => (
+                    <div key={index} className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={option}
+                        onChange={(e) => updatePollOption(index, e.target.value)}
+                        disabled={pollHasVotes}
+                        placeholder={`Option ${index + 1}`}
+                        className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePollOption(index)}
+                        disabled={pollHasVotes || pollOptions.length <= 2}
+                        className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addPollOption}
+                  disabled={pollHasVotes || pollOptions.length >= 6}
+                  className="flex items-center gap-1 self-start text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Ajouter une option
+                </button>
+              </div>
+            )}
+          </div>
+
         </div>
 
         <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
@@ -145,7 +251,7 @@ export default function EditPostModal({
             Annuler
           </Button>
           <Button
-            disabled={!takenAt || isPending}
+            disabled={!takenAt || !pollValid || isPending}
             className="rounded-2xl cursor-pointer"
             onClick={handleConfirm}
           >
