@@ -1,15 +1,9 @@
 'use server'
 
-import webpush from 'web-push'
+import webpush, { ensureVapidConfigured } from '@utils/webpush'
 import { createClient } from '@utils/supabase/server'
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
-
-webpush.setVapidDetails(
-  'mailto:bergmann.baptiste@gmail.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
 
 function currentTimeInParis() {
   return new Intl.DateTimeFormat('fr-FR', {
@@ -91,6 +85,7 @@ export async function notifyUsers(
 
     if (!devices || devices.length === 0) return
 
+    ensureVapidConfigured()
     const payload = JSON.stringify({ title: content.title, body: content.body, url: content.url, tag: type })
 
     await Promise.all(devices.map(async (device) => {

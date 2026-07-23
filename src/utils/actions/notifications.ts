@@ -1,14 +1,8 @@
 "use server";
-import webpush from 'web-push';
+import webpush, { ensureVapidConfigured } from '@utils/webpush';
 import { createClient } from '@utils/supabase/server';
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
-
-webpush.setVapidDetails(
-  'mailto:bergmann.baptiste@gmail.com', // Your admin email
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
 
 export async function subscribeUser(sub: PushSubscription, deviceLabel?: string) {
   const supabase = await createClient()
@@ -299,6 +293,7 @@ export async function sendNotification(message: string, targetUserId?: string) {
     icon: '/favicon-96x96.png',
   })
 
+  ensureVapidConfigured()
   const results = await Promise.allSettled(
     devices.map((device) => webpush.sendNotification(device.subscription as webpush.PushSubscription, payload))
   )
