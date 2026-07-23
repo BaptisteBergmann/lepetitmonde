@@ -27,7 +27,7 @@
             <tr>
               <td style="padding:16px 32px; text-align:center;">
                 <a
-                  href="{{ .ConfirmationURL }}"
+                  href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password"
                   style="display:inline-block; background-color:#1c1917; color:#ffffff; text-decoration:none; font-size:15px; font-weight:600; padding:12px 28px; border-radius:8px;"
                 >
                   Réinitialiser mon mot de passe
