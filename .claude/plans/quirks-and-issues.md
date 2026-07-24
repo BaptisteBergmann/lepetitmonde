@@ -4,7 +4,7 @@
 
 A full read-through of the codebase (`docs/PROJECT_OVERVIEW.md` covers the resulting architecture) turned up a number of dead-code paths, half-finished features, and small correctness bugs — none of them exploitable security holes (those are tracked separately in `.claude/plans/security-review.md`), but worth working through since several silently produce wrong behavior. Grouped by area, roughly in priority order within each group. Each item lists the evidence so it can be re-verified before fixing.
 
-## Status: items 0, 2, 3, 4, 5, 6 fixed; rest outstanding
+## Status: items 0, 1, 2, 3, 4, 5, 6 fixed (item 1 needs a live confirm — see note); rest outstanding
 
 ---
 
@@ -16,9 +16,14 @@ Discovered while testing the fix for item 5 below: unauthenticated requests to a
 **Impact**: not an auth bypass — every Server Component/Action still does its own `getUser()`/`getAuthUser()` check (confirmed via warn-logs like `"No authenticated user on settings page"`) — but the "bounce a logged-out user to `/login`" UX flow has silently never fired, on any deployment of this app to date. Logged-out users hitting a protected page got a broken/empty page shell instead of a redirect.
 **Fix**: moved `proxy.ts` → `src/proxy.ts` (no content change beyond the item-6 fix below). Verified end-to-end against a real production standalone build.
 
-### 1. Realtime relay subscribes to a `users` filter on a column that doesn't exist
-`src/utils/supabase/realtime-relay.ts` opens a `postgres_changes` binding on `users` with `filter: baby_id=eq.${babyId}` — but `users` has no `baby_id` column (only `circles` and `circles_access` do; confirmed against `database.types.ts` and the baseline migration). Supabase Realtime silently drops/never-matches filters against nonexistent columns, so **new-member and profile-update events likely never reach `RealtimeUsersList`** on the admin page — members would need a manual page refresh to see a new signup appear, contradicting the apparent intent of wiring it into the realtime relay at all.
-**Fix direction**: either drop the `baby_id` filter on the `users` binding and filter client-side by cross-referencing `circles_access`/`baby_access`, or bind on `baby_access` instead (which does have `baby_id` and is the table that actually changes when someone joins).
+### 1. [Fixed, needs a live confirm] Realtime relay subscribed to a `users` filter on a column that doesn't exist
+`src/utils/supabase/realtime-relay.ts` opened a `postgres_changes` binding on `users` with `filter: baby_id=eq.${babyId}` — but `users` has no `baby_id` column (only `circles` and `circles_access` do; confirmed against `database.types.ts` and the baseline migration). Supabase Realtime silently drops/never-matches filters against nonexistent columns, so new-member and profile-update events never reached `RealtimeUsersList` on the admin page.
+**Fix**: split into two bindings — `baby_access` filtered by the (real) `baby_id` column for membership changes (join/leave/access-level edits), which triggers `router.refresh()` in `RealtimeUsersList` since the payload doesn't carry the joined user profile; and an unfiltered `users` `UPDATE` binding for profile edits (name/nickname), applied client-side only if the user is already a known member of the list.
+**Not verified live**: couldn't confirm from this environment whether `baby_access` is actually in the self-hosted instance's `supabase_realtime` publication (only the Kong gateway port was reachable, not Postgres directly). `docker/dev/data.sql`'s local dev seed only adds a leftover `profiles` table to the publication, not any of this app's real tables, so production's publication membership may have been configured manually and could differ. If events still don't show up after this fix, check with:
+```sql
+select tablename from pg_publication_tables where pubname = 'supabase_realtime';
+```
+and `alter publication supabase_realtime add table baby_access, users;` if missing.
 
 ### 2. [Fixed] `getBaby()`'s `isAdmin` field is always `false`
 `src/utils/actions/baby.ts` returned `{ ...baby, isAdmin: baby.owner_id === user.id }`, but `babies` has no `owner_id` column (only `id`, `created_at`, `baby_surname`). Confirmed dead code via grep (zero consumers read `.isAdmin` off a `getBaby()` result), so no live authorization gap existed.
