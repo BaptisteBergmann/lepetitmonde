@@ -49,6 +49,20 @@ Schema changes are tracked as SQL files in `supabase/migrations/` using the Supa
 
 The first migration (`..._baseline.sql`) is a schema-only dump of the database as it existed before this workflow was introduced, and was marked as already-applied via `supabase migration repair` rather than executed — so it never touched existing tables or data.
 
+## 🔌 Supabase Backend (Self-Hosted)
+
+Supabase itself (Postgres, Auth, Storage, Realtime, Kong) isn't vendored in this repo — it runs from the official [self-hosting Docker bundle](https://github.com/supabase/supabase/tree/master/docker), separately from the Next.js app.
+
+To set it up:
+
+```bash
+git clone --depth 1 https://github.com/supabase/supabase.git
+cp -r supabase/docker docker
+cd docker && cp .env.example .env
+```
+
+Fill in `docker/.env` (`POSTGRES_PASSWORD`, `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, etc. — see [Supabase's self-hosting guide](https://supabase.com/docs/guides/self-hosting/docker)) so they match the values the app is configured with (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY` in `mise.toml`), then `docker compose up -d` from `docker/`. This repo's `docker/` is gitignored — the app only stores the values it connects with, never the backend stack itself.
+
 ## 🐳 Docker Build & Deploy
 
 The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private self-hosted registry, then run via a Portainer stack.
