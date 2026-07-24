@@ -7,6 +7,7 @@ import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { getBabyAdminIds } from './access'
 import { notifyUsers } from './notify'
+import { getDisplayName } from '@utils/users'
 import { logger } from '../logger'
 
 export async function addComment(postId: string, babyId: string, body: string) {
@@ -29,9 +30,11 @@ export async function addComment(postId: string, babyId: string, body: string) {
   revalidatePath(`/baby/${babyId}/feed`)
 
   const recipients = await getBabyAdminIds(babyId, user.id)
+  const { data: commenter } = await supabase.from('users').select('first_name, last_name, nickname').eq('id', user.id).single()
+  const name = getDisplayName(commenter) || 'Quelqu\'un'
   await notifyUsers(babyId, 'new_comment', {
     title: 'Nouveau commentaire',
-    body,
+    body: `${name} : ${body}`,
     url: `/baby/${babyId}/feed`,
   }, recipients)
 }
