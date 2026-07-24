@@ -31,6 +31,10 @@ export async function signup(formData: FormData) {
     return redirect('/signup?message=Lien d\'invitation invalide ou expiré')
   }
 
+  if (new Date(invitation.data.expires_at) < new Date()) {
+    return redirect('/signup?message=Lien d\'invitation invalide ou expiré')
+  }
+
   // On tente de créer le compte via Supabase
   const { data: user, error } = await supabase.auth.signUp({
     email,
