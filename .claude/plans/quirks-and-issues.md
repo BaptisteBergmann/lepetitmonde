@@ -4,7 +4,7 @@
 
 A full read-through of the codebase (`docs/PROJECT_OVERVIEW.md` covers the resulting architecture) turned up a number of dead-code paths, half-finished features, and small correctness bugs — none of them exploitable security holes (those are tracked separately in `.claude/plans/security-review.md`), but worth working through since several silently produce wrong behavior. Grouped by area, roughly in priority order within each group. Each item lists the evidence so it can be re-verified before fixing.
 
-## Status: items 0, 2, 3, 5, 6 fixed; rest outstanding
+## Status: items 0, 2, 3, 4, 5, 6 fixed; rest outstanding
 
 ---
 
@@ -28,9 +28,9 @@ Discovered while testing the fix for item 5 below: unauthenticated requests to a
 `src/utils/actions/signup.ts` fetches the `invitations` row by `id = token` and only checks that it exists — `expires_at` is never compared against `now()`. Only the admin-facing `InvitationsList` UI treats an old link as "Expiré" (cosmetic only). An expired invite link can still be redeemed to create an account indefinitely.
 **Fix direction**: add `.gt('expires_at', new Date().toISOString())` to the lookup in `signup()`, matching the same message shown for a missing/invalid token.
 
-### 4. "Inviter par e-mail" doesn't send an email
-`sendInvite` (`src/utils/actions/invite.ts`) inserts an `invitations` row exactly like `generateShortLivedLink` but never calls anything from `src/utils/email.ts` (which only exports `sendWelcomeEmail`, sent post-signup, not pre-signup). The admin UI copy implies an email goes out; today it just creates a redeemable link with no delivery mechanism and no way for the admin to retrieve/share it afterward (unlike `generateShortLivedLink`, which returns the URL for copying).
-**Fix direction**: either wire an actual "you're invited" email (new Resend template) or rename the UI/action to match what it does (e.g. fold it into the copy-link flow and drop the separate "by email" entry point).
+### 4. [Fixed] "Inviter par e-mail" doesn't send an email
+`sendInvite` (`src/utils/actions/invite.ts`) inserted an `invitations` row exactly like `generateShortLivedLink` but never called anything from `src/utils/email.ts` (which only exported `sendWelcomeEmail`, sent post-signup, not pre-signup) — and never even read the `email` field the form already collected. The admin UI copy implied an email goes out; it just silently created a redeemable link nobody received.
+**Fix**: added `sendInviteEmail` to `email.ts` (same `Resend` + `readFile`/`replaceAll` template pattern as `sendWelcomeEmail`) and a new `public/emails/invite-member.html` template styled like `welcome.html`. `sendInvite` now reads `email` from the form, builds the same `/signup?token=<id>` link `generateShortLivedLink` produces, and emails it with the baby's name for context.
 
 ### 5. [Fixed] `redirectTo` query param is set but never consumed
 `src/utils/supabase/middleware.ts` redirects unauthenticated users to `/login?redirectTo=<path>`, but `src/utils/actions/login.ts`'s `login()` action ignored form/query state entirely and always `redirect('/')` on success. A user who got bounced from a deep link (e.g. a notification pointing at a specific post) landed on the baby picker instead of back where they were headed.
