@@ -7,13 +7,14 @@ import { fr } from 'date-fns/locale'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { getComments } from '@utils/actions/comments'
-import { Trash2, Pencil, Loader2, Play } from 'lucide-react'
+import { Trash2, Pencil, Loader2, Play, BarChart3 } from 'lucide-react'
 import { cn } from '@utils/utils'
 import { Badge } from '@components/ui/badge'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
 import PhotoLightbox from './photo_lightbox'
 import EditPostModal from './edit_post_modal'
+import PostStatsModal from './post_stats_modal'
 import ReactionPicker from './reaction_picker'
 import PollVoter from './poll_voter'
 import PostViews from './post_views'
@@ -38,6 +39,7 @@ export default function PostCard({
   const router = useRouter()
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
@@ -130,6 +132,14 @@ export default function PostCard({
         />
       )}
 
+      {statsOpen && (
+        <PostStatsModal
+          post={post}
+          circles={circles}
+          onClose={() => setStatsOpen(false)}
+        />
+      )}
+
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -152,6 +162,12 @@ export default function PostCard({
           </div>
           {isAdmin && (
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setStatsOpen(true)}
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+              >
+                <BarChart3 className="h-3.5 w-3.5" />
+              </button>
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
