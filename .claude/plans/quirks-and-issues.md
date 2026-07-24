@@ -82,5 +82,12 @@ No test framework is configured anywhere in `package.json`/the app (only unrelat
 
 ---
 
+## Feature ideas
+
+### 16. Prioritize loading images closest to the viewport
+Feed (`post_card.tsx:102-110`) and calendar day cells (`calendar_view.tsx:183`) both render photos as plain `<img loading="lazy" decoding="async">` — no Next.js `<Image>` (images are served through the app's own storage-proxy route, not the Next image optimizer). Native `loading="lazy"` already defers offscreen images, but gives no control over *ordering* among the images the browser decides are near-viewport — on a long scroll, images just about to enter view compete evenly with ones further down. Idea: give the browser an explicit priority hint (e.g. `fetchpriority="high"` on the first row of photos, or an `IntersectionObserver`-driven approach that bumps priority as an image approaches the viewport) so the images the user is about to see win the fetch queue over ones several screens away. Would touch `post_card.tsx` and `calendar_view.tsx`; no backend change needed.
+
+---
+
 ## Suggested order of attack
 Items 3 and 6 are the cheapest fixes with the clearest user-facing benefit (real auth-adjacent correctness). Item 1 (realtime `users` filter) is worth confirming with a manual test (add a member, watch the admin page without refreshing) before spending time on a fix. Items 7–10 are product decisions as much as engineering ones — worth a quick conversation about whether to build or prune them before touching code.
