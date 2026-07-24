@@ -5,6 +5,7 @@ import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
 import { logger } from '../logger'
 import { ensureBugReportsBucket } from './storage'
+import { assertIsAdmin } from './access'
 
 export async function submitBugReport(formData: FormData) {
   const contextLogger = logger.child({ function: submitBugReport.name })
@@ -51,4 +52,25 @@ export async function submitBugReport(formData: FormData) {
   }
 
   contextLogger.info({ userId: user.id, hasScreenshot: Boolean(screenshotPath) }, "Bug report submitted")
+}
+
+// Bug reports aren't tied to a baby, but every admin page is reached through
+// a baby route, so we piggyback on that baby's admin check as the gate.
+export async function getBugReports(babyId: string) {
+  const contextLogger = logger.child({ function: getBugReports.name, babyId })
+
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const { data, error } = await supabase
+    .from('bug_reports')
+    .select(`*, users (first_name, last_name, nickname)`)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    contextLogger.error(error, "Error fetching bug reports")
+    throw error
+  }
+
+  return data
 }

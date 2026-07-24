@@ -7,8 +7,10 @@ import RealtimeUsersList from "./_components/display_users";
 import InvitationsList from "./_components/display_invitations";
 import { getUsers, getUserAccess } from "@/utils/actions/users";
 import { getMembersDevices } from "@/utils/actions/notifications";
+import { getBugReports } from "@/utils/actions/bug_reports";
+import DisplayBugReports from "./_components/display_bug_reports";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Mail, ShieldCheck } from "lucide-react";
+import { Users, UserPlus, Mail, ShieldCheck, Bug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Reveal } from "@components/reveal";
@@ -23,6 +25,7 @@ export default async function InviteForm({
   const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
   const users = await getUsers(babyId);
   const devicesByUser = isAdmin ? await getMembersDevices(babyId) : {};
+  const bugReports = isAdmin ? await getBugReports(babyId) : [];
 
   return (
     <div className="bg-landing-background text-landing-foreground">
@@ -144,6 +147,24 @@ export default async function InviteForm({
                 </CardHeader>
                 <CardContent className="px-0 pb-2">
                   <InvitationsList invitations={await getInvitations(babyId)} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Bug Reports List Card (admin only) */}
+            {isAdmin && (
+              <Card className="border-landing-border bg-landing-surface">
+                <CardHeader className="pb-3">
+                  <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
+                    <Bug className="h-4.5 w-4.5 text-primary" />
+                    Signalements de bugs
+                  </CardTitle>
+                  <CardDescription className="text-xs text-landing-muted">
+                    Problèmes remontés par les membres du journal.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-0 pb-2">
+                  <DisplayBugReports bugReports={bugReports} />
                 </CardContent>
               </Card>
             )}
