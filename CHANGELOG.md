@@ -4,7 +4,10 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `e581f93` Update CHANGELOG.md for 4aac6e1 and 888680c
 - `888680c` Add project overview documentation
+- `08c76e8` Update CHANGELOG.md for 882ff1a
+- `ebf8ecf` Update CHANGELOG.md for aec8faa
 - `4aac6e1` Mark fixed findings in the security review and quirks plans
 - `882ff1a` Reject expired invitation links at signup
 - `aec8faa` Require baby membership before commenting, reacting, viewing, or voting
