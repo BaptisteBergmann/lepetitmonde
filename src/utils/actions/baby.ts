@@ -38,6 +38,6 @@ export const getBaby = cache(async (babyId: string) => {
     return []
   }
 
-  return { ...baby, isAdmin: baby.owner_id === user.id }
+  return baby
 })
 
