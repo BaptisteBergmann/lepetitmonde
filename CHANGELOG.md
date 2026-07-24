@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `aec8faa` Require baby membership before commenting, reacting, viewing, or voting
 - `c566e4d` Require a CHANGELOG.md update after every commit
 - `f31cb88` Include the commenter's name in new comment notifications
 - `c300be0` Notify only admins on new comments, not all circle members
