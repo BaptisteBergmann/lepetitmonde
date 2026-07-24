@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `888680c` Add project overview documentation
+- `4aac6e1` Mark fixed findings in the security review and quirks plans
 - `882ff1a` Reject expired invitation links at signup
 - `aec8faa` Require baby membership before commenting, reacting, viewing, or voting
 - `c566e4d` Require a CHANGELOG.md update after every commit
