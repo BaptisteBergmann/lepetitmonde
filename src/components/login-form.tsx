@@ -15,10 +15,12 @@ import { login } from "@utils/actions/login"
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
   message?: string
+  redirectTo?: string
 }
 
 export function LoginForm({
   message,
+  redirectTo,
   className,
   ...props
 }: LoginFormProps) {
@@ -27,6 +29,9 @@ export function LoginForm({
       <Card className="overflow-hidden border-landing-border bg-landing-surface p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form action={login} className="p-6 md:p-8">
+            {redirectTo && (
+              <input type="hidden" name="redirectTo" value={redirectTo} />
+            )}
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="font-display text-2xl font-semibold">Bon retour</h1>
