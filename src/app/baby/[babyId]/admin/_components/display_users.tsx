@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ export default function RealtimeUsersList({
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [sendingUserId, setSendingUserId] = useState<string | null>(null);
+  const router = useRouter();
 
   const contextLogger = logger.child({
     module: 'RealtimeUsersList',
@@ -57,17 +59,17 @@ export default function RealtimeUsersList({
   }, [initialUsers]);
 
   useBabyRealtime(babyId, (event) => {
-    if (event.table !== "users") return;
-    if (event.eventType === "INSERT") {
-      const newUser = event.new as User;
-      setUsers((prev) => [...prev, newUser]);
-    } else if (event.eventType === "DELETE") {
-      const oldUser = event.old as User;
-      setUsers((prev) => prev.filter((q) => q.id !== oldUser.id));
-    } else if (event.eventType === "UPDATE") {
-      const updatedUser = event.new as User;
+    if (event.table === "baby_access") {
+      // Membership just changed (joined/left/access level updated) — the payload only
+      // carries the baby_access row, not the joined user profile, so refetch from the
+      // server rather than trying to reconstruct it client-side.
+      router.refresh();
+    } else if (event.table === "users") {
+      // Profile edit (name/nickname). Not baby-scoped at the DB level, so only apply it
+      // if this person is already a member shown in this list.
+      const updatedUser = event.new as Tables<'users'>;
       setUsers((prev) =>
-        prev.map((q) => (q.id === updatedUser.id ? updatedUser : q))
+        prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u))
       );
     }
   });

@@ -2,7 +2,7 @@ import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
 type RealtimeEvent = {
-  table: 'users' | 'circles' | 'circles_access'
+  table: 'users' | 'baby_access' | 'circles' | 'circles_access'
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: unknown
   old: unknown
@@ -29,11 +29,25 @@ function openChannel(babyId: string): Entry {
   const channel = supabase
     .channel(`realtime-relay-${babyId}`)
     .on(
+      // `users` has no baby_id column — membership changes (join/leave/access level)
+      // live on `baby_access`, which does. Profile edits (name/nickname) are handled
+      // by the unfiltered `users` UPDATE binding below.
       'postgres_changes',
-      { event: '*', schema: 'public', table: 'users', filter: `baby_id=eq.${babyId}` },
+      { event: '*', schema: 'public', table: 'baby_access', filter: `baby_id=eq.${babyId}` },
       (payload) => {
         for (const listener of listeners) {
-          listener({ table: 'users', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+          listener({ table: 'baby_access', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+        }
+      }
+    )
+    .on(
+      // Can't filter by baby_id (no such column on `users`), so this fans out to every
+      // baby's channel; consumers ignore updates for users they don't already know about.
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'users' },
+      (payload) => {
+        for (const listener of listeners) {
+          listener({ table: 'users', eventType: 'UPDATE', new: payload.new, old: payload.old })
         }
       }
     )
