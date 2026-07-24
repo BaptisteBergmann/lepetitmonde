@@ -126,6 +126,73 @@ export async function updateUserAccessLevel(babyId: string, userId: string, acce
   revalidatePath(`/baby/${babyId}/admin`)
 }
 
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: updateProfile.name })
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const firstName = (formData.get('firstName') as string || '').trim()
+  const lastName = (formData.get('lastName') as string || '').trim()
+
+  const { error: profileError } = await supabase
+    .from('users')
+    .update({ first_name: firstName || null, last_name: lastName || null })
+    .eq('id', user.id)
+
+  if (profileError) { contextLogger.error(profileError, "Error updating profile"); throw profileError }
+
+  // Keeps user_metadata.full_name (used as a display-name fallback) in sync;
+  // best-effort since the profile update above already succeeded.
+  const fullName = [firstName, lastName].filter(Boolean).join(' ')
+  const { error: authError } = await supabase.auth.updateUser({ data: { full_name: fullName } })
+  if (authError) contextLogger.error(authError, "Error syncing full_name to auth metadata")
+
+  contextLogger.info("Profile updated")
+
+  revalidatePath('/settings')
+}
+
+export async function requestEmailChange(formData: FormData) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: requestEmailChange.name })
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const email = (formData.get('email') as string || '').trim()
+  if (!email) throw new Error("Adresse email requise")
+
+  const { error } = await supabase.auth.updateUser({ email })
+  if (error) { contextLogger.error(error, "Error requesting email change"); throw error }
+
+  contextLogger.info("Email change requested")
+}
+
+export async function updateBabyAccessSettings(babyId: string, formData: FormData) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: updateBabyAccessSettings.name, babyId })
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const nickname = (formData.get('nickname') as string || '').trim()
+  const relationToBaby = (formData.get('relationToBaby') as string || '').trim()
+
+  const { error } = await supabase
+    .from('baby_access')
+    .update({ nickname: nickname || null, relation_to_baby: relationToBaby })
+    .eq('baby_id', babyId)
+    .eq('user_id', user.id)
+
+  if (error) { contextLogger.error(error, "Error updating baby access settings"); throw error }
+
+  contextLogger.info({ nickname, relationToBaby }, "Baby access settings updated")
+
+  revalidatePath('/settings')
+}
+
 export async function getUser(babyId: string) {
   const supabase = await createClient();
   const contextLogger = logger.child({ function: getUser.name, babyId })

@@ -14,6 +14,7 @@ import { usePushSubscription } from '@utils/hooks/use-push-subscription'
 import { Tables, Enums } from '@utils/supabase/database.types'
 import { getBabiesList } from '@utils/actions/baby'
 import { getUserAccess } from '@utils/actions/users'
+import { NOTIFICATION_LABELS, ADMIN_ONLY_TYPES, ALL_NOTIFICATION_TYPES as ALL_TYPES } from '@utils/notification-types'
 import {
   getMyNotifications,
   getUnreadNotificationCount,
@@ -27,17 +28,6 @@ import {
   setQuietHours,
 } from '@utils/actions/notifications'
 
-const NOTIFICATION_LABELS: Record<Enums<'notification_type'>, string> = {
-  new_post: 'Nouvelles publications',
-  new_comment: 'Nouveaux commentaires',
-  new_pronostic: 'Nouveaux pronostics',
-  new_member: 'Nouveaux membres',
-  new_reaction: 'Réactions sur vos publications',
-  new_milestone: 'Nouvelles étapes du calendrier',
-  circle_access_granted: 'Accès à un groupe',
-}
-const ADMIN_ONLY_TYPES: Enums<'notification_type'>[] = ['new_member']
-const ALL_TYPES = Object.keys(NOTIFICATION_LABELS) as Enums<'notification_type'>[]
 const ENABLE_PROMPT_DISMISSED_KEY = 'notif-enable-prompt-dismissed'
 
 type Device = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
