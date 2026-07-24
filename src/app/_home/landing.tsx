@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, CalendarDays, Dices, Users, ShieldCheck, ArrowRight, Heart } from "lucide-react";
+import { BookOpen, CalendarDays, Dices, Users, ShieldCheck, ArrowRight, Heart, Baby, Camera } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@utils/utils";
 import { Reveal } from "@components/reveal";
@@ -24,11 +24,28 @@ const PAGES = [
     title: "Le jeu des pronostics",
     text: "Prénom, poids, date de naissance : papis, mamies et parrains tentent leur chance, parfois avant même le premier jour.",
   },
+];
+
+const STEPS = [
+  {
+    icon: Baby,
+    title: "Créez le journal de bébé",
+    text: "Un espace privé qui lui est propre, prêt en quelques secondes — un seul journal par enfant.",
+  },
   {
     icon: Users,
-    eyebrow: "Page — Le cercle",
-    title: "Toute la famille, à sa place",
-    text: "Invitez qui vous voulez, à votre rythme. Chaque page reste privée : jamais publique, jamais partagée ailleurs.",
+    title: "Formez des cercles",
+    text: "Grands-parents, parrains, cousins : chacun rejoint un ou plusieurs cercles, et ne voit que ce qui lui est destiné.",
+  },
+  {
+    icon: Camera,
+    title: "Publiez au fil des jours",
+    text: "Photos, vidéos, petites phrases : chaque publication arrive dans le journal, classée par date, avec réactions et commentaires.",
+  },
+  {
+    icon: CalendarDays,
+    title: "Tenez le calendrier à jour",
+    text: "Rendez-vous, poussées de croissance, premières fois : tout se retrouve au même endroit, visible par le bon cercle.",
   },
 ];
 
@@ -69,15 +86,6 @@ export default function Landing() {
                 Ouvrir le journal
                 <ArrowRight className="size-4" />
               </Link>
-              <Link
-                href="#pages"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "h-11 rounded-full border-landing-border px-6 text-base text-landing-foreground hover:bg-landing-surface"
-                )}
-              >
-                Voir un exemple
-              </Link>
             </div>
           </Reveal>
 
@@ -110,17 +118,17 @@ export default function Landing() {
       </section>
 
       {/* ---------- pages ---------- */}
-      <section id="pages" className="mx-auto max-w-[1180px] px-4 py-14 sm:px-6 sm:py-20 lg:px-12">
+      <section className="mx-auto max-w-[1180px] px-4 py-14 sm:px-6 sm:py-20 lg:px-12">
         <Reveal className="mb-10 max-w-[52ch] sm:mb-14">
           <h2 className="text-balance font-display text-[clamp(1.9rem,2vw+1.3rem,2.6rem)] leading-[1.12] font-semibold">
-            Un journal, quatre pages
+            Un journal, trois pages
           </h2>
           <p className="mt-3 text-lg text-landing-muted">
             Pas de fonctionnalités à apprendre — juste les moments qu&apos;une famille a envie de garder.
           </p>
         </Reveal>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-3">
           {PAGES.map(({ icon: Icon, eyebrow, title, text }, i) => (
             <Reveal key={title} delay={i * 90}>
               <article className="landing-page-card group relative h-full overflow-hidden rounded-[20px] border border-landing-border bg-landing-surface p-8 transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(43,53,66,0.35)] dark:hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.55)]">
@@ -131,6 +139,33 @@ export default function Landing() {
                 <h3 className="mt-1.5 font-display text-[1.35rem] font-semibold">{title}</h3>
                 <p className="mt-2.5 text-[0.98rem] leading-relaxed text-landing-muted">{text}</p>
               </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ---------- how it works ---------- */}
+      <section className="mx-auto max-w-[1180px] px-4 py-14 sm:px-6 sm:py-20 lg:px-12">
+        <Reveal className="mb-10 max-w-[52ch] sm:mb-14">
+          <h2 className="text-balance font-display text-[clamp(1.9rem,2vw+1.3rem,2.6rem)] leading-[1.12] font-semibold">
+            Comment ça marche
+          </h2>
+          <p className="mt-3 text-lg text-landing-muted">
+            Quatre étapes, et le journal tourne tout seul.
+          </p>
+        </Reveal>
+
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map(({ icon: Icon, title, text }, i) => (
+            <Reveal key={title} delay={i * 90}>
+              <div className="flex size-11 items-center justify-center rounded-xl bg-landing-surface text-primary">
+                <Icon className="size-[22px]" strokeWidth={1.8} />
+              </div>
+              <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-landing-camel uppercase">
+                Étape {i + 1}
+              </p>
+              <h3 className="mt-1.5 font-display text-[1.2rem] font-semibold">{title}</h3>
+              <p className="mt-2 text-[0.95rem] leading-relaxed text-landing-muted">{text}</p>
             </Reveal>
           ))}
         </div>
