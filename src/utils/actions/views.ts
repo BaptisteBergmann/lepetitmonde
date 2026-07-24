@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { getDisplayName } from '@utils/users'
+import { getUserAccess } from './users'
 import { logger } from '../logger'
 
 export type PostViewsData = {
@@ -16,6 +17,9 @@ export async function markPostViewed(postId: string, babyId: string) {
 
   const { data: { user } } = await getAuthUser()
   if (!user) return
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) return
 
   const { error } = await supabase
     .from('post_views')

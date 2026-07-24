@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { REACTIONS } from '@utils/reactions'
 import { getDisplayName } from '@utils/users'
 import { notifyUsers } from './notify'
+import { getUserAccess } from './users'
 import { logger } from '../logger'
 
 export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
@@ -14,6 +15,9 @@ export async function addReaction(postId: string, babyId: string, emoji: string 
 
   const { data: { user } } = await getAuthUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
 
   const { error } = await supabase
     .from('post_reactions')
@@ -43,6 +47,9 @@ export async function removeReaction(postId: string, babyId: string) {
 
   const { data: { user } } = await getAuthUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
 
   const { error } = await supabase
     .from('post_reactions')

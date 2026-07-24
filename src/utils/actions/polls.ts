@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
+import { getUserAccess } from './users'
 import { getDisplayName } from '../users'
 import { logger } from '../logger'
 
@@ -109,6 +110,9 @@ export async function votePoll(pollId: string, babyId: string, optionId: string)
 
   const { data: { user } } = await getAuthUser()
   if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
 
   const { error } = await supabase
     .from('poll_votes')

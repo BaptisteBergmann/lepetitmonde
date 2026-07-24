@@ -17,6 +17,9 @@ export async function addComment(postId: string, babyId: string, body: string) {
   const { data: { user } } = await getAuthUser()
   if (!user) throw new Error("Non autorisé")
 
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
   const circleIds = await getUserCircleIds(babyId, user.id)
 
   const { error } = await supabase
