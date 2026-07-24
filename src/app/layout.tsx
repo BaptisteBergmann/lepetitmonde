@@ -8,6 +8,8 @@ import PullToRefresh from '@/components/pull_to_refresh';
 import BugReportButton from '@/components/bug_report_button';
 import { Toaster } from '@/components/ui/sonner';
 import { getAuthUser } from '@utils/supabase/auth';
+import { getChangelog } from '@utils/changelog';
+import VersionFooter from '@/components/version_footer';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -69,6 +71,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { data: { user } } = await getAuthUser()
+  const commitSha = process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'dev'
+  const changelog = getChangelog()
 
   return (
     <html
@@ -87,7 +91,7 @@ export default async function RootLayout({
           <PullToRefresh>{children}</PullToRefresh>
         </main>
         <footer className="py-4 text-center text-xs text-muted-foreground">
-          v{process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'dev'}
+          <VersionFooter commitSha={commitSha} changelog={changelog} />
         </footer>
         <PwaRegistry />
         {user && <BugReportButton />}
