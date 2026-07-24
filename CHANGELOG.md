@@ -4,6 +4,18 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `c566e4d` Require a CHANGELOG.md update after every commit
+- `f31cb88` Include the commenter's name in new comment notifications
+- `c300be0` Notify only admins on new comments, not all circle members
+- `8b98f77` Let admins review bug reports and notify reporters when fixed
+- `429671e` Show submitted bug reports on the admin page
+- `038bf96` Truncate long name lists in reaction/view popovers
+- `3d8f25d` Add a per-post statistics modal for admins
+- `7888971` Restrict the seen-by report to admins
+- `d3f8196` Track and display per-post view counts on the journal
+- `9c51c05` Trim landing page to 3 pages and add a how-it-works section
+- `bd5f55d` Notify members when added to a circle, show pending state on journal
+- `c173286` Regenerate CHANGELOG.md after the LICENSE root-commit rebase
 - `1459d05` Add license section to README
 - `d9be73a` Move welcome-email from-address to an env var
 - `2dcf9da` Show commit changelog in a dialog from the version footer
