@@ -4,21 +4,45 @@ import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
+import { sendInviteEmail } from '@/utils/email'
 
 export async function sendInvite(formData: FormData) {
   const babyId = formData.get('babyId') as string
+  const email = formData.get('email') as string
+  const contextLogger = logger.child({ function: sendInvite.name, babyId })
 
   const supabase = await createClient()
   await assertIsAdmin(supabase, babyId)
 
+  if (!email) throw new Error("L'e-mail est requis")
+
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + 24);
 
-  const rep = await supabase
+  const { data: baby, error: babyError } = await supabase
+    .from('babies')
+    .select('baby_surname')
+    .eq('id', babyId)
+    .single()
+
+  if (babyError) {
+    contextLogger.error(babyError, "Error fetching baby for invite email")
+    throw new Error("Erreur lors de l'invitation")
+  }
+
+  const { data: invitation, error } = await supabase
     .from('invitations')
     .insert([{ baby_id: babyId, expires_at: expiresAt.toISOString() }])
+    .select('id')
+    .single()
 
-  if (rep.error) throw new Error("Erreur lors de l'invitation")
+  if (error) {
+    contextLogger.error(error, "Error creating invitation")
+    throw new Error("Erreur lors de l'invitation")
+  }
+
+  const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/signup?token=${invitation.id}`
+  await sendInviteEmail(email, baby.baby_surname, inviteUrl)
 
   revalidatePath(`/baby/${babyId}/admin`)
 }
