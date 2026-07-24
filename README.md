@@ -91,3 +91,7 @@ The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private se
    then `sudo systemctl restart docker`. Registry credentials (if auth is enabled) are added under Portainer → **Registries** → **Add registry**.
 
 For local-only testing without the registry, `docker compose build && docker compose up` (root `docker-compose.yml`) builds and runs the image directly — see `.env.docker.example` for the required vars.
+
+## 📄 License
+
+[PolyForm Noncommercial 1.0.0](LICENSE) — free to use, fork, and modify for noncommercial purposes.
