@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `ba5c04a` Fix comment author name showing legal name instead of nickname
 - `0de25ff` Add user settings: edit profile/email/password, per-baby nickname/relation/notifications
 - `98c3718` Move nickname from users to baby_access (per-baby nicknames)
 - `58e8566` Note next/image tradeoffs on the image-priority idea
