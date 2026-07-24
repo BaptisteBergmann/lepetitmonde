@@ -9,10 +9,12 @@ export default function PostViews({
   postId,
   babyId,
   excludeUserId,
+  isAdmin,
 }: {
   postId: string
   babyId: string
   excludeUserId?: string | null
+  isAdmin: boolean
 }) {
   const [views, setViews] = useState<PostViewsData | null>(null)
   const [open, setOpen] = useState(false)
@@ -21,9 +23,12 @@ export default function PostViews({
   // positive intersection ratio.
   const ref = useRef<HTMLDivElement>(null)
 
+  // The "seen by" report is admin-only, but everyone's view still gets
+  // recorded below — otherwise the report would have nothing to show.
   useEffect(() => {
+    if (!isAdmin) return
     getPostViews(postId, excludeUserId).then(setViews)
-  }, [postId, excludeUserId])
+  }, [postId, excludeUserId, isAdmin])
 
   useEffect(() => {
     const node = ref.current
@@ -33,17 +38,19 @@ export default function PostViews({
       ([entry]) => {
         if (!entry.isIntersecting) return
         observer.disconnect()
-        markPostViewed(postId, babyId).then(() => getPostViews(postId, excludeUserId).then(setViews))
+        markPostViewed(postId, babyId).then(() => {
+          if (isAdmin) getPostViews(postId, excludeUserId).then(setViews)
+        })
       },
       { threshold: 0.6 }
     )
     observer.observe(node)
     return () => observer.disconnect()
-  }, [postId, babyId, excludeUserId])
+  }, [postId, babyId, excludeUserId, isAdmin])
 
   return (
     <div ref={ref} className="inline-flex min-h-[1px] min-w-[1px] items-center">
-      {views && views.count > 0 && (
+      {isAdmin && views && views.count > 0 && (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger className="flex items-center gap-1 h-7 px-2 rounded-full bg-landing-background text-landing-muted cursor-pointer hover:bg-landing-border hover:text-landing-foreground transition-colors">
             <Eye className="h-3.5 w-3.5" />

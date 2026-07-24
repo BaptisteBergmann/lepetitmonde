@@ -175,7 +175,7 @@ export default function PostCard({
 
         <div className="flex items-center justify-between gap-2">
           <ReactionPicker postId={post.id} babyId={babyId} />
-          <PostViews postId={post.id} babyId={babyId} excludeUserId={post.created_by} />
+          <PostViews postId={post.id} babyId={babyId} excludeUserId={post.created_by} isAdmin={isAdmin} />
         </div>
 
         <PollVoter postId={post.id} babyId={babyId} />
