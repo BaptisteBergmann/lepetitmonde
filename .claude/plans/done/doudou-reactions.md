@@ -1,5 +1,12 @@
 # Réactions Doudou (custom emoji reactions)
 
+## Status: implemented
+
+Shipped in `e1764da` (5-emoji `ReactionPicker` replacing the heart button),
+with follow-up polish in `9a043f7` (per-emoji breakdown with reactor names),
+`a52b074` (nickname over first/last name), and `038bf96` (truncated name
+lists in popovers). No deviations from the plan below.
+
 Replace the single hardcoded ❤️ "like" button on posts with a picker of 5
 baby-themed emojis: 🍼 Biberon, 👶 Bébé, 😴 Dodo, 🎉 Célébration, ❤️ Cœur.
 

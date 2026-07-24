@@ -1,5 +1,11 @@
 # Polls on posts ("sondage")
 
+## Status: implemented
+
+Shipped in `2c213a3` (schema: `polls`/`poll_options`/`poll_votes`) and
+`d5ec0fe` (`polls.ts` server actions + `PollVoter` UI, mounted in
+`post_card.tsx`). No deviations from the plan below.
+
 ## Context
 
 Feature request: let a post carry an optional lightweight poll — e.g. a photo from an apple-picking outing with the question "Who do you think ate the most apples?" and a few free-text options people vote on. This is explicitly **not** related to the existing `/baby/[babyId]/guess` "pronostic" game (guess_questions/guesses tables — private, single immutable guess per user, admin-moderated proposals, no results reveal). The new feature is the opposite in spirit: public, live, re-votable, no moderation.
