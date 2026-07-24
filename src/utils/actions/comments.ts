@@ -4,7 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { getUserCircleIds } from './circles'
-import { getUserAccess } from './users'
+import { getUserAccess, getNicknamesByBaby } from './users'
 import { getBabyAdminIds } from './access'
 import { notifyUsers } from './notify'
 import { getDisplayName } from '@utils/users'
@@ -105,17 +105,20 @@ export async function getComments(postId: string, babyId: string) {
   const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
   const userCircleIds = new Set(await getUserCircleIds(babyId, user.id))
 
-  const { data, error } = await supabase
-    .from('post_comments')
-    .select('*, users (*)')
-    .eq('post_id', postId)
-    .order('created_at', { ascending: true })
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('post_comments')
+      .select('*, users (*)')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true }),
+    getNicknamesByBaby(babyId),
+  ])
 
   if (error) { contextLogger.error(error, "Error fetching comments"); return [] }
 
-  const visible = data.filter(
-    (comment) => isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id))
-  )
+  const visible = data
+    .filter((comment) => isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id)))
+    .map((comment) => ({ ...comment, nickname: nicknames[comment.user_id] ?? null }))
 
   contextLogger.debug({ count: visible.length }, "Comments received")
 

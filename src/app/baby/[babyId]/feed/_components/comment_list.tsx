@@ -77,7 +77,7 @@ export default function CommentList({
   return (
     <div className="flex flex-col gap-2">
       {comments.map((comment) => {
-        const author = getDisplayName(comment.users) || "Utilisateur"
+        const author = getDisplayName(comment.users, comment.nickname) || "Utilisateur"
         const isOwner = currentUserId !== null && comment.user_id === currentUserId
         const isEditing = editingId === comment.id
 
