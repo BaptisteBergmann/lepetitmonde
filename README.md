@@ -66,7 +66,7 @@ The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private se
 
    `NEXT_PUBLIC_*` values are inlined into the client bundle at build time — changing them later requires rebuilding and repushing. Real values live in `mise.toml`. Supabase itself is never reachable from the browser: `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `SERVICE_ROLE_KEY` are server-only (no `NEXT_PUBLIC_` prefix), read at request time, so they're runtime env vars passed via the Portainer stack, not build args.
 
-2. Deploy/update the stack in Portainer using `docker-compose.portainer.yml`, which pulls `192.168.2.177:5000/lepetitmonde:latest` (`pull_policy: always`) and sets the runtime-only env vars (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY`, etc.).
+2. Deploy/update the stack in Portainer using `docker-compose.portainer.yml`, which pulls `192.168.2.177:5000/lepetitmonde:latest` (`pull_policy: always`) and sets the runtime-only env vars (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_CONTACT_EMAIL`, etc.).
 
 3. If the registry serves plain HTTP, the Docker host running Portainer needs it allow-listed in `/etc/docker/daemon.json`:
 
