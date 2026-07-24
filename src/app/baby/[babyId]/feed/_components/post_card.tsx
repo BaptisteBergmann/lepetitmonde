@@ -16,6 +16,7 @@ import PhotoLightbox from './photo_lightbox'
 import EditPostModal from './edit_post_modal'
 import ReactionPicker from './reaction_picker'
 import PollVoter from './poll_voter'
+import PostViews from './post_views'
 
 export type Comment = Awaited<ReturnType<typeof getComments>>[number]
 
@@ -172,7 +173,10 @@ export default function PostCard({
           <p className="text-sm text-landing-foreground whitespace-pre-wrap">{post.caption}</p>
         )}
 
-        <ReactionPicker postId={post.id} babyId={babyId} />
+        <div className="flex items-center justify-between gap-2">
+          <ReactionPicker postId={post.id} babyId={babyId} />
+          <PostViews postId={post.id} babyId={babyId} excludeUserId={post.created_by} />
+        </div>
 
         <PollVoter postId={post.id} babyId={babyId} />
 
