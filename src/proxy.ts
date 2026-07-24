@@ -15,7 +15,9 @@ export const config = {
      * - _next/image (optimisation d'images)
      * - favicon.ico (icône du site)
      * - les images (svg, png, jpg, etc.)
+     * - api (chaque route gère elle-même son auth et renvoie du JSON,
+     *   pas une redirection HTML vers /login)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
