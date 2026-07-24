@@ -4,6 +4,11 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `fbd50e5` Mark quirks 0, 2, 5, 6 fixed; document the proxy.ts location bug
+- `263c6b8` Redirect back to the originating page after login
+- `73315e6` Exclude /api from the proxy matcher, keep route handlers as the auth gate
+- `ac24aa1` Remove dead isAdmin field from getBaby()
+- `cd20877` Archive shipped doudou-reactions and polls plans to done/
 - `e581f93` Update CHANGELOG.md for 4aac6e1 and 888680c
 - `888680c` Add project overview documentation
 - `08c76e8` Update CHANGELOG.md for 882ff1a
