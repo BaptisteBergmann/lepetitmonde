@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { REACTIONS } from '@utils/reactions'
 import { getDisplayName } from '@utils/users'
 import { notifyUsers } from './notify'
-import { getUserAccess } from './users'
+import { getUserAccess, getNicknamesByBaby } from './users'
 import { logger } from '../logger'
 
 export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
@@ -31,8 +31,14 @@ export async function addReaction(postId: string, babyId: string, emoji: string 
 
   const { data: post } = await supabase.from('posts').select('created_by').eq('id', postId).single()
   if (post?.created_by && post.created_by !== user.id) {
-    const { data: reactor } = await supabase.from('users').select('first_name, last_name, nickname').eq('id', user.id).single()
-    const name = getDisplayName(reactor) || 'Quelqu\'un'
+    const { data: reactor } = await supabase
+      .from('baby_access')
+      .select('nickname, users (first_name, last_name)')
+      .eq('baby_id', babyId)
+      .eq('user_id', user.id)
+      .single()
+    const reactorProfile = Array.isArray(reactor?.users) ? reactor.users[0] : reactor?.users
+    const name = getDisplayName(reactorProfile, reactor?.nickname) || 'Quelqu\'un'
     await notifyUsers(babyId, 'new_reaction', {
       title: 'Nouvelle réaction',
       body: `${name} a réagi ${emoji} à votre publication`,
@@ -69,23 +75,26 @@ export type ReactionsData = {
   myEmoji: string | null
 }
 
-export async function getReactions(postId: string): Promise<ReactionsData> {
+export async function getReactions(postId: string, babyId: string): Promise<ReactionsData> {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: getReactions.name, postId })
+  const contextLogger = logger.child({ function: getReactions.name, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
 
-  const { data, error } = await supabase
-    .from('post_reactions')
-    .select('emoji, user_id, users (*)')
-    .eq('post_id', postId)
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('post_reactions')
+      .select('emoji, user_id, users (first_name, last_name)')
+      .eq('post_id', postId),
+    getNicknamesByBaby(babyId),
+  ])
 
   if (error) { contextLogger.error(error, "Error fetching reactions"); return { breakdown: [], myEmoji: null } }
 
   const namesByEmoji = new Map<string, string[]>()
-  data.forEach(({ emoji, users: reactorOrList }) => {
+  data.forEach(({ emoji, user_id, users: reactorOrList }) => {
     const reactor = Array.isArray(reactorOrList) ? reactorOrList[0] : reactorOrList
-    const name = getDisplayName(reactor) || "Utilisateur"
+    const name = getDisplayName(reactor, nicknames[user_id]) || "Utilisateur"
     namesByEmoji.set(emoji, [...(namesByEmoji.get(emoji) ?? []), name])
   })
 

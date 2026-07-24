@@ -45,7 +45,7 @@ export default function EditPostModal({
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""])
 
   useEffect(() => {
-    getPollWithResults(post.id).then((poll) => {
+    getPollWithResults(post.id, babyId).then((poll) => {
       if (!poll) return
       setExistingPollId(poll.id)
       setPollHasVotes(poll.totalVotes > 0)
@@ -53,7 +53,7 @@ export default function EditPostModal({
       setPollQuestion(poll.question)
       setPollOptions(poll.options.map((option) => option.label))
     })
-  }, [post.id])
+  }, [post.id, babyId])
 
   const validPollOptionsCount = pollOptions.filter((option) => option.trim()).length
   const pollValid = !pollEnabled || (pollQuestion.trim().length > 0 && validPollOptionsCount >= 2)

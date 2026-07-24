@@ -23,7 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Bell, Smartphone } from "lucide-react";
 import { cn } from "@utils/utils";
 
-type User = Tables<'users'> & { access_level: Enums<'role'> };
+type User = Tables<'users'> & { nickname: string | null; access_level: Enums<'role'> };
 
 interface RealtimeUsersListProps {
   initialUsers: User[];
@@ -65,7 +65,7 @@ export default function RealtimeUsersList({
       // server rather than trying to reconstruct it client-side.
       router.refresh();
     } else if (event.table === "users") {
-      // Profile edit (name/nickname). Not baby-scoped at the DB level, so only apply it
+      // First/last name edit. Not baby-scoped at the DB level, so only apply it
       // if this person is already a member shown in this list.
       const updatedUser = event.new as Tables<'users'>;
       setUsers((prev) =>

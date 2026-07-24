@@ -30,8 +30,9 @@ function openChannel(babyId: string): Entry {
     .channel(`realtime-relay-${babyId}`)
     .on(
       // `users` has no baby_id column — membership changes (join/leave/access level)
-      // live on `baby_access`, which does. Profile edits (name/nickname) are handled
-      // by the unfiltered `users` UPDATE binding below.
+      // live on `baby_access`, which does. Nickname edits live here too (nickname is
+      // per user+baby); first/last name edits are handled by the unfiltered `users`
+      // UPDATE binding below.
       'postgres_changes',
       { event: '*', schema: 'public', table: 'baby_access', filter: `baby_id=eq.${babyId}` },
       (payload) => {

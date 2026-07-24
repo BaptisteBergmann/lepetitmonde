@@ -11,13 +11,13 @@ export type PostStats = {
   commentCount: number
 }
 
-export async function getPostStats(postId: string, excludeUserId?: string | null): Promise<PostStats> {
+export async function getPostStats(postId: string, babyId: string, excludeUserId?: string | null): Promise<PostStats> {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: getPostStats.name, postId })
+  const contextLogger = logger.child({ function: getPostStats.name, postId, babyId })
 
   const [{ breakdown }, views, { count, error }] = await Promise.all([
-    getReactions(postId),
-    getPostViews(postId, excludeUserId),
+    getReactions(postId, babyId),
+    getPostViews(postId, excludeUserId, babyId),
     supabase.from('post_comments').select('*', { count: 'exact', head: true }).eq('post_id', postId),
   ])
 

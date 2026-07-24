@@ -12,10 +12,12 @@ import { Badge } from '@components/ui/badge'
 type Circle = Tables<'circles'>
 
 export default function PostStatsModal({
+  babyId,
   post,
   circles,
   onClose,
 }: {
+  babyId: string
   post: PostWithDetails
   circles: Circle[]
   onClose: () => void
@@ -23,8 +25,8 @@ export default function PostStatsModal({
   const [stats, setStats] = useState<PostStats | null>(null)
 
   useEffect(() => {
-    getPostStats(post.id, post.created_by).then(setStats)
-  }, [post.id, post.created_by])
+    getPostStats(post.id, babyId, post.created_by).then(setStats)
+  }, [post.id, babyId, post.created_by])
 
   const postCircles = post.circle_ids.map((id) => circles.find((c) => c.id === id))
 

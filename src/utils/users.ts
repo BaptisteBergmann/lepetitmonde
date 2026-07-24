@@ -1,10 +1,10 @@
 import { Tables } from '@utils/supabase/database.types'
 
-type NamedUser = Pick<Tables<'users'>, 'first_name' | 'last_name' | 'nickname'>
+type NamedUser = Pick<Tables<'users'>, 'first_name' | 'last_name'>
 
-export function getDisplayName(user: NamedUser | null | undefined): string {
+export function getDisplayName(user: NamedUser | null | undefined, nickname?: string | null): string {
   if (!user) return ''
-  if (user.nickname) return user.nickname
+  if (nickname) return nickname
   return [user.first_name, user.last_name].filter(Boolean).join(' ')
 }
 

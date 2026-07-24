@@ -9,6 +9,7 @@ import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { ensureBugReportsBucket } from './storage'
 import { assertIsAdmin } from './access'
+import { getNicknamesByBaby } from './users'
 
 export async function submitBugReport(formData: FormData) {
   const contextLogger = logger.child({ function: submitBugReport.name })
@@ -65,17 +66,20 @@ export async function getBugReports(babyId: string) {
   const supabase = await createClient()
   await assertIsAdmin(supabase, babyId)
 
-  const { data, error } = await supabase
-    .from('bug_reports')
-    .select(`*, users (first_name, last_name, nickname)`)
-    .order('created_at', { ascending: false })
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('bug_reports')
+      .select(`*, users (first_name, last_name)`)
+      .order('created_at', { ascending: false }),
+    getNicknamesByBaby(babyId),
+  ])
 
   if (error) {
     contextLogger.error(error, "Error fetching bug reports")
     throw error
   }
 
-  return data
+  return data.map((report) => ({ ...report, nickname: report.created_by ? nicknames[report.created_by] ?? null : null }))
 }
 
 // Marking a report "fixed" also pushes the reporter a heads-up. Marking it

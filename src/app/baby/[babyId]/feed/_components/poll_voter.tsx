@@ -12,15 +12,15 @@ export default function PollVoter({ postId, babyId }: { postId: string; babyId: 
   const [pending, setPending] = useState(false)
 
   useEffect(() => {
-    getPollWithResults(postId).then((data) => { setPoll(data); setLoaded(true) })
-  }, [postId])
+    getPollWithResults(postId, babyId).then((data) => { setPoll(data); setLoaded(true) })
+  }, [postId, babyId])
 
   const vote = async (optionId: string) => {
     if (!poll || pending) return
     setPending(true)
     try {
       await votePoll(poll.id, babyId, optionId)
-      setPoll(await getPollWithResults(postId))
+      setPoll(await getPollWithResults(postId, babyId))
     } catch (err) {
       console.error(err)
     } finally {

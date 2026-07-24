@@ -33,6 +33,7 @@ export type Database = {
           baby_id: string
           created_at: string
           id: string
+          nickname: string | null
           relation_to_baby: string
           user_id: string
         }
@@ -41,6 +42,7 @@ export type Database = {
           baby_id: string
           created_at?: string
           id?: string
+          nickname?: string | null
           relation_to_baby?: string
           user_id?: string
         }
@@ -49,6 +51,7 @@ export type Database = {
           baby_id?: string
           created_at?: string
           id?: string
+          nickname?: string | null
           relation_to_baby?: string
           user_id?: string
         }
@@ -888,21 +891,18 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
-          nickname: string | null
         }
         Insert: {
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
-          nickname?: string | null
         }
         Update: {
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
-          nickname?: string | null
         }
         Relationships: []
       }

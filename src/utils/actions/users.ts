@@ -64,7 +64,23 @@ export async function getUsers(babyId: string) {
 
   return data
     .filter((access) => access.users)
-    .map((access) => ({ ...access.users!, access_level: access.access_level }));
+    .map((access) => ({ ...access.users!, nickname: access.nickname, access_level: access.access_level }));
+}
+
+// One nickname lookup per baby, used wherever a display name needs to be
+// resolved for several users at once (reactions, post views, poll voters,
+// bug reports) — nickname lives on baby_access (per user+baby), not on users.
+export async function getNicknamesByBaby(babyId: string): Promise<Record<string, string | null>> {
+  const supabase = await createClient();
+  const contextLogger = logger.child({ function: getNicknamesByBaby.name, babyId })
+  const { data, error } = await supabase
+    .from('baby_access')
+    .select('user_id, nickname')
+    .eq('baby_id', babyId);
+
+  if (error) { contextLogger.error(error, "Error fetching nicknames"); return {} }
+
+  return Object.fromEntries(data.map((row) => [row.user_id, row.nickname]))
 }
 
 export async function updateUserAccessLevel(babyId: string, userId: string, accessLevel: Enums<'role'>) {

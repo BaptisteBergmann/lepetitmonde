@@ -4,7 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
-import { getUserAccess } from './users'
+import { getUserAccess, getNicknamesByBaby } from './users'
 import { getDisplayName } from '../users'
 import { logger } from '../logger'
 
@@ -133,17 +133,20 @@ export type PollWithResults = {
   options: { id: string; label: string; count: number; voterNames: string[] }[]
 }
 
-export async function getPollWithResults(postId: string): Promise<PollWithResults | null> {
+export async function getPollWithResults(postId: string, babyId: string): Promise<PollWithResults | null> {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: getPollWithResults.name, postId })
+  const contextLogger = logger.child({ function: getPollWithResults.name, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
 
-  const { data, error } = await supabase
-    .from('polls')
-    .select('id, question, poll_options (id, label, position, poll_votes (user_id, users (*)))')
-    .eq('post_id', postId)
-    .maybeSingle()
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('polls')
+      .select('id, question, poll_options (id, label, position, poll_votes (user_id, users (first_name, last_name)))')
+      .eq('post_id', postId)
+      .maybeSingle(),
+    getNicknamesByBaby(babyId),
+  ])
 
   if (error) { contextLogger.error(error, "Error fetching poll"); return null }
   if (!data) return null
@@ -153,9 +156,9 @@ export async function getPollWithResults(postId: string): Promise<PollWithResult
   let myOptionId: string | null = null
   const options = sortedOptions.map((option) => {
     if (user && option.poll_votes.some((vote) => vote.user_id === user.id)) myOptionId = option.id
-    const voterNames = option.poll_votes.map(({ users: voterOrList }) => {
+    const voterNames = option.poll_votes.map(({ user_id, users: voterOrList }) => {
       const voter = Array.isArray(voterOrList) ? voterOrList[0] : voterOrList
-      return getDisplayName(voter) || "Utilisateur"
+      return getDisplayName(voter, nicknames[user_id]) || "Utilisateur"
     })
     return { id: option.id, label: option.label, count: option.poll_votes.length, voterNames }
   })

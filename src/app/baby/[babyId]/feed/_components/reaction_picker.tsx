@@ -14,8 +14,8 @@ export default function ReactionPicker({ postId, babyId }: { postId: string; bab
   const [pickerOpen, setPickerOpen] = useState(false)
 
   useEffect(() => {
-    getReactions(postId).then(setReactions)
-  }, [postId])
+    getReactions(postId, babyId).then(setReactions)
+  }, [postId, babyId])
 
   const pick = async (emoji: string) => {
     if (!reactions || pending) return
@@ -28,7 +28,7 @@ export default function ReactionPicker({ postId, babyId }: { postId: string; bab
       } else {
         await addReaction(postId, babyId, emoji)
       }
-      setReactions(await getReactions(postId))
+      setReactions(await getReactions(postId, babyId))
     } catch (err) {
       console.error(err)
     } finally {

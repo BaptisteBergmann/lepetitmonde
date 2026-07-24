@@ -33,8 +33,14 @@ export async function addComment(postId: string, babyId: string, body: string) {
   revalidatePath(`/baby/${babyId}/feed`)
 
   const recipients = await getBabyAdminIds(babyId, user.id)
-  const { data: commenter } = await supabase.from('users').select('first_name, last_name, nickname').eq('id', user.id).single()
-  const name = getDisplayName(commenter) || 'Quelqu\'un'
+  const { data: commenter } = await supabase
+    .from('baby_access')
+    .select('nickname, users (first_name, last_name)')
+    .eq('baby_id', babyId)
+    .eq('user_id', user.id)
+    .single()
+  const commenterProfile = Array.isArray(commenter?.users) ? commenter.users[0] : commenter?.users
+  const name = getDisplayName(commenterProfile, commenter?.nickname) || 'Quelqu\'un'
   await notifyUsers(babyId, 'new_comment', {
     title: 'Nouveau commentaire',
     body: `${name} : ${body}`,

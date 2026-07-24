@@ -134,6 +134,7 @@ export default function PostCard({
 
       {statsOpen && (
         <PostStatsModal
+          babyId={babyId}
           post={post}
           circles={circles}
           onClose={() => setStatsOpen(false)}

@@ -28,8 +28,8 @@ export default function PostViews({
   // recorded below — otherwise the report would have nothing to show.
   useEffect(() => {
     if (!isAdmin) return
-    getPostViews(postId, excludeUserId).then(setViews)
-  }, [postId, excludeUserId, isAdmin])
+    getPostViews(postId, excludeUserId, babyId).then(setViews)
+  }, [postId, excludeUserId, isAdmin, babyId])
 
   useEffect(() => {
     const node = ref.current
@@ -40,7 +40,7 @@ export default function PostViews({
         if (!entry.isIntersecting) return
         observer.disconnect()
         markPostViewed(postId, babyId).then(() => {
-          if (isAdmin) getPostViews(postId, excludeUserId).then(setViews)
+          if (isAdmin) getPostViews(postId, excludeUserId, babyId).then(setViews)
         })
       },
       { threshold: 0.6 }

@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 
 type BugReport = Tables<'bug_reports'> & {
-  users: Pick<Tables<'users'>, 'first_name' | 'last_name' | 'nickname'> | null;
+  users: Pick<Tables<'users'>, 'first_name' | 'last_name'> | null;
+  nickname: string | null;
 };
 
 interface DisplayBugReportsProps {
@@ -75,7 +76,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
         {bugReports.map((report) => {
           const reporterName = [report.users?.first_name, report.users?.last_name]
             .filter(Boolean)
-            .join(" ") || report.users?.nickname || "Utilisateur inconnu";
+            .join(" ") || report.nickname || "Utilisateur inconnu";
           const screenshotUrl = report.screenshot_path
             ? `/api/bug-reports/${report.screenshot_path}`
             : null;

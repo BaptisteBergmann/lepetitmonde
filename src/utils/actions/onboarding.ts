@@ -16,20 +16,13 @@ export async function completeOnboarding(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { error: userError } = await supabase
-    .from('users')
-    .update({ nickname: nickname || null })
-    .eq('id', user.id)
-
-  if (userError) contextLogger.error(userError, "Error updating user profile")
-
   const { error: accessError } = await supabase
     .from('baby_access')
-    .update({ relation_to_baby: relationToBaby })
+    .update({ nickname: nickname || null, relation_to_baby: relationToBaby })
     .eq('baby_id', babyId)
     .eq('user_id', user.id)
 
-  if (accessError) contextLogger.error(accessError, "Error updating relation to baby")
+  if (accessError) contextLogger.error(accessError, "Error updating nickname/relation to baby")
 
   contextLogger.info({ nickname, relationToBaby }, "Onboarding completed")
 
