@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `b424260` Note idea: prioritize loading images closest to the viewport
 - `0d2c892` Mark quirk 1 fixed, flag unverified realtime publication membership
 - `81321be` Fix realtime users list never updating live (wrong filter column)
 - `89fc4d3` Mark quirk 4 fixed: invite-by-email now sends an email
