@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { addReaction, getReactions, removeReaction, ReactionsData } from '@utils/actions/reactions'
 import { REACTIONS } from '@utils/reactions'
+import { formatNamesPreview } from '@utils/users'
 import { cn } from '@utils/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { SmilePlus } from 'lucide-react'
@@ -86,7 +87,7 @@ function ReactionPill({ emoji, count, names }: { emoji: string; count: number; n
         <span className="text-xs">{count}</span>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-2">
-        <p className="text-xs text-landing-foreground whitespace-nowrap">{names.join(", ")}</p>
+        <p className="text-xs text-landing-foreground whitespace-nowrap">{formatNamesPreview(names)}</p>
       </PopoverContent>
     </Popover>
   )

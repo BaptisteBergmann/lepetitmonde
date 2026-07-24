@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Eye } from 'lucide-react'
 import { getPostViews, markPostViewed, PostViewsData } from '@utils/actions/views'
+import { formatNamesPreview } from '@utils/users'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 
 export default function PostViews({
@@ -58,7 +59,7 @@ export default function PostViews({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-auto p-2">
             <p className="text-xs text-landing-foreground whitespace-nowrap">
-              Vu par {views.names.join(", ")}
+              Vu par {formatNamesPreview(views.names)}
             </p>
           </PopoverContent>
         </Popover>
