@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-24
 
+- `89fc4d3` Mark quirk 4 fixed: invite-by-email now sends an email
+- `b80a148` Send an actual email when inviting a member by email
 - `fbd50e5` Mark quirks 0, 2, 5, 6 fixed; document the proxy.ts location bug
 - `263c6b8` Redirect back to the originating page after login
 - `73315e6` Exclude /api from the proxy matcher, keep route handlers as the auth gate
