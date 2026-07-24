@@ -1,8 +1,11 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+import webpush, { ensureVapidConfigured } from '@utils/webpush'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
+import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { ensureBugReportsBucket } from './storage'
 import { assertIsAdmin } from './access'
@@ -73,4 +76,68 @@ export async function getBugReports(babyId: string) {
   }
 
   return data
+}
+
+// Marking a report "fixed" also pushes the reporter a heads-up. Marking it
+// merely "reviewed" (still investigating) does not — that status exists so
+// admins can tell apart "seen" from "untouched" without spamming the reporter.
+export async function updateBugReportStatus(babyId: string, bugReportId: string, status: Enums<'bug_report_status'>) {
+  const contextLogger = logger.child({ function: updateBugReportStatus.name, babyId, bugReportId, status })
+
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const { data: report, error } = await supabase
+    .from('bug_reports')
+    .update({ status })
+    .eq('id', bugReportId)
+    .select('created_by')
+    .single()
+
+  if (error) {
+    contextLogger.error(error, "Error updating bug report status")
+    throw error
+  }
+
+  contextLogger.info("Bug report status updated")
+
+  if (status === 'fixed' && report.created_by) {
+    await notifyBugReportFixed(report.created_by)
+  }
+
+  revalidatePath(`/baby/${babyId}/admin`)
+}
+
+// Best-effort, like the rest of the push pipeline: a reporter with no
+// registered device (or a delivery failure) must not block the status update.
+async function notifyBugReportFixed(userId: string) {
+  const contextLogger = logger.child({ function: notifyBugReportFixed.name, userId })
+
+  try {
+    const supabase = await createClient()
+    const { data: devices } = await supabase
+      .from('push_subscriptions')
+      .select('subscription')
+      .eq('user_id', userId)
+
+    if (!devices || devices.length === 0) return
+
+    const payload = JSON.stringify({
+      title: 'Le petit monde',
+      body: 'Le bug que vous avez signalé a été corrigé. Merci pour votre signalement !',
+      icon: '/favicon-96x96.png',
+    })
+
+    ensureVapidConfigured()
+    const results = await Promise.allSettled(
+      devices.map((device) => webpush.sendNotification(device.subscription as webpush.PushSubscription, payload))
+    )
+
+    const failures = results.filter((r) => r.status === 'rejected')
+    if (failures.length > 0) {
+      contextLogger.error({ failures: failures.length, total: devices.length }, "Some devices failed to receive the bug-fixed push")
+    }
+  } catch (err) {
+    contextLogger.error(err, "Error sending bug-fixed notification")
+  }
 }

@@ -164,7 +164,7 @@ export default async function InviteForm({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0 pb-2">
-                  <DisplayBugReports bugReports={bugReports} />
+                  <DisplayBugReports bugReports={bugReports} babyId={babyId} />
                 </CardContent>
               </Card>
             )}

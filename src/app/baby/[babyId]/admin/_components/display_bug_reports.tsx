@@ -3,8 +3,17 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Tables } from "@utils/supabase/database.types";
+import { toast } from "sonner";
+import { Tables, Enums } from "@utils/supabase/database.types";
+import { updateBugReportStatus } from "@utils/actions/bug_reports";
 import { ExternalLink, ImageOff, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type BugReport = Tables<'bug_reports'> & {
   users: Pick<Tables<'users'>, 'first_name' | 'last_name' | 'nickname'> | null;
@@ -12,10 +21,45 @@ type BugReport = Tables<'bug_reports'> & {
 
 interface DisplayBugReportsProps {
   bugReports: BugReport[];
+  babyId: string;
 }
 
-export default function DisplayBugReports({ bugReports }: DisplayBugReportsProps) {
+const STATUS_LABELS: Record<Enums<'bug_report_status'>, string> = {
+  new: "Nouveau",
+  reviewed: "En cours",
+  fixed: "Corrigé",
+};
+
+const STATUS_STYLES: Record<Enums<'bug_report_status'>, string> = {
+  new: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  reviewed: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  fixed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+};
+
+export default function DisplayBugReports({ bugReports: initialBugReports, babyId }: DisplayBugReportsProps) {
+  const [bugReports, setBugReports] = useState(initialBugReports);
   const [openScreenshot, setOpenScreenshot] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  const handleStatusChange = async (reportId: string, status: Enums<'bug_report_status'>) => {
+    const previousStatus = bugReports.find((r) => r.id === reportId)?.status;
+    setPendingId(reportId);
+    setBugReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status } : r)));
+    try {
+      await updateBugReportStatus(babyId, reportId, status);
+      if (status === "fixed") {
+        toast.success("Statut mis à jour, le signaleur a été notifié.");
+      }
+    } catch (err) {
+      console.error(err);
+      if (previousStatus) {
+        setBugReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status: previousStatus } : r)));
+      }
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour du statut.");
+    } finally {
+      setPendingId(null);
+    }
+  };
 
   if (bugReports.length === 0) {
     return (
@@ -53,9 +97,16 @@ export default function DisplayBugReports({ bugReports }: DisplayBugReportsProps
               )}
 
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-landing-foreground whitespace-pre-wrap break-words">
-                  {report.description}
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm text-landing-foreground whitespace-pre-wrap break-words">
+                    {report.description}
+                  </p>
+                  <span
+                    className={`shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[report.status]}`}
+                  >
+                    {STATUS_LABELS[report.status]}
+                  </span>
+                </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-landing-muted">
                   <span className="font-semibold">{reporterName}</span>
                   <span>{format(new Date(report.created_at), "d MMM yyyy 'à' HH:mm", { locale: fr })}</span>
@@ -70,6 +121,27 @@ export default function DisplayBugReports({ bugReports }: DisplayBugReportsProps
                       Page
                     </a>
                   )}
+                </div>
+
+                <div className="mt-2">
+                  <Select
+                    value={report.status}
+                    onValueChange={(value: string | null) =>
+                      value && handleStatusChange(report.id, value as Enums<'bug_report_status'>)
+                    }
+                    disabled={pendingId === report.id}
+                  >
+                    <SelectTrigger size="sm" className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(STATUS_LABELS) as Enums<'bug_report_status'>[]).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {STATUS_LABELS[status]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

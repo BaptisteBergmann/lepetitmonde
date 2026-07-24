@@ -77,6 +77,7 @@ export type Database = {
           id: string
           page_url: string | null
           screenshot_path: string | null
+          status: Database["public"]["Enums"]["bug_report_status"]
           user_agent: string | null
         }
         Insert: {
@@ -86,6 +87,7 @@ export type Database = {
           id?: string
           page_url?: string | null
           screenshot_path?: string | null
+          status?: Database["public"]["Enums"]["bug_report_status"]
           user_agent?: string | null
         }
         Update: {
@@ -95,6 +97,7 @@ export type Database = {
           id?: string
           page_url?: string | null
           screenshot_path?: string | null
+          status?: Database["public"]["Enums"]["bug_report_status"]
           user_agent?: string | null
         }
         Relationships: [
@@ -911,6 +914,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      bug_report_status: "new" | "reviewed" | "fixed"
       event_kind: "custom" | "milestone"
       milestone_type:
         | "first_steps"
@@ -1056,6 +1060,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      bug_report_status: ["new", "reviewed", "fixed"],
       event_kind: ["custom", "milestone"],
       milestone_type: [
         "first_steps",
