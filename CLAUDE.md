@@ -61,6 +61,7 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 ## ✅ Git Workflow
 
 - Commit as soon as each subtask/fix in a multi-step task is done and verified (e.g. typechecks pass) — do not batch unrelated fixes into a single commit. Each commit should be small and scoped to one subtask.
+- After every commit, immediately update `CHANGELOG.md` in a follow-up commit: add a `` `<short-hash>` <subject> `` line under the `## <YYYY-MM-DD>` heading for that day (newest entry at the top of its date group; add a new date heading at the top of the file if the commit is the first of a new day).
 
 ## 📋 Planning
 
