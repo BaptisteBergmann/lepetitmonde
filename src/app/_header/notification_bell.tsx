@@ -34,6 +34,7 @@ const NOTIFICATION_LABELS: Record<Enums<'notification_type'>, string> = {
   new_member: 'Nouveaux membres',
   new_reaction: 'Réactions sur vos publications',
   new_milestone: 'Nouvelles étapes du calendrier',
+  circle_access_granted: 'Accès à un groupe',
 }
 const ADMIN_ONLY_TYPES: Enums<'notification_type'>[] = ['new_member']
 const ALL_TYPES = Object.keys(NOTIFICATION_LABELS) as Enums<'notification_type'>[]

@@ -891,6 +891,7 @@ export type Database = {
         | "new_member"
         | "new_reaction"
         | "new_milestone"
+        | "circle_access_granted"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -1036,6 +1037,7 @@ export const Constants = {
         "new_member",
         "new_reaction",
         "new_milestone",
+        "circle_access_granted",
       ],
       role: ["admin", "viewer"],
     },

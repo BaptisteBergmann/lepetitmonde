@@ -4,7 +4,9 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
+import { logger } from '../logger'
 import { assertIsAdmin } from './access'
+import { notifyUsers } from './notify'
 
 type NewCircle = TablesInsert<'circles'>;
 
@@ -104,6 +106,7 @@ export async function getAllCirclesAccess(babyId: string) {
 
 export async function addUserToCircle(circleId: string, userId: string, babyId: string) {
   const supabase = await createClient()
+  const contextLogger = logger.child({ function: addUserToCircle.name, babyId, circleId, userId })
   await assertIsAdmin(supabase, babyId)
 
   const rep = await supabase
@@ -112,7 +115,24 @@ export async function addUserToCircle(circleId: string, userId: string, babyId: 
 
   if (rep.error) throw rep.error
 
+  const { data: circle } = await supabase
+    .from('circles')
+    .select('name')
+    .eq('id', circleId)
+    .single()
+
+  await notifyUsers(babyId, 'circle_access_granted', {
+    title: 'Accès accordé',
+    body: circle?.name
+      ? `Vous avez été ajouté au groupe "${circle.name}" et pouvez maintenant voir son contenu.`
+      : 'Vous avez été ajouté à un groupe et pouvez maintenant voir son contenu.',
+    url: `/baby/${babyId}/feed`,
+  }, [userId])
+
+  contextLogger.info("User added to circle")
+
   revalidatePath(`/baby/${babyId}/admin`)
+  revalidatePath(`/baby/${babyId}/feed`)
 }
 
 export async function removeUserFromCircle(circleId: string, userId: string, babyId: string) {

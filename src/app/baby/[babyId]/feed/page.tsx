@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { Loader2, BookOpen } from "lucide-react";
+import { Loader2, BookOpen, Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
-import { getCircles } from "@/utils/actions/circles";
+import { getCircles, getUserCircleIds } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
 import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
@@ -64,8 +64,17 @@ export default async function FeedPage({
 }
 
 async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boolean }) {
-  const [{ data: { user } }, circles, posts] = await Promise.all([
-    getAuthUser(),
+  const { data: { user } } = await getAuthUser()
+  if (!user) return null
+
+  if (!isAdmin) {
+    const circleIds = await getUserCircleIds(babyId, user.id)
+    if (circleIds.length === 0) {
+      return <PendingCircleAccessNotice />
+    }
+  }
+
+  const [circles, posts] = await Promise.all([
     getCircles(babyId),
     getPosts(babyId, { limit: PAGE_SIZE }),
   ])
@@ -74,10 +83,25 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
     <FeedView
       babyId={babyId}
       isAdmin={isAdmin}
-      currentUserId={user?.id ?? null}
+      currentUserId={user.id}
       circles={circles}
       initialPosts={posts}
       pageSize={PAGE_SIZE}
     />
+  )
+}
+
+function PendingCircleAccessNotice() {
+  return (
+    <div className="flex flex-col items-center gap-3 py-16 text-center">
+      <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Clock className="h-5 w-5" />
+      </span>
+      <p className="max-w-xs text-sm text-landing-muted">
+        Vous n&apos;êtes pas encore rattaché à un groupe de ce journal.
+        L&apos;administrateur a été notifié et vous aurez accès au contenu
+        dès qu&apos;il vous aura ajouté à un groupe.
+      </p>
+    </div>
   )
 }
