@@ -4,18 +4,25 @@
 
 A full read-through of the codebase (`docs/PROJECT_OVERVIEW.md` covers the resulting architecture) turned up a number of dead-code paths, half-finished features, and small correctness bugs — none of them exploitable security holes (those are tracked separately in `.claude/plans/security-review.md`), but worth working through since several silently produce wrong behavior. Grouped by area, roughly in priority order within each group. Each item lists the evidence so it can be re-verified before fixing.
 
-## Status: item 3 fixed in `882ff1a`; rest outstanding
+## Status: items 0, 2, 3, 5, 6 fixed; rest outstanding
 
 ---
 
 ## Correctness bugs
 
+### 0. [High, fixed] `proxy.ts` (the auth-redirect middleware) never actually ran, in dev or production
+Discovered while testing the fix for item 5 below: unauthenticated requests to any page (including `/`) returned `200` instead of the expected `307` redirect to `/login`, in both `next dev` and a real `next build` + `node .next/standalone/server.js` run (the exact mechanism the Docker image uses). Root cause: this project uses the `src/app` layout, and Next.js's build computes the required location for the `middleware.ts`/`proxy.ts` convention file as the *parent of the app directory* — i.e. `src/`, not the actual repository root. `proxy.ts` lived at the true repo root, so Next.js's file scan never found it; the emitted `middleware-manifest.json` had an empty `sortedMiddleware: []`. Confirmed by moving the file to `src/proxy.ts`, rebuilding, and seeing `ƒ Proxy (Middleware)` appear in the build's route table for the first time, plus real `307` redirects with a working `redirectTo` param on the standalone server.
+
+**Impact**: not an auth bypass — every Server Component/Action still does its own `getUser()`/`getAuthUser()` check (confirmed via warn-logs like `"No authenticated user on settings page"`) — but the "bounce a logged-out user to `/login`" UX flow has silently never fired, on any deployment of this app to date. Logged-out users hitting a protected page got a broken/empty page shell instead of a redirect.
+**Fix**: moved `proxy.ts` → `src/proxy.ts` (no content change beyond the item-6 fix below). Verified end-to-end against a real production standalone build.
+
 ### 1. Realtime relay subscribes to a `users` filter on a column that doesn't exist
 `src/utils/supabase/realtime-relay.ts` opens a `postgres_changes` binding on `users` with `filter: baby_id=eq.${babyId}` — but `users` has no `baby_id` column (only `circles` and `circles_access` do; confirmed against `database.types.ts` and the baseline migration). Supabase Realtime silently drops/never-matches filters against nonexistent columns, so **new-member and profile-update events likely never reach `RealtimeUsersList`** on the admin page — members would need a manual page refresh to see a new signup appear, contradicting the apparent intent of wiring it into the realtime relay at all.
 **Fix direction**: either drop the `baby_id` filter on the `users` binding and filter client-side by cross-referencing `circles_access`/`baby_access`, or bind on `baby_access` instead (which does have `baby_id` and is the table that actually changes when someone joins).
 
-### 2. `getBaby()`'s `isAdmin` field is always `false`
-`src/utils/actions/baby.ts` returns `{ ...baby, isAdmin: baby.owner_id === user.id }`, but `babies` has no `owner_id` column (only `id`, `created_at`, `baby_surname`). This is dead/broken code — real admin checks elsewhere correctly go through `baby_access.access_level` via `getUserAccess`/`assertIsAdmin`, so it doesn't appear to cause a live authorization gap. Grep for consumers of `.isAdmin` on a `getBaby()` result before removing it — if unused, delete the field; if something reads it expecting real admin status, that call site has a live bug.
+### 2. [Fixed] `getBaby()`'s `isAdmin` field is always `false`
+`src/utils/actions/baby.ts` returned `{ ...baby, isAdmin: baby.owner_id === user.id }`, but `babies` has no `owner_id` column (only `id`, `created_at`, `baby_surname`). Confirmed dead code via grep (zero consumers read `.isAdmin` off a `getBaby()` result), so no live authorization gap existed.
+**Fix**: deleted the field — `getBaby()` now returns the `baby` row as-is.
 
 ### 3. [Fixed in `882ff1a`] Invitation expiry is never checked at signup
 `src/utils/actions/signup.ts` fetches the `invitations` row by `id = token` and only checks that it exists — `expires_at` is never compared against `now()`. Only the admin-facing `InvitationsList` UI treats an old link as "Expiré" (cosmetic only). An expired invite link can still be redeemed to create an account indefinitely.
@@ -25,13 +32,13 @@ A full read-through of the codebase (`docs/PROJECT_OVERVIEW.md` covers the resul
 `sendInvite` (`src/utils/actions/invite.ts`) inserts an `invitations` row exactly like `generateShortLivedLink` but never calls anything from `src/utils/email.ts` (which only exports `sendWelcomeEmail`, sent post-signup, not pre-signup). The admin UI copy implies an email goes out; today it just creates a redeemable link with no delivery mechanism and no way for the admin to retrieve/share it afterward (unlike `generateShortLivedLink`, which returns the URL for copying).
 **Fix direction**: either wire an actual "you're invited" email (new Resend template) or rename the UI/action to match what it does (e.g. fold it into the copy-link flow and drop the separate "by email" entry point).
 
-### 5. `redirectTo` query param is set but never consumed
-`src/utils/supabase/middleware.ts` redirects unauthenticated users to `/login?redirectTo=<path>`, but `src/utils/actions/login.ts`'s `login()` action ignores form/query state entirely and always `redirect('/')` on success. A user who got bounced from a deep link (e.g. a notification pointing at a specific post) lands on the baby picker instead of back where they were headed.
-**Fix direction**: read `redirectTo` from the login form's hidden field (would need adding) or searchParams and redirect there after a successful `signInWithPassword`, with a same-origin check against open-redirect (only allow relative paths).
+### 5. [Fixed] `redirectTo` query param is set but never consumed
+`src/utils/supabase/middleware.ts` redirects unauthenticated users to `/login?redirectTo=<path>`, but `src/utils/actions/login.ts`'s `login()` action ignored form/query state entirely and always `redirect('/')` on success. A user who got bounced from a deep link (e.g. a notification pointing at a specific post) landed on the baby picker instead of back where they were headed.
+**Fix**: `redirectTo` is now threaded through `login/page.tsx` → a hidden field in `login-form.tsx` → `login()`, which redirects there on success (and preserves it across a failed-login retry). Guarded against open redirects: only same-origin relative paths are honored (`//evil.com` and `/\evil.com` are rejected). Only actually exercisable once item 0 above was fixed — before that, the middleware which sets `redirectTo` never ran.
 
-### 6. Unauthenticated API requests get an HTML redirect, not a JSON error
-`proxy.ts`'s matcher doesn't exclude `/api/*`, so `updateSession()` runs for API routes too. An unauthenticated `fetch('/api/upload')` (or `/api/storage/...`, `/api/realtime/...`) gets a 307 redirect to `/login` **before** the route handler's own `getAuthUser()` check ever runs — meaning that check is currently unreachable dead code for the "no session" case, and any client-side code expecting a `401` JSON body (`{ error: 'Non authentifié' }`) instead gets redirected and likely fails on `res.json()` parsing HTML. Not a security gap (still blocked), just an inconsistent failure mode.
-**Fix direction**: exclude `/api` from the `proxy.ts` matcher (or from the redirect branch specifically) and let each route's own `getAuthUser()`/`getUserAccess()` checks be the sole gate, returning proper JSON errors.
+### 6. [Fixed] Unauthenticated API requests get an HTML redirect, not a JSON error
+`proxy.ts`'s matcher didn't exclude `/api/*`, so `updateSession()` would run for API routes too — though this turned out to be moot in practice until item 0 above was fixed, since the middleware wasn't running at all. Still worth excluding for correctness once middleware is live: an unauthenticated `fetch('/api/upload')` should get the route handler's own JSON `401` (`{ error: 'Non authentifié' }`), not an HTML redirect it can't `res.json()`.
+**Fix**: added `api` to the negative-lookahead in `proxy.ts`'s matcher. Verified on a real production build: unauthenticated `POST /api/upload` returns `401` JSON, while `/` and `/baby/[id]/feed` correctly redirect to `/login?redirectTo=...`.
 
 ---
 
