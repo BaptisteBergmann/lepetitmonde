@@ -9,6 +9,12 @@ export const dynamic = 'force-dynamic'
 
 const HEIC_EXTENSION_RE = /\.hei[cf]$/i
 
+// heic-convert decodes the whole file into memory (no streaming API), so
+// this bounds the worst case rather than eliminating it — well above a
+// typical iPhone HEIC photo (a few MB), to reject pathological uploads
+// instead of a decode that blows up the container's memory.
+const MAX_HEIC_UPLOAD_BYTES = 30 * 1024 * 1024
+
 function isHeicUpload(contentType: string, path: string) {
   return contentType === 'image/heic' || contentType === 'image/heif' || HEIC_EXTENSION_RE.test(path)
 }
@@ -60,6 +66,12 @@ export async function POST(request: Request) {
   let uploadContentType = contentType
 
   if (isHeicUpload(contentType, path)) {
+    const contentLength = Number(request.headers.get('content-length') ?? 0)
+    if (contentLength > MAX_HEIC_UPLOAD_BYTES) {
+      contextLoggerWithPath.warn({ contentLength }, 'Rejected oversized HEIC upload')
+      return Response.json({ error: 'Fichier HEIC trop volumineux' }, { status: 413 })
+    }
+
     try {
       const heicBuffer = Buffer.from(await request.arrayBuffer())
       const jpegBuffer = await convertHeic({ buffer: heicBuffer, format: 'JPEG', quality: 0.92 })
