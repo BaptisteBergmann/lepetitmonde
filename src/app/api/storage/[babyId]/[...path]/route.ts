@@ -1,4 +1,3 @@
-import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
 import { getUserAccess } from '@utils/actions/users'
 import { logger } from '@/utils/logger'
@@ -9,6 +8,17 @@ export const dynamic = 'force-dynamic'
 // handing the browser Supabase's raw signed URL, which points at the internal
 // LAN host and gets blocked as mixed content / cross-origin private-network
 // access once the app is served over HTTPS.
+//
+// Talks to the Storage REST API directly (same URL/headers the SDK's
+// `.download()` uses internally) rather than going through the SDK, because
+// the SDK always buffers the whole object into memory (`fetch().blob()`)
+// before handing it back — fine for small files, but it means every photo/
+// video view fully materializes the file in the app's memory, and multiple
+// concurrent viewers of a media-heavy feed can exhaust the container. Piping
+// `upstreamResponse.body` straight into the outgoing `Response` avoids ever
+// holding the full file in memory, and forwarding the `Range` header lets
+// Storage itself serve partial content instead of us buffering the whole
+// object just to slice a few KB out of it for video seeking.
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ babyId: string; path: string[] }> }
@@ -28,54 +38,34 @@ export async function GET(
     return Response.json({ error: 'Non autorisé' }, { status: 403 })
   }
 
-  const supabaseAdmin = createAdminClient()
-  const { data, error } = await supabaseAdmin.storage.from(babyId).download(objectPath)
-
-  if (error || !data) {
-    contextLogger.error(error, 'Error downloading storage object')
-    return Response.json({ error: 'Introuvable' }, { status: 404 })
-  }
-
-  const contentType = data.type || 'application/octet-stream'
-
-  // Safari (notably iOS) refuses to play <video> at all unless the server
-  // honors Range requests, so partial content is handled explicitly here
-  // rather than just streaming the full body.
+  const upstreamPath = [babyId, ...path].map(encodeURIComponent).join('/')
   const range = request.headers.get('range')
-  if (range) {
-    const buffer = Buffer.from(await data.arrayBuffer())
-    const totalSize = buffer.length
-    const match = range.match(/bytes=(\d+)-(\d*)/)
 
-    if (match) {
-      const start = parseInt(match[1], 10)
-      const end = match[2] ? Math.min(parseInt(match[2], 10), totalSize - 1) : totalSize - 1
+  const upstreamResponse = await fetch(`${process.env.SUPABASE_URL}/storage/v1/object/${upstreamPath}`, {
+    headers: {
+      apikey: process.env.SERVICE_ROLE_KEY!,
+      Authorization: `Bearer ${process.env.SERVICE_ROLE_KEY}`,
+      ...(range ? { Range: range } : {}),
+    },
+  })
 
-      if (start >= 0 && start <= end && end < totalSize) {
-        return new Response(buffer.subarray(start, end + 1), {
-          status: 206,
-          headers: {
-            'Content-Type': contentType,
-            'Content-Range': `bytes ${start}-${end}/${totalSize}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': String(end - start + 1),
-            'Cache-Control': 'private, max-age=3600',
-          },
-        })
-      }
-    }
-
-    return new Response(null, {
-      status: 416,
-      headers: { 'Content-Range': `bytes */${totalSize}` },
-    })
+  if (!upstreamResponse.ok && upstreamResponse.status !== 206) {
+    contextLogger.error({ status: upstreamResponse.status }, 'Error downloading storage object')
+    return Response.json({ error: 'Introuvable' }, { status: upstreamResponse.status === 404 ? 404 : 502 })
   }
 
-  return new Response(data.stream(), {
-    headers: {
-      'Content-Type': contentType,
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'private, max-age=3600',
-    },
+  const headers = new Headers({
+    'Content-Type': upstreamResponse.headers.get('content-type') ?? 'application/octet-stream',
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'private, max-age=3600',
+  })
+  const contentRange = upstreamResponse.headers.get('content-range')
+  if (contentRange) headers.set('Content-Range', contentRange)
+  const contentLength = upstreamResponse.headers.get('content-length')
+  if (contentLength) headers.set('Content-Length', contentLength)
+
+  return new Response(upstreamResponse.body, {
+    status: upstreamResponse.status,
+    headers,
   })
 }
