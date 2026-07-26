@@ -7,17 +7,23 @@ import { getAuthUser } from '@utils/supabase/auth'
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger';
 import { assertIsAdmin } from './access'
+import { createTtlCache } from '../cache/ttl-cache'
 
-export const getUserAccess = cache(async (babyId: string) => {
+// Every comment/reaction/poll/view read (and the media proxy) checks
+// getUserAccess, often several times per page load and again for every
+// concurrent viewer of the same feed. React's cache() only dedupes within
+// one request, so a short cross-request TTL is what actually absorbs a
+// burst of viewers loading the same baby's feed at once.
+const userAccessCache = createTtlCache<Awaited<ReturnType<typeof fetchUserAccess>>>(5_000)
+
+async function fetchUserAccess(babyId: string, userId: string) {
   const supabase = await createClient();
   const contextLogger = logger.child({ function: 'getUserAccess', babyId })
-  const { data: { user } } = await getAuthUser()
-  if (!user) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table
     .select(`*`)
     .eq('baby_id', babyId)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .single();
 
   if (error) { contextLogger.error(error, "Error get user access"); return [] }
@@ -25,6 +31,12 @@ export const getUserAccess = cache(async (babyId: string) => {
   contextLogger.debug(data, "User access received")
 
   return data;
+}
+
+export const getUserAccess = cache(async (babyId: string) => {
+  const { data: { user } } = await getAuthUser()
+  if (!user) return []
+  return userAccessCache.get(`${babyId}:${user.id}`, () => fetchUserAccess(babyId, user.id))
 })
 
 export async function getAllUserAccess() {
@@ -70,17 +82,23 @@ export async function getUsers(babyId: string) {
 // One nickname lookup per baby, used wherever a display name needs to be
 // resolved for several users at once (reactions, post views, poll voters,
 // bug reports) — nickname lives on baby_access (per user+baby), not on users.
+// Cached the same way as getUserAccess: cheap to be a few seconds stale,
+// expensive to re-run for every reader of every post on a busy feed.
+const nicknamesCache = createTtlCache<Record<string, string | null>>(5_000)
+
 export async function getNicknamesByBaby(babyId: string): Promise<Record<string, string | null>> {
-  const supabase = await createClient();
-  const contextLogger = logger.child({ function: getNicknamesByBaby.name, babyId })
-  const { data, error } = await supabase
-    .from('baby_access')
-    .select('user_id, nickname')
-    .eq('baby_id', babyId);
+  return nicknamesCache.get(babyId, async () => {
+    const supabase = await createClient();
+    const contextLogger = logger.child({ function: getNicknamesByBaby.name, babyId })
+    const { data, error } = await supabase
+      .from('baby_access')
+      .select('user_id, nickname')
+      .eq('baby_id', babyId);
 
-  if (error) { contextLogger.error(error, "Error fetching nicknames"); return {} }
+    if (error) { contextLogger.error(error, "Error fetching nicknames"); return {} }
 
-  return Object.fromEntries(data.map((row) => [row.user_id, row.nickname]))
+    return Object.fromEntries(data.map((row) => [row.user_id, row.nickname]))
+  })
 }
 
 export async function updateUserAccessLevel(babyId: string, userId: string, accessLevel: Enums<'role'>) {
