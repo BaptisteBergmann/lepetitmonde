@@ -4,6 +4,9 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `eece04b` Cache getAuthUser's GoTrue verification for a few seconds
+- `4cbb280` Cache getUserAccess/getNicknamesByBaby for a few seconds
+- `e0688ac` Cache post media indefinitely in the browser, not just for an hour
 - `df4ff53` Batch per-post comment/reaction/poll/view fetches instead of one-per-card
 - `47730b5` Stream media proxy instead of buffering whole files in memory
 
