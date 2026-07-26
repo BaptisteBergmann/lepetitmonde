@@ -6,7 +6,16 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    # Bounds a request spike to this container instead of it consuming the
+    # whole host and starving Postgres/GoTrue/etc. running alongside it.
+    # Tune against actual usage — these are conservative starting points,
+    # not measured limits. max-old-space-size is kept below mem_limit so
+    # Node's own GC kicks in before the container gets OOM-killed outright.
+    mem_limit: 2g
+    mem_reservation: 512m
+    cpus: 2
     environment:
+      NODE_OPTIONS: --max-old-space-size=1536
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
