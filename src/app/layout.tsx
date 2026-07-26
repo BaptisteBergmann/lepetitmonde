@@ -10,6 +10,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { getAuthUser } from '@utils/supabase/auth';
 import { getChangelog } from '@utils/changelog';
 import VersionFooter from '@/components/version_footer';
+import { WebVitalsReporter } from './web-vitals-reporter';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -94,6 +95,7 @@ export default async function RootLayout({
           <VersionFooter commitSha={commitSha} changelog={changelog} />
         </footer>
         <PwaRegistry />
+        <WebVitalsReporter />
         {user && <BugReportButton />}
         <Toaster position="bottom-center" />
       </body>
