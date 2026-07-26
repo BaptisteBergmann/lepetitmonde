@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `8b6c24a` Report Core Web Vitals to /api/vitals for Pino logging
+- `95c1091` Log server-side timing for feed load, media proxy, and uploads
 - `3bfa17f` Cap app container memory/CPU so it can't starve the rest of the stack
 - `b8b17a9` Cap HEIC upload size to bound worst-case decode memory
 - `eece04b` Cache getAuthUser's GoTrue verification for a few seconds
