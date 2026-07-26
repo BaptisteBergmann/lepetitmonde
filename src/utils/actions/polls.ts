@@ -167,3 +167,44 @@ export async function getPollWithResults(postId: string, babyId: string): Promis
 
   return { id: data.id, question: data.question, totalVotes, myOptionId, options }
 }
+
+// Batched form of getPollWithResults for rendering a whole feed page at
+// once: does the auth/nickname lookups once instead of once per post.
+export async function getPollsForPosts(postIds: string[], babyId: string): Promise<Record<string, PollWithResults | null>> {
+  const contextLogger = logger.child({ function: getPollsForPosts.name, babyId, postCount: postIds.length })
+  const byPost: Record<string, PollWithResults | null> = Object.fromEntries(postIds.map((id) => [id, null]))
+  if (postIds.length === 0) return byPost
+
+  const supabase = await createClient()
+  const { data: { user } } = await getAuthUser()
+
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('polls')
+      .select('id, post_id, question, poll_options (id, label, position, poll_votes (user_id, users (first_name, last_name)))')
+      .in('post_id', postIds),
+    getNicknamesByBaby(babyId),
+  ])
+
+  if (error) { contextLogger.error(error, "Error fetching polls for posts"); return byPost }
+
+  for (const poll of data) {
+    const sortedOptions = [...poll.poll_options].sort((a, b) => a.position - b.position)
+
+    let myOptionId: string | null = null
+    const options = sortedOptions.map((option) => {
+      if (user && option.poll_votes.some((vote) => vote.user_id === user.id)) myOptionId = option.id
+      const voterNames = option.poll_votes.map(({ user_id, users: voterOrList }) => {
+        const voter = Array.isArray(voterOrList) ? voterOrList[0] : voterOrList
+        return getDisplayName(voter, nicknames[user_id]) || "Utilisateur"
+      })
+      return { id: option.id, label: option.label, count: option.poll_votes.length, voterNames }
+    })
+
+    const totalVotes = options.reduce((sum, option) => sum + option.count, 0)
+
+    byPost[poll.post_id] = { id: poll.id, question: poll.question, totalVotes, myOptionId, options }
+  }
+
+  return byPost
+}

@@ -1,19 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { votePoll, getPollWithResults, PollWithResults } from '@utils/actions/polls'
 import { cn } from '@utils/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { BarChart3 } from 'lucide-react'
 
-export default function PollVoter({ postId, babyId }: { postId: string; babyId: string }) {
-  const [poll, setPoll] = useState<PollWithResults | null>(null)
-  const [loaded, setLoaded] = useState(false)
+export default function PollVoter({
+  postId,
+  babyId,
+  initialPoll,
+}: {
+  postId: string
+  babyId: string
+  initialPoll: PollWithResults | null
+}) {
+  const [poll, setPoll] = useState(initialPoll)
   const [pending, setPending] = useState(false)
-
-  useEffect(() => {
-    getPollWithResults(postId, babyId).then((data) => { setPoll(data); setLoaded(true) })
-  }, [postId, babyId])
 
   const vote = async (optionId: string) => {
     if (!poll || pending) return
@@ -28,7 +31,7 @@ export default function PollVoter({ postId, babyId }: { postId: string; babyId: 
     }
   }
 
-  if (!loaded || !poll) return null
+  if (!poll) return null
 
   return (
     <div className="rounded-2xl border border-landing-border p-3 space-y-2">

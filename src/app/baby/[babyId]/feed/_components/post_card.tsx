@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -18,8 +18,6 @@ import PostStatsModal from './post_stats_modal'
 import ReactionPicker from './reaction_picker'
 import PollVoter from './poll_voter'
 import PostViews from './post_views'
-
-export type Comment = Awaited<ReturnType<typeof getComments>>[number]
 
 type Circle = Tables<'circles'>
 
@@ -40,15 +38,11 @@ export default function PostCard({
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [statsOpen, setStatsOpen] = useState(false)
-  const [comments, setComments] = useState<Comment[]>([])
+  const [comments, setComments] = useState(post.comments)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const loadComments = useCallback(async () => {
     setComments(await getComments(post.id, babyId))
-  }, [post.id, babyId])
-
-  useEffect(() => {
-    getComments(post.id, babyId).then(setComments)
   }, [post.id, babyId])
 
   const handleDelete = async () => {
@@ -191,11 +185,11 @@ export default function PostCard({
         )}
 
         <div className="flex items-center justify-between gap-2">
-          <ReactionPicker postId={post.id} babyId={babyId} />
-          <PostViews postId={post.id} babyId={babyId} excludeUserId={post.created_by} isAdmin={isAdmin} />
+          <ReactionPicker postId={post.id} babyId={babyId} initialReactions={post.reactions} />
+          <PostViews postId={post.id} babyId={babyId} excludeUserId={post.created_by} isAdmin={isAdmin} initialViews={post.views} />
         </div>
 
-        <PollVoter postId={post.id} babyId={babyId} />
+        <PollVoter postId={post.id} babyId={babyId} initialPoll={post.poll} />
 
         <div className="border-t border-landing-border pt-3 space-y-3">
           <CommentList

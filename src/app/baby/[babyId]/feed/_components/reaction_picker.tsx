@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { addReaction, getReactions, removeReaction, ReactionsData } from '@utils/actions/reactions'
 import { REACTIONS } from '@utils/reactions'
 import { formatNamesPreview } from '@utils/users'
@@ -8,17 +8,21 @@ import { cn } from '@utils/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { SmilePlus } from 'lucide-react'
 
-export default function ReactionPicker({ postId, babyId }: { postId: string; babyId: string }) {
-  const [reactions, setReactions] = useState<ReactionsData | null>(null)
+export default function ReactionPicker({
+  postId,
+  babyId,
+  initialReactions,
+}: {
+  postId: string
+  babyId: string
+  initialReactions: ReactionsData
+}) {
+  const [reactions, setReactions] = useState(initialReactions)
   const [pending, setPending] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  useEffect(() => {
-    getReactions(postId, babyId).then(setReactions)
-  }, [postId, babyId])
-
   const pick = async (emoji: string) => {
-    if (!reactions || pending) return
+    if (pending) return
     setPickerOpen(false)
     setPending(true)
     const wasMine = reactions.myEmoji === emoji
@@ -40,13 +44,13 @@ export default function ReactionPicker({ postId, babyId }: { postId: string; bab
     <div className="flex items-center gap-1.5 flex-wrap">
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger
-          disabled={!reactions || pending}
+          disabled={pending}
           className={cn(
             "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50",
-            reactions?.myEmoji ? "text-rose-500" : "text-landing-muted hover:text-landing-foreground hover:bg-landing-background"
+            reactions.myEmoji ? "text-rose-500" : "text-landing-muted hover:text-landing-foreground hover:bg-landing-background"
           )}
         >
-          {reactions?.myEmoji ? (
+          {reactions.myEmoji ? (
             <span className="text-base leading-none">{reactions.myEmoji}</span>
           ) : (
             <SmilePlus className="h-4 w-4" />
@@ -61,7 +65,7 @@ export default function ReactionPicker({ postId, babyId }: { postId: string; bab
               title={label}
               className={cn(
                 "rounded-full p-1.5 text-xl leading-none transition-transform cursor-pointer hover:scale-110 hover:bg-landing-background",
-                reactions?.myEmoji === emoji && "scale-110 bg-landing-background"
+                reactions.myEmoji === emoji && "scale-110 bg-landing-background"
               )}
             >
               {emoji}
@@ -70,7 +74,7 @@ export default function ReactionPicker({ postId, babyId }: { postId: string; bab
         </PopoverContent>
       </Popover>
 
-      {reactions?.breakdown.map(({ emoji, count, names }) => (
+      {reactions.breakdown.map(({ emoji, count, names }) => (
         <ReactionPill key={emoji} emoji={emoji} count={count} names={names} />
       ))}
     </div>

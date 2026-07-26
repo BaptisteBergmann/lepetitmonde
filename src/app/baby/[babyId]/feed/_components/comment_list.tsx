@@ -8,7 +8,7 @@ import { getDisplayName } from '@utils/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
-import type { Comment } from './post_card'
+import type { Comment } from '@utils/actions/comments'
 
 export default function CommentList({
   comments,

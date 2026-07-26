@@ -11,13 +11,15 @@ export default function PostViews({
   babyId,
   excludeUserId,
   isAdmin,
+  initialViews,
 }: {
   postId: string
   babyId: string
   excludeUserId?: string | null
   isAdmin: boolean
+  initialViews: PostViewsData
 }) {
-  const [views, setViews] = useState<PostViewsData | null>(null)
+  const [views, setViews] = useState(initialViews)
   const [open, setOpen] = useState(false)
   // Always non-zero size (even with no children yet) so the IntersectionObserver
   // below has a real box to measure — a collapsed 0x0 target never reaches a
@@ -27,11 +29,6 @@ export default function PostViews({
   // The "seen by" report is admin-only, but everyone's view still gets
   // recorded below — otherwise the report would have nothing to show.
   useEffect(() => {
-    if (!isAdmin) return
-    getPostViews(postId, excludeUserId, babyId).then(setViews)
-  }, [postId, excludeUserId, isAdmin, babyId])
-
-  useEffect(() => {
     const node = ref.current
     if (!node) return
 
@@ -39,6 +36,8 @@ export default function PostViews({
       ([entry]) => {
         if (!entry.isIntersecting) return
         observer.disconnect()
+        // Refetch just this post's count after a real view event — the
+        // initial count already arrived as a prop with the rest of the feed.
         markPostViewed(postId, babyId).then(() => {
           if (isAdmin) getPostViews(postId, excludeUserId, babyId).then(setViews)
         })
@@ -51,7 +50,7 @@ export default function PostViews({
 
   return (
     <div ref={ref} className="inline-flex min-h-[1px] min-w-[1px] items-center">
-      {isAdmin && views && views.count > 0 && (
+      {isAdmin && views.count > 0 && (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger className="flex items-center gap-1 h-7 px-2 rounded-full bg-landing-background text-landing-muted cursor-pointer hover:bg-landing-border hover:text-landing-foreground transition-colors">
             <Eye className="h-3.5 w-3.5" />

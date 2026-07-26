@@ -106,3 +106,45 @@ export async function getReactions(postId: string, babyId: string): Promise<Reac
 
   return { breakdown, myEmoji }
 }
+
+// Batched form of getReactions for rendering a whole feed page at once: does
+// the auth/nickname lookups once instead of once per post.
+export async function getReactionsForPosts(postIds: string[], babyId: string): Promise<Record<string, ReactionsData>> {
+  const contextLogger = logger.child({ function: getReactionsForPosts.name, babyId, postCount: postIds.length })
+  const byPost: Record<string, ReactionsData> = Object.fromEntries(postIds.map((id) => [id, { breakdown: [], myEmoji: null }]))
+  if (postIds.length === 0) return byPost
+
+  const supabase = await createClient()
+  const { data: { user } } = await getAuthUser()
+
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('post_reactions')
+      .select('post_id, emoji, user_id, users (first_name, last_name)')
+      .in('post_id', postIds),
+    getNicknamesByBaby(babyId),
+  ])
+
+  if (error) { contextLogger.error(error, "Error fetching reactions for posts"); return byPost }
+
+  const namesByPostEmoji = new Map<string, Map<string, string[]>>()
+  const myEmojiByPost = new Map<string, string>()
+  data.forEach(({ post_id, emoji, user_id, users: reactorOrList }) => {
+    const reactor = Array.isArray(reactorOrList) ? reactorOrList[0] : reactorOrList
+    const name = getDisplayName(reactor, nicknames[user_id]) || "Utilisateur"
+    const namesByEmoji = namesByPostEmoji.get(post_id) ?? new Map<string, string[]>()
+    namesByEmoji.set(emoji, [...(namesByEmoji.get(emoji) ?? []), name])
+    namesByPostEmoji.set(post_id, namesByEmoji)
+    if (user && user_id === user.id) myEmojiByPost.set(post_id, emoji)
+  })
+
+  for (const postId of postIds) {
+    const namesByEmoji = namesByPostEmoji.get(postId)
+    const breakdown = REACTIONS
+      .map(({ emoji }) => ({ emoji, count: namesByEmoji?.get(emoji)?.length ?? 0, names: namesByEmoji?.get(emoji) ?? [] }))
+      .filter((reaction) => reaction.count > 0)
+    byPost[postId] = { breakdown, myEmoji: myEmojiByPost.get(postId) ?? null }
+  }
+
+  return byPost
+}

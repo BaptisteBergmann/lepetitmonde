@@ -9,6 +9,10 @@ import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
+import { Comment, getCommentsForPosts } from './comments'
+import { ReactionsData, getReactionsForPosts } from './reactions'
+import { PollWithResults, getPollsForPosts } from './polls'
+import { PostViewsData, getPostViewsForPosts } from './views'
 import { logger } from '../logger'
 
 type NewPost = TablesInsert<'posts'>
@@ -16,6 +20,10 @@ export type PostPhotoWithUrl = Tables<'post_photos'> & { url: string | null; thu
 export type PostWithDetails = Tables<'posts'> & {
   circle_ids: string[]
   photos: PostPhotoWithUrl[]
+  comments: Comment[]
+  reactions: ReactionsData
+  poll: PollWithResults | null
+  views: PostViewsData
 }
 
 export async function createPost(post: NewPost, circleIds: string[]) {
@@ -156,7 +164,34 @@ async function toPostWithDetails(row: {
     ...(post as Tables<'posts'>),
     circle_ids: posts_circles.map((pc) => pc.circle_id),
     photos,
+    comments: [],
+    reactions: { breakdown: [], myEmoji: null },
+    poll: null,
+    views: { count: 0, names: [] },
   }
+}
+
+// Fills in comments/reactions/poll/views for a batch of posts in one query
+// per data type instead of one per post — the initial useEffect-per-post-
+// card fan-out was the main source of request/DB load on a busy feed page.
+async function attachInteractionData(babyId: string, posts: PostWithDetails[]): Promise<PostWithDetails[]> {
+  if (posts.length === 0) return posts
+
+  const postIds = posts.map((post) => post.id)
+  const [comments, reactions, polls, views] = await Promise.all([
+    getCommentsForPosts(postIds, babyId),
+    getReactionsForPosts(postIds, babyId),
+    getPollsForPosts(postIds, babyId),
+    getPostViewsForPosts(posts.map((post) => ({ id: post.id, created_by: post.created_by })), babyId),
+  ])
+
+  return posts.map((post) => ({
+    ...post,
+    comments: comments[post.id] ?? [],
+    reactions: reactions[post.id] ?? { breakdown: [], myEmoji: null },
+    poll: polls[post.id] ?? null,
+    views: views[post.id] ?? { count: 0, names: [] },
+  }))
 }
 
 export async function getPosts(
@@ -187,7 +222,7 @@ export async function getPosts(
   const visibleRows = data.filter(
     (row) => isAdmin || row.posts_circles.some((pc: { circle_id: string }) => userCircleIds.has(pc.circle_id))
   )
-  const visible = await Promise.all(visibleRows.map(toPostWithDetails))
+  const visible = await attachInteractionData(babyId, await Promise.all(visibleRows.map(toPostWithDetails)))
 
   contextLogger.debug({ count: visible.length }, "Posts received")
 
@@ -210,7 +245,7 @@ export async function getPostsForRange(babyId: string, from: string, to: string)
   const visibleRows = data.filter(
     (row) => isAdmin || row.posts_circles.some((pc: { circle_id: string }) => userCircleIds.has(pc.circle_id))
   )
-  const visible = await Promise.all(visibleRows.map(toPostWithDetails))
+  const visible = await attachInteractionData(babyId, await Promise.all(visibleRows.map(toPostWithDetails)))
 
   contextLogger.debug({ count: visible.length }, "Posts for range received")
 

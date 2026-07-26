@@ -52,3 +52,43 @@ export async function getPostViews(postId: string, excludeUserId: string | null 
 
   return { count: others.length, names }
 }
+
+// Batched form of getPostViews for rendering a whole feed page at once: does
+// the access/nickname lookups once instead of once per post. The "seen by"
+// report is admin-only (same rule as getPostViews), so non-admins get an
+// empty result without hitting the DB.
+export async function getPostViewsForPosts(
+  posts: { id: string; created_by: string | null }[],
+  babyId: string
+): Promise<Record<string, PostViewsData>> {
+  const contextLogger = logger.child({ function: getPostViewsForPosts.name, babyId, postCount: posts.length })
+  const byPost: Record<string, PostViewsData> = Object.fromEntries(posts.map((p) => [p.id, { count: 0, names: [] }]))
+  if (posts.length === 0) return byPost
+
+  const supabase = await createClient()
+  const access = await getUserAccess(babyId)
+  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
+  if (!isAdmin) return byPost
+
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('post_views')
+      .select('post_id, user_id, users (first_name, last_name)')
+      .in('post_id', posts.map((p) => p.id)),
+    getNicknamesByBaby(babyId),
+  ])
+
+  if (error) { contextLogger.error(error, "Error fetching post views for posts"); return byPost }
+
+  const excludeByPost = new Map(posts.map((p) => [p.id, p.created_by]))
+  for (const row of data) {
+    if (row.user_id === excludeByPost.get(row.post_id)) continue
+    const viewer = Array.isArray(row.users) ? row.users[0] : row.users
+    const name = getDisplayName(viewer, nicknames[row.user_id]) || "Utilisateur"
+    const entry = byPost[row.post_id]
+    entry.count += 1
+    entry.names.push(name)
+  }
+
+  return byPost
+}

@@ -124,3 +124,42 @@ export async function getComments(postId: string, babyId: string) {
 
   return visible
 }
+
+export type Comment = Awaited<ReturnType<typeof getComments>>[number]
+
+// Batched form of getComments for rendering a whole feed page at once: does
+// the auth/access/circle/nickname lookups once instead of once per post, so
+// a feed of N posts costs one query fan-out instead of N.
+export async function getCommentsForPosts(postIds: string[], babyId: string): Promise<Record<string, Comment[]>> {
+  const contextLogger = logger.child({ function: getCommentsForPosts.name, babyId, postCount: postIds.length })
+  const byPost: Record<string, Comment[]> = Object.fromEntries(postIds.map((id) => [id, []]))
+  if (postIds.length === 0) return byPost
+
+  const supabase = await createClient()
+  const { data: { user } } = await getAuthUser()
+  if (!user) return byPost
+
+  const access = await getUserAccess(babyId)
+  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
+  const userCircleIds = new Set(await getUserCircleIds(babyId, user.id))
+
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('post_comments')
+      .select('*, users (*)')
+      .in('post_id', postIds)
+      .order('created_at', { ascending: true }),
+    getNicknamesByBaby(babyId),
+  ])
+
+  if (error) { contextLogger.error(error, "Error fetching comments for posts"); return byPost }
+
+  for (const comment of data) {
+    if (!(isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id)))) continue
+    byPost[comment.post_id]?.push({ ...comment, nickname: nicknames[comment.user_id] ?? null })
+  }
+
+  contextLogger.debug({ postCount: postIds.length }, "Comments for posts received")
+
+  return byPost
+}
