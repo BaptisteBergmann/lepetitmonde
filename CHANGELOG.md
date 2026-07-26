@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-07-26
+
+- `47730b5` Stream media proxy instead of buffering whole files in memory
+
 ## 2026-07-24
 
 - `ba5c04a` Fix comment author name showing legal name instead of nickname
