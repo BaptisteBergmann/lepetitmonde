@@ -1,6 +1,7 @@
 import { getAuthUser } from '@utils/supabase/auth'
 import { getUserAccess } from '@utils/actions/users'
 import { logger } from '@/utils/logger'
+import { withTiming } from '@/utils/timing'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,13 +42,19 @@ export async function GET(
   const upstreamPath = [babyId, ...path].map(encodeURIComponent).join('/')
   const range = request.headers.get('range')
 
-  const upstreamResponse = await fetch(`${process.env.SUPABASE_URL}/storage/v1/object/${upstreamPath}`, {
-    headers: {
-      apikey: process.env.SERVICE_ROLE_KEY!,
-      Authorization: `Bearer ${process.env.SERVICE_ROLE_KEY}`,
-      ...(range ? { Range: range } : {}),
-    },
-  })
+  // Time to first byte from Storage, not total transfer time (which depends
+  // on the client's own bandwidth and is streamed after this point anyway).
+  const { result: upstreamResponse, durationMs } = await withTiming(() => fetch(
+    `${process.env.SUPABASE_URL}/storage/v1/object/${upstreamPath}`,
+    {
+      headers: {
+        apikey: process.env.SERVICE_ROLE_KEY!,
+        Authorization: `Bearer ${process.env.SERVICE_ROLE_KEY}`,
+        ...(range ? { Range: range } : {}),
+      },
+    }
+  ))
+  contextLogger.info({ durationMs, status: upstreamResponse.status, ranged: !!range }, "Storage object fetched")
 
   if (!upstreamResponse.ok && upstreamResponse.status !== 206) {
     contextLogger.error({ status: upstreamResponse.status }, 'Error downloading storage object')

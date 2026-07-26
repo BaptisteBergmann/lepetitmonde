@@ -4,6 +4,7 @@ import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
 import { assertIsAdmin } from '@utils/actions/access'
 import { logger } from '@/utils/logger'
+import { withTiming } from '@/utils/timing'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,8 +65,9 @@ export async function POST(request: Request) {
   let uploadPath = path
   let uploadBody: ReadableStream<Uint8Array> | Buffer = request.body
   let uploadContentType = contentType
+  const isHeic = isHeicUpload(contentType, path)
 
-  if (isHeicUpload(contentType, path)) {
+  if (isHeic) {
     const contentLength = Number(request.headers.get('content-length') ?? 0)
     if (contentLength > MAX_HEIC_UPLOAD_BYTES) {
       contextLoggerWithPath.warn({ contentLength }, 'Rejected oversized HEIC upload')
@@ -73,10 +75,13 @@ export async function POST(request: Request) {
     }
 
     try {
-      const heicBuffer = Buffer.from(await request.arrayBuffer())
-      const jpegBuffer = await convertHeic({ buffer: heicBuffer, format: 'JPEG', quality: 0.92 })
+      const { result, durationMs } = await withTiming(async () => {
+        const heicBuffer = Buffer.from(await request.arrayBuffer())
+        return convertHeic({ buffer: heicBuffer, format: 'JPEG', quality: 0.92 })
+      })
+      contextLoggerWithPath.info({ durationMs }, 'HEIC converted to JPEG')
       uploadPath = withJpegExtension(path)
-      uploadBody = Buffer.from(jpegBuffer)
+      uploadBody = Buffer.from(result)
       uploadContentType = 'image/jpeg'
     } catch (err) {
       contextLoggerWithPath.error(err, 'Error converting HEIC/HEIF file to JPEG')
@@ -84,15 +89,16 @@ export async function POST(request: Request) {
     }
   }
 
-  const { error } = await supabaseAdmin.storage.from(bucketName).upload(uploadPath, uploadBody, {
+  const { result, durationMs } = await withTiming(() => supabaseAdmin.storage.from(bucketName).upload(uploadPath, uploadBody, {
     contentType: uploadContentType,
     cacheControl,
     upsert,
-  })
+  }))
+  contextLoggerWithPath.info({ durationMs, isHeic }, 'Upload to storage completed')
 
-  if (error) {
-    contextLoggerWithPath.error(error, 'Error uploading file')
-    return Response.json({ error: error.message }, { status: 400 })
+  if (result.error) {
+    contextLoggerWithPath.error(result.error, 'Error uploading file')
+    return Response.json({ error: result.error.message }, { status: 400 })
   }
 
   return Response.json({ error: null, filename: uploadPath.split('/').pop() })

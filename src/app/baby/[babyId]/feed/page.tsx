@@ -5,6 +5,7 @@ import { getCircles, getUserCircleIds } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
 import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
+import { withTiming } from "@/utils/timing";
 import { Reveal } from "@components/reveal";
 import FeedView from "./feed_view";
 
@@ -64,6 +65,7 @@ export default async function FeedPage({
 }
 
 async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boolean }) {
+  const contextLogger = logger.child({ function: FeedContent.name, babyId })
   const { data: { user } } = await getAuthUser()
   if (!user) return null
 
@@ -74,10 +76,11 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
     }
   }
 
-  const [circles, posts] = await Promise.all([
+  const { result: [circles, posts], durationMs } = await withTiming(() => Promise.all([
     getCircles(babyId),
     getPosts(babyId, { limit: PAGE_SIZE }),
-  ])
+  ]))
+  contextLogger.info({ durationMs, postCount: posts.length }, "Feed content loaded")
 
   return (
     <FeedView
