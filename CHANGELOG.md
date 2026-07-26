@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `3bfa17f` Cap app container memory/CPU so it can't starve the rest of the stack
 - `b8b17a9` Cap HEIC upload size to bound worst-case decode memory
 - `eece04b` Cache getAuthUser's GoTrue verification for a few seconds
 - `4cbb280` Cache getUserAccess/getNicknamesByBaby for a few seconds
