@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `b8b17a9` Cap HEIC upload size to bound worst-case decode memory
 - `eece04b` Cache getAuthUser's GoTrue verification for a few seconds
 - `4cbb280` Cache getUserAccess/getNicknamesByBaby for a few seconds
 - `e0688ac` Cache post media indefinitely in the browser, not just for an hour
