@@ -57,7 +57,11 @@ export async function GET(
   const headers = new Headers({
     'Content-Type': upstreamResponse.headers.get('content-type') ?? 'application/octet-stream',
     'Accept-Ranges': 'bytes',
-    'Cache-Control': 'private, max-age=3600',
+    // Post photos/videos are uploaded with upsert:false (create_post_modal.tsx),
+    // so a given storage path never changes content once written — safe to let
+    // the browser cache it indefinitely instead of re-requesting (and this app
+    // re-streaming) it on every repeat view of the same post.
+    'Cache-Control': 'private, max-age=31536000, immutable',
   })
   const contentRange = upstreamResponse.headers.get('content-range')
   if (contentRange) headers.set('Content-Range', contentRange)
