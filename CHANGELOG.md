@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `e5e49fd` Move cross-user notification writes/reads onto the service-role client
 - `b1a7a7b` Fix docker_tag_prod: buildx imagetools fails TLS on this HTTP registry
 - `a7cb5a9` Rework calendar event types: occasion, life_stage, medical
 - `02a0989` Document the :prod tag promotion workflow
