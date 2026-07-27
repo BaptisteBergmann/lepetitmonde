@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `a7cb5a9` Rework calendar event types: occasion, life_stage, medical
 - `02a0989` Document the :prod tag promotion workflow
 - `8b6c24a` Report Core Web Vitals to /api/vitals for Pino logging
 - `95c1091` Log server-side timing for feed load, media proxy, and uploads
