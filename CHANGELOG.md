@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `4e8d9ba` Regenerate database types after applying the RLS helper functions migration
 - `bbfdcaf` Add RLS helper functions: is_baby_member, is_baby_admin, is_circle_visible, shares_baby_with
 - `e5e49fd` Move cross-user notification writes/reads onto the service-role client
 - `b1a7a7b` Fix docker_tag_prod: buildx imagetools fails TLS on this HTTP registry
