@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-26
 
+- `02a0989` Document the :prod tag promotion workflow
 - `8b6c24a` Report Core Web Vitals to /api/vitals for Pino logging
 - `95c1091` Log server-side timing for feed load, media proxy, and uploads
 - `3bfa17f` Cap app container memory/CPU so it can't starve the rest of the stack
