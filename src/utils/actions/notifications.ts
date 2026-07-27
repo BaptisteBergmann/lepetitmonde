@@ -1,6 +1,7 @@
 "use server";
 import webpush, { ensureVapidConfigured } from '@utils/webpush';
 import { createClient } from '@utils/supabase/server';
+import { createAdminClient } from '@utils/supabase/admin';
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
@@ -67,6 +68,12 @@ export async function getMyDevices() {
 // (a member with no registered device can't receive a push) and to list
 // which devices would get it. getMyDevices() can't be reused here since it
 // hardcodes user_id = auth.uid().
+//
+// The push_subscriptions read is cross-user (every member's devices, not
+// just the caller's), which per-user RLS policies won't allow — runs on the
+// service-role client, same reasoning as notifyUsers(). The membership check
+// (assertIsAdmin) and member list read stay on the regular client since
+// those are the caller's own baby_access-scoped rows.
 export async function getMembersDevices(babyId: string): Promise<Record<string, MemberDevice[]>> {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getMembersDevices.name, babyId })
@@ -82,7 +89,8 @@ export async function getMembersDevices(babyId: string): Promise<Record<string, 
   const userIds = (members ?? []).map((row) => row.user_id)
   if (userIds.length === 0) return {}
 
-  const { data, error } = await supabase
+  const supabaseAdmin = createAdminClient()
+  const { data, error } = await supabaseAdmin
     .from('push_subscriptions')
     .select('id, user_id, device_label, created_at, last_seen_at')
     .in('user_id', userIds)

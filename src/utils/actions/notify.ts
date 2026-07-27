@@ -1,7 +1,7 @@
 'use server'
 
 import webpush, { ensureVapidConfigured } from '@utils/webpush'
-import { createClient } from '@utils/supabase/server'
+import { createAdminClient } from '@utils/supabase/admin'
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 
@@ -27,6 +27,13 @@ function isInQuietHours(now: string, start: string | null, end: string | null) {
  * currently inside their quiet hours. Never throws: a notification failure
  * must not break the action that triggered it (creating a post, adding a
  * comment, etc).
+ *
+ * Runs on the service-role client: every read/write here targets recipient
+ * rows, not the caller's own (notification_preferences, notifications,
+ * push_subscriptions), which per-user RLS policies won't allow. The
+ * recipient list is already trusted by the time it gets here — always
+ * computed from a baby-scoped membership query (getVisibleUserIds,
+ * getBabyAdminIds, getAllBabyMemberIds) by the caller.
  */
 export async function notifyUsers(
   babyId: string,
@@ -38,7 +45,7 @@ export async function notifyUsers(
   if (targetUserIds.length === 0) return
 
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     const { data: disabled } = await supabase
       .from('notification_preferences')
