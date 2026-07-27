@@ -21,8 +21,9 @@ import { MILESTONE_LABELS } from './constants'
 type Circle = Tables<'circles'>
 
 const KIND_ITEMS: Record<Enums<'event_kind'>, string> = {
-  custom: "Événement",
-  milestone: "Jalon",
+  occasion: "Occasion",
+  life_stage: "Étape de vie",
+  medical: "Rendez-vous médical",
 }
 
 export default function CreateEventModal({
@@ -44,12 +45,14 @@ export default function CreateEventModal({
   const [title, setTitle] = useState(event?.title ?? "")
   const [description, setDescription] = useState(event?.description ?? "")
   const [eventDate, setEventDate] = useState(event?.event_date ?? date)
-  const [kind, setKind] = useState<Enums<'event_kind'>>(event?.kind ?? "custom")
+  const [eventTime, setEventTime] = useState(event?.event_time ?? "")
+  const [kind, setKind] = useState<Enums<'event_kind'>>(event?.kind ?? "occasion")
   const [milestoneType, setMilestoneType] = useState<Enums<'milestone_type'> | "">(event?.milestone_type ?? "")
   const [circleIds, setCircleIds] = useState<string[]>(event?.circle_ids ?? [])
   const [isPending, setIsPending] = useState(false)
 
-  const isMilestone = kind === "milestone"
+  const isLifeStage = kind === "life_stage"
+  const isMedical = kind === "medical"
 
   const circleItems = useMemo(
     () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
@@ -63,8 +66,9 @@ export default function CreateEventModal({
         await updateEvent(event.id, babyId, {
           circleIds,
           eventDate,
+          eventTime: isMedical ? (eventTime || null) : null,
           kind,
-          milestoneType: isMilestone ? (milestoneType || "other") : null,
+          milestoneType: isLifeStage ? (milestoneType || "other") : null,
           title,
           description: description || null,
         })
@@ -72,8 +76,9 @@ export default function CreateEventModal({
         await createEvent({
           baby_id: babyId,
           event_date: eventDate,
+          event_time: isMedical ? (eventTime || null) : null,
           kind,
-          milestone_type: isMilestone ? (milestoneType || "other") : null,
+          milestone_type: isLifeStage ? (milestoneType || "other") : null,
           title,
           description: description || null,
         }, circleIds)
@@ -171,14 +176,14 @@ export default function CreateEventModal({
             </Select>
           </div>
 
-          {isMilestone && (
+          {isLifeStage && (
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Jalon
+                Étape de vie
               </Label>
               <Select items={MILESTONE_LABELS} value={milestoneType} onValueChange={(value) => value && setMilestoneType(value as Enums<'milestone_type'>)}>
                 <SelectTrigger className="w-full text-foreground bg-input/50">
-                  <SelectValue placeholder="Sélectionner un jalon" />
+                  <SelectValue placeholder="Sélectionner une étape" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -188,6 +193,20 @@ export default function CreateEventModal({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {isMedical && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event_time" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Heure (facultative)
+              </Label>
+              <Input
+                type="time"
+                id="event_time"
+                value={eventTime}
+                onChange={(e) => setEventTime(e.target.value)}
+              />
             </div>
           )}
 
@@ -228,7 +247,7 @@ export default function CreateEventModal({
             Annuler
           </Button>
           <Button
-            disabled={!title.trim() || !eventDate || (isMilestone && !milestoneType) || isPending}
+            disabled={!title.trim() || !eventDate || (isLifeStage && !milestoneType) || isPending}
             className="rounded-2xl cursor-pointer"
             onClick={handleConfirm}
           >

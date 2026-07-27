@@ -19,15 +19,16 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
 
   await assertIsAdmin(supabase, event.baby_id)
 
-  const kind = event.kind ?? 'custom'
+  const kind = event.kind ?? 'occasion'
 
   const { data, error } = await supabase
     .from('events')
     .insert([{
       baby_id: event.baby_id,
       event_date: event.event_date,
+      event_time: event.event_time ?? null,
       kind,
-      milestone_type: kind === 'milestone' ? event.milestone_type : null,
+      milestone_type: kind === 'life_stage' ? event.milestone_type : null,
       title: event.title,
       description: event.description || null,
     }])
@@ -48,10 +49,10 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
 
   revalidatePath(`/baby/${event.baby_id}/calendar`)
 
-  if (kind === 'milestone') {
+  if (kind === 'life_stage') {
     const { data: { user } } = await supabase.auth.getUser()
     const recipients = await getVisibleUserIds(event.baby_id, circleIds, user?.id)
-    await notifyUsers(event.baby_id, 'new_milestone', {
+    await notifyUsers(event.baby_id, 'new_life_stage', {
       title: 'Nouvelle étape !',
       body: event.title,
       url: `/baby/${event.baby_id}/calendar`,
@@ -62,6 +63,7 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
 export async function updateEvent(eventId: string, babyId: string, patch: {
   circleIds?: string[]
   eventDate?: string
+  eventTime?: string | null
   kind?: Enums<'event_kind'>
   milestoneType?: Enums<'milestone_type'> | null
   title?: string
@@ -75,8 +77,9 @@ export async function updateEvent(eventId: string, babyId: string, patch: {
     .from('events')
     .update({
       event_date: patch.eventDate,
+      event_time: patch.eventTime,
       kind: patch.kind,
-      milestone_type: patch.kind === 'milestone' ? patch.milestoneType : null,
+      milestone_type: patch.kind === 'life_stage' ? patch.milestoneType : null,
       title: patch.title,
       description: patch.description,
     })

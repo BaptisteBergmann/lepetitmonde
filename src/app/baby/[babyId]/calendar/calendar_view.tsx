@@ -23,7 +23,7 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { cn } from '@utils/utils'
 import DayDetailSheet from './_components/day_detail_sheet'
 import CreateEventModal from './_components/create_event_modal'
-import { CIRCLE_COLORS, MILESTONE_ICONS } from './_components/constants'
+import { CIRCLE_COLORS, MILESTONE_ICONS, KIND_ICONS } from './_components/constants'
 
 type Event = EventWithCircles
 type Post = PostWithDetails
@@ -159,8 +159,10 @@ export default function CalendarView({
           const dayKey = format(day, 'yyyy-MM-dd')
           const dayEvents = eventsByDay.get(dayKey) ?? []
           const dayPosts = postsByDay.get(dayKey) ?? []
-          const milestone = dayEvents.find((e) => e.kind === 'milestone')
-          const MilestoneIcon = milestone ? MILESTONE_ICONS[milestone.milestone_type ?? 'other'] : null
+          const lifeStage = dayEvents.find((e) => e.kind === 'life_stage')
+          const LifeStageIcon = lifeStage ? MILESTONE_ICONS[lifeStage.milestone_type ?? 'other'] : null
+          const medical = dayEvents.find((e) => e.kind === 'medical')
+          const MedicalIcon = medical ? KIND_ICONS.medical : null
           const firstPhoto = dayPosts.find((p) => p.photos[0]?.url)?.photos[0]
           const thumbnailUrl = firstPhoto && (
             firstPhoto.mime_type?.startsWith('video/') ? firstPhoto.thumbnailUrl : firstPhoto.url
@@ -192,7 +194,12 @@ export default function CalendarView({
                   )}
                 </div>
               )}
-              {MilestoneIcon && <MilestoneIcon className="h-3.5 w-3.5 text-primary" />}
+              {(LifeStageIcon || MedicalIcon) && (
+                <div className="flex items-center gap-1">
+                  {LifeStageIcon && <LifeStageIcon className="h-3.5 w-3.5 text-primary" />}
+                  {MedicalIcon && <MedicalIcon className="h-3.5 w-3.5 text-primary" />}
+                </div>
+              )}
               {dayEvents.length > 0 && (
                 <div className="flex items-center gap-0.5 flex-wrap justify-center">
                   {dayEvents.slice(0, 4).map((event) => (

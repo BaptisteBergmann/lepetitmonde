@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { deleteEvent, EventWithCircles } from '@utils/actions/events'
 import { PostWithDetails } from '@utils/actions/posts'
 import { Plus, Pencil, Trash2, X, Loader2 } from 'lucide-react'
-import { MILESTONE_ICONS, MILESTONE_LABELS } from './constants'
+import { MILESTONE_ICONS, MILESTONE_LABELS, KIND_ICONS } from './constants'
 import PostCard from '../../feed/_components/post_card'
 
 type Event = EventWithCircles
@@ -90,21 +90,28 @@ export default function DayDetailSheet({
           ))}
 
           {events.map((event) => {
-            const MilestoneIcon = event.kind === 'milestone' ? MILESTONE_ICONS[event.milestone_type ?? 'other'] : null
+            const LifeStageIcon = event.kind === 'life_stage' ? MILESTONE_ICONS[event.milestone_type ?? 'other'] : null
+            const MedicalIcon = event.kind === 'medical' ? KIND_ICONS.medical : null
+            const EventIcon = LifeStageIcon ?? MedicalIcon
 
             return (
               <div key={event.id} className="flex items-start gap-3 rounded-2xl bg-landing-background p-3">
-                {MilestoneIcon && (
+                {EventIcon && (
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                    <MilestoneIcon className="h-4 w-4" />
+                    <EventIcon className="h-4 w-4" />
                   </span>
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-landing-foreground truncate">
                     {event.title}
-                    {event.kind === 'milestone' && event.milestone_type && (
+                    {event.kind === 'life_stage' && event.milestone_type && (
                       <span className="ml-2 text-xs font-normal text-landing-muted">
                         {MILESTONE_LABELS[event.milestone_type]}
+                      </span>
+                    )}
+                    {event.kind === 'medical' && event.event_time && (
+                      <span className="ml-2 text-xs font-normal text-landing-muted">
+                        {event.event_time.slice(0, 5)}
                       </span>
                     )}
                   </p>

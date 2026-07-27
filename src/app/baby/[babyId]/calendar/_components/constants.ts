@@ -1,4 +1,4 @@
-import { Footprints, Gem, MessageCircle, Smile, Laugh, Cake, Star, LucideIcon } from 'lucide-react'
+import { Footprints, Gem, MessageCircle, Smile, Laugh, Cake, Star, Stethoscope, LucideIcon } from 'lucide-react'
 import { Enums } from '@utils/supabase/database.types'
 
 export const CIRCLE_COLORS = [
@@ -28,4 +28,8 @@ export const MILESTONE_LABELS: Record<Enums<'milestone_type'>, string> = {
   first_laugh: "Premier éclat de rire",
   birthday: "Anniversaire",
   other: "Autre",
+}
+
+export const KIND_ICONS: Partial<Record<Enums<'event_kind'>, LucideIcon>> = {
+  medical: Stethoscope,
 }

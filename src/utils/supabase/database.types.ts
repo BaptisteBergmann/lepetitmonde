@@ -198,6 +198,7 @@ export type Database = {
           created_by: string
           description: string | null
           event_date: string
+          event_time: string | null
           id: string
           kind: Database["public"]["Enums"]["event_kind"]
           milestone_type: Database["public"]["Enums"]["milestone_type"] | null
@@ -209,6 +210,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           event_date: string
+          event_time?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["event_kind"]
           milestone_type?: Database["public"]["Enums"]["milestone_type"] | null
@@ -220,6 +222,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           event_date?: string
+          event_time?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["event_kind"]
           milestone_type?: Database["public"]["Enums"]["milestone_type"] | null
@@ -915,7 +918,7 @@ export type Database = {
     }
     Enums: {
       bug_report_status: "new" | "reviewed" | "fixed"
-      event_kind: "custom" | "milestone"
+      event_kind: "occasion" | "life_stage" | "medical"
       milestone_type:
         | "first_steps"
         | "first_tooth"
@@ -930,7 +933,7 @@ export type Database = {
         | "new_pronostic"
         | "new_member"
         | "new_reaction"
-        | "new_milestone"
+        | "new_life_stage"
         | "circle_access_granted"
       role: "admin" | "viewer"
     }
@@ -1061,7 +1064,7 @@ export const Constants = {
   public: {
     Enums: {
       bug_report_status: ["new", "reviewed", "fixed"],
-      event_kind: ["custom", "milestone"],
+      event_kind: ["occasion", "life_stage", "medical"],
       milestone_type: [
         "first_steps",
         "first_tooth",
@@ -1077,7 +1080,7 @@ export const Constants = {
         "new_pronostic",
         "new_member",
         "new_reaction",
-        "new_milestone",
+        "new_life_stage",
         "circle_access_granted",
       ],
       role: ["admin", "viewer"],
