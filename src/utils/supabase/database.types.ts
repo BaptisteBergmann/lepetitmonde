@@ -914,7 +914,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_baby_admin: { Args: { target_baby_id: string }; Returns: boolean }
+      is_baby_member: { Args: { target_baby_id: string }; Returns: boolean }
+      is_circle_visible: {
+        Args: { target_baby_id: string; target_circle_ids: string[] }
+        Returns: boolean
+      }
+      shares_baby_with: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {
       bug_report_status: "new" | "reviewed" | "fixed"
