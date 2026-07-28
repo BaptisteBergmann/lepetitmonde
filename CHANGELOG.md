@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-28
 
+- `71f4389` Fix: carry the Status: implemented note into the moved plan file
 - `04ff759` Mark Gazette plan implemented, move to .claude/plans/done/
 - `c378612` Exclude docker/ from TypeScript's include glob
 - `0576800` Enable the Gazette nav entry and add its settings page
