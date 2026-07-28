@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-07-28
+
+- `b0b239c` Add Gazette and Gazette monetization implementation plans
+
 ## 2026-07-26
 
 - `4e8d9ba` Regenerate database types after applying the RLS helper functions migration
