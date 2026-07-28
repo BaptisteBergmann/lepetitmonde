@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-28
 
+- `0576800` Enable the Gazette nav entry and add its settings page
 - `a9d9d74` Add /api/cron/gazette digest send route
 - `4da1ea2` Wire CRON_SECRET as a runtime env var for the Gazette cron route
 - `5997f8d` Add gazette_digest label to notification preferences
