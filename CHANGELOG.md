@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-28
 
+- `5997f8d` Add gazette_digest label to notification preferences
 - `83dce21` Regenerate database types after the Gazette migrations
 - `26fb8ec` Add babies.last_gazette_sent_at
 - `d75f7b7` Add gazette_digest notification type
