@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@utils/supabase/server'
-import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
@@ -145,19 +144,6 @@ async function withVisibility(babyId: string) {
   return { supabase, isAdmin, userCircleIds }
 }
 
-// "No circle assigned = admin-only, N circles = visible to those circles +
-// admins" — the one visibility rule for posts, kept here so the session-bound
-// path (withVisibility) and the session-independent one (getPostsForRangeAsMember,
-// used by the Gazette digest cron job) can't drift apart.
-function filterVisiblePosts<T extends { posts_circles: { circle_id: string }[] }>(
-  rows: T[],
-  { isAdmin, circleIds }: { isAdmin: boolean; circleIds: Set<string> }
-): T[] {
-  return rows.filter(
-    (row) => isAdmin || row.posts_circles.some((pc) => circleIds.has(pc.circle_id))
-  )
-}
-
 async function toPostWithDetails(row: {
   baby_id: string
   posts_circles: { circle_id: string }[]
@@ -233,7 +219,9 @@ export async function getPosts(
 
   if (error) { contextLogger.error(error, "Error fetching posts"); return [] }
 
-  const visibleRows = filterVisiblePosts(data, { isAdmin, circleIds: userCircleIds })
+  const visibleRows = data.filter(
+    (row) => isAdmin || row.posts_circles.some((pc: { circle_id: string }) => userCircleIds.has(pc.circle_id))
+  )
   const visible = await attachInteractionData(babyId, await Promise.all(visibleRows.map(toPostWithDetails)))
 
   contextLogger.debug({ count: visible.length }, "Posts received")
@@ -254,7 +242,9 @@ export async function getPostsForRange(babyId: string, from: string, to: string)
 
   if (error) { contextLogger.error(error, "Error fetching posts for range"); return [] }
 
-  const visibleRows = filterVisiblePosts(data, { isAdmin, circleIds: userCircleIds })
+  const visibleRows = data.filter(
+    (row) => isAdmin || row.posts_circles.some((pc: { circle_id: string }) => userCircleIds.has(pc.circle_id))
+  )
   const visible = await attachInteractionData(babyId, await Promise.all(visibleRows.map(toPostWithDetails)))
 
   contextLogger.debug({ count: visible.length }, "Posts for range received")
@@ -262,41 +252,10 @@ export async function getPostsForRange(babyId: string, from: string, to: string)
   return visible
 }
 
-// Session-independent variant for the Gazette digest cron job: no request to
-// bind a session to, and a multi-recipient digest needs the visibility rule
-// evaluated once per recipient (an admin and a circle-restricted viewer
-// legitimately see different posts in the same run), not once globally.
-// Comments/reactions/polls/views are intentionally left at toPostWithDetails's
-// defaults — the digest only renders captions/photos, not interactive state.
-export async function getPostsForRangeAsMember(
-  babyId: string,
-  from: string,
-  to: string,
-  { isAdmin, circleIds }: { isAdmin: boolean; circleIds: string[] }
-): Promise<PostWithDetails[]> {
-  const contextLogger = logger.child({ function: getPostsForRangeAsMember.name, babyId, from, to })
-  const supabase = createAdminClient()
-
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*, posts_circles (circle_id), post_photos (*)')
-    .eq('baby_id', babyId)
-    .gte('taken_at', from)
-    .lte('taken_at', to)
-
-  if (error) { contextLogger.error(error, "Error fetching posts for range as member"); return [] }
-
-  const visibleRows = filterVisiblePosts(data, { isAdmin, circleIds: new Set(circleIds) })
-  const visible = await Promise.all(visibleRows.map(toPostWithDetails))
-
-  contextLogger.debug({ count: visible.length }, "Posts for range as member received")
-
-  return visible
-}
-
 export async function getPostActivityBeyond(babyId: string, from: string, to: string): Promise<{ hasBefore: boolean; hasAfter: boolean }> {
   const contextLogger = logger.child({ function: getPostActivityBeyond.name, babyId, from, to })
   const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
+  const isVisible = (circleIds: string[]) => isAdmin || circleIds.some((id) => userCircleIds.has(id))
 
   const [{ data: before, error: beforeError }, { data: after, error: afterError }] = await Promise.all([
     supabase.from('posts').select('posts_circles (circle_id)').eq('baby_id', babyId).lt('taken_at', from),
@@ -307,8 +266,8 @@ export async function getPostActivityBeyond(babyId: string, from: string, to: st
   if (afterError) contextLogger.error(afterError, "Error checking later posts")
 
   return {
-    hasBefore: filterVisiblePosts(before ?? [], { isAdmin, circleIds: userCircleIds }).length > 0,
-    hasAfter: filterVisiblePosts(after ?? [], { isAdmin, circleIds: userCircleIds }).length > 0,
+    hasBefore: (before ?? []).some((row) => isVisible(row.posts_circles.map((pc) => pc.circle_id))),
+    hasAfter: (after ?? []).some((row) => isVisible(row.posts_circles.map((pc) => pc.circle_id))),
   }
 }
 

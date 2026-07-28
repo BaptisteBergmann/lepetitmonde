@@ -25,7 +25,7 @@ export default async function Header({ babies, params }: { babies: any[], params
     { id: "calendar", name: "Calendrier", role: "viewer", enabled: true },
     { id: "guess", name: "Pronostics", role: "viewer", enabled: true },
     { id: "admin", name: "Administration", role: "admin", enabled: true },
-    { id: "gazette", name: "Gazette", role: "viewer", enabled: true },
+    { id: "news", name: "Newsletter", role: "viewer", enabled: false },
   ];
 
   const accesses = allUserAccess.map((acc) => ({
