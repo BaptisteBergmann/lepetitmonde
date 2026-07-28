@@ -4,6 +4,11 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-28
 
+- `8f348ff` Remove CRON_SECRET wiring now that the Gazette cron route is gone
+- `61c0d4e` Remove Gazette plan docs
+- `1d869a8` Regenerate database types after reverting the Gazette schema
+- `ab27be6` Drop Gazette schema additions
+- `030d36f` Revert the Gazette feature
 - `71f4389` Fix: carry the Status: implemented note into the moved plan file
 - `04ff759` Mark Gazette plan implemented, move to .claude/plans/done/
 - `c378612` Exclude docker/ from TypeScript's include glob
