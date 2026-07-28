@@ -4,6 +4,9 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-28
 
+- `83dce21` Regenerate database types after the Gazette migrations
+- `26fb8ec` Add babies.last_gazette_sent_at
+- `d75f7b7` Add gazette_digest notification type
 - `16a4468` Add Gazette digest email template and sender
 - `2edab79` Extract pure post-visibility filter, add session-independent range query
 - `b0b239c` Add Gazette and Gazette monetization implementation plans
