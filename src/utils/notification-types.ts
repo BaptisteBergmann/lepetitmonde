@@ -8,6 +8,7 @@ export const NOTIFICATION_LABELS: Record<Enums<'notification_type'>, string> = {
   new_reaction: 'Réactions sur vos publications',
   new_life_stage: 'Nouvelles étapes du calendrier',
   circle_access_granted: 'Accès à un groupe',
+  gazette_digest: 'La Gazette (résumé par email)',
 }
 
 export const ADMIN_ONLY_TYPES: Enums<'notification_type'>[] = ['new_member']
