@@ -1,5 +1,11 @@
 # Gazette — automated newsletter digest (free, ungated)
 
+## Status: implemented
+
+All 5 phases shipped as planned, no deviations. Notable: the opt-out toggle needed no new UI at all — `BabySettingsCard` already renders every `ALL_NOTIFICATION_TYPES` entry, so adding `gazette_digest` to the label map was enough. The Gazette settings page (Phase 5) ended up simpler than "settings" implied — just a last-sent date and a link to the existing notification preferences, no dedicated opt-out control there.
+
+Verified live: wrong secret → 401, correct secret → 200 with a real summary against production data (`{"babiesProcessed":1,"emailsSent":0,"recipientsSkippedEmpty":24,"recipientsSkippedOptedOut":0}` — no posts in the last 7 days, so the skip path was exercised but not the actual send; the user opted not to trigger a real email to test that path). `pnpm build` passes. Along the way, fixed an unrelated pre-existing issue: `tsconfig.json`'s `include` glob was picking up the gitignored local `docker/` Supabase self-host clone's Deno files, breaking `pnpm build` on this machine — added `docker` to `exclude`.
+
 ## Context
 
 The Gazette is one of the app's headline features per `README.md`, but it's never been built — it's just a disabled nav stub (`{ id: "news", name: "Newsletter", role: "viewer", enabled: false }` in `src/app/_header/header.tsx:28`). This plan builds it as a real, working feature available to everyone with baby access, no payment involved. A follow-up plan (`gazette-monetization.md`) will gate it behind a paid subscription once this ships and is verified — do not add any Stripe/paywall code here.
