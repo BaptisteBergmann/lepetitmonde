@@ -14,19 +14,16 @@ export type Database = {
           baby_surname: string
           created_at: string
           id: string
-          last_gazette_sent_at: string | null
         }
         Insert: {
           baby_surname: string
           created_at?: string
           id?: string
-          last_gazette_sent_at?: string | null
         }
         Update: {
           baby_surname?: string
           created_at?: string
           id?: string
-          last_gazette_sent_at?: string | null
         }
         Relationships: []
       }
@@ -944,7 +941,6 @@ export type Database = {
         | "new_reaction"
         | "new_life_stage"
         | "circle_access_granted"
-        | "gazette_digest"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -1092,7 +1088,6 @@ export const Constants = {
         "new_reaction",
         "new_life_stage",
         "circle_access_granted",
-        "gazette_digest",
       ],
       role: ["admin", "viewer"],
     },
