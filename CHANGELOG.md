@@ -4,8 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-28
 
+- `16a4468` Add Gazette digest email template and sender
 - `2edab79` Extract pure post-visibility filter, add session-independent range query
-- `5cf4a00` Update CHANGELOG.md for b0b239c
 - `b0b239c` Add Gazette and Gazette monetization implementation plans
 
 ## 2026-07-26
