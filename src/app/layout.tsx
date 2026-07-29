@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import { cn } from "@utils/utils";
 import { PwaRegistry } from './settings/pwaRegistry';
+import { PwaHistoryTracker } from '@/components/pwa-history-tracker';
 import HeaderWrapper from './_header/header_wrapper';
 import PullToRefresh from '@/components/pull_to_refresh';
 import BugReportButton from '@/components/bug_report_button';
@@ -95,6 +96,7 @@ export default async function RootLayout({
           <VersionFooter commitSha={commitSha} changelog={changelog} />
         </footer>
         <PwaRegistry />
+        <PwaHistoryTracker />
         <WebVitalsReporter />
         {user && <BugReportButton />}
         <Toaster position="bottom-center" />

@@ -3,12 +3,15 @@
 import { Tables } from '@/utils/supabase/database.types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { goToRoot } from '@/utils/pwa-navigation';
 
 type Baby = Tables<'babies'>;
 
 export default function SiteTitle({ babies }: { babies: Baby[] }) {
   const params = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const rawBabyId = params?.babyId;
   const babyId = Array.isArray(rawBabyId) ? rawBabyId[0] : rawBabyId;
   const baby = babies.find((b) => b.id === babyId);
@@ -19,6 +22,10 @@ export default function SiteTitle({ babies }: { babies: Baby[] }) {
   return (
     <Link
       href="/"
+      onClick={(e) => {
+        e.preventDefault();
+        goToRoot(pathname, router.push);
+      }}
       className="flex shrink-0 items-center gap-2 cursor-pointer transition-opacity hover:opacity-80"
     >
       <Image src="/logo_mark.svg" alt="" width={512} height={512} className="h-7 w-auto sm:h-8" priority unoptimized />
