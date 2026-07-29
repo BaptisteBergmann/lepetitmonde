@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-29
 
+- `fd47513` Genericize LAN IPs in .env.docker.example
 - `ae58009` Add CI, issue templates, CONTRIBUTING.md, and a generic Docker build script
 - `e85ce0a` Rewrite README for outside readers
 - `a5f09f3` Genericize private-registry IP and hostnames for public release
