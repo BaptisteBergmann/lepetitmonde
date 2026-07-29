@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  typecheck-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build-only sanity check that the Dockerfile still produces a working
+      # image after a change — there's no registry to push to from CI (the
+      # real deploy target is a private, LAN-only registry), so this
+      # intentionally stops at `docker build`.
+      - run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_SITE_URL="http://localhost:3000" \
+            --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="" \
+            --build-arg NEXT_PUBLIC_COMMIT_SHA="${GITHUB_SHA::7}" \
+            -t babyfeed:ci \
+            .
