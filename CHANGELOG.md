@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-29
 
+- `e85ce0a` Rewrite README for outside readers
 - `a5f09f3` Genericize private-registry IP and hostnames for public release
 - `6305d0e` Add tracked example configs for a fresh clone
 - `bec6763` Add public-release prep plan
