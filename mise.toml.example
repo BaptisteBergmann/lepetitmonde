@@ -1,0 +1,75 @@
+# Copy to `mise.toml` (repo root, gitignored) and fill in real values.
+# Gives you `pnpm`/Node pinning plus the [tasks] below (db migrations, docker
+# build/push). If you'd rather not use mise, `.env.local.example` covers the
+# app's own runtime env vars and you can run the underlying commands directly.
+
+[settings]
+env_shell_expand = true
+
+[tools]
+pnpm = "latest"
+
+[env]
+NEXT_PUBLIC_SITE_URL = "http://localhost:3000"
+SUPABASE_URL = "http://localhost:8000"
+SUPABASE_PUBLISHABLE_KEY = ""
+SERVICE_ROLE_KEY = ""
+RESEND_API_KEY = ""
+EMAIL_FROM = "Your App <noreply@example.com>"
+
+NEXT_PUBLIC_VAPID_PUBLIC_KEY = ""
+VAPID_PRIVATE_KEY = ""
+VAPID_CONTACT_EMAIL = "you@example.com"
+
+# Direct-Postgres connection for the Supabase CLI (migrations, type generation).
+# If you're self-hosting via Supabase's docker bundle, these come from that
+# bundle's own `.env` (POOLER_TENANT_ID, POSTGRES_PASSWORD, POSTGRES_PORT) —
+# see README's "Self-Hosted Supabase" section. `_.file` below auto-loads it.
+# _.file = '../path/to/supabase/docker/.env'
+SUPABASE_DB_HOST = "localhost"
+POOLER_TENANT_ID = ""
+POSTGRES_PASSWORD = ""
+POSTGRES_PORT = "5432"
+
+# Only needed if you build/push a multi-arch image to your own registry —
+# see README's "Docker Build & Deploy" section. Leave as-is otherwise; the
+# plain `docker compose build` / `scripts/build-docker-image.sh` paths don't
+# need any of these.
+DOCKER_REGISTRY = "your-registry-host:5000"
+DOCKER_IMAGE = "your-app-name"
+
+[tasks.update_types]
+description = "Get database types"
+run = "pnpm supabase gen types typescript --db-url postgres://postgres.${POOLER_TENANT_ID}:${POSTGRES_PASSWORD}@${SUPABASE_DB_HOST}:${POSTGRES_PORT}/postgres --schema public > src/utils/supabase/database.types.ts"
+
+[tasks.db_migration_new]
+description = "Create an empty migration file (usage: mise run db_migration_new <name>)"
+run = "pnpm supabase migration new"
+
+[tasks.db_migration_status]
+description = "Show which migrations are applied locally vs on the remote database"
+run = "pnpm supabase migration list --db-url \"postgres://postgres.${POOLER_TENANT_ID}:${POSTGRES_PASSWORD}@${SUPABASE_DB_HOST}:${POSTGRES_PORT}/postgres?sslmode=disable\""
+
+[tasks.db_push]
+description = "Apply pending migrations to the database (also used to init a fresh database — runs every migration not yet recorded as applied)"
+run = "pnpm supabase db push --db-url \"postgres://postgres.${POOLER_TENANT_ID}:${POSTGRES_PASSWORD}@${SUPABASE_DB_HOST}:${POSTGRES_PORT}/postgres?sslmode=disable\""
+
+[tasks.docker_build_push]
+description = "Build and push the multi-arch Docker image to your private registry"
+run = '''
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --build-arg NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL}" \
+  --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="${NEXT_PUBLIC_VAPID_PUBLIC_KEY}" \
+  --build-arg NEXT_PUBLIC_COMMIT_SHA="$(git rev-parse --short HEAD)" \
+  -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest \
+  --push .
+'''
+
+[tasks.docker_tag_prod]
+description = "Point :prod at whatever :latest currently is, without rebuilding — lets dev (:latest) and prod (:prod) stacks run side by side for comparison"
+run = '''
+docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
+docker tag ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:prod
+docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:prod
+'''

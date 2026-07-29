@@ -1,6 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 mise.toml
 /mise.toml
+!mise.toml.example
 docker/
 /docker/
 
@@ -36,6 +37,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.docker.example
+!.env.local.example
 
 # vercel
 .vercel
