@@ -1,0 +1,54 @@
+# Brings up the entire stack in one command: self-hosted Supabase (Supabase's
+# own compose bundle, pulled in below via `include:`) plus this app — for
+# trying the whole thing out on one machine with no external Supabase project.
+#
+# Setup (see README's "Full Stack (App + Self-Hosted Supabase)" section):
+#   1. Clone Supabase's bundle into docker/ (gitignored, not vendored here):
+#        git clone --depth 1 https://github.com/supabase/supabase.git
+#        cp -r supabase/docker docker
+#   2. cd docker && cp .env.example .env, then fill in POSTGRES_PASSWORD,
+#      JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY, DASHBOARD_USERNAME/PASSWORD,
+#      etc. — see https://supabase.com/docs/guides/self-hosting/docker for
+#      how to generate ANON_KEY/SERVICE_ROLE_KEY from JWT_SECRET.
+#   3. Back at the repo root: cp .env.full.example .env, then set
+#      SUPABASE_PUBLISHABLE_KEY / SERVICE_ROLE_KEY to the exact same
+#      ANON_KEY / SERVICE_ROLE_KEY values from docker/.env — they're the same
+#      JWTs, shared by Supabase's own gateway and by this app.
+#
+# Then:
+#   docker compose -f docker-compose.full.yml up -d --build
+#   mise run db_push   # applies this app's schema — see README's
+#                       # "Database Migrations" section for the non-mise form
+#
+# Requires Docker Compose v2.20+ (the `include:` directive below).
+
+include:
+  - path: docker/docker-compose.yml
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+    container_name: babyfeed
+    restart: unless-stopped
+    depends_on:
+      kong:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      # Internal Kong gateway address — resolvable by service name since `app`
+      # joins the same Compose project/network as the included Supabase stack.
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_CONTACT_EMAIL: ${VAPID_CONTACT_EMAIL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM}

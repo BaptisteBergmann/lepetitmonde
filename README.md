@@ -83,6 +83,17 @@ cd docker && cp .env.example .env
 
 Fill in `docker/.env` (`POSTGRES_PASSWORD`, `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, etc. — see [Supabase's self-hosting guide](https://supabase.com/docs/guides/self-hosting/docker)) so they match the values the app is configured with (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY` in your `.env.local`/`mise.toml`), then `docker compose up -d` from `docker/`. This repo's `docker/` is gitignored — the app only stores the values it connects with, never the backend stack itself.
 
+## 🐙 Full Stack in One Command
+
+`docker-compose.full.yml` brings up the app *and* the self-hosted Supabase stack above together, for trying the whole thing out on one machine with nothing external. It uses Compose's `include:` (requires Compose v2.20+) to pull in `docker/docker-compose.yml` as-is — Supabase's own bundle stays the source of truth, this just adds the app service alongside it on the same network.
+
+1. Clone Supabase's bundle into `docker/` and fill in `docker/.env`, exactly as in [Supabase Backend (Self-Hosted)](#-supabase-backend-self-hosted) above.
+2. Copy `.env.full.example` to `.env` (repo root) and fill it in. `SUPABASE_PUBLISHABLE_KEY` / `SERVICE_ROLE_KEY` must exactly match `ANON_KEY` / `SERVICE_ROLE_KEY` in `docker/.env` — same JWTs, shared by Supabase's gateway and by the app.
+3. `docker compose -f docker-compose.full.yml up -d --build`
+4. Apply the app's schema to the now-running (but empty) Postgres: `mise run db_push` (or the plain `supabase db push` form — see [Database Migrations](#-database-migrations)).
+
+The app talks to Supabase over the internal Docker network at `http://kong:8000` (Kong, Supabase's API gateway) rather than `localhost`, since both are containers in the same Compose project.
+
 ## 🐳 Docker Build & Deploy
 
 The app itself ships as a multi-stage `Dockerfile` (deps → build → standalone runner). Two ways to build it:
