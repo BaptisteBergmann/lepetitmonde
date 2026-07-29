@@ -42,6 +42,9 @@ export function usePushSubscription() {
 
   useEffect(() => {
     if (!('serviceWorker' in navigator && 'PushManager' in window)) return
+    // navigator/window don't exist during SSR, so this one-time support check
+    // can't move to render — it has to run after mount, client-only.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSupported(true)
 
     navigator.serviceWorker

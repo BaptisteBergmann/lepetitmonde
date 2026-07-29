@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tables } from "@utils/supabase/database.types";
 import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
 import { addUserToCircle, removeUserFromCircle, deleteCircle } from "@utils/actions/circles";
@@ -45,14 +45,20 @@ export default function RealtimeCirclesList({
   const [selectedUserByCircle, setSelectedUserByCircle] = useState<Record<string, string>>({});
   const [pendingCircleId, setPendingCircleId] = useState<string | null>(null);
 
-  // Permet de synchroniser l'état si les props serveur changent (ex: navigation)
-  useEffect(() => {
+  // Permet de synchroniser l'état si les props serveur changent (ex: navigation).
+  // Ajusté pendant le rendu plutôt que dans un effect (cf. react.dev "You Might
+  // Not Need An Effect" — adjusting state when a prop changes).
+  const [prevInitialCircles, setPrevInitialCircles] = useState(initialCircles);
+  if (initialCircles !== prevInitialCircles) {
+    setPrevInitialCircles(initialCircles);
     setCircles(initialCircles);
-  }, [initialCircles]);
+  }
 
-  useEffect(() => {
+  const [prevInitialCirclesAccess, setPrevInitialCirclesAccess] = useState(initialCirclesAccess);
+  if (initialCirclesAccess !== prevInitialCirclesAccess) {
+    setPrevInitialCirclesAccess(initialCirclesAccess);
     setCirclesAccess(initialCirclesAccess);
-  }, [initialCirclesAccess]);
+  }
 
   useBabyRealtime(babyId, (event) => {
     if (event.table === "circles") {

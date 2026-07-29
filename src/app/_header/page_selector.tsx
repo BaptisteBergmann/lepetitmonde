@@ -3,15 +3,16 @@
 import { logger } from '@/utils/logger';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
+import { AccessWithPages } from './types';
 
-export default function PageSelector({ access }: { access: any[] }) {
+export default function PageSelector({ access }: { access: AccessWithPages[] }) {
   const contextLogger = logger.child({ function: PageSelector.name })
   const params = useParams();
   const pathname = usePathname(); // Ajouté pour détecter la page active
 
   const currentBabyId = params?.babyId as string;
 
-  const babyAccess = access.find((acc) => acc.baby_id === currentBabyId) || {}
+  const babyAccess = access.find((acc) => acc.baby_id === currentBabyId)
 
   // Optionnel : on évite les logs en production pour ne pas polluer
   contextLogger.debug(currentBabyId)
@@ -23,7 +24,7 @@ export default function PageSelector({ access }: { access: any[] }) {
   return (
     <nav className="mx-auto flex max-w-fit items-center justify-center gap-1 sm:gap-2 rounded-full border border-border/50 bg-card/70 p-1.5 shadow-md backdrop-blur-md">
       {
-        babyAccess?.allowedPages?.map((page: any) => {
+        babyAccess?.allowedPages?.map((page) => {
           const href = `/baby/${currentBabyId}/${page.id}`;
           // On vérifie si l'URL actuelle contient le lien pour le mettre en surbrillance
           const isActive = pathname?.includes(href);

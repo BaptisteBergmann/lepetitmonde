@@ -192,6 +192,10 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
   useEffect(() => {
     if (files.length === 0) {
+      // Re-derives from the current file list as a whole (paired below with the
+      // maxFiles trim), not a simple one-state-from-one-prop sync, so this stays
+      // in an effect rather than the render-time "adjust state" pattern.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setErrors([])
     }
 

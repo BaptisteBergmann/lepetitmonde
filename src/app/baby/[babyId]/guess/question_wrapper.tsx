@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { submitGuess } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
-import { Tables } from "@/utils/supabase/database.types";
-import { useState, Dispatch } from "react";
+import { Tables, Json } from "@/utils/supabase/database.types";
+import { useState, Dispatch, SetStateAction } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { CheckCircle2, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,10 +14,20 @@ import TextPicker from "./_components/picker/text";
 import TimePicker from "./_components/picker/time";
 import OptionPicker from "./_components/picker/option";
 
+// The `options` column is a free-form Json in the DB, but in practice only ever
+// holds this shape depending on the question's `type` (min/max/precision for
+// "number", choices for "option"; unused for date/text/time).
+export type QuestionOptions = {
+  min?: number;
+  max?: number;
+  precision?: number;
+  choices?: string[];
+};
+
 export interface PickerProps {
   value: number | string | Date | undefined;
-  options: any;
-  onChange: Dispatch<any> | undefined;
+  options: QuestionOptions | null;
+  onChange: Dispatch<SetStateAction<number | string | Date | undefined>> | undefined;
   id: string;
 }
 
@@ -30,13 +40,15 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
   contextLogger.info(questionWithGuess, "Display question");
 
   const router = useRouter();
-  const [value, setValue] = useState(
+  const [value, setValue] = useState<number | string | Date | undefined>(
     // Non pré-rempli pour "date" : le Calendar attend un `Date | undefined`, jamais une chaîne vide.
     questionWithGuess.type === "date" ? undefined : ""
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasAnswered = !!questionWithGuess.guesses && questionWithGuess.guesses.length > 0;
+  // The DB column is a free-form Json; see QuestionOptions for the actual shape used here.
+  const questionOptions = questionWithGuess.options as QuestionOptions | null;
 
   const handleSend = async () => {
     if (value === undefined || value === null || value === "") return;
@@ -44,7 +56,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
     try {
       await submitGuess({
         baby_id: questionWithGuess.baby_id,
-        answer: value,
+        answer: value instanceof Date ? value.toISOString() : value,
         question_id: questionWithGuess.id,
       });
       router.refresh();
@@ -56,11 +68,11 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
     }
   };
 
-  const formatDisplayValue = (val: any, type: string, options: any) => {
+  const formatDisplayValue = (val: Json | undefined, type: string, options: QuestionOptions | null) => {
     if (val === undefined || val === null || val === "") return "-";
     if (type === "date") {
       try {
-        const d = new Date(val);
+        const d = new Date(val as string | number);
         if (!isNaN(d.getTime())) {
           return d.toLocaleDateString("fr-FR", {
             day: "numeric",
@@ -106,7 +118,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
                 Votre réponse
               </span>
               <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
-                {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type, questionWithGuess.options)}
+                {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type, questionOptions)}
               </p>
             </div>
             <div className="bg-emerald-500 text-white rounded-full p-1.5 shadow-xs">
@@ -119,7 +131,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
               {questionWithGuess.type === "date" && (
                 <CalendarPicker
                   id={questionWithGuess.id}
-                  options={questionWithGuess.options}
+                  options={questionOptions}
                   value={value}
                   onChange={setValue}
                 />
@@ -127,7 +139,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
               {questionWithGuess.type === "number" && (
                 <NumberPicker
                   id={questionWithGuess.id}
-                  options={questionWithGuess.options}
+                  options={questionOptions}
                   value={value}
                   onChange={setValue}
                 />
@@ -135,7 +147,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
               {questionWithGuess.type === "text" && (
                 <TextPicker
                   id={questionWithGuess.id}
-                  options={questionWithGuess.options}
+                  options={questionOptions}
                   value={value}
                   onChange={setValue}
                 />
@@ -143,7 +155,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
               {questionWithGuess.type === "time" && (
                 <TimePicker
                   id={questionWithGuess.id}
-                  options={questionWithGuess.options}
+                  options={questionOptions}
                   value={value}
                   onChange={setValue}
                 />
@@ -151,7 +163,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
               {questionWithGuess.type === "option" && (
                 <OptionPicker
                   id={questionWithGuess.id}
-                  options={questionWithGuess.options}
+                  options={questionOptions}
                   value={value}
                   onChange={setValue}
                 />

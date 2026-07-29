@@ -25,6 +25,9 @@ export function Reveal({
     if (!node) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // window doesn't exist during SSR, so this one-time preference check
+      // can't move to render — it has to run after mount, client-only.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
       return;
     }

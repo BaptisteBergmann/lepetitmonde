@@ -25,6 +25,9 @@ export default function InstallCard({
   const [isInstalling, setIsInstalling] = useState(false)
 
   useEffect(() => {
+    // navigator/window don't exist during SSR, so this one-time device/display-mode
+    // detection can't move to render — it has to run after mount, client-only.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window))
     setIsStandalone(window.matchMedia('(display-mode: standalone)').matches)
 

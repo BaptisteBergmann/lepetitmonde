@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -53,10 +53,14 @@ export default function RealtimeUsersList({
   });
 
 
-  // Permet de synchroniser l'état si les props serveur changent (ex: navigation)
-  useEffect(() => {
+  // Permet de synchroniser l'état si les props serveur changent (ex: navigation).
+  // Ajusté pendant le rendu plutôt que dans un effect (cf. react.dev "You Might
+  // Not Need An Effect" — adjusting state when a prop changes).
+  const [prevInitialUsers, setPrevInitialUsers] = useState(initialUsers);
+  if (initialUsers !== prevInitialUsers) {
+    setPrevInitialUsers(initialUsers);
     setUsers(initialUsers);
-  }, [initialUsers]);
+  }
 
   useBabyRealtime(babyId, (event) => {
     if (event.table === "baby_access") {

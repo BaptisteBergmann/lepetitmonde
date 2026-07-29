@@ -7,8 +7,10 @@ import UserMenu from './user_menu';
 import MobileMenu from './mobile_menu';
 import NotificationBell from './notification_bell';
 import { createClient } from '@/utils/supabase/server';
+import { Tables } from '@/utils/supabase/database.types';
+import { NavPage } from './types';
 
-export default async function Header({ babies, params }: { babies: any[], params?: any }) {
+export default async function Header({ babies }: { babies: Tables<'babies'>[] }) {
   const contextLogger = logger.child({ function: Header.name });
   const supabase = await createClient();
 
@@ -20,7 +22,7 @@ export default async function Header({ babies, params }: { babies: any[], params
 
   const allUserAccess = await getAllUserAccess();
 
-  const pages = [
+  const pages: NavPage[] = [
     { id: "feed", name: "Journal", role: "viewer", enabled: true },
     { id: "calendar", name: "Calendrier", role: "viewer", enabled: true },
     { id: "guess", name: "Pronostics", role: "viewer", enabled: true },

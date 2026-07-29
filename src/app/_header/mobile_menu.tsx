@@ -12,12 +12,13 @@ import {
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import { LogOut, Settings, Menu, HelpCircle, ShieldCheck, Users, CalendarDays } from 'lucide-react'
+import { AccessWithPages } from './types'
 
 interface MobileMenuProps {
   initials: string
   fullName: string
   email?: string
-  accesses: any[]
+  accesses: AccessWithPages[]
 }
 
 export default function MobileMenu({ initials, fullName, email, accesses }: MobileMenuProps) {
@@ -25,7 +26,7 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
   const pathname = usePathname()
   const currentBabyId = params?.babyId as string
 
-  const babyAccess = accesses.find((acc) => acc.baby_id === currentBabyId) || {}
+  const babyAccess = accesses.find((acc) => acc.baby_id === currentBabyId)
   const allowedPages = babyAccess?.allowedPages || []
 
   const handleLogout = async () => {
@@ -63,7 +64,7 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
             <DropdownMenuLabel className="px-2.5 py-1 text-2xs uppercase tracking-wider font-semibold text-muted-foreground">
               Navigation
             </DropdownMenuLabel>
-            {allowedPages.map((page: any) => {
+            {allowedPages.map((page) => {
               const Icon = page.id === 'guess' ? HelpCircle : page.id === 'admin' ? ShieldCheck : page.id === 'calendar' ? CalendarDays : Users
               const active = isPageActive(page.id)
               return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import QuestionWrapper from "./question_wrapper";
+import QuestionWrapper, { QuestionWithGuess } from "./question_wrapper";
 import { HelpCircle, CheckCircle2, ClipboardList, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
@@ -13,8 +13,8 @@ export default function GuessesTabs({
   babyId,
   isAdmin = false,
 }: {
-  unanswered: any[];
-  answered: any[];
+  unanswered: QuestionWithGuess[];
+  answered: QuestionWithGuess[];
   babyId: string;
   isAdmin?: boolean;
 }) {
