@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-07-29
 
+- `3a4aaf0` Add docker-compose.full.yml for the whole stack in one command
 - `14b6fd0` Fix all pre-existing lint errors so the new CI is green
 - `fd47513` Genericize LAN IPs in .env.docker.example
 - `ae58009` Add CI, issue templates, CONTRIBUTING.md, and a generic Docker build script
