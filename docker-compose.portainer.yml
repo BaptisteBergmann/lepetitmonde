@@ -1,6 +1,6 @@
 services:
   app:
-    image: 192.168.2.177:5000/lepetitmonde:latest
+    image: your-registry-host:5000/your-app-name:latest
     pull_policy: always
     container_name: babyfeed
     restart: unless-stopped

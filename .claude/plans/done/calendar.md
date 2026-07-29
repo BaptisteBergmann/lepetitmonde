@@ -5,7 +5,7 @@
 Shipped and deployed. Six scoped commits on `main`: plan prerequisites doc,
 `CLAUDE.md` `mise exec` note, `typecheck` script, `events`/`events_circles`
 migrations, event server actions, calendar page/components + nav enablement.
-Multi-arch image built and pushed to `192.168.2.177:5000/lepetitmonde:latest`
+Multi-arch image built and pushed to the private registry (`your-registry-host:5000/your-app-name:latest`)
 via `mise run docker_build_push` (Portainer stack still needs a manual
 pull/restart to go live — the push alone doesn't redeploy).
 

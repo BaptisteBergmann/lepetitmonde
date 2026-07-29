@@ -41,7 +41,7 @@ The application is built for total data sovereignty (Self-Hosted):
 
 ## 🗃️ Database Migrations
 
-Schema changes are tracked as SQL files in `supabase/migrations/` using the Supabase CLI (already a devDependency). The remote Postgres (self-hosted, reached via the Supavisor pooler at `192.168.2.177:${POSTGRES_PORT}`) tracks which migrations it has applied in a `supabase_migrations.schema_migrations` table, so `db_push` is idempotent: on a fresh database it runs every migration (acting as init), on an existing one it only runs what's new.
+Schema changes are tracked as SQL files in `supabase/migrations/` using the Supabase CLI (already a devDependency). The remote Postgres (self-hosted, reached via the Supavisor pooler at `${SUPABASE_DB_HOST}:${POSTGRES_PORT}`) tracks which migrations it has applied in a `supabase_migrations.schema_migrations` table, so `db_push` is idempotent: on a fresh database it runs every migration (acting as init), on an existing one it only runs what's new.
 
 - **Create a migration**: `mise run db_migration_new <name>` — scaffolds an empty, timestamped file in `supabase/migrations/`. Write the `ALTER TABLE` / `CREATE TABLE` / etc. SQL by hand.
 - **Apply pending migrations**: `mise run db_push` — connects with `sslmode=disable` (the pooler doesn't negotiate TLS on this connection type; occasionally flaky on the first attempt over the LAN — just retry).
@@ -67,25 +67,25 @@ Fill in `docker/.env` (`POSTGRES_PASSWORD`, `JWT_SECRET`, `ANON_KEY`, `SERVICE_R
 
 The app is deployed as a multi-arch (amd64 + arm64) image pushed to a private self-hosted registry, then run via a Portainer stack.
 
-1. Build and push in one step with `mise run docker_build_push` (requires `docker login 192.168.2.177:5000` once beforehand), which runs:
+1. Build and push in one step with `mise run docker_build_push` (requires `docker login your-registry-host:5000` once beforehand), which runs:
 
    ```bash
    docker buildx build \
      --platform linux/amd64,linux/arm64 \
      --build-arg NEXT_PUBLIC_SITE_URL="<value>" \
      --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="<value>" \
-     -t 192.168.2.177:5000/lepetitmonde:latest \
+     -t your-registry-host:5000/your-app-name:latest \
      --push .
    ```
 
    `NEXT_PUBLIC_*` values are inlined into the client bundle at build time — changing them later requires rebuilding and repushing. Real values live in `mise.toml`. Supabase itself is never reachable from the browser: `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `SERVICE_ROLE_KEY` are server-only (no `NEXT_PUBLIC_` prefix), read at request time, so they're runtime env vars passed via the Portainer stack, not build args.
 
-2. Deploy/update the stack in Portainer using `docker-compose.portainer.yml`, which pulls `192.168.2.177:5000/lepetitmonde:latest` (`pull_policy: always`) and sets the runtime-only env vars (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_CONTACT_EMAIL`, `EMAIL_FROM`, etc.).
+2. Deploy/update the stack in Portainer using `docker-compose.portainer.yml`, which pulls `your-registry-host:5000/your-app-name:latest` (`pull_policy: always`) and sets the runtime-only env vars (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_CONTACT_EMAIL`, `EMAIL_FROM`, etc.).
 
 3. If the registry serves plain HTTP, the Docker host running Portainer needs it allow-listed in `/etc/docker/daemon.json`:
 
    ```json
-   { "insecure-registries": ["192.168.2.177:5000"] }
+   { "insecure-registries": ["your-registry-host:5000"] }
    ```
 
    then `sudo systemctl restart docker`. Registry credentials (if auth is enabled) are added under Portainer → **Registries** → **Add registry**.

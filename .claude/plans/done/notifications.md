@@ -18,7 +18,7 @@ All six phases shipped as separate commits on `main`:
 
 Deviations from the plan as written below:
 - No live browser click-through was performed. This app has a single
-  environment (the production self-hosted Supabase at `192.168.2.177`, no
+  environment (the production self-hosted Supabase, on a private LAN host, no
   staging instance) and no test account was available, so verification was
   limited to `tsc --noEmit`, `eslint`, and confirming each migration applied
   cleanly against the real schema (including a real 4-row backfill in
