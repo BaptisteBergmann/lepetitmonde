@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-07-29
+
+- `11033ef` Fix Android PWA back button exiting to wrong screen after tapping logo
+
 ## 2026-07-28
 
 - `8f348ff` Remove CRON_SECRET wiring now that the Gazette cron route is gone
