@@ -28,7 +28,8 @@ import {
   setQuietHours,
 } from '@utils/actions/notifications'
 
-const ENABLE_PROMPT_DISMISSED_KEY = 'notif-enable-prompt-dismissed'
+const ENABLE_PROMPT_LAST_SHOWN_KEY = 'notif-enable-prompt-last-shown'
+const ENABLE_PROMPT_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 type Device = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
@@ -52,17 +53,20 @@ export default function NotificationBell() {
     getUnreadNotificationCount().then(setUnreadCount)
   }, [])
 
-  // One-time soft nudge, not the native browser permission dialog: shown at
-  // most once per browser (localStorage flag set as soon as it's shown,
-  // regardless of what the user does with it) so it never nags. Skipped
-  // entirely if the user already said no at the OS/browser level.
+  // Soft nudge, not the native browser permission dialog: shown at most once
+  // every ENABLE_PROMPT_INTERVAL_MS per browser (localStorage timestamp set
+  // as soon as it's shown, regardless of what the user does with it), so it
+  // re-asks periodically until the user subscribes. Skipped entirely once
+  // subscribed, or if the user already said no at the OS/browser level.
   useEffect(() => {
     if (!isSupported || subscription) return
     if (typeof Notification !== 'undefined' && Notification.permission === 'denied') return
-    if (localStorage.getItem(ENABLE_PROMPT_DISMISSED_KEY)) return
+
+    const lastShown = localStorage.getItem(ENABLE_PROMPT_LAST_SHOWN_KEY)
+    if (lastShown && Date.now() - Number(lastShown) < ENABLE_PROMPT_INTERVAL_MS) return
 
     const timeout = setTimeout(() => {
-      localStorage.setItem(ENABLE_PROMPT_DISMISSED_KEY, '1')
+      localStorage.setItem(ENABLE_PROMPT_LAST_SHOWN_KEY, String(Date.now()))
       toast('Activez les notifications', {
         description: 'Soyez averti des nouvelles publications, commentaires et pronostics.',
         action: { label: 'Activer', onClick: () => subscribe() },
