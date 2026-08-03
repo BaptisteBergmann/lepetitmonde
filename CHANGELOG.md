@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-03
+
+- `60cba27` Re-prompt notification enrollment every 7 days instead of once ever
+
 ## 2026-07-29
 
 - `3a4aaf0` Add docker-compose.full.yml for the whole stack in one command
