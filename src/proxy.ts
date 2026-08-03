@@ -17,7 +17,10 @@ export const config = {
      * - les images (svg, png, jpg, etc.)
      * - api (chaque route gère elle-même son auth et renvoie du JSON,
      *   pas une redirection HTML vers /login)
+     * - manifest.webmanifest et sw.js (doivent rester accessibles sans session :
+     *   un redirect HTML vers /login casse le parsing JSON du manifest et
+     *   l'enregistrement du service worker, empêchant le prompt d'installation PWA)
      */
-    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
