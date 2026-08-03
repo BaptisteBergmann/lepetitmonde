@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-03
 
+- `272699d` Exclude manifest.webmanifest and sw.js from auth middleware redirect
 - `58f5ec9` Add explicit No button to notification prompt, only that suppresses re-asking
 - `60cba27` Re-prompt notification enrollment every 7 days instead of once ever
 
