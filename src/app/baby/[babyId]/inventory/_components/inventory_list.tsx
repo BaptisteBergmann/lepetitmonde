@@ -1,26 +1,13 @@
 'use client'
 
 import { useMemo, useState } from "react";
-import { Package, Pencil } from "lucide-react";
+import { Search, Shirt } from "lucide-react";
 import { Tables } from "@utils/supabase/database.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import InventoryItemModal from "./inventory_item_modal";
-import ReorderInventoryItemButtons from "./reorder_inventory_item_buttons";
-import DeleteInventoryItemButton from "./delete_inventory_item_button";
 
 type InventoryItem = Tables<'inventory_items'>;
-
-const CONDITION_LABELS: Record<NonNullable<InventoryItem['condition']>, string> = {
-  new: "Neuf",
-  secondhand: "Occasion",
-};
-
-const CONDITION_STYLES: Record<NonNullable<InventoryItem['condition']>, string> = {
-  new: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  secondhand: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-};
 
 function formatPrice(amount: number) {
   return amount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
@@ -38,19 +25,33 @@ export default function InventoryList({
   sources: string[];
 }) {
   const [onlyMissing, setOnlyMissing] = useState(false);
+  const [query, setQuery] = useState("");
 
-  // Items already arrive ordered by position; grouping preserves first-appearance
-  // order, which is always that category's lowest position since we walk the
-  // list in ascending position order.
+  // Grouped by garment name rather than size: with one card per size (the
+  // original layout) a full wardrobe spans a dozen-plus cards to scroll
+  // through. Grouping by garment keeps it to one card per item type, with
+  // sizes as chips inside — far fewer cards, and each one fits a phone width.
   const groups = useMemo(() => {
     const grouped = new Map<string, InventoryItem[]>();
     for (const item of items) {
-      const group = grouped.get(item.category);
+      const group = grouped.get(item.name);
       if (group) group.push(item);
-      else grouped.set(item.category, [item]);
+      else grouped.set(item.name, [item]);
     }
-    return Array.from(grouped.entries());
+    return Array.from(grouped.entries()).sort(([a], [b]) => a.localeCompare(b, "fr"));
   }, [items]);
+
+  const visibleGroups = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return groups
+      .map(([name, groupItems]) => {
+        const visibleItems = onlyMissing
+          ? groupItems.filter((item) => item.quantity_target != null && item.quantity_target > item.quantity_owned)
+          : groupItems;
+        return { name, groupItems, visibleItems };
+      })
+      .filter(({ name, visibleItems }) => visibleItems.length > 0 && (q === "" || name.toLowerCase().includes(q)));
+  }, [groups, onlyMissing, query]);
 
   if (items.length === 0) {
     return (
@@ -63,115 +64,85 @@ export default function InventoryList({
 
   return (
     <div className="space-y-6">
-      <label className="flex items-center gap-2 text-sm text-landing-muted cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={onlyMissing}
-          onChange={(e) => setOnlyMissing(e.target.checked)}
-          className="h-4 w-4 rounded border-landing-border accent-primary cursor-pointer"
-        />
-        Afficher uniquement ce qu&apos;il reste à acheter
-      </label>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="flex items-center gap-2 text-sm text-landing-muted cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={onlyMissing}
+            onChange={(e) => setOnlyMissing(e.target.checked)}
+            className="h-4 w-4 rounded border-landing-border accent-primary cursor-pointer"
+          />
+          Afficher uniquement ce qu&apos;il reste à acheter
+        </label>
 
-      <div className="space-y-4">
-        {groups.map(([category, categoryItems]) => {
-          const visibleItems = onlyMissing
-            ? categoryItems.filter((item) => item.quantity_target != null && item.quantity_target > item.quantity_owned)
-            : categoryItems;
-
-          if (visibleItems.length === 0) return null;
-
-          const subtotal = categoryItems.reduce((sum, item) => sum + (item.price_paid ?? 0), 0);
-
-          return (
-            <Card key={category} className="border-landing-border bg-landing-surface">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between gap-3">
-                  <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
-                    <Package className="h-4.5 w-4.5 text-primary" />
-                    {category}
-                  </CardTitle>
-                  {subtotal > 0 && (
-                    <span className="text-xs font-semibold text-landing-muted">
-                      {formatPrice(subtotal)}
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 pb-2 divide-y divide-landing-border">
-                {visibleItems.map((item) => {
-                  const indexInCategory = categoryItems.findIndex((i) => i.id === item.id);
-                  const reste = item.quantity_target != null && item.quantity_target > item.quantity_owned
-                    ? item.quantity_target - item.quantity_owned
-                    : 0;
-
-                  return (
-                    <div key={item.id} className="flex items-start gap-3 py-3 px-6">
-                      <ReorderInventoryItemButtons
-                        babyId={babyId}
-                        itemId={item.id}
-                        isFirst={indexInCategory === 0}
-                        isLast={indexInCategory === categoryItems.length - 1}
-                      />
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <p className="text-sm font-semibold text-landing-foreground">
-                            {item.name}
-                          </p>
-                          {item.detail && (
-                            <span className="text-xs text-landing-muted">{item.detail}</span>
-                          )}
-                          {reste > 0 && (
-                            <Badge variant="outline" className="border-landing-camel text-landing-camel">
-                              reste à acheter : {reste}
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-landing-muted">
-                          <span>
-                            {item.quantity_owned} possédé{item.quantity_owned > 1 ? "s" : ""}
-                            {item.quantity_target != null && ` / ${item.quantity_target} souhaité${item.quantity_target > 1 ? "s" : ""}`}
-                          </span>
-                          {item.price_paid != null && <span className="font-semibold">{formatPrice(item.price_paid)}</span>}
-                          {item.condition && (
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CONDITION_STYLES[item.condition]}`}>
-                              {CONDITION_LABELS[item.condition]}
-                            </span>
-                          )}
-                          {item.purchased_from && <span>via {item.purchased_from}</span>}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <InventoryItemModal
-                          babyId={babyId}
-                          categories={categories}
-                          sources={sources}
-                          item={item}
-                          trigger={
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-7 w-7 rounded-lg cursor-pointer"
-                              aria-label="Modifier l'article"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                          }
-                        />
-                        <DeleteInventoryItemButton babyId={babyId} itemId={item.id} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          );
-        })}
+        <div className="relative sm:w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-landing-muted" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filtrer un vêtement…"
+            className="pl-8"
+          />
+        </div>
       </div>
+
+      {visibleGroups.length === 0 ? (
+        <p className="py-8 text-center text-sm text-landing-muted">Aucun article ne correspond.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {visibleGroups.map(({ name, groupItems, visibleItems }) => {
+            const totalOwned = groupItems.reduce((sum, item) => sum + item.quantity_owned, 0);
+            const subtotal = groupItems.reduce((sum, item) => sum + (item.price_paid ?? 0), 0);
+
+            return (
+              <Card key={name} className="border-landing-border bg-landing-surface">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="font-display text-sm font-semibold flex items-center gap-2 min-w-0">
+                      <Shirt className="h-4 w-4 text-primary shrink-0" />
+                      <span className="truncate">{name}</span>
+                    </CardTitle>
+                    <span className="shrink-0 text-xs font-semibold text-landing-muted">
+                      {totalOwned} au total{subtotal > 0 && ` · ${formatPrice(subtotal)}`}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-1.5 pt-0">
+                  {visibleItems.map((item) => {
+                    const reste = item.quantity_target != null && item.quantity_target > item.quantity_owned
+                      ? item.quantity_target - item.quantity_owned
+                      : 0;
+
+                    return (
+                      <InventoryItemModal
+                        key={item.id}
+                        babyId={babyId}
+                        categories={categories}
+                        sources={sources}
+                        item={item}
+                        trigger={
+                          <button
+                            type="button"
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs cursor-pointer transition-colors ${
+                              reste > 0
+                                ? "border-landing-camel/50 bg-landing-camel/10 hover:bg-landing-camel/20"
+                                : "border-landing-border bg-landing-background hover:bg-landing-surface"
+                            }`}
+                          >
+                            <span className="text-landing-muted">{item.category}</span>
+                            <span className="font-semibold text-landing-foreground">{item.quantity_owned}</span>
+                            {reste > 0 && <span className="font-semibold text-landing-camel">+{reste}</span>}
+                          </button>
+                        }
+                      />
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -96,52 +96,6 @@ export async function deleteInventoryItem(babyId: string, itemId: string) {
   revalidatePath(`/baby/${babyId}/inventory`)
 }
 
-// Reordering only ever swaps with the nearest neighbor sharing the same
-// category, so a stray up/down click can't scramble category boundaries.
-export async function reorderInventoryItem(babyId: string, itemId: string, direction: 'up' | 'down') {
-  const supabase = await createClient()
-  await assertIsAdmin(supabase, babyId)
-
-  const contextLogger = logger.child({ function: reorderInventoryItem.name, babyId, itemId, direction })
-
-  const { data: target, error: targetError } = await supabase
-    .from('inventory_items')
-    .select('category')
-    .eq('id', itemId)
-    .eq('baby_id', babyId)
-    .single()
-
-  if (targetError) { contextLogger.error(targetError, "Error fetching item before reorder"); throw targetError }
-
-  const { data: items, error } = await supabase
-    .from('inventory_items')
-    .select('id, position')
-    .eq('baby_id', babyId)
-    .eq('category', target.category)
-    .order('position', { ascending: true })
-
-  if (error) { contextLogger.error(error, "Error fetching category items before reorder"); throw error }
-
-  const index = items.findIndex((item) => item.id === itemId)
-  if (index === -1) throw new Error("Article introuvable")
-
-  const swapIndex = direction === 'up' ? index - 1 : index + 1
-  if (swapIndex < 0 || swapIndex >= items.length) return
-
-  const current = items[index]
-  const swapWith = items[swapIndex]
-
-  const [{ error: error1 }, { error: error2 }] = await Promise.all([
-    supabase.from('inventory_items').update({ position: swapWith.position }).eq('baby_id', babyId).eq('id', current.id),
-    supabase.from('inventory_items').update({ position: current.position }).eq('baby_id', babyId).eq('id', swapWith.id),
-  ])
-
-  if (error1 || error2) { contextLogger.error(error1 || error2, "Error swapping positions"); throw error1 || error2 }
-  contextLogger.info("Item moved")
-
-  revalidatePath(`/baby/${babyId}/inventory`)
-}
-
 // Family-facing view of the same table: everything an admin still wants
 // more of. No second source of truth — just a filter on inventory_items.
 // Supabase can't compare two columns in a query filter, so the

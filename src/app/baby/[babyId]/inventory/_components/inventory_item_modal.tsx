@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { createInventoryItem, updateInventoryItem } from '@utils/actions/inventory'
+import { createInventoryItem, updateInventoryItem, deleteInventoryItem } from '@utils/actions/inventory'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Loader2, Package, Pencil, X } from 'lucide-react'
+import { Plus, Loader2, Package, Pencil, Trash2, X } from 'lucide-react'
 import { Tables, Enums } from '@utils/supabase/database.types'
 
 type InventoryItem = Tables<'inventory_items'>
@@ -50,6 +50,7 @@ export default function InventoryItemModal({
   const [condition, setCondition] = useState<string>(item?.condition ?? UNSPECIFIED)
 
   const [isPending, setIsPending] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const resetForm = () => {
     setCategory("")
@@ -90,6 +91,23 @@ export default function InventoryItemModal({
       alert(err instanceof Error ? err.message : "Une erreur est survenue lors de la sauvegarde.")
     } finally {
       setIsPending(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!item) return
+    if (!confirm("Supprimer cet article ? Cette action est irréversible.")) return
+
+    setIsDeleting(true)
+    try {
+      await deleteInventoryItem(babyId, item.id)
+      setOpen(false)
+      router.refresh()
+    } catch (err) {
+      console.error(err)
+      alert(err instanceof Error ? err.message : "Une erreur est survenue lors de la suppression.")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -253,28 +271,42 @@ export default function InventoryItemModal({
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
-              <Button
-                variant="outline"
-                className="rounded-2xl cursor-pointer"
-                onClick={() => setOpen(false)}
-              >
-                Annuler
-              </Button>
-              <Button
-                disabled={!category.trim() || !name.trim() || isPending}
-                className="rounded-2xl cursor-pointer"
-                onClick={handleConfirm}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{isEditMode ? "Enregistrement..." : "Ajout..."}</span>
-                  </>
-                ) : (
-                  <span>{isEditMode ? "Enregistrer" : "Ajouter"}</span>
-                )}
-              </Button>
+            <div className="border-t border-landing-border bg-landing-background flex justify-between gap-2 items-center px-5 py-3.5">
+              {isEditMode ? (
+                <Button
+                  variant="outline"
+                  disabled={isDeleting || isPending}
+                  className="rounded-2xl cursor-pointer text-destructive hover:text-destructive"
+                  onClick={handleDelete}
+                >
+                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  <span>Supprimer</span>
+                </Button>
+              ) : <span />}
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-2xl cursor-pointer"
+                  onClick={() => setOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  disabled={!category.trim() || !name.trim() || isPending || isDeleting}
+                  className="rounded-2xl cursor-pointer"
+                  onClick={handleConfirm}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>{isEditMode ? "Enregistrement..." : "Ajout..."}</span>
+                    </>
+                  ) : (
+                    <span>{isEditMode ? "Enregistrer" : "Ajouter"}</span>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>,
