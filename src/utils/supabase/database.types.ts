@@ -382,6 +382,8 @@ export type Database = {
           purchased_from: string | null
           quantity_owned: number
           quantity_target: number | null
+          updated_at: string
+          updated_by: string | null
         }
         Insert: {
           baby_id: string
@@ -397,6 +399,8 @@ export type Database = {
           purchased_from?: string | null
           quantity_owned?: number
           quantity_target?: number | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           baby_id?: string
@@ -412,6 +416,8 @@ export type Database = {
           purchased_from?: string | null
           quantity_owned?: number
           quantity_target?: number | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -424,6 +430,13 @@ export type Database = {
           {
             foreignKeyName: "inventory_items_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -977,6 +990,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_inventory_owned: {
+        Args: { actor_id: string; delta: number; item_id: string }
+        Returns: {
+          baby_id: string
+          category: string
+          condition: Database["public"]["Enums"]["item_condition"] | null
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          id: string
+          name: string
+          position: number
+          price_paid: number | null
+          purchased_from: string | null
+          quantity_owned: number
+          quantity_target: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+      }
       is_baby_admin: { Args: { target_baby_id: string }; Returns: boolean }
       is_baby_member: { Args: { target_baby_id: string }; Returns: boolean }
       is_circle_visible: {
