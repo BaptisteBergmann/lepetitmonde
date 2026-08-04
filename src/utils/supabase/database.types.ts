@@ -367,6 +367,69 @@ export type Database = {
           },
         ]
       }
+      inventory_items: {
+        Row: {
+          baby_id: string
+          category: string
+          condition: Database["public"]["Enums"]["item_condition"] | null
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          id: string
+          name: string
+          position: number
+          price_paid: number | null
+          purchased_from: string | null
+          quantity_owned: number
+          quantity_target: number | null
+        }
+        Insert: {
+          baby_id: string
+          category: string
+          condition?: Database["public"]["Enums"]["item_condition"] | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          id?: string
+          name: string
+          position: number
+          price_paid?: number | null
+          purchased_from?: string | null
+          quantity_owned?: number
+          quantity_target?: number | null
+        }
+        Update: {
+          baby_id?: string
+          category?: string
+          condition?: Database["public"]["Enums"]["item_condition"] | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          id?: string
+          name?: string
+          position?: number
+          price_paid?: number | null
+          purchased_from?: string | null
+          quantity_owned?: number
+          quantity_target?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           baby_id: string
@@ -925,6 +988,7 @@ export type Database = {
     Enums: {
       bug_report_status: "new" | "reviewed" | "fixed"
       event_kind: "occasion" | "life_stage" | "medical"
+      item_condition: "new" | "secondhand"
       milestone_type:
         | "first_steps"
         | "first_tooth"
@@ -1071,6 +1135,7 @@ export const Constants = {
     Enums: {
       bug_report_status: ["new", "reviewed", "fixed"],
       event_kind: ["occasion", "life_stage", "medical"],
+      item_condition: ["new", "secondhand"],
       milestone_type: [
         "first_steps",
         "first_tooth",
