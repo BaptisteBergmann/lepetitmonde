@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `5df1ef5` Scope adjust_inventory_owned by baby_id to close a cross-baby write hole
 - `9b7d8b6` Add updated_at/updated_by columns and adjust_inventory_owned RPC
 - `05e249d` Add inventory admin page UI
 - `0c5c9f1` Add Inventaire nav entry (admin-only for now)
