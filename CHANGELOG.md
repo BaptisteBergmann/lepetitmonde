@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `9b7d8b6` Add updated_at/updated_by columns and adjust_inventory_owned RPC
 - `05e249d` Add inventory admin page UI
 - `0c5c9f1` Add Inventaire nav entry (admin-only for now)
 - `65a3e41` Add inventory_items Server Actions (CRUD + category-scoped reorder)
