@@ -30,12 +30,22 @@ export default function InventoryList({
   const [onlyMissing, setOnlyMissing] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
+  const [expandedTitles, setExpandedTitles] = useState<Set<string>>(new Set());
 
   const toggleSize = (size: string) => {
     setSelectedSizes((prev) => {
       const next = new Set(prev);
       if (next.has(size)) next.delete(size);
       else next.add(size);
+      return next;
+    });
+  };
+
+  const toggleTitle = (key: string) => {
+    setExpandedTitles((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -183,7 +193,16 @@ export default function InventoryList({
                       {viewMode === 'garment'
                         ? <Shirt className="h-4 w-4 text-primary shrink-0" />
                         : <Ruler className="h-4 w-4 text-primary shrink-0" />}
-                      <span className="truncate">{key}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleTitle(key)}
+                        title={key}
+                        className={`min-w-0 flex-1 cursor-pointer text-left ${
+                          expandedTitles.has(key) ? "whitespace-normal break-words" : "truncate"
+                        }`}
+                      >
+                        {key}
+                      </button>
                     </CardTitle>
                     <span className="shrink-0 text-xs font-semibold text-landing-muted">
                       {totalOwned} au total{subtotal > 0 && ` · ${formatPrice(subtotal)}`}
