@@ -991,7 +991,12 @@ export type Database = {
     }
     Functions: {
       adjust_inventory_owned: {
-        Args: { actor_id: string; delta: number; item_id: string; target_baby_id: string }
+        Args: {
+          actor_id: string
+          delta: number
+          item_id: string
+          target_baby_id: string
+        }
         Returns: {
           baby_id: string
           category: string
@@ -1008,6 +1013,12 @@ export type Database = {
           quantity_target: number | null
           updated_at: string
           updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "inventory_items"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       is_baby_admin: { Args: { target_baby_id: string }; Returns: boolean }
@@ -1191,4 +1202,3 @@ export const Constants = {
     },
   },
 } as const
-
