@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import QuestionsListWrapper from "./questions_list_wrapper";
 import { Loader2, Settings, Dices } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
+import { assertPageAccess } from "@/utils/actions/page_settings";
 import { logger } from "@/utils/logger";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@components/reveal";
@@ -14,6 +15,9 @@ export default async function GuessesPage({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
+
+  await assertPageAccess(babyId, 'guess')
+
   const access = await getUserAccess(babyId)
   const contextLogger = logger.child({ function: GuessesPage.name, params })
   contextLogger.debug(access, "User Access")

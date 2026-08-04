@@ -1,4 +1,5 @@
 import { getBuyListItems } from "@/utils/actions/inventory";
+import { assertPageAccess } from "@/utils/actions/page_settings";
 import BuyList from "./_components/buy_list";
 import { Reveal } from "@components/reveal";
 
@@ -8,6 +9,9 @@ export default async function BuyListPage({
   params: Promise<{ babyId: string }>;
 }) {
   const { babyId } = await params;
+
+  await assertPageAccess(babyId, 'buy-list');
+
   const items = await getBuyListItems(babyId);
 
   return (

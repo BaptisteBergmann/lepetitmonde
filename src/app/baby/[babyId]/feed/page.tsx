@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Loader2, BookOpen, Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
+import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles, getUserCircleIds } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
 import { getAuthUser } from "@/utils/supabase/auth";
@@ -18,6 +19,8 @@ export default async function FeedPage({
 }) {
   const { babyId } = await params;
   const contextLogger = logger.child({ function: FeedPage.name, babyId })
+
+  await assertPageAccess(babyId, 'feed')
 
   const access = await getUserAccess(babyId)
   if (Array.isArray(access)) {

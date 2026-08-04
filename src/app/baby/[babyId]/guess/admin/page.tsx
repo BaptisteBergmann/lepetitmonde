@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
+import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getPendingQuestions, getQuestions } from "@/utils/actions/guesses_questions";
 import { getAllGuesses } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
@@ -54,6 +55,11 @@ export default async function GuessAdminPage({
   const { babyId } = await params;
   const contextLogger = logger.child({ function: GuessAdminPage.name, babyId });
 
+  // Feature-level gate: can this member reach Pronostics at all.
+  await assertPageAccess(babyId, 'guess');
+
+  // Within Pronostics, managing questions is admin-only — a separate,
+  // narrower concern from the page-level gate above.
   const access = await getUserAccess(babyId);
   if (Array.isArray(access) || access.access_level !== "admin") {
     contextLogger.warn("Non-admin attempted to access guess admin page");

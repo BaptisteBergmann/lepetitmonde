@@ -1,7 +1,5 @@
-import { redirect } from "next/navigation";
-import { getUserAccess } from "@/utils/actions/users";
+import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getInventoryItems } from "@/utils/actions/inventory";
-import { logger } from "@/utils/logger";
 import InventoryItemModal from "./_components/inventory_item_modal";
 import InventoryList from "./_components/inventory_list";
 import { Reveal } from "@components/reveal";
@@ -12,13 +10,8 @@ export default async function InventoryPage({
   params: Promise<{ babyId: string }>;
 }) {
   const { babyId } = await params;
-  const contextLogger = logger.child({ function: InventoryPage.name, babyId });
 
-  const access = await getUserAccess(babyId);
-  if (Array.isArray(access) || access.access_level !== "admin") {
-    contextLogger.warn("Non-admin attempted to access inventory page");
-    redirect(`/baby/${babyId}`);
-  }
+  await assertPageAccess(babyId, 'inventory');
 
   const items = await getInventoryItems(babyId);
 
