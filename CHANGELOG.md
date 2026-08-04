@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `db1ae4d` Add page_settings Server Actions: get/update settings, assert access
 - `c48cbb9` Add page_registry.ts as the single source of truth for app pages
 - `6bc4985` Add page_settings table for per-baby page access overrides
 - `e560916` Regenerate database.types.ts from the live schema
