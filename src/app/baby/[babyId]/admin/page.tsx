@@ -28,7 +28,14 @@ export default async function InviteForm({
   const users = await getUsers(babyId);
   const devicesByUser = isAdmin ? await getMembersDevices(babyId) : {};
   const bugReports = isAdmin ? await getBugReports(babyId) : [];
-  const manageablePages = isAdmin ? (await getPageSettings(babyId)).filter((page) => page.manageable) : [];
+  // Plain objects only — this is passed into DisplayPageSettings, a Client
+  // Component, and ResolvedPage's `icon` (a function reference) can't cross
+  // that boundary. See the note on NavPage in _header/types.ts.
+  const manageablePages = isAdmin
+    ? (await getPageSettings(babyId))
+      .filter((page) => page.manageable)
+      .map((page) => ({ id: page.id, name: page.name, enabled: page.enabled, role: page.role }))
+    : [];
 
   return (
     <div className="bg-landing-background text-landing-foreground">
