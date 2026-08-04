@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `6ce5f40` Add "Liste d'achats" nav entry, visible to all members
 - `841b906` Add inventory_items to the realtime relay
 - `010bdf0` Add getBuyListItems and adjustInventoryOwned Server Actions
 - `5df1ef5` Scope adjust_inventory_owned by baby_id to close a cross-baby write hole
