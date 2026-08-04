@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `b491c72` Add page-access-settings implementation plan
 - `a6c961d` Add "Pages & accès" admin card for per-baby page access settings
 - `d4af927` Enforce page access on every protected page via assertPageAccess
 - `d7832aa` Retrofit baby landing page to read sections from getPageSettings
