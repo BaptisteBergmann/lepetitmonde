@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `841b906` Add inventory_items to the realtime relay
 - `010bdf0` Add getBuyListItems and adjustInventoryOwned Server Actions
 - `5df1ef5` Scope adjust_inventory_owned by baby_id to close a cross-baby write hole
 - `9b7d8b6` Add updated_at/updated_by columns and adjust_inventory_owned RPC
