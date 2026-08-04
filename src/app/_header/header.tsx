@@ -1,5 +1,6 @@
 import SiteTitle from './site_title';
 import { getAllUserAccess } from '@/utils/actions/users';
+import { getPageSettings } from '@/utils/actions/page_settings';
 import { logger } from '@/utils/logger';
 import Link from 'next/link';
 import PageSelector from './page_selector';
@@ -8,7 +9,6 @@ import MobileMenu from './mobile_menu';
 import NotificationBell from './notification_bell';
 import { createClient } from '@/utils/supabase/server';
 import { Tables } from '@/utils/supabase/database.types';
-import { NavPage } from './types';
 
 export default async function Header({ babies }: { babies: Tables<'babies'>[] }) {
   const contextLogger = logger.child({ function: Header.name });
@@ -22,21 +22,14 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
 
   const allUserAccess = await getAllUserAccess();
 
-  const pages: NavPage[] = [
-    { id: "feed", name: "Journal", role: "viewer", enabled: true },
-    { id: "calendar", name: "Calendrier", role: "viewer", enabled: true },
-    { id: "guess", name: "Pronostics", role: "viewer", enabled: true },
-    { id: "admin", name: "Administration", role: "admin", enabled: true },
-    { id: "inventory", name: "Inventaire", role: "admin", enabled: true },
-    { id: "buy-list", name: "Liste d'achats", role: "viewer", enabled: true },
-    { id: "news", name: "Newsletter", role: "viewer", enabled: false },
-  ];
-
-  const accesses = allUserAccess.map((acc) => ({
-    ...acc,
-    allowedPages: pages.filter((page) =>
-      page.enabled && (acc.access_level === "admin" || acc.access_level === page.role)
-    )
+  const accesses = await Promise.all(allUserAccess.map(async (acc) => {
+    const pages = await getPageSettings(acc.baby_id);
+    return {
+      ...acc,
+      allowedPages: pages.filter((page) =>
+        page.enabled && (acc.access_level === "admin" || acc.access_level === page.role)
+      )
+    };
   }));
 
   contextLogger.debug(accesses, "User accesses");

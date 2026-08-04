@@ -1,10 +1,12 @@
-import { Tables } from '@/utils/supabase/database.types';
+import { Tables, Enums } from '@/utils/supabase/database.types';
+import { LucideIcon } from 'lucide-react';
 
 export type NavPage = {
   id: string;
   name: string;
-  role: string;
+  role: Enums<'role'>;
   enabled: boolean;
+  icon: LucideIcon;
 };
 
 export type AccessWithPages = Tables<'baby_access'> & {
