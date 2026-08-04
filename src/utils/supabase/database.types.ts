@@ -585,6 +585,41 @@ export type Database = {
           },
         ]
       }
+      page_settings: {
+        Row: {
+          baby_id: string
+          enabled: boolean
+          id: string
+          page_id: string
+          required_role: Database["public"]["Enums"]["role"]
+          updated_at: string
+        }
+        Insert: {
+          baby_id: string
+          enabled?: boolean
+          id?: string
+          page_id: string
+          required_role?: Database["public"]["Enums"]["role"]
+          updated_at?: string
+        }
+        Update: {
+          baby_id?: string
+          enabled?: boolean
+          id?: string
+          page_id?: string
+          required_role?: Database["public"]["Enums"]["role"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_settings_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_options: {
         Row: {
           id: string
@@ -1202,3 +1237,4 @@ export const Constants = {
     },
   },
 } as const
+
