@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `7bcac57` Add inventory_items table migration and matching database types
 - `e718400` Add implementation plans for inventory and shared buy-list features
 
 ## 2026-08-03
