@@ -1,48 +1,14 @@
 import { getBaby } from "@utils/actions/baby";
 import { getUserAccess } from "@utils/actions/users";
+import { getPageSettings } from "@utils/actions/page_settings";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BookOpen, CalendarDays, Dices, Users, ChevronRight, ShieldCheck } from "lucide-react";
+import { ChevronRight, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Reveal } from "@components/reveal";
-
-const SECTIONS = [
-  {
-    id: "feed",
-    name: "Journal",
-    eyebrow: "Page — Le quotidien",
-    description: "Photos, vidéos et petits mots du jour, partagés en famille.",
-    role: "viewer" as const,
-    icon: BookOpen,
-  },
-  {
-    id: "calendar",
-    name: "Calendrier",
-    eyebrow: "Page — Les grandes étapes",
-    description: "Rendez-vous, poussées de croissance et jalons à venir.",
-    role: "viewer" as const,
-    icon: CalendarDays,
-  },
-  {
-    id: "guess",
-    name: "Pronostics",
-    eyebrow: "Page — Les paris de famille",
-    description: "Prénom, poids, date de naissance : les paris de toute la famille.",
-    role: "viewer" as const,
-    icon: Dices,
-  },
-  {
-    id: "admin",
-    name: "Administration",
-    eyebrow: "Page — Le cercle",
-    description: "Gérez qui a accès au journal et organisez le cercle de partage.",
-    role: "admin" as const,
-    icon: Users,
-  },
-];
 
 export default async function BabyPage({
   params,
@@ -58,8 +24,9 @@ export default async function BabyPage({
     notFound();
   }
 
-  const sections = SECTIONS.filter(
-    (section) => accessLevel === "admin" || accessLevel === section.role
+  const pages = await getPageSettings(babyId);
+  const sections = pages.filter(
+    (page) => page.enabled && (accessLevel === "admin" || accessLevel === page.role)
   );
 
   return (
