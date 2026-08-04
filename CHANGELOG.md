@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `e560916` Regenerate database.types.ts from the live schema
 - `ae0cecd` Add buy-list page UI
 - `6ce5f40` Add "Liste d'achats" nav entry, visible to all members
 - `841b906` Add inventory_items to the realtime relay
