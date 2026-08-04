@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
 import { TablesInsert, TablesUpdate } from '@utils/supabase/database.types'
 import { logger } from '../logger'
+import { getDisplayName } from '../users'
 import { assertIsAdmin } from './access'
+import { getUserAccess, getNicknamesByBaby } from './users'
 
 export async function getInventoryItems(babyId: string) {
   const supabase = await createClient()
@@ -137,5 +139,73 @@ export async function reorderInventoryItem(babyId: string, itemId: string, direc
   if (error1 || error2) { contextLogger.error(error1 || error2, "Error swapping positions"); throw error1 || error2 }
   contextLogger.info("Item moved")
 
+  revalidatePath(`/baby/${babyId}/inventory`)
+}
+
+// Family-facing view of the same table: everything an admin still wants
+// more of. No second source of truth — just a filter on inventory_items.
+// Supabase can't compare two columns in a query filter, so the
+// quantity_target > quantity_owned check happens in JS after fetching the
+// (small) set of rows that have a target set at all.
+export async function getBuyListItems(babyId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
+  const contextLogger = logger.child({ function: getBuyListItems.name, babyId })
+
+  const [{ data, error }, nicknames] = await Promise.all([
+    supabase
+      .from('inventory_items')
+      .select('*, updated_by_user:users!inventory_items_updated_by_fkey(first_name, last_name)')
+      .eq('baby_id', babyId)
+      .not('quantity_target', 'is', null)
+      .order('position', { ascending: true }),
+    getNicknamesByBaby(babyId),
+  ])
+
+  if (error) { contextLogger.error(error, "Error fetching buy list items"); return [] }
+
+  const stillNeeded = data
+    .filter((item) => item.quantity_target !== null && item.quantity_target > item.quantity_owned)
+    .map((item) => ({
+      ...item,
+      updatedByName: item.updated_by ? getDisplayName(item.updated_by_user, nicknames[item.updated_by] ?? null) : null,
+    }))
+
+  contextLogger.debug({ count: stillNeeded.length }, "Buy list items received")
+
+  return stillNeeded
+}
+
+// Any member can mark items bought while shopping, not just admins — see
+// adjust_inventory_owned() in the migration for the atomic clamp that keeps
+// concurrent taps from racing each other into a lost update.
+export async function adjustInventoryOwned(babyId: string, itemId: string, delta: 1 | -1) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Non autorisé")
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw new Error("Non autorisé")
+
+  const contextLogger = logger.child({ function: adjustInventoryOwned.name, babyId, itemId, delta })
+
+  const { error } = await supabase.rpc('adjust_inventory_owned', {
+    item_id: itemId,
+    target_baby_id: babyId,
+    delta,
+    actor_id: user.id,
+  })
+
+  if (error) { contextLogger.error(error, "Error adjusting inventory owned quantity"); throw error }
+  contextLogger.info("Inventory owned quantity adjusted")
+
+  revalidatePath(`/baby/${babyId}/buy-list`)
   revalidatePath(`/baby/${babyId}/inventory`)
 }
