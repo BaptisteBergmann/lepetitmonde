@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `4419d4f` Fix same RSC serialization crash on the admin page's Pages & accès card
 - `1f8bb02` Fix RSC serialization crash: resolve nav icons client-side, not via props
 - `b491c72` Add page-access-settings implementation plan
 - `a6c961d` Add "Pages & accès" admin card for per-baby page access settings
