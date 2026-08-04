@@ -8,9 +8,11 @@ import InvitationsList from "./_components/display_invitations";
 import { getUsers, getUserAccess } from "@/utils/actions/users";
 import { getMembersDevices } from "@/utils/actions/notifications";
 import { getBugReports } from "@/utils/actions/bug_reports";
+import { getPageSettings } from "@/utils/actions/page_settings";
 import DisplayBugReports from "./_components/display_bug_reports";
+import DisplayPageSettings from "./_components/display_page_settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Mail, ShieldCheck, Bug } from "lucide-react";
+import { Users, UserPlus, Mail, ShieldCheck, Bug, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Reveal } from "@components/reveal";
@@ -26,6 +28,7 @@ export default async function InviteForm({
   const users = await getUsers(babyId);
   const devicesByUser = isAdmin ? await getMembersDevices(babyId) : {};
   const bugReports = isAdmin ? await getBugReports(babyId) : [];
+  const manageablePages = isAdmin ? (await getPageSettings(babyId)).filter((page) => page.manageable) : [];
 
   return (
     <div className="bg-landing-background text-landing-foreground">
@@ -165,6 +168,24 @@ export default async function InviteForm({
                 </CardHeader>
                 <CardContent className="px-0 pb-2">
                   <DisplayBugReports bugReports={bugReports} babyId={babyId} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Pages & accès Card (admin only) */}
+            {isAdmin && (
+              <Card className="border-landing-border bg-landing-surface">
+                <CardHeader className="pb-3">
+                  <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
+                    <LayoutGrid className="h-4.5 w-4.5 text-primary" />
+                    Pages & accès
+                  </CardTitle>
+                  <CardDescription className="text-xs text-landing-muted">
+                    Activez ou restreignez l&apos;accès à chaque page de ce journal.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-0 pb-2">
+                  <DisplayPageSettings babyId={babyId} pages={manageablePages} />
                 </CardContent>
               </Card>
             )}
