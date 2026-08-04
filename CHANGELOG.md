@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `05e249d` Add inventory admin page UI
 - `0c5c9f1` Add Inventaire nav entry (admin-only for now)
 - `65a3e41` Add inventory_items Server Actions (CRUD + category-scoped reorder)
 - `7bcac57` Add inventory_items table migration and matching database types
