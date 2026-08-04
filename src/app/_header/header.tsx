@@ -26,9 +26,12 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
     const pages = await getPageSettings(acc.baby_id);
     return {
       ...acc,
-      allowedPages: pages.filter((page) =>
-        page.enabled && (acc.access_level === "admin" || acc.access_level === page.role)
-      )
+      // Plain objects only — this is passed into MobileMenu, a Client
+      // Component, and ResolvedPage's `icon` (a function reference) can't
+      // cross that boundary. See the note on NavPage in ./types.
+      allowedPages: pages
+        .filter((page) => page.enabled && (acc.access_level === "admin" || acc.access_level === page.role))
+        .map((page) => ({ id: page.id, name: page.name, role: page.role, enabled: page.enabled }))
     };
   }));
 

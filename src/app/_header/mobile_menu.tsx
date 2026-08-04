@@ -13,6 +13,17 @@ import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import { LogOut, Settings, Menu } from 'lucide-react'
 import { AccessWithPages } from './types'
+import { PAGE_REGISTRY } from '@utils/page_registry'
+
+// Icons come from PAGE_REGISTRY directly rather than through the `accesses`
+// prop: Lucide icon components are function references, and Next.js can't
+// serialize a function value across the Server → Client Component boundary
+// (only already-rendered JSX or plain data can cross). Importing the same
+// registry module here keeps this as the only place resolving id → icon,
+// still without duplicating the icon list itself.
+const ICONS_BY_PAGE_ID = new Map<string, typeof PAGE_REGISTRY[number]['icon']>(
+  PAGE_REGISTRY.map((page) => [page.id, page.icon])
+)
 
 interface MobileMenuProps {
   initials: string
@@ -65,7 +76,7 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
               Navigation
             </DropdownMenuLabel>
             {allowedPages.map((page) => {
-              const Icon = page.icon
+              const Icon = ICONS_BY_PAGE_ID.get(page.id) ?? Menu
               const active = isPageActive(page.id)
               return (
                 <DropdownMenuItem
