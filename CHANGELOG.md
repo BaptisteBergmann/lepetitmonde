@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `65a3e41` Add inventory_items Server Actions (CRUD + category-scoped reorder)
 - `7bcac57` Add inventory_items table migration and matching database types
 - `e718400` Add implementation plans for inventory and shared buy-list features
 
