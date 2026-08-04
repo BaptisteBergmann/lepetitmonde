@@ -991,7 +991,7 @@ export type Database = {
     }
     Functions: {
       adjust_inventory_owned: {
-        Args: { actor_id: string; delta: number; item_id: string }
+        Args: { actor_id: string; delta: number; item_id: string; target_baby_id: string }
         Returns: {
           baby_id: string
           category: string

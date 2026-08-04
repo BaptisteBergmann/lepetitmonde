@@ -40,7 +40,7 @@ fine. Use a Postgres function for an atomic, clamped increment instead:
 
 ```sql
 CREATE OR REPLACE FUNCTION "public"."adjust_inventory_owned"(
-  "item_id" uuid, "delta" integer, "actor_id" uuid
+  "item_id" uuid, "target_baby_id" uuid, "delta" integer, "actor_id" uuid
 )
 RETURNS "public"."inventory_items"
 LANGUAGE "sql"
@@ -52,15 +52,18 @@ AS $$
       ),
       "updated_at" = now(),
       "updated_by" = "actor_id"
-  WHERE "id" = "item_id"
+  WHERE "id" = "item_id" AND "baby_id" = "target_baby_id"
   RETURNING *;
 $$;
 
-GRANT EXECUTE ON FUNCTION "public"."adjust_inventory_owned"(uuid, integer, uuid) TO "authenticated", "service_role";
+GRANT EXECUTE ON FUNCTION "public"."adjust_inventory_owned"(uuid, uuid, integer, uuid) TO "authenticated", "service_role";
 ```
 
 `delta` is `+1` or `-1` per tap; the `LEAST`/`GREATEST` clamp keeps `quantity_owned` inside
 `[0, quantity_target]` regardless of how many concurrent taps land, no lost updates.
+`target_baby_id` is required, not just `item_id`: the calling action only checks that the caller
+has *some* access to `babyId`, not that `item_id` actually belongs to that baby — without this
+parameter the WHERE clause would let a member of any baby adjust any other baby's items.
 
 Regenerate types after: `mise run update_types`.
 
@@ -80,7 +83,7 @@ Regenerate types after: `mise run update_types`.
   way as the admin inventory page (category by lowest `position`, then `position`). Joins
   `updated_by` to a display name via `getNicknamesByBaby`/`getDisplayName`, same as `comments.ts`.
 - `adjustInventoryOwned(babyId, itemId, delta: 1 | -1)` — membership check only; calls
-  `supabase.rpc('adjust_inventory_owned', { item_id: itemId, delta, actor_id: user.id })`;
+  `supabase.rpc('adjust_inventory_owned', { item_id: itemId, target_baby_id: babyId, delta, actor_id: user.id })`;
   `revalidatePath` both `/baby/${babyId}/buy-list` and `/baby/${babyId}/inventory` so the admin
   view reflects checks made from the family view.
 
