@@ -28,6 +28,7 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
     { id: "guess", name: "Pronostics", role: "viewer", enabled: true },
     { id: "admin", name: "Administration", role: "admin", enabled: true },
     { id: "inventory", name: "Inventaire", role: "admin", enabled: true },
+    { id: "buy-list", name: "Liste d'achats", role: "viewer", enabled: true },
     { id: "news", name: "Newsletter", role: "viewer", enabled: false },
   ];
 
