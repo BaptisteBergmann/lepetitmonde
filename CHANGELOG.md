@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-04
 
+- `d7832aa` Retrofit baby landing page to read sections from getPageSettings
 - `9a38db6` Retrofit header.tsx + mobile_menu.tsx to read from getPageSettings
 - `db1ae4d` Add page_settings Server Actions: get/update settings, assert access
 - `c48cbb9` Add page_registry.ts as the single source of truth for app pages
