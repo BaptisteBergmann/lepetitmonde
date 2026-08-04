@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-04
+
+- `e718400` Add implementation plans for inventory and shared buy-list features
+
 ## 2026-08-03
 
 - `272699d` Exclude manifest.webmanifest and sw.js from auth middleware redirect
