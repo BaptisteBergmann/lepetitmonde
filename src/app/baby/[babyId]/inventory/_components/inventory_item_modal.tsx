@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Plus, Loader2, Package, Pencil, Trash2, X } from 'lucide-react'
 import { Tables, Enums } from '@utils/supabase/database.types'
+import { ITEM_KINDS, ITEM_KIND_LABEL, ItemKind } from '@utils/inventory_kind'
 
 type InventoryItem = Tables<'inventory_items'>
 type Condition = Enums<'item_condition'>
@@ -25,13 +26,13 @@ const UNSPECIFIED = "unspecified"
 
 export default function InventoryItemModal({
   babyId,
-  categories,
+  sizes,
   sources,
   item,
   trigger,
 }: {
   babyId: string
-  categories: string[]
+  sizes: string[]
   sources: string[]
   item?: InventoryItem
   trigger?: React.ReactNode
@@ -40,7 +41,8 @@ export default function InventoryItemModal({
   const isEditMode = !!item
   const [open, setOpen] = useState(false)
 
-  const [category, setCategory] = useState(item?.category ?? "")
+  const [kind, setKind] = useState<ItemKind>(item?.kind ?? "clothing")
+  const [size, setSize] = useState(item?.size ?? "")
   const [name, setName] = useState(item?.name ?? "")
   const [detail, setDetail] = useState(item?.detail ?? "")
   const [quantityOwned, setQuantityOwned] = useState(String(item?.quantity_owned ?? 0))
@@ -53,7 +55,8 @@ export default function InventoryItemModal({
   const [isDeleting, setIsDeleting] = useState(false)
 
   const resetForm = () => {
-    setCategory("")
+    setKind("clothing")
+    setSize("")
     setName("")
     setDetail("")
     setQuantityOwned("0")
@@ -67,7 +70,8 @@ export default function InventoryItemModal({
     setIsPending(true)
     try {
       const payload = {
-        category: category.trim(),
+        kind,
+        size: kind === "clothing" ? (size.trim() || null) : null,
         name: name.trim(),
         detail: detail.trim() || null,
         quantity_owned: Number(quantityOwned) || 0,
@@ -151,21 +155,38 @@ export default function InventoryItemModal({
             <div className="p-5 space-y-4 flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5 col-span-2">
-                  <Label htmlFor="category" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Catégorie
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Type d&apos;article
                   </Label>
-                  <Input
-                    id="category"
-                    list="inventory-categories"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="Ex: 0/3 mois"
-                    required
-                  />
-                  <datalist id="inventory-categories">
-                    {categories.map((c) => <option key={c} value={c} />)}
-                  </datalist>
+                  <Select value={kind} onValueChange={(value: string | null) => setKind((value as ItemKind) ?? "clothing")}>
+                    <SelectTrigger className="w-full text-foreground bg-input/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {ITEM_KINDS.map((k) => <SelectItem key={k} value={k}>{ITEM_KIND_LABEL[k]}</SelectItem>)}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                {kind === "clothing" && (
+                  <div className="flex flex-col gap-1.5 col-span-2">
+                    <Label htmlFor="size" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Taille (facultatif)
+                    </Label>
+                    <Input
+                      id="size"
+                      list="inventory-sizes"
+                      value={size}
+                      onChange={(e) => setSize(e.target.value)}
+                      placeholder="Ex: 0/3 mois"
+                    />
+                    <datalist id="inventory-sizes">
+                      {sizes.map((s) => <option key={s} value={s} />)}
+                    </datalist>
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -293,7 +314,7 @@ export default function InventoryItemModal({
                   Annuler
                 </Button>
                 <Button
-                  disabled={!category.trim() || !name.trim() || isPending || isDeleting}
+                  disabled={!name.trim() || isPending || isDeleting}
                   className="rounded-2xl cursor-pointer"
                   onClick={handleConfirm}
                 >

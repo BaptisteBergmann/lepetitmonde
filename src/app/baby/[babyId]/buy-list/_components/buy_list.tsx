@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2, Minus, Package, Plus } from "lucide-react";
+import { Loader2, Minus, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { adjustInventoryOwned, type getBuyListItems } from "@utils/actions/inventory";
 import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
+import { ITEM_KIND_ICON, ITEM_KIND_LABEL, ItemKind } from "@utils/inventory_kind";
 
 type BuyListItem = Awaited<ReturnType<typeof getBuyListItems>>[number];
 
@@ -30,11 +31,11 @@ export default function BuyList({
   });
 
   const groups = useMemo(() => {
-    const grouped = new Map<string, BuyListItem[]>();
+    const grouped = new Map<ItemKind, BuyListItem[]>();
     for (const item of initialItems) {
-      const group = grouped.get(item.category);
+      const group = grouped.get(item.kind);
       if (group) group.push(item);
-      else grouped.set(item.category, [item]);
+      else grouped.set(item.kind, [item]);
     }
     return Array.from(grouped.entries());
   }, [initialItems]);
@@ -62,16 +63,18 @@ export default function BuyList({
 
   return (
     <div className="space-y-4">
-      {groups.map(([category, categoryItems]) => (
-        <Card key={category} className="border-landing-border bg-landing-surface">
+      {groups.map(([kind, kindItems]) => {
+        const KindIcon = ITEM_KIND_ICON[kind];
+        return (
+        <Card key={kind} className="border-landing-border bg-landing-surface">
           <CardHeader className="pb-3">
             <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
-              <Package className="h-4.5 w-4.5 text-primary" />
-              {category}
+              <KindIcon className="h-4.5 w-4.5 text-primary" />
+              {ITEM_KIND_LABEL[kind]}
             </CardTitle>
           </CardHeader>
           <CardContent className="px-0 pb-2 divide-y divide-landing-border">
-            {categoryItems.map((item) => {
+            {kindItems.map((item) => {
               const missing = (item.quantity_target ?? 0) - item.quantity_owned;
               const isPending = pendingId === item.id;
               const atTarget = item.quantity_target != null && item.quantity_owned >= item.quantity_target;
@@ -81,6 +84,7 @@ export default function BuyList({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <p className="text-sm font-semibold text-landing-foreground">{item.name}</p>
+                      {item.size && <span className="text-xs text-landing-muted">{item.size}</span>}
                       {item.detail && <span className="text-xs text-landing-muted">{item.detail}</span>}
                       <Badge variant="outline" className="border-landing-camel text-landing-camel">
                         manque {missing}
@@ -122,7 +126,8 @@ export default function BuyList({
             })}
           </CardContent>
         </Card>
-      ))}
+        );
+      })}
     </div>
   );
 }

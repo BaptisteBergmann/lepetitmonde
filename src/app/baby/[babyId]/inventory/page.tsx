@@ -16,7 +16,9 @@ export default async function InventoryPage({
   const items = await getInventoryItems(babyId);
 
   const totalSpent = items.reduce((sum, item) => sum + (item.price_paid ?? 0), 0);
-  const categories = Array.from(new Set(items.map((item) => item.category))).sort();
+  const sizes = Array.from(
+    new Set(items.filter((item) => item.kind === 'clothing' && item.size).map((item) => item.size as string))
+  ).sort();
   const sources = Array.from(
     new Set(items.map((item) => item.purchased_from).filter((source): source is string => Boolean(source)))
   ).sort();
@@ -43,12 +45,12 @@ export default async function InventoryPage({
               )}
             </div>
             <div className="flex shrink-0">
-              <InventoryItemModal babyId={babyId} categories={categories} sources={sources} />
+              <InventoryItemModal babyId={babyId} sizes={sizes} sources={sources} />
             </div>
           </div>
         </Reveal>
 
-        <InventoryList babyId={babyId} items={items} categories={categories} sources={sources} />
+        <InventoryList babyId={babyId} items={items} sizes={sizes} sources={sources} />
       </div>
     </div>
   );
