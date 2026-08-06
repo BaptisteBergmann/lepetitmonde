@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-06
+
+- `f169d94` Add item_kind enum and rename inventory category to size
+
 ## 2026-08-04
 
 - `ac923ad` Fix inventory card title truncation, make title tap-to-expand
