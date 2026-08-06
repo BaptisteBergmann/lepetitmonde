@@ -26,13 +26,13 @@ const UNSPECIFIED = "unspecified"
 
 export default function InventoryItemModal({
   babyId,
-  sizes,
+  subtypesByKind,
   sources,
   item,
   trigger,
 }: {
   babyId: string
-  sizes: string[]
+  subtypesByKind: Partial<Record<ItemKind, string[]>>
   sources: string[]
   item?: InventoryItem
   trigger?: React.ReactNode
@@ -54,6 +54,8 @@ export default function InventoryItemModal({
   const [isPending, setIsPending] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const subtypeSuggestions = subtypesByKind[kind] ?? []
+
   const resetForm = () => {
     setKind("clothing")
     setSize("")
@@ -71,7 +73,7 @@ export default function InventoryItemModal({
     try {
       const payload = {
         kind,
-        size: kind === "clothing" ? (size.trim() || null) : null,
+        size: size.trim() || null,
         name: name.trim(),
         detail: detail.trim() || null,
         quantity_owned: Number(quantityOwned) || 0,
@@ -170,23 +172,21 @@ export default function InventoryItemModal({
                   </Select>
                 </div>
 
-                {kind === "clothing" && (
-                  <div className="flex flex-col gap-1.5 col-span-2">
-                    <Label htmlFor="size" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Taille (facultatif)
-                    </Label>
-                    <Input
-                      id="size"
-                      list="inventory-sizes"
-                      value={size}
-                      onChange={(e) => setSize(e.target.value)}
-                      placeholder="Ex: 0/3 mois"
-                    />
-                    <datalist id="inventory-sizes">
-                      {sizes.map((s) => <option key={s} value={s} />)}
-                    </datalist>
-                  </div>
-                )}
+                <div className="flex flex-col gap-1.5 col-span-2">
+                  <Label htmlFor="size" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Sous-type (facultatif)
+                  </Label>
+                  <Input
+                    id="size"
+                    list="inventory-subtypes"
+                    value={size}
+                    onChange={(e) => setSize(e.target.value)}
+                    placeholder={kind === "clothing" ? "Ex: 0/3 mois" : "Ex: Chambre, Salle de bain…"}
+                  />
+                  <datalist id="inventory-subtypes">
+                    {subtypeSuggestions.map((s) => <option key={s} value={s} />)}
+                  </datalist>
+                </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

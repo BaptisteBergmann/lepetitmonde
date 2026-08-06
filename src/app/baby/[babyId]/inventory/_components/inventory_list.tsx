@@ -16,15 +16,35 @@ function formatPrice(amount: number) {
   return amount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
 }
 
+const NO_SUBTYPE = "Sans sous-type";
+
+// Par type cards get a second grouping level by sub-type (the "size" field,
+// now generic to every kind) so a type with many articles doesn't dump them
+// all into one flat chip list.
+function subgroupBySubtype(items: InventoryItem[]) {
+  const grouped = new Map<string, InventoryItem[]>();
+  for (const item of items) {
+    const key = item.size ?? NO_SUBTYPE;
+    const group = grouped.get(key);
+    if (group) group.push(item);
+    else grouped.set(key, [item]);
+  }
+  return Array.from(grouped.entries()).sort(([a], [b]) => {
+    if (a === NO_SUBTYPE) return 1;
+    if (b === NO_SUBTYPE) return -1;
+    return a.localeCompare(b, "fr");
+  });
+}
+
 export default function InventoryList({
   babyId,
   items,
-  sizes,
+  subtypesByKind,
   sources,
 }: {
   babyId: string;
   items: InventoryItem[];
-  sizes: string[];
+  subtypesByKind: Partial<Record<ItemKind, string[]>>;
   sources: string[];
 }) {
   const [viewMode, setViewMode] = useState<ViewMode>('article');
@@ -87,6 +107,36 @@ export default function InventoryList({
       })
       .filter(({ visibleItems }) => visibleItems.length > 0);
   }, [groups, onlyMissing, query]);
+
+  const renderItemChip = (item: InventoryItem, chipLabel: string) => {
+    const reste = item.quantity_target != null && item.quantity_target > item.quantity_owned
+      ? item.quantity_target - item.quantity_owned
+      : 0;
+
+    return (
+      <InventoryItemModal
+        key={item.id}
+        babyId={babyId}
+        subtypesByKind={subtypesByKind}
+        sources={sources}
+        item={item}
+        trigger={
+          <button
+            type="button"
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs cursor-pointer transition-colors ${
+              reste > 0
+                ? "border-landing-camel/50 bg-landing-camel/10 hover:bg-landing-camel/20"
+                : "border-landing-border bg-landing-background hover:bg-landing-surface"
+            }`}
+          >
+            <span className="text-landing-muted">{chipLabel}</span>
+            <span className="font-semibold text-landing-foreground">{item.quantity_owned}</span>
+            {reste > 0 && <span className="font-semibold text-landing-camel">+{reste}</span>}
+          </button>
+        }
+      />
+    );
+  };
 
   if (items.length === 0) {
     return (
@@ -209,37 +259,25 @@ export default function InventoryList({
                     </span>
                   </div>
                 </CardHeader>
-                <CardContent className="flex flex-wrap gap-1.5 pt-0">
-                  {visibleItems.map((item) => {
-                    const reste = item.quantity_target != null && item.quantity_target > item.quantity_owned
-                      ? item.quantity_target - item.quantity_owned
-                      : 0;
-                    const chipLabel = viewMode === 'article' ? (item.size ?? ITEM_KIND_LABEL[item.kind]) : item.name;
-
-                    return (
-                      <InventoryItemModal
-                        key={item.id}
-                        babyId={babyId}
-                        sizes={sizes}
-                        sources={sources}
-                        item={item}
-                        trigger={
-                          <button
-                            type="button"
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs cursor-pointer transition-colors ${
-                              reste > 0
-                                ? "border-landing-camel/50 bg-landing-camel/10 hover:bg-landing-camel/20"
-                                : "border-landing-border bg-landing-background hover:bg-landing-surface"
-                            }`}
-                          >
-                            <span className="text-landing-muted">{chipLabel}</span>
-                            <span className="font-semibold text-landing-foreground">{item.quantity_owned}</span>
-                            {reste > 0 && <span className="font-semibold text-landing-camel">+{reste}</span>}
-                          </button>
-                        }
-                      />
-                    );
-                  })}
+                <CardContent className="pt-0">
+                  {viewMode === 'article' ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {visibleItems.map((item) => renderItemChip(item, item.size ?? ITEM_KIND_LABEL[item.kind]))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {subgroupBySubtype(visibleItems).map(([subtype, subItems]) => (
+                        <div key={subtype}>
+                          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-landing-muted">
+                            {subtype}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {subItems.map((item) => renderItemChip(item, item.name))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
