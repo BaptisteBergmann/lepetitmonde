@@ -1,5 +1,9 @@
 # Inventory: support non-clothes items (gear, feeding, bathing, etc.)
 
+## Status: implemented
+
+Shipped as planned across two commits (`f169d94` migration/types, `9612a88` UI). Deviation: could not do full interactive browser verification (adding items, toggling views, checking buy-list grouping) — the app requires logging into the user's real self-hosted Supabase instance, and creating test data there without asking felt like the wrong call. Verified instead via `pnpm tsc --noEmit` (clean), `pnpm lint` on all changed files (clean), and starting the dev server to confirm the touched routes compile without runtime errors. The user should click through the flows themselves to confirm.
+
 ## Context
 
 The `inventory` page currently only models baby clothes: every row requires a `category` value that's really a *size* (e.g. "0/3 mois"), and the whole UI (copy, icons, view toggle, filters) is hard-coded around "vêtement"/"taille". The user wants to track non-clothing items too (high chair, bathtub, etc.) in the same inventory.
