@@ -375,7 +375,7 @@ export type Database = {
           created_by: string | null
           detail: string | null
           id: string
-          kind: Database["public"]["Enums"]["item_kind"]
+          kind: string
           name: string
           position: number
           price_paid: number | null
@@ -393,7 +393,7 @@ export type Database = {
           created_by?: string | null
           detail?: string | null
           id?: string
-          kind?: Database["public"]["Enums"]["item_kind"]
+          kind?: string
           name: string
           position: number
           price_paid?: number | null
@@ -411,7 +411,7 @@ export type Database = {
           created_by?: string | null
           detail?: string | null
           id?: string
-          kind?: Database["public"]["Enums"]["item_kind"]
+          kind?: string
           name?: string
           position?: number
           price_paid?: number | null
@@ -1042,7 +1042,7 @@ export type Database = {
           created_by: string | null
           detail: string | null
           id: string
-          kind: Database["public"]["Enums"]["item_kind"]
+          kind: string
           name: string
           position: number
           price_paid: number | null
@@ -1072,15 +1072,6 @@ export type Database = {
       bug_report_status: "new" | "reviewed" | "fixed"
       event_kind: "occasion" | "life_stage" | "medical"
       item_condition: "new" | "secondhand"
-      item_kind:
-        | "clothing"
-        | "feeding"
-        | "bathing"
-        | "room"
-        | "safety"
-        | "transport"
-        | "toy"
-        | "other"
       milestone_type:
         | "first_steps"
         | "first_tooth"
@@ -1228,16 +1219,6 @@ export const Constants = {
       bug_report_status: ["new", "reviewed", "fixed"],
       event_kind: ["occasion", "life_stage", "medical"],
       item_condition: ["new", "secondhand"],
-      item_kind: [
-        "clothing",
-        "feeding",
-        "bathing",
-        "room",
-        "safety",
-        "transport",
-        "toy",
-        "other",
-      ],
       milestone_type: [
         "first_steps",
         "first_tooth",
