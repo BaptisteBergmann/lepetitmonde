@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-06
 
+- `9612a88` Support non-clothes items in inventory (Repas, Bain, Chambre, etc.)
 - `f169d94` Add item_kind enum and rename inventory category to size
 
 ## 2026-08-04
