@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-06
 
+- `b668926` Add sub-type grouping to the inventory Par type view
+- `f50cd55` Fix: include the Status: implemented section on the inventory plan
 - `9612a88` Support non-clothes items in inventory (Repas, Bain, Chambre, etc.)
 - `f169d94` Add item_kind enum and rename inventory category to size
 
