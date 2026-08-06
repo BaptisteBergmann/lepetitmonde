@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-06
 
+- `056a3b6` Let families add custom article types in the inventory modal
+- `73c7a59` Convert inventory item_kind from a fixed enum to free text
 - `b668926` Add sub-type grouping to the inventory Par type view
 - `f50cd55` Fix: include the Status: implemented section on the inventory plan
 - `9612a88` Support non-clothes items in inventory (Repas, Bain, Chambre, etc.)
