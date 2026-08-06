@@ -5,7 +5,7 @@ import { Search, Package, Tag } from "lucide-react";
 import { Tables } from "@utils/supabase/database.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ITEM_KINDS, ITEM_KIND_LABEL, ITEM_KIND_ICON, ItemKind } from "@utils/inventory_kind";
+import { compareItemKinds, getItemKindIcon, ItemKind } from "@utils/inventory_kind";
 import InventoryItemModal from "./inventory_item_modal";
 
 type InventoryItem = Tables<'inventory_items'>;
@@ -39,11 +39,13 @@ function subgroupBySubtype(items: InventoryItem[]) {
 export default function InventoryList({
   babyId,
   items,
+  kindOptions,
   subtypesByKind,
   sources,
 }: {
   babyId: string;
   items: InventoryItem[];
+  kindOptions: string[];
   subtypesByKind: Partial<Record<ItemKind, string[]>>;
   sources: string[];
 }) {
@@ -52,6 +54,13 @@ export default function InventoryList({
   const [selectedKinds, setSelectedKinds] = useState<Set<ItemKind>>(new Set());
   const [query, setQuery] = useState("");
   const [expandedTitles, setExpandedTitles] = useState<Set<string>>(new Set());
+
+  // Filter chips only show kinds actually present in this baby's items,
+  // unlike the modal's kindOptions which also offers unused defaults.
+  const presentKinds = useMemo(
+    () => Array.from(new Set(items.map((item) => item.kind))).sort(compareItemKinds),
+    [items]
+  );
 
   const toggleKind = (kind: ItemKind) => {
     setSelectedKinds((prev) => {
@@ -88,7 +97,7 @@ export default function InventoryList({
     const entries = Array.from(grouped.entries());
     return viewMode === 'article'
       ? entries.sort(([a], [b]) => a.localeCompare(b, "fr"))
-      : entries.sort(([a], [b]) => ITEM_KINDS.indexOf(a as ItemKind) - ITEM_KINDS.indexOf(b as ItemKind));
+      : entries.sort(([a], [b]) => compareItemKinds(a, b));
   }, [items, viewMode, selectedKinds]);
 
   const visibleGroups = useMemo(() => {
@@ -117,6 +126,7 @@ export default function InventoryList({
       <InventoryItemModal
         key={item.id}
         babyId={babyId}
+        kindOptions={kindOptions}
         subtypesByKind={subtypesByKind}
         sources={sources}
         item={item}
@@ -207,7 +217,7 @@ export default function InventoryList({
         >
           Tous
         </button>
-        {ITEM_KINDS.map((k) => {
+        {presentKinds.map((k) => {
           const active = selectedKinds.has(k);
           return (
             <button
@@ -221,7 +231,7 @@ export default function InventoryList({
                   : "border-landing-border bg-landing-background text-landing-muted hover:text-landing-foreground"
               }`}
             >
-              {ITEM_KIND_LABEL[k]}
+              {k}
             </button>
           );
         })}
@@ -234,8 +244,7 @@ export default function InventoryList({
           {visibleGroups.map(({ key, groupItems, visibleItems }) => {
             const totalOwned = groupItems.reduce((sum, item) => sum + item.quantity_owned, 0);
             const subtotal = groupItems.reduce((sum, item) => sum + (item.price_paid ?? 0), 0);
-            const GroupIcon = viewMode === 'article' ? Package : ITEM_KIND_ICON[key as ItemKind];
-            const title = viewMode === 'article' ? key : ITEM_KIND_LABEL[key as ItemKind];
+            const GroupIcon = viewMode === 'article' ? Package : getItemKindIcon(key);
 
             return (
               <Card key={key} className="border-landing-border bg-landing-surface">
@@ -246,12 +255,12 @@ export default function InventoryList({
                       <button
                         type="button"
                         onClick={() => toggleTitle(key)}
-                        title={title}
+                        title={key}
                         className={`min-w-0 flex-1 cursor-pointer text-left ${
                           expandedTitles.has(key) ? "whitespace-normal break-words" : "truncate"
                         }`}
                       >
-                        {title}
+                        {key}
                       </button>
                     </CardTitle>
                     <span className="shrink-0 text-xs font-semibold text-landing-muted">
@@ -262,7 +271,7 @@ export default function InventoryList({
                 <CardContent className="pt-0">
                   {viewMode === 'article' ? (
                     <div className="flex flex-wrap gap-1.5">
-                      {visibleItems.map((item) => renderItemChip(item, item.size ?? ITEM_KIND_LABEL[item.kind]))}
+                      {visibleItems.map((item) => renderItemChip(item, item.size ?? item.kind))}
                     </div>
                   ) : (
                     <div className="space-y-2.5">

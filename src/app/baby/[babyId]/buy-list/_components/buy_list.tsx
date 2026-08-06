@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { adjustInventoryOwned, type getBuyListItems } from "@utils/actions/inventory";
 import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
-import { ITEM_KIND_ICON, ITEM_KIND_LABEL, ItemKind } from "@utils/inventory_kind";
+import { compareItemKinds, getItemKindIcon, ItemKind } from "@utils/inventory_kind";
 
 type BuyListItem = Awaited<ReturnType<typeof getBuyListItems>>[number];
 
@@ -37,7 +37,7 @@ export default function BuyList({
       if (group) group.push(item);
       else grouped.set(item.kind, [item]);
     }
-    return Array.from(grouped.entries());
+    return Array.from(grouped.entries()).sort(([a], [b]) => compareItemKinds(a, b));
   }, [initialItems]);
 
   const handleAdjust = async (itemId: string, delta: 1 | -1) => {
@@ -64,13 +64,13 @@ export default function BuyList({
   return (
     <div className="space-y-4">
       {groups.map(([kind, kindItems]) => {
-        const KindIcon = ITEM_KIND_ICON[kind];
+        const KindIcon = getItemKindIcon(kind);
         return (
         <Card key={kind} className="border-landing-border bg-landing-surface">
           <CardHeader className="pb-3">
             <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
               <KindIcon className="h-4.5 w-4.5 text-primary" />
-              {ITEM_KIND_LABEL[kind]}
+              {kind}
             </CardTitle>
           </CardHeader>
           <CardContent className="px-0 pb-2 divide-y divide-landing-border">

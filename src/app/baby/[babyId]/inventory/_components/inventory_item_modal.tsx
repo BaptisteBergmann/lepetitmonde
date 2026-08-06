@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Plus, Loader2, Package, Pencil, Trash2, X } from 'lucide-react'
 import { Tables, Enums } from '@utils/supabase/database.types'
-import { ITEM_KINDS, ITEM_KIND_LABEL, ItemKind } from '@utils/inventory_kind'
+import { DEFAULT_ITEM_KINDS, ItemKind } from '@utils/inventory_kind'
 
 type InventoryItem = Tables<'inventory_items'>
 type Condition = Enums<'item_condition'>
@@ -26,12 +26,14 @@ const UNSPECIFIED = "unspecified"
 
 export default function InventoryItemModal({
   babyId,
+  kindOptions,
   subtypesByKind,
   sources,
   item,
   trigger,
 }: {
   babyId: string
+  kindOptions: string[]
   subtypesByKind: Partial<Record<ItemKind, string[]>>
   sources: string[]
   item?: InventoryItem
@@ -41,7 +43,7 @@ export default function InventoryItemModal({
   const isEditMode = !!item
   const [open, setOpen] = useState(false)
 
-  const [kind, setKind] = useState<ItemKind>(item?.kind ?? "clothing")
+  const [kind, setKind] = useState<ItemKind>(item?.kind ?? DEFAULT_ITEM_KINDS[0])
   const [size, setSize] = useState(item?.size ?? "")
   const [name, setName] = useState(item?.name ?? "")
   const [detail, setDetail] = useState(item?.detail ?? "")
@@ -57,7 +59,7 @@ export default function InventoryItemModal({
   const subtypeSuggestions = subtypesByKind[kind] ?? []
 
   const resetForm = () => {
-    setKind("clothing")
+    setKind(DEFAULT_ITEM_KINDS[0])
     setSize("")
     setName("")
     setDetail("")
@@ -72,7 +74,7 @@ export default function InventoryItemModal({
     setIsPending(true)
     try {
       const payload = {
-        kind,
+        kind: kind.trim(),
         size: size.trim() || null,
         name: name.trim(),
         detail: detail.trim() || null,
@@ -157,19 +159,20 @@ export default function InventoryItemModal({
             <div className="p-5 space-y-4 flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5 col-span-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Label htmlFor="kind" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Type d&apos;article
                   </Label>
-                  <Select value={kind} onValueChange={(value: string | null) => setKind((value as ItemKind) ?? "clothing")}>
-                    <SelectTrigger className="w-full text-foreground bg-input/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {ITEM_KINDS.map((k) => <SelectItem key={k} value={k}>{ITEM_KIND_LABEL[k]}</SelectItem>)}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="kind"
+                    list="inventory-kinds"
+                    value={kind}
+                    onChange={(e) => setKind(e.target.value)}
+                    placeholder="Ex: Vêtement, Repas, Bain…"
+                    required
+                  />
+                  <datalist id="inventory-kinds">
+                    {kindOptions.map((k) => <option key={k} value={k} />)}
+                  </datalist>
                 </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">
@@ -181,7 +184,7 @@ export default function InventoryItemModal({
                     list="inventory-subtypes"
                     value={size}
                     onChange={(e) => setSize(e.target.value)}
-                    placeholder={kind === "clothing" ? "Ex: 0/3 mois" : "Ex: Chambre, Salle de bain…"}
+                    placeholder={kind === "Vêtement" ? "Ex: 0/3 mois" : "Ex: Chambre, Salle de bain…"}
                   />
                   <datalist id="inventory-subtypes">
                     {subtypeSuggestions.map((s) => <option key={s} value={s} />)}
@@ -314,7 +317,7 @@ export default function InventoryItemModal({
                   Annuler
                 </Button>
                 <Button
-                  disabled={!name.trim() || isPending || isDeleting}
+                  disabled={!kind.trim() || !name.trim() || isPending || isDeleting}
                   className="rounded-2xl cursor-pointer"
                   onClick={handleConfirm}
                 >

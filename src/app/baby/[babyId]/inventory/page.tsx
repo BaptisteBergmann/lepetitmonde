@@ -3,7 +3,7 @@ import { getInventoryItems } from "@/utils/actions/inventory";
 import InventoryItemModal from "./_components/inventory_item_modal";
 import InventoryList from "./_components/inventory_list";
 import { Reveal } from "@components/reveal";
-import { ITEM_KINDS, ItemKind } from "@utils/inventory_kind";
+import { compareItemKinds, DEFAULT_ITEM_KINDS } from "@utils/inventory_kind";
 
 export default async function InventoryPage({
   params,
@@ -17,14 +17,18 @@ export default async function InventoryPage({
   const items = await getInventoryItems(babyId);
 
   const totalSpent = items.reduce((sum, item) => sum + (item.price_paid ?? 0), 0);
+  // Datalist suggestions for the "Type d'article" field: the built-in
+  // defaults plus any custom kind a family has already typed in.
+  const kindOptions = Array.from(new Set([...DEFAULT_ITEM_KINDS, ...items.map((item) => item.kind)])).sort(compareItemKinds);
   // Sub-type suggestions (the "size" field) are scoped per kind so picking
   // "Repas" doesn't autocomplete clothing sizes like "0/3 mois".
-  const subtypesByKind = Object.fromEntries(
-    ITEM_KINDS.map((k) => [
-      k,
-      Array.from(new Set(items.filter((item) => item.kind === k && item.size).map((item) => item.size as string))).sort(),
-    ])
-  ) as Record<ItemKind, string[]>;
+  const subtypesByKind: Record<string, string[]> = {};
+  for (const item of items) {
+    if (!item.size) continue;
+    const list = subtypesByKind[item.kind] ?? (subtypesByKind[item.kind] = []);
+    if (!list.includes(item.size)) list.push(item.size);
+  }
+  for (const list of Object.values(subtypesByKind)) list.sort();
   const sources = Array.from(
     new Set(items.map((item) => item.purchased_from).filter((source): source is string => Boolean(source)))
   ).sort();
@@ -51,12 +55,12 @@ export default async function InventoryPage({
               )}
             </div>
             <div className="flex shrink-0">
-              <InventoryItemModal babyId={babyId} subtypesByKind={subtypesByKind} sources={sources} />
+              <InventoryItemModal babyId={babyId} kindOptions={kindOptions} subtypesByKind={subtypesByKind} sources={sources} />
             </div>
           </div>
         </Reveal>
 
-        <InventoryList babyId={babyId} items={items} subtypesByKind={subtypesByKind} sources={sources} />
+        <InventoryList babyId={babyId} items={items} kindOptions={kindOptions} subtypesByKind={subtypesByKind} sources={sources} />
       </div>
     </div>
   );
