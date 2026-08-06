@@ -370,52 +370,55 @@ export type Database = {
       inventory_items: {
         Row: {
           baby_id: string
-          category: string
           condition: Database["public"]["Enums"]["item_condition"] | null
           created_at: string
           created_by: string | null
           detail: string | null
           id: string
+          kind: Database["public"]["Enums"]["item_kind"]
           name: string
           position: number
           price_paid: number | null
           purchased_from: string | null
           quantity_owned: number
           quantity_target: number | null
+          size: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           baby_id: string
-          category: string
           condition?: Database["public"]["Enums"]["item_condition"] | null
           created_at?: string
           created_by?: string | null
           detail?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["item_kind"]
           name: string
           position: number
           price_paid?: number | null
           purchased_from?: string | null
           quantity_owned?: number
           quantity_target?: number | null
+          size?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           baby_id?: string
-          category?: string
           condition?: Database["public"]["Enums"]["item_condition"] | null
           created_at?: string
           created_by?: string | null
           detail?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["item_kind"]
           name?: string
           position?: number
           price_paid?: number | null
           purchased_from?: string | null
           quantity_owned?: number
           quantity_target?: number | null
+          size?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -1034,18 +1037,19 @@ export type Database = {
         }
         Returns: {
           baby_id: string
-          category: string
           condition: Database["public"]["Enums"]["item_condition"] | null
           created_at: string
           created_by: string | null
           detail: string | null
           id: string
+          kind: Database["public"]["Enums"]["item_kind"]
           name: string
           position: number
           price_paid: number | null
           purchased_from: string | null
           quantity_owned: number
           quantity_target: number | null
+          size: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -1068,6 +1072,15 @@ export type Database = {
       bug_report_status: "new" | "reviewed" | "fixed"
       event_kind: "occasion" | "life_stage" | "medical"
       item_condition: "new" | "secondhand"
+      item_kind:
+        | "clothing"
+        | "feeding"
+        | "bathing"
+        | "room"
+        | "safety"
+        | "transport"
+        | "toy"
+        | "other"
       milestone_type:
         | "first_steps"
         | "first_tooth"
@@ -1215,6 +1228,16 @@ export const Constants = {
       bug_report_status: ["new", "reviewed", "fixed"],
       event_kind: ["occasion", "life_stage", "medical"],
       item_condition: ["new", "secondhand"],
+      item_kind: [
+        "clothing",
+        "feeding",
+        "bathing",
+        "room",
+        "safety",
+        "transport",
+        "toy",
+        "other",
+      ],
       milestone_type: [
         "first_steps",
         "first_tooth",
