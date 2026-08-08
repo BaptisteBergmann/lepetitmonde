@@ -1009,6 +1009,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           expires_at: string | null
+          group_label: string | null
           id: string
           media_path: string
           mime_type: string
@@ -1020,6 +1021,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           expires_at?: string | null
+          group_label?: string | null
           id?: string
           media_path: string
           mime_type: string
@@ -1031,6 +1033,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           expires_at?: string | null
+          group_label?: string | null
           id?: string
           media_path?: string
           mime_type?: string

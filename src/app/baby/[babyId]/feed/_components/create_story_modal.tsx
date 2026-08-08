@@ -30,17 +30,20 @@ const DURATION_LABELS: Record<string, string> = {
 export default function CreateStoryModal({
   babyId,
   circles,
+  existingGroupLabels,
   onClose,
   onCreated,
 }: {
   babyId: string
   circles: Circle[]
+  existingGroupLabels: string[]
   onClose: () => void
   onCreated: () => void
 }) {
   const [storyId] = useState(() => crypto.randomUUID())
 
   const [caption, setCaption] = useState("")
+  const [groupLabel, setGroupLabel] = useState("")
   const [duration, setDuration] = useState<string>('24')
   const [circleIds, setCircleIds] = useState<string[]>([])
   const [isPending, setIsPending] = useState(false)
@@ -92,6 +95,7 @@ export default function CreateStoryModal({
         baby_id: babyId,
         caption: caption || null,
         durationHours: duration === 'never' ? null : Number(duration),
+        groupLabel: groupLabel.trim() || null,
         mediaFilename: filename,
         mimeType,
         thumbnailFilename,
@@ -155,6 +159,29 @@ export default function CreateStoryModal({
               rows={2}
               className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="story-group" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Groupe (facultatif)
+            </Label>
+            <input
+              type="text"
+              id="story-group"
+              list="story-group-labels"
+              value={groupLabel}
+              onChange={(e) => setGroupLabel(e.target.value)}
+              placeholder="ex: Journée à la plage"
+              className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
+            />
+            <datalist id="story-group-labels">
+              {existingGroupLabels.map((label) => (
+                <option key={label} value={label} />
+              ))}
+            </datalist>
+            <p className="text-xs text-muted-foreground">
+              Les stories partageant le même nom de groupe apparaissent ensemble, même si elles viennent de plusieurs personnes.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5">

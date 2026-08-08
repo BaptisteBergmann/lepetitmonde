@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Plus, Film } from 'lucide-react'
 import { Tables } from '@utils/supabase/database.types'
-import { StoryAuthorGroup, StoryWithUrl, getActiveStories } from '@utils/actions/stories'
+import { StoryGroup, StoryWithUrl, getActiveStories } from '@utils/actions/stories'
 import { HighlightWithStories, getHighlights } from '@utils/actions/story_highlights'
 import { cn } from '@utils/utils'
 import CreateStoryModal from './create_story_modal'
@@ -12,7 +12,7 @@ import StoryViewer from './story_viewer'
 type Circle = Tables<'circles'>
 
 export type ViewerTarget =
-  | { kind: 'author'; index: number }
+  | { kind: 'group'; index: number }
   | { kind: 'highlight'; index: number }
 
 function bubbleImageFor(story: StoryWithUrl | undefined) {
@@ -64,10 +64,10 @@ export default function StoryTray({
   isAdmin: boolean
   circles: Circle[]
   initialHighlights: HighlightWithStories[]
-  initialStories: StoryAuthorGroup[]
+  initialStories: StoryGroup[]
 }) {
   const [highlights, setHighlights] = useState(initialHighlights)
-  const [authorGroups, setAuthorGroups] = useState(initialStories)
+  const [groups, setGroups] = useState(initialStories)
   const [createOpen, setCreateOpen] = useState(false)
   const [viewerTarget, setViewerTarget] = useState<ViewerTarget | null>(null)
 
@@ -77,10 +77,14 @@ export default function StoryTray({
       getActiveStories(babyId),
     ])
     setHighlights(nextHighlights)
-    setAuthorGroups(nextStories)
+    setGroups(nextStories)
   }
 
-  if (highlights.length === 0 && authorGroups.length === 0 && !isAdmin) return null
+  // Existing labeled group names, offered as autocomplete so continuing a
+  // group (e.g. "Beach day") doesn't fragment into two by a typo.
+  const existingGroupLabels = groups.filter((g) => g.isLabeled).map((g) => g.title)
+
+  if (highlights.length === 0 && groups.length === 0 && !isAdmin) return null
 
   return (
     <div className="space-y-3">
@@ -106,7 +110,7 @@ export default function StoryTray({
         </div>
       )}
 
-      {(authorGroups.length > 0 || isAdmin) && (
+      {(groups.length > 0 || isAdmin) && (
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
           {isAdmin && (
             <button
@@ -120,26 +124,27 @@ export default function StoryTray({
             </button>
           )}
 
-          {authorGroups.map((group, index) => (
+          {groups.map((group, index) => (
             <button
-              key={group.authorId}
-              onClick={() => setViewerTarget({ kind: 'author', index })}
+              key={group.key}
+              onClick={() => setViewerTarget({ kind: 'group', index })}
               className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer"
             >
               <span
                 className={cn(
-                  "flex size-14 rounded-full p-0.5 ring-2",
+                  "flex size-14 p-0.5 ring-2",
+                  group.isLabeled ? "rounded-2xl" : "rounded-full",
                   group.allViewed ? "ring-landing-border" : "ring-primary"
                 )}
               >
                 <BubbleThumb
                   imageUrl={bubbleImageFor(group.stories[0])}
-                  fallbackLabel={group.authorName}
+                  fallbackLabel={group.title}
                   fallbackIsVideo={group.stories[0]?.mime_type?.startsWith('video/')}
-                  rounded="full"
+                  rounded={group.isLabeled ? '2xl' : 'full'}
                 />
               </span>
-              <span className="text-xs text-landing-muted truncate w-full text-center">{group.authorName}</span>
+              <span className="text-xs text-landing-muted truncate w-full text-center">{group.title}</span>
             </button>
           ))}
         </div>
@@ -149,6 +154,7 @@ export default function StoryTray({
         <CreateStoryModal
           babyId={babyId}
           circles={circles}
+          existingGroupLabels={existingGroupLabels}
           onClose={() => setCreateOpen(false)}
           onCreated={refresh}
         />
@@ -159,7 +165,7 @@ export default function StoryTray({
           babyId={babyId}
           isAdmin={isAdmin}
           highlights={highlights}
-          authorGroups={authorGroups}
+          groups={groups}
           target={viewerTarget}
           onClose={() => setViewerTarget(null)}
           onChanged={refresh}

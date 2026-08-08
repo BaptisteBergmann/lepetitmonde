@@ -1,5 +1,34 @@
 # Stories feature — plan
 
+## Status: implemented
+
+Shipped as planned: `stories`/`stories_circles`/`story_views`/
+`story_highlights`/`story_highlight_items` tables, `stories.ts`/
+`story_highlights.ts` server actions, and `story_tray.tsx`/
+`create_story_modal.tsx`/`story_viewer.tsx`. Migrations pushed and
+`database.types.ts` regenerated against the live database; typecheck,
+lint, and build all pass.
+
+Deviations from the original plan:
+- **Highlight membership clears `expires_at` instead of "protecting" it.**
+  The original plan had `pruneExpiredStories` skip any story referenced by
+  `story_highlight_items`, keeping its original `expires_at` around
+  forever. Simplified per user feedback: adding a story to a highlight now
+  sets its `expires_at` to `null` directly (`clearStoryExpiry` in
+  `story_highlights.ts`), so a highlighted story is just "never expires" —
+  no separate protection check needed in `pruneExpiredStories`. Removing a
+  story from a highlight does not restore a countdown (matches Instagram:
+  once saved, it stays saved).
+- **Added cross-author group labels** (not in the original plan): `stories`
+  has an optional `group_label` (e.g. "Beach day"). `getActiveStories`
+  groups by `label:<group_label>` when set instead of `author:<id>`, so
+  stories from different admins sharing a label cluster into one tray
+  bubble. The type returned by `getActiveStories` is `StoryGroup` (`key`/
+  `title`/`isLabeled`/`stories`/`allViewed`) rather than the originally
+  planned `StoryAuthorGroup`. `create_story_modal.tsx` has a "Groupe
+  (facultatif)" text input with a datalist of existing active group labels
+  to avoid fragmenting a group via typos.
+
 ## Context
 
 Ephemeral photo/video "stories" (Instagram/Snapchat-style): admins post a

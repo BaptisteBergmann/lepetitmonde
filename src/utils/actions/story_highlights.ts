@@ -81,6 +81,19 @@ export async function getHighlights(babyId: string): Promise<HighlightWithStorie
   return highlights
 }
 
+// A highlighted story never expires — added to a highlight, its expires_at
+// is cleared to null rather than merely being protected from the prune
+// sweep. Removing it from a highlight later doesn't restore a countdown
+// (matches Instagram: once saved, it stays saved).
+async function clearStoryExpiry(supabase: Awaited<ReturnType<typeof createClient>>, storyId: string) {
+  const { error } = await supabase
+    .from('stories')
+    .update({ expires_at: null })
+    .eq('id', storyId)
+
+  return error
+}
+
 export async function createHighlight(babyId: string, name: string, storyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: createHighlight.name, babyId, storyId })
@@ -100,6 +113,9 @@ export async function createHighlight(babyId: string, name: string, storyId: str
     .insert([{ highlight_id: data.id, story_id: storyId, position: 0 }])
 
   if (itemError) { contextLogger.error(itemError, "Error adding story to new highlight"); throw itemError }
+
+  const expiryError = await clearStoryExpiry(supabase, storyId)
+  if (expiryError) contextLogger.error(expiryError, "Error clearing story expiry after adding to highlight")
 
   contextLogger.info({ highlightId: data.id }, "Highlight created")
 
@@ -130,6 +146,9 @@ export async function addStoryToHighlight(highlightId: string, storyId: string, 
     .insert([{ highlight_id: highlightId, story_id: storyId, position: nextPosition }])
 
   if (error) { contextLogger.error(error, "Error adding story to highlight"); throw error }
+
+  const expiryError = await clearStoryExpiry(supabase, storyId)
+  if (expiryError) contextLogger.error(expiryError, "Error clearing story expiry after adding to highlight")
 
   contextLogger.info("Story added to highlight")
 

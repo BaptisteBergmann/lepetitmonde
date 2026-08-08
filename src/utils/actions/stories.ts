@@ -17,9 +17,12 @@ export type StoryWithUrl = Tables<'stories'> & {
   thumbnailUrl: string | null
   circleIds: string[]
 }
-export type StoryAuthorGroup = {
-  authorId: string
-  authorName: string
+// A tray bubble: either one author's stream (key = "author:<id>") or a
+// shared, cross-author group_label like "Beach day" (key = "label:<label>").
+export type StoryGroup = {
+  key: string
+  title: string
+  isLabeled: boolean
   stories: StoryWithUrl[]
   allViewed: boolean
 }
@@ -30,6 +33,7 @@ type NewStory = {
   baby_id: string
   caption: string | null
   durationHours: number | null
+  groupLabel: string | null
   mediaFilename: string
   mimeType: string
   thumbnailFilename?: string
@@ -53,6 +57,7 @@ export async function createStory(story: NewStory, circleIds: string[]) {
       baby_id: story.baby_id,
       caption: story.caption,
       expires_at: expiresAt,
+      group_label: story.groupLabel,
       media_path: `stories/${story.id}/${story.mediaFilename}`,
       thumbnail_path: story.thumbnailFilename ? `stories/${story.id}/thumbnails/${story.thumbnailFilename}` : null,
       mime_type: story.mimeType,
@@ -94,9 +99,9 @@ function toStoryUrl(babyId: string, path: string) {
 
 // Best-effort, self-cleaning expiry: there is no cron/scheduler in this app,
 // so expired stories are swept lazily whenever the tray is loaded rather
-// than on a fixed schedule. A story referenced by any story_highlight_items
-// row is protected from deletion even once its own expires_at has passed —
-// that's what makes highlights durable.
+// than on a fixed schedule. Highlighted stories never show up here — adding
+// a story to a highlight clears its expires_at to null (see
+// story_highlights.ts), so it's already excluded by the `not is null` check.
 async function pruneExpiredStories(babyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: pruneExpiredStories.name, babyId })
@@ -111,19 +116,8 @@ async function pruneExpiredStories(babyId: string) {
   if (error) { contextLogger.error(error, "Error fetching expired stories"); return }
   if (expired.length === 0) return
 
-  const { data: highlighted, error: highlightedError } = await supabase
-    .from('story_highlight_items')
-    .select('story_id')
-    .in('story_id', expired.map((s) => s.id))
-
-  if (highlightedError) { contextLogger.error(highlightedError, "Error checking highlighted stories"); return }
-
-  const protectedIds = new Set((highlighted ?? []).map((h) => h.story_id))
-  const toDelete = expired.filter((s) => !protectedIds.has(s.id))
-  if (toDelete.length === 0) return
-
   try {
-    const paths = toDelete.flatMap((s) => s.thumbnail_path ? [s.media_path, s.thumbnail_path] : [s.media_path])
+    const paths = expired.flatMap((s) => s.thumbnail_path ? [s.media_path, s.thumbnail_path] : [s.media_path])
     await removeStorageObjects(babyId, paths)
   } catch (err) {
     contextLogger.error(err, "Error removing expired story storage objects")
@@ -132,11 +126,11 @@ async function pruneExpiredStories(babyId: string) {
   const { error: deleteError } = await supabase
     .from('stories')
     .delete()
-    .in('id', toDelete.map((s) => s.id))
+    .in('id', expired.map((s) => s.id))
 
   if (deleteError) { contextLogger.error(deleteError, "Error deleting expired stories"); return }
 
-  contextLogger.info({ count: toDelete.length }, "Expired stories pruned")
+  contextLogger.info({ count: expired.length }, "Expired stories pruned")
 }
 
 async function getViewedStoryIds(storyIds: string[], userId: string | undefined): Promise<Set<string>> {
@@ -153,7 +147,7 @@ async function getViewedStoryIds(storyIds: string[], userId: string | undefined)
   return new Set(data.map((row) => row.story_id))
 }
 
-export async function getActiveStories(babyId: string): Promise<StoryAuthorGroup[]> {
+export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
   const contextLogger = logger.child({ function: getActiveStories.name, babyId })
   await pruneExpiredStories(babyId)
 
@@ -181,15 +175,18 @@ export async function getActiveStories(babyId: string): Promise<StoryAuthorGroup
   const nicknames = await getNicknamesByBaby(babyId)
   const viewedIds = await getViewedStoryIds(visibleRows.map((row) => row.id), user?.id)
 
-  const byAuthor = new Map<string, { authorName: string; stories: StoryWithUrl[] }>()
+  const byKey = new Map<string, { title: string; isLabeled: boolean; stories: StoryWithUrl[] }>()
   for (const row of visibleRows) {
     const { stories_circles, users: authorOrList, ...story } = row
     const authorId = story.created_by ?? 'unknown'
     const author = Array.isArray(authorOrList) ? authorOrList[0] : authorOrList
 
-    const group = byAuthor.get(authorId) ?? {
-      authorName: getDisplayName(author, nicknames[authorId]) || "Utilisateur",
-      stories: [],
+    const isLabeled = !!story.group_label
+    const key = isLabeled ? `label:${story.group_label}` : `author:${authorId}`
+    const group = byKey.get(key) ?? {
+      title: isLabeled ? story.group_label! : (getDisplayName(author, nicknames[authorId]) || "Utilisateur"),
+      isLabeled,
+      stories: [] as StoryWithUrl[],
     }
     group.stories.push({
       ...story,
@@ -197,19 +194,20 @@ export async function getActiveStories(babyId: string): Promise<StoryAuthorGroup
       url: toStoryUrl(babyId, story.media_path),
       thumbnailUrl: story.thumbnail_path ? toStoryUrl(babyId, story.thumbnail_path) : null,
     })
-    byAuthor.set(authorId, group)
+    byKey.set(key, group)
   }
 
-  const groups = Array.from(byAuthor.entries()).map(([authorId, group]) => ({
-    authorId,
-    authorName: group.authorName,
+  const groups = Array.from(byKey.entries()).map(([key, group]) => ({
+    key,
+    title: group.title,
+    isLabeled: group.isLabeled,
     stories: group.stories,
     allViewed: group.stories.every((s) => viewedIds.has(s.id)),
   }))
 
   groups.sort((a, b) => Number(a.allViewed) - Number(b.allViewed))
 
-  contextLogger.debug({ authorCount: groups.length }, "Active stories received")
+  contextLogger.debug({ groupCount: groups.length }, "Active stories received")
 
   return groups
 }

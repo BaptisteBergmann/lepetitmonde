@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, getPosts } from '@utils/actions/posts'
-import { StoryAuthorGroup } from '@utils/actions/stories'
+import { StoryGroup } from '@utils/actions/stories'
 import { HighlightWithStories } from '@utils/actions/story_highlights'
 import { Button } from '@/components/ui/button'
 import { Loader2, Plus } from 'lucide-react'
@@ -30,7 +30,7 @@ export default function FeedView({
   initialPosts: PostWithDetails[]
   pageSize: number
   initialHighlights: HighlightWithStories[]
-  initialStories: StoryAuthorGroup[]
+  initialStories: StoryGroup[]
 }) {
   const [posts, setPosts] = useState<PostWithDetails[]>(initialPosts)
   const [loadingMore, setLoadingMore] = useState(false)

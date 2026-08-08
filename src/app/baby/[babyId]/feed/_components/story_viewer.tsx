@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { X, ChevronLeft, ChevronRight, Eye, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
 import { cn } from '@utils/utils'
-import { StoryAuthorGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
+import { StoryGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
 import { HighlightWithStories, createHighlight, addStoryToHighlight } from '@utils/actions/story_highlights'
 import type { ViewerTarget } from './story_tray'
 
@@ -15,7 +15,7 @@ export default function StoryViewer({
   babyId,
   isAdmin,
   highlights,
-  authorGroups,
+  groups,
   target,
   onClose,
   onChanged,
@@ -23,7 +23,7 @@ export default function StoryViewer({
   babyId: string
   isAdmin: boolean
   highlights: HighlightWithStories[]
-  authorGroups: StoryAuthorGroup[]
+  groups: StoryGroup[]
   target: ViewerTarget
   onClose: () => void
   onChanged: () => void
@@ -31,10 +31,10 @@ export default function StoryViewer({
   const isHighlight = target.kind === 'highlight'
   const stories: StoryWithUrl[] = isHighlight
     ? highlights[target.index]?.stories ?? []
-    : authorGroups[target.index]?.stories ?? []
+    : groups[target.index]?.stories ?? []
   const title = isHighlight
     ? highlights[target.index]?.name ?? ''
-    : authorGroups[target.index]?.authorName ?? ''
+    : groups[target.index]?.title ?? ''
 
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
