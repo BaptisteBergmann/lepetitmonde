@@ -41,7 +41,7 @@ export async function sendInvite(formData: FormData) {
     throw new Error("Erreur lors de l'invitation")
   }
 
-  const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/signup?token=${invitation.id}`
+  const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/invite?token=${invitation.id}`
   await sendInviteEmail(email, baby.baby_surname, inviteUrl)
 
   revalidatePath(`/baby/${babyId}/admin`)
@@ -69,7 +69,7 @@ export async function generateShortLivedLink(babyId: string, hoursValid: number 
 
   revalidatePath(`/baby/${babyId}/admin`)
 
-  const shareableLink = `${process.env.NEXT_PUBLIC_SITE_URL}/signup?token=${data.id}`;
+  const shareableLink = `${process.env.NEXT_PUBLIC_SITE_URL}/invite?token=${data.id}`;
 
   return shareableLink;
 }

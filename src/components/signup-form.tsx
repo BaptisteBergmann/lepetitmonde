@@ -15,16 +15,15 @@ import { signup } from "@utils/actions/signup"
 // On ajoute 'token' aux props attendues
 interface SignupFormProps extends React.ComponentProps<"div"> {
   token: string;
+  message?: string;
 }
 
 export function SignupForm({
   token,
+  message,
   className,
   ...props
 }: SignupFormProps) {
-
-
-  // Si aucun token n'est présent dans l'URL, on bloque l'affichage
 
   return (
     <div className="flex flex-col gap-6" >
@@ -38,6 +37,10 @@ export function SignupForm({
                   Inscrivez-vous pour commencer
                 </p>
               </div>
+
+              {message && (
+                <p className="text-sm text-center text-muted-foreground">{message}</p>
+              )}
 
               {/* Ajout d'un champ Nom pour l'inscription */}
               <Field hidden>

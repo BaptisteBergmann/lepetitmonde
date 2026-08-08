@@ -100,7 +100,7 @@ export function LoginForm({
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Vous n&apos;avez pas de compte ? <a href="/signup">Inscrivez-vous</a>
+                Vous n&apos;avez pas de compte ? <a href="/invite">Inscrivez-vous</a>
               </FieldDescription>
             </FieldGroup>
           </form>

@@ -1,25 +1,13 @@
-import { SignupForm } from "@components/signup-form"
+import { redirect } from "next/navigation"
 
+// Invite links now point at /invite; this keeps already-sent /signup?token=...
+// links (emails, old shares) working by forwarding to the new route.
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>
+  searchParams: Promise<Record<string, string>>
 }) {
-  // On attend et on récupère les paramètres de l'URL
   const params = await searchParams
-  const token = params.token
-
-  if (!token) {
-    return (
-      <div className="max-w-md space-y-4 text-center mx-auto">
-        <h1 className="font-display text-2xl font-semibold text-destructive">Lien d&apos;invitation invalide</h1>
-        <p className="text-muted-foreground">
-          Vous devez utiliser un lien d&apos;invitation valide contenant un jeton sécurisé pour pouvoir créer un compte et rejoindre Le petit monde.
-        </p>
-      </div>
-    )
-  }
-
-  return <SignupForm token={token} />
+  const query = new URLSearchParams(params).toString()
+  redirect(query ? `/invite?${query}` : '/invite')
 }
-

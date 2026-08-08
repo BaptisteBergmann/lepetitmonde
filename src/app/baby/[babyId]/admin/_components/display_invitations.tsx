@@ -15,7 +15,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = async (id: string) => {
-    const link = `${window.location.origin}/signup?token=${id}`;
+    const link = `${window.location.origin}/invite?token=${id}`;
     try {
       await navigator.clipboard.writeText(link);
       setCopiedId(id);
