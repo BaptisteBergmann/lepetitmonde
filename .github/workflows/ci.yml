@@ -24,18 +24,68 @@ jobs:
       - run: pnpm lint
 
   docker-build:
+    needs: typecheck-and-lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      # Build-only sanity check that the Dockerfile still produces a working
-      # image after a change — there's no registry to push to from CI (the
-      # real deploy target is a private, LAN-only registry), so this
-      # intentionally stops at `docker build`.
-      - run: |
-          docker build \
-            --build-arg NEXT_PUBLIC_SITE_URL="http://localhost:3000" \
-            --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="" \
-            --build-arg NEXT_PUBLIC_COMMIT_SHA="${GITHUB_SHA::7}" \
-            -t lepetitmonde:ci \
-            .
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      # GHCR requires an all-lowercase image name, but github.repository
+      # preserves the owner's actual case (BaptisteBergmann/lepetitmonde) —
+      # GitHub Actions expressions have no toLower(), so this has to be a
+      # shell step.
+      - name: Lowercase image name
+        id: image
+        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      # This maintainer's own production image is still built/pushed
+      # separately to a private, LAN-only registry (`mise run
+      # docker_build_push`, see README) — this is a generic public image for
+      # anyone else self-hosting the app, so NEXT_PUBLIC_* build args use the
+      # same local-dev placeholder defaults as scripts/build-docker-image.sh,
+      # not this maintainer's own secrets.
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.vars.outputs.sha_short }}
+
+      # Pushes on main/branch pushes; builds only (no push) on pull requests,
+      # since PR images aren't trusted and forked PRs can't write packages.
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=http://localhost:3000
+            NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+            NEXT_PUBLIC_COMMIT_SHA=${{ steps.vars.outputs.sha_short }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
