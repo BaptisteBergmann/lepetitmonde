@@ -16,7 +16,7 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-IMAGE_TAG="${1:-babyfeed:local}"
+IMAGE_TAG="${1:-lepetitmonde:local}"
 
 if [ -f .env.local ]; then
   # shellcheck disable=SC1091

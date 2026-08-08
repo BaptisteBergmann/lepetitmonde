@@ -98,7 +98,7 @@ The app talks to Supabase over the internal Docker network at `http://kong:8000`
 
 The app itself ships as a multi-stage `Dockerfile` (deps → build → standalone runner). Two ways to build it:
 
-- **Generic, no registry needed**: `./scripts/build-docker-image.sh` — builds a local `babyfeed:local` image for your current platform. Good for trying the app out or self-hosting on a single machine.
+- **Generic, no registry needed**: `./scripts/build-docker-image.sh` — builds a local `lepetitmonde:local` image for your current platform. Good for trying the app out or self-hosting on a single machine.
 - **My own workflow**: multi-arch (amd64 + arm64), built and pushed to a private registry, then deployed via a Portainer stack (`docker-compose.portainer.yml`) that pulls the image and injects runtime secrets. Documented here in case it's a useful reference for a similar setup — adapt the registry host and image name to your own.
 
   1. `mise run docker_build_push` (requires `docker login your-registry-host:5000` once beforehand):

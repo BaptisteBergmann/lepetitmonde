@@ -17,7 +17,7 @@ The one real issue: `.claude/plans/security-review.md` and `rls.md` document (ac
 Decision: preserve the full 270-commit history rather than squashing. Use `git filter-repo` to surgically strip the 3 excluded files from every commit before pushing publicly.
 
 Mechanics:
-- Work on a **fresh clone** of the repo (filter-repo rewrites refs destructively; never run it on the only copy). `git clone /Users/baptistebergmann/Documents/perso/babyfeed babyfeed-public-filtered`.
+- Work on a **fresh clone** of the repo (filter-repo rewrites refs destructively; never run it on the only copy). `git clone /Users/baptistebergmann/Documents/perso/lepetitmonde lepetitmonde-public-filtered`.
 - `git filter-repo --path .claude/plans/security-review.md --path .claude/plans/rls.md --path .claude/plans/quirks-and-issues.md --invert-paths` — removes those 3 paths from every commit that ever touched them, across all history.
 - Verify afterward: `git log --all --diff-filter=A --name-only | grep -E 'security-review|rls\.md|quirks-and-issues'` should return nothing, and `git log --all -p -- .claude/plans/security-review.md` should be empty.
 - Also re-run the full secret/history grep scan (same ones used in the initial audit) against the filtered repo — filter-repo rewrites commit hashes, so it's worth a second pass rather than assuming the first scan still applies 1:1.
@@ -58,7 +58,7 @@ Current README assumes the reader already has this specific self-hosted Supabase
 - `.github/workflows/ci.yml` — on PRs to `main`:
   - job 1: `pnpm install` (frozen lockfile) → `pnpm typecheck` → `pnpm lint`.
   - job 2: `docker build` the image using generic/placeholder `--build-arg` values (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`) — **build-only, no push**. There's nowhere for CI to push to: the real registry (`192.168.2.177:5000`) is a private LAN address unreachable from GitHub-hosted runners, and pushing isn't the point of this check anyway — it just confirms the `Dockerfile` still builds after a change (catches a broken multi-stage build before it reaches your local `mise run docker_build_push`).
-- `scripts/build-docker-image.sh` — a small standalone script (no mise, no private registry) so anyone cloning the public repo can build the image locally: takes `NEXT_PUBLIC_SITE_URL`/`NEXT_PUBLIC_VAPID_PUBLIC_KEY` as env vars or prompts, runs `docker build --build-arg ... -t babyfeed:local .`. This is the generic counterpart to your `mise run docker_build_push` task (which stays as-is for your own private-registry workflow) — it's what an external user runs instead, documented in the README's Docker section.
+- `scripts/build-docker-image.sh` — a small standalone script (no mise, no private registry) so anyone cloning the public repo can build the image locally: takes `NEXT_PUBLIC_SITE_URL`/`NEXT_PUBLIC_VAPID_PUBLIC_KEY` as env vars or prompts, runs `docker build --build-arg ... -t lepetitmonde:local .`. This is the generic counterpart to your `mise run docker_build_push` task (which stays as-is for your own private-registry workflow) — it's what an external user runs instead, documented in the README's Docker section.
 
 ## 7. Final verification before pushing
 
