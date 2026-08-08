@@ -42,7 +42,7 @@ export default function Modal({
   // Nouveaux états pour la question de pronostic
   const [title, setTitle] = useState(question?.title ?? "");
   const [description, setDescription] = useState(question?.description ?? "");
-  const initialOptions = (question?.options as { choices?: string[]; min?: number; max?: number; precision?: number } | null) ?? null;
+  const initialOptions = (question?.options as { choices?: string[]; min?: number; max?: number; precision?: number; defaultMonth?: string; highlightedDate?: string } | null) ?? null;
   const [choices, setChoices] = useState<string[]>(
     initialOptions?.choices && initialOptions.choices.length > 0 ? initialOptions.choices : ["", ""]
   );
@@ -55,12 +55,15 @@ export default function Modal({
   const [precision, setPrecision] = useState<string>(
     initialOptions?.precision !== undefined && initialOptions?.precision !== null ? String(initialOptions.precision) : "2"
   );
+  const [defaultMonth, setDefaultMonth] = useState<string>(initialOptions?.defaultMonth ?? "");
+  const [highlightedDate, setHighlightedDate] = useState<string>(initialOptions?.highlightedDate ?? "");
 
   const [isPending, setIsPending] = useState(false)
 
   const validChoices = choices.map((c) => c.trim()).filter(Boolean);
   const isOptionType = selectValue === "option";
   const isNumberType = selectValue === "number";
+  const isDateType = selectValue === "date";
 
   const buildOptions = () => {
     if (isOptionType) return { choices: validChoices }
@@ -69,6 +72,12 @@ export default function Modal({
         min: minValue === "" ? null : Number(minValue),
         max: maxValue === "" ? null : Number(maxValue),
         precision: Number(precision),
+      }
+    }
+    if (isDateType) {
+      return {
+        defaultMonth: defaultMonth || null,
+        highlightedDate: highlightedDate || null,
       }
     }
     return null
@@ -102,6 +111,8 @@ export default function Modal({
         setMinValue("")
         setMaxValue("")
         setPrecision("2")
+        setDefaultMonth("")
+        setHighlightedDate("")
       }
       router.refresh()
     } catch (err) {
@@ -328,6 +339,34 @@ export default function Modal({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Réglages du calendrier (uniquement pour le type "Date") */}
+              {isAdmin && isDateType && (
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="defaultMonth" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Mois affiché par défaut (facultatif)
+                    </Label>
+                    <Input
+                      type="month"
+                      id="defaultMonth"
+                      value={defaultMonth}
+                      onChange={(e) => setDefaultMonth(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="highlightedDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Date mise en avant (facultatif)
+                    </Label>
+                    <Input
+                      type="date"
+                      id="highlightedDate"
+                      value={highlightedDate}
+                      onChange={(e) => setHighlightedDate(e.target.value)}
+                    />
                   </div>
                 </div>
               )}

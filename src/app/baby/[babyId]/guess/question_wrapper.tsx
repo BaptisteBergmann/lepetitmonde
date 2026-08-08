@@ -16,12 +16,15 @@ import OptionPicker from "./_components/picker/option";
 
 // The `options` column is a free-form Json in the DB, but in practice only ever
 // holds this shape depending on the question's `type` (min/max/precision for
-// "number", choices for "option"; unused for date/text/time).
+// "number", choices for "option", defaultMonth/highlightedDate for "date";
+// unused for text/time).
 export type QuestionOptions = {
   min?: number;
   max?: number;
   precision?: number;
   choices?: string[];
+  defaultMonth?: string;
+  highlightedDate?: string;
 };
 
 export interface PickerProps {
