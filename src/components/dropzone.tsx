@@ -1,4 +1,4 @@
-import { CheckCircle, File, Loader2, Upload, Video, X } from 'lucide-react'
+import { CheckCircle, File, Upload, Video, X } from 'lucide-react'
 import { createContext, useCallback, useContext, type PropsWithChildren } from 'react'
 
 import { cn } from "@utils/utils"
@@ -65,7 +65,6 @@ const DropzoneContent = ({ className }: { className?: string }) => {
   const {
     files,
     setFiles,
-    onUpload,
     loading,
     successes,
     errors,
@@ -161,24 +160,6 @@ const DropzoneContent = ({ className }: { className?: string }) => {
         <p className="text-sm text-left mt-2 text-destructive">
           Vous ne pouvez téléverser que {maxFiles} fichier{maxFiles > 1 ? 's' : ''} maximum, veuillez en retirer {files.length - maxFiles}.
         </p>
-      )}
-      {files.length > 0 && !exceedMaxFiles && (
-        <div className="mt-2">
-          <Button
-            variant="outline"
-            onClick={onUpload}
-            disabled={files.some((file) => file.errors.length !== 0) || loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Téléversement...
-              </>
-            ) : (
-              <>Téléverser les fichiers</>
-            )}
-          </Button>
-        </div>
       )}
     </div>
   )
