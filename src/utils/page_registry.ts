@@ -36,7 +36,7 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
     description: 'Rendez-vous, poussées de croissance et jalons à venir.',
     icon: CalendarDays,
     defaultRole: 'viewer',
-    defaultEnabled: true,
+    defaultEnabled: false,
     manageable: true,
   },
   {
@@ -56,7 +56,7 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
     description: 'Les petites phrases et moments rigolos du quotidien, à garder pour toujours.',
     icon: Sparkles,
     defaultRole: 'viewer',
-    defaultEnabled: true,
+    defaultEnabled: false,
     manageable: true,
   },
   {
@@ -66,7 +66,7 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
     description: 'Suivez ce que vous possédez déjà, ce qu\'il reste à acheter, et combien vous avez dépensé.',
     icon: Package,
     defaultRole: 'admin',
-    defaultEnabled: true,
+    defaultEnabled: false,
     manageable: true,
   },
   {
@@ -76,7 +76,7 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
     description: 'Ce qu\'il reste à acheter. Cochez au fur et à mesure, tout le monde voit la mise à jour en direct.',
     icon: ShoppingCart,
     defaultRole: 'viewer',
-    defaultEnabled: true,
+    defaultEnabled: false,
     manageable: true,
   },
   {
