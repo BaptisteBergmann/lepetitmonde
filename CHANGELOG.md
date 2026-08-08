@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-08
 
+- `18a2b52` Disable all pages except Journal and Pronostics by default
+- `6775430` Add anecdotes page for family quotes and funny moments
 - `21a5027` Let admins set a default month and highlighted date for pronostic date pickers
 - `5e8298c` Add cross-author story groups and simplify highlight expiry
 - `46f472f` Remove broken manual upload button from post/story dropzone
