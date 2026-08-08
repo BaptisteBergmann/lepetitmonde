@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-08
 
+- `5e8298c` Add cross-author story groups and simplify highlight expiry
 - `46f472f` Remove broken manual upload button from post/story dropzone
 - `a9d24fe` Let an already-logged-in user redeem an invite to a second baby
 - `dbcf24e` Rename project references from babyfeed to lepetitmonde
