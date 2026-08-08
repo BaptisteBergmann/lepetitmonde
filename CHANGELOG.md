@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-08
 
+- `21a5027` Let admins set a default month and highlighted date for pronostic date pickers
 - `5e8298c` Add cross-author story groups and simplify highlight expiry
 - `46f472f` Remove broken manual upload button from post/story dropzone
 - `a9d24fe` Let an already-logged-in user redeem an invite to a second baby
