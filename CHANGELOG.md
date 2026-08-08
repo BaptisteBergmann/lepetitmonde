@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-08
 
+- `dbcf24e` Rename project references from babyfeed to lepetitmonde
 - `d87a3dc` Add ephemeral stories with custom expiry and highlights
 
 ## 2026-08-06
