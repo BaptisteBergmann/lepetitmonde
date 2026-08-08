@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-08
+
+- `d87a3dc` Add ephemeral stories with custom expiry and highlights
+
 ## 2026-08-06
 
 - `056a3b6` Let families add custom article types in the inventory modal
