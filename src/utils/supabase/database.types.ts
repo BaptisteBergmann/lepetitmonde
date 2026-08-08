@@ -9,6 +9,87 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      anecdotes: {
+        Row: {
+          baby_id: string
+          content: string
+          created_at: string
+          created_by: string | null
+          happened_at: string
+          id: string
+          photo_mime_type: string | null
+          photo_path: string | null
+          photo_thumbnail_path: string | null
+        }
+        Insert: {
+          baby_id: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          happened_at?: string
+          id?: string
+          photo_mime_type?: string | null
+          photo_path?: string | null
+          photo_thumbnail_path?: string | null
+        }
+        Update: {
+          baby_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          happened_at?: string
+          id?: string
+          photo_mime_type?: string | null
+          photo_path?: string | null
+          photo_thumbnail_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anecdotes_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anecdotes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anecdotes_circles: {
+        Row: {
+          anecdote_id: string
+          circle_id: string
+        }
+        Insert: {
+          anecdote_id: string
+          circle_id: string
+        }
+        Update: {
+          anecdote_id?: string
+          circle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anecdotes_circles_anecdote_id_fkey"
+            columns: ["anecdote_id"]
+            isOneToOne: false
+            referencedRelation: "anecdotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anecdotes_circles_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       babies: {
         Row: {
           baby_surname: string
@@ -1291,6 +1372,7 @@ export type Database = {
         | "new_life_stage"
         | "circle_access_granted"
         | "new_story"
+        | "new_anecdote"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -1440,6 +1522,7 @@ export const Constants = {
         "new_life_stage",
         "circle_access_granted",
         "new_story",
+        "new_anecdote",
       ],
       role: ["admin", "viewer"],
     },

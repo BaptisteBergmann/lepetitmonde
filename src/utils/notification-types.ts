@@ -9,6 +9,7 @@ export const NOTIFICATION_LABELS: Record<Enums<'notification_type'>, string> = {
   new_life_stage: 'Nouvelles étapes du calendrier',
   circle_access_granted: 'Accès à un groupe',
   new_story: 'Nouvelles stories',
+  new_anecdote: 'Nouvelles anecdotes',
 }
 
 export const ADMIN_ONLY_TYPES: Enums<'notification_type'>[] = ['new_member']
