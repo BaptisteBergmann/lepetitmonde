@@ -203,3 +203,14 @@ body {
     @apply font-sans;
   }
 }
+
+/* Story viewer progress segment fill (photos only — videos drive their
+   width from playback progress in JS instead). */
+@keyframes story-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}

@@ -1002,6 +1002,205 @@ export type Database = {
           },
         ]
       }
+      stories: {
+        Row: {
+          baby_id: string
+          caption: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          media_path: string
+          mime_type: string
+          thumbnail_path: string | null
+        }
+        Insert: {
+          baby_id: string
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          media_path: string
+          mime_type: string
+          thumbnail_path?: string | null
+        }
+        Update: {
+          baby_id?: string
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          media_path?: string
+          mime_type?: string
+          thumbnail_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stories_circles: {
+        Row: {
+          circle_id: string
+          story_id: string
+        }
+        Insert: {
+          circle_id: string
+          story_id: string
+        }
+        Update: {
+          circle_id?: string
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_circles_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_circles_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_highlight_items: {
+        Row: {
+          highlight_id: string
+          position: number
+          story_id: string
+        }
+        Insert: {
+          highlight_id: string
+          position?: number
+          story_id: string
+        }
+        Update: {
+          highlight_id?: string
+          position?: number
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_highlight_items_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "story_highlights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_highlight_items_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_highlights: {
+        Row: {
+          baby_id: string
+          cover_story_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          baby_id: string
+          cover_story_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          baby_id?: string
+          cover_story_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_highlights_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_highlights_cover_story_id_fkey"
+            columns: ["cover_story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_highlights_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_views: {
+        Row: {
+          id: number
+          story_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: number
+          story_id: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: number
+          story_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
@@ -1088,6 +1287,7 @@ export type Database = {
         | "new_reaction"
         | "new_life_stage"
         | "circle_access_granted"
+        | "new_story"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -1236,6 +1436,7 @@ export const Constants = {
         "new_reaction",
         "new_life_stage",
         "circle_access_granted",
+        "new_story",
       ],
       role: ["admin", "viewer"],
     },

@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, getPosts } from '@utils/actions/posts'
+import { StoryAuthorGroup } from '@utils/actions/stories'
+import { HighlightWithStories } from '@utils/actions/story_highlights'
 import { Button } from '@/components/ui/button'
 import { Loader2, Plus } from 'lucide-react'
 import PostCard from './_components/post_card'
 import CreatePostModal from './_components/create_post_modal'
+import StoryTray from './_components/story_tray'
 
 type Circle = Tables<'circles'>
 
@@ -17,6 +20,8 @@ export default function FeedView({
   circles,
   initialPosts,
   pageSize,
+  initialHighlights,
+  initialStories,
 }: {
   babyId: string
   isAdmin: boolean
@@ -24,6 +29,8 @@ export default function FeedView({
   circles: Circle[]
   initialPosts: PostWithDetails[]
   pageSize: number
+  initialHighlights: HighlightWithStories[]
+  initialStories: StoryAuthorGroup[]
 }) {
   const [posts, setPosts] = useState<PostWithDetails[]>(initialPosts)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -46,6 +53,14 @@ export default function FeedView({
 
   return (
     <div className="relative space-y-4">
+      <StoryTray
+        babyId={babyId}
+        isAdmin={isAdmin}
+        circles={circles}
+        initialHighlights={initialHighlights}
+        initialStories={initialStories}
+      />
+
       {isAdmin && (
         <div className="flex justify-end">
           <Button className="gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>

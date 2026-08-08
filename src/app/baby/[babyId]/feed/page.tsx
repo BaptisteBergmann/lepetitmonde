@@ -4,6 +4,8 @@ import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles, getUserCircleIds } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
+import { getActiveStories } from "@/utils/actions/stories";
+import { getHighlights } from "@/utils/actions/story_highlights";
 import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
 import { withTiming } from "@/utils/timing";
@@ -79,9 +81,11 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
     }
   }
 
-  const { result: [circles, posts], durationMs } = await withTiming(() => Promise.all([
+  const { result: [circles, posts, highlights, stories], durationMs } = await withTiming(() => Promise.all([
     getCircles(babyId),
     getPosts(babyId, { limit: PAGE_SIZE }),
+    getHighlights(babyId),
+    getActiveStories(babyId),
   ]))
   contextLogger.info({ durationMs, postCount: posts.length }, "Feed content loaded")
 
@@ -93,6 +97,8 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
       circles={circles}
       initialPosts={posts}
       pageSize={PAGE_SIZE}
+      initialHighlights={highlights}
+      initialStories={stories}
     />
   )
 }
