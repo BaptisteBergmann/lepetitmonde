@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { subscribeUser, unsubscribeUser } from '@utils/actions/notifications'
+import { getVapidPublicKey, subscribeUser, unsubscribeUser } from '@utils/actions/notifications'
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -57,11 +57,10 @@ export function usePushSubscription() {
     setIsPending(true)
     try {
       const registration = await navigator.serviceWorker.ready
+      const vapidPublicKey = await getVapidPublicKey()
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-        ),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       })
       setSubscription(sub)
       const serializedSub = JSON.parse(JSON.stringify(sub))

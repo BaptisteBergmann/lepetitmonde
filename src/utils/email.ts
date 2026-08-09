@@ -3,7 +3,7 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { logger } from '@/utils/logger'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
+const siteUrl = process.env.SITE_URL!
 
 export async function sendWelcomeEmail(to: string, firstName: string) {
   const contextLogger = logger.child({ function: sendWelcomeEmail.name, to })

@@ -3,10 +3,10 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
 
-// Redirects are built from NEXT_PUBLIC_SITE_URL rather than request.url:
-// behind the reverse proxy, the Host header the app sees doesn't reliably
-// reflect the public hostname, which sent users to http://0.0.0.0:3000/...
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
+// Redirects are built from SITE_URL rather than request.url: behind the
+// reverse proxy, the Host header the app sees doesn't reliably reflect the
+// public hostname, which sent users to http://0.0.0.0:3000/...
+const siteUrl = process.env.SITE_URL!
 
 export async function GET(request: NextRequest) {
   const contextLogger = logger.child({ function: 'authConfirm' })

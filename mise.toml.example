@@ -10,14 +10,14 @@ env_shell_expand = true
 pnpm = "latest"
 
 [env]
-NEXT_PUBLIC_SITE_URL = "http://localhost:3000"
+SITE_URL = "http://localhost:3000"
 SUPABASE_URL = "http://localhost:8000"
 SUPABASE_PUBLISHABLE_KEY = ""
 SERVICE_ROLE_KEY = ""
 RESEND_API_KEY = ""
 EMAIL_FROM = "Your App <noreply@example.com>"
 
-NEXT_PUBLIC_VAPID_PUBLIC_KEY = ""
+VAPID_PUBLIC_KEY = ""
 VAPID_PRIVATE_KEY = ""
 VAPID_CONTACT_EMAIL = "you@example.com"
 
@@ -59,8 +59,6 @@ description = "Build and push the multi-arch Docker image to your private regist
 run = '''
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  --build-arg NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL}" \
-  --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="${NEXT_PUBLIC_VAPID_PUBLIC_KEY}" \
   --build-arg NEXT_PUBLIC_COMMIT_SHA="$(git rev-parse --short HEAD)" \
   -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest \
   --push .

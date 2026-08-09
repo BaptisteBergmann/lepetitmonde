@@ -30,9 +30,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
-        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
     container_name: lepetitmonde
     restart: unless-stopped
     depends_on:
@@ -41,13 +38,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      SITE_URL: ${SITE_URL}
       # Internal Kong gateway address — resolvable by service name since `app`
       # joins the same Compose project/network as the included Supabase stack.
       SUPABASE_URL: http://kong:8000
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
       SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
       VAPID_CONTACT_EMAIL: ${VAPID_CONTACT_EMAIL}
       RESEND_API_KEY: ${RESEND_API_KEY}

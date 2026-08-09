@@ -13,16 +13,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# NEXT_PUBLIC_* vars are inlined into the client bundle at build time,
-# so they must be passed in as build args, not just runtime env.
-# SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY are server-only (no NEXT_PUBLIC_ prefix)
-# and read at request time, so they're runtime env vars, not build args.
-ARG NEXT_PUBLIC_SITE_URL
-ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+# App config (SITE_URL, SUPABASE_URL, VAPID_PUBLIC_KEY, etc.) is all
+# server-only, read at request time via runtime env vars — set them on the
+# container, not here. NEXT_PUBLIC_COMMIT_SHA is the one exception: it's
+# genuinely inlined into the client bundle (shown in the footer's
+# commit-history dialog), so it has to be a build arg.
 ARG NEXT_PUBLIC_COMMIT_SHA
-ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-    NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY \
-    NEXT_PUBLIC_COMMIT_SHA=$NEXT_PUBLIC_COMMIT_SHA
+ENV NEXT_PUBLIC_COMMIT_SHA=$NEXT_PUBLIC_COMMIT_SHA
 
 # Next.js collects completely anonymous telemetry data. Disable it here if you prefer.
 ENV NEXT_TELEMETRY_DISABLED=1

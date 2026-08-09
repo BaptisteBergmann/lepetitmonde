@@ -1,6 +1,9 @@
 services:
   app:
-    image: your-registry-host:5000/your-app-name:latest
+    # Multi-arch (amd64/arm64), built by CI on every push to main. Swap the
+    # tag for a pinned commit SHA (see the GHCR package page) if you'd rather
+    # not auto-update to :latest.
+    image: ghcr.io/baptistebergmann/lepetitmonde:latest
     pull_policy: always
     container_name: lepetitmonde
     restart: unless-stopped
@@ -16,11 +19,11 @@ services:
     cpus: 2
     environment:
       NODE_OPTIONS: --max-old-space-size=1536
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      SITE_URL: ${SITE_URL}
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
       SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
       VAPID_CONTACT_EMAIL: ${VAPID_CONTACT_EMAIL}
       RESEND_API_KEY: ${RESEND_API_KEY}

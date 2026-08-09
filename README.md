@@ -96,35 +96,13 @@ The app talks to Supabase over the internal Docker network at `http://kong:8000`
 
 ## 🐳 Docker Build & Deploy
 
-The app itself ships as a multi-stage `Dockerfile` (deps → build → standalone runner). Two ways to build it:
+The app itself ships as a multi-stage `Dockerfile` (deps → build → standalone runner). All app config (`SITE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, etc.) is read at request time as plain runtime env vars — none of it is baked into the image at build time, so a single image works unmodified for any self-hoster. (The one exception is `NEXT_PUBLIC_COMMIT_SHA`, shown in the footer's commit-history dialog — genuinely inlined into the client bundle, so it's a build arg, not runtime config.)
 
-- **Generic, no registry needed**: `./scripts/build-docker-image.sh` — builds a local `lepetitmonde:local` image for your current platform. Good for trying the app out or self-hosting on a single machine.
-- **My own workflow**: multi-arch (amd64 + arm64), built and pushed to a private registry, then deployed via a Portainer stack (`docker-compose.portainer.yml`) that pulls the image and injects runtime secrets. Documented here in case it's a useful reference for a similar setup — adapt the registry host and image name to your own.
+- **Prebuilt image (recommended)**: pull `ghcr.io/baptistebergmann/lepetitmonde:latest` (multi-arch: amd64 + arm64, built by CI on every push to `main`) and run it with your own env vars — no build step needed. `docker-compose.portainer.yml` is a ready-made stack for this: set `image:` to the GHCR image, fill in the runtime env vars, deploy.
+- **Build it yourself**: `./scripts/build-docker-image.sh` — builds a local `lepetitmonde:local` image for your current platform. Useful if you want to build from a fork/branch instead of the published image.
+- **My own workflow**: same GHCR image, deployed via a Portainer stack (`docker-compose.portainer.yml`, `pull_policy: always`) that injects runtime secrets. Update the stack in Portainer to pick up a new push.
 
-  1. `mise run docker_build_push` (requires `docker login your-registry-host:5000` once beforehand):
-
-     ```bash
-     docker buildx build \
-       --platform linux/amd64,linux/arm64 \
-       --build-arg NEXT_PUBLIC_SITE_URL="<value>" \
-       --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY="<value>" \
-       -t your-registry-host:5000/your-app-name:latest \
-       --push .
-     ```
-
-     `NEXT_PUBLIC_*` values are inlined into the client bundle at build time — changing them later requires rebuilding and repushing. Supabase itself is never reachable from the browser: `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `SERVICE_ROLE_KEY` are server-only (no `NEXT_PUBLIC_` prefix), read at request time, so they're runtime env vars passed via the deploy stack, not build args.
-
-  2. Deploy/update the stack in Portainer using `docker-compose.portainer.yml`, which pulls the image (`pull_policy: always`) and sets the runtime-only env vars (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_CONTACT_EMAIL`, `EMAIL_FROM`, etc.).
-
-  3. If the registry serves plain HTTP, the Docker host needs it allow-listed in `/etc/docker/daemon.json`:
-
-     ```json
-     { "insecure-registries": ["your-registry-host:5000"] }
-     ```
-
-     then `sudo systemctl restart docker`. Registry credentials (if auth is enabled) are added under Portainer → **Registries** → **Add registry**.
-
-For local-only testing without any registry, `docker compose build && docker compose up` (root `docker-compose.yml`) builds and runs the image directly — see `.env.docker.example` for the required vars.
+For local-only testing, `docker compose build && docker compose up` (root `docker-compose.yml`) builds and runs the image directly — see `.env.docker.example` for the required vars.
 
 ## 🤝 Contributing
 

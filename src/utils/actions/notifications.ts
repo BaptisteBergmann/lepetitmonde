@@ -8,6 +8,13 @@ import { assertIsAdmin } from './access'
 
 export type MemberDevice = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
+// VAPID_PUBLIC_KEY is a runtime-only env var (no NEXT_PUBLIC_ prefix), so the
+// browser fetches it via this action instead of it being inlined at build
+// time — lets the same Docker image serve any self-hoster's own keys.
+export async function getVapidPublicKey() {
+  return process.env.VAPID_PUBLIC_KEY!
+}
+
 export async function subscribeUser(sub: PushSubscription, deviceLabel?: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: subscribeUser.name })
