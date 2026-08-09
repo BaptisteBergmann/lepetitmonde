@@ -9,6 +9,7 @@ import { logger } from "@/utils/logger";
 import Modal from "../_components/modal";
 import PendingQuestions from "./_components/pending_questions";
 import DeleteQuestionButton from "./_components/delete_question_button";
+import DeleteGuessButton from "./_components/delete_guess_button";
 import ReorderQuestionButtons from "./_components/reorder_question_buttons";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -173,20 +174,26 @@ export default async function GuessAdminPage({
                       </div>
                     ) : (
                       <div className="flex flex-col gap-1.5">
-                        {questionGuesses.map((guess) => (
-                          <div
-                            key={guess.id}
-                            className="flex items-center justify-between gap-3 rounded-xl bg-landing-background px-3 py-2 text-sm"
-                          >
-                            <span className="flex items-center gap-1.5 text-landing-muted">
-                              <User className="h-3.5 w-3.5" />
-                              {userNameById.get(guess.user_id) ?? "Utilisateur"}
-                            </span>
-                            <span className="font-semibold text-landing-foreground">
-                              {formatAnswer(guess.answer, question.type, question.options)}
-                            </span>
-                          </div>
-                        ))}
+                        {questionGuesses.map((guess) => {
+                          const guessUserName = userNameById.get(guess.user_id) ?? "Utilisateur";
+                          return (
+                            <div
+                              key={guess.id}
+                              className="flex items-center justify-between gap-3 rounded-xl bg-landing-background px-3 py-2 text-sm"
+                            >
+                              <span className="flex items-center gap-1.5 text-landing-muted">
+                                <User className="h-3.5 w-3.5" />
+                                {guessUserName}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-landing-foreground">
+                                  {formatAnswer(guess.answer, question.type, question.options)}
+                                </span>
+                                <DeleteGuessButton babyId={babyId} guessId={guess.id} userName={guessUserName} />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>

@@ -1,9 +1,11 @@
 'use server' // Obligatoire pour définir que ce fichier contient des Server Actions
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
 import { logger } from '../logger'
 import { TablesInsert } from '../supabase/database.types'
 import { getUserAccess } from './users'
+import { assertIsAdmin } from './access'
 
 type InsertGuess = TablesInsert<"guesses">
 
@@ -83,5 +85,23 @@ export async function getAllGuesses(babyId: string) {
     return []
   }
   return data
+}
+
+export async function deleteGuess(babyId: string, guessId: string) {
+  const contextLogger = logger.child({ function: deleteGuess.name, babyId, guessId })
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const { error } = await supabase
+    .from('guesses')
+    .delete()
+    .eq('id', guessId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error deleting guess"); throw error }
+  contextLogger.info("Guess deleted")
+
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
 }
 
