@@ -61,6 +61,7 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 
 ## ✅ Git Workflow
 
+- Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for every commit message: `<type>[optional scope]: <description>`, e.g. `feat(auth): add pronostic delete confirm modal`. Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`. Use `!` after the type/scope (or a `BREAKING CHANGE:` footer) for breaking changes.
 - Commit as soon as each subtask/fix in a multi-step task is done and verified (e.g. typechecks pass) — do not batch unrelated fixes into a single commit. Each commit should be small and scoped to one subtask.
 - After every commit, immediately update `CHANGELOG.md` in a follow-up commit: add a `` `<short-hash>` <subject> `` line under the `## <YYYY-MM-DD>` heading for that day (newest entry at the top of its date group; add a new date heading at the top of the file if the commit is the first of a new day).
 
