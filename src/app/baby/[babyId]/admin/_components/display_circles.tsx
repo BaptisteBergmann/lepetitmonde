@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CircleDot, Trash2, X, UserPlus } from "lucide-react";
+import { CircleDot, CircleOff, Trash2, X, UserPlus } from "lucide-react";
 
 type Circle = Tables<'circles'>;
 type CircleAccess = Tables<'circles_access'>;
@@ -125,11 +125,20 @@ export default function RealtimeCirclesList({
     }
   };
 
+  const usersWithoutCircle = users.filter(
+    (u) => !circlesAccess.some((a) => a.user_id === u.id)
+  );
+
   if (circles.length === 0) {
     return (
-      <div className="text-center py-10 text-landing-muted px-4">
-        <p className="text-sm font-medium">Aucun cercle de partage créé pour le moment.</p>
-        <p className="text-xs text-landing-muted mt-1">Utilisez le formulaire ci-contre pour créer votre premier groupe.</p>
+      <div className="divide-y divide-landing-border">
+        <div className="text-center py-10 text-landing-muted px-4">
+          <p className="text-sm font-medium">Aucun cercle de partage créé pour le moment.</p>
+          <p className="text-xs text-landing-muted mt-1">Utilisez le formulaire ci-contre pour créer votre premier groupe.</p>
+        </div>
+        {usersWithoutCircle.length > 0 && (
+          <UsersWithoutCircle users={usersWithoutCircle} />
+        )}
       </div>
     );
   }
@@ -228,6 +237,35 @@ export default function RealtimeCirclesList({
           </div>
         );
       })}
+      {usersWithoutCircle.length > 0 && (
+        <UsersWithoutCircle users={usersWithoutCircle} />
+      )}
+    </div>
+  );
+}
+
+function UsersWithoutCircle({ users }: { users: User[] }) {
+  return (
+    <div className="py-3.5 px-6 space-y-3">
+      <div className="flex items-center gap-3">
+        <div className="bg-landing-muted/10 text-landing-muted p-2 rounded-xl">
+          <CircleOff className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="font-semibold text-sm text-landing-foreground">Sans cercle</p>
+          <p className="text-[10px] text-landing-muted">Membres ne faisant partie d&apos;aucun cercle</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 pl-1">
+        {users.map((user) => (
+          <span
+            key={user.id}
+            className="inline-flex items-center gap-1.5 rounded-full bg-landing-background pl-2.5 pr-2.5 py-1 text-xs font-medium text-landing-foreground"
+          >
+            {getMemberLabel(user)}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
