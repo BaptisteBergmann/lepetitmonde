@@ -6,6 +6,19 @@ on:
   push:
     branches: [main]
 
+# On main (push events, branches: [main] above so github.ref is always
+# refs/heads/main here): queue instead of racing, so every push still gets
+# a completed run through to a GHCR push — without this, two pushes
+# seconds apart run independently and whichever run happens to finish last
+# wins the :latest tag, regardless of which commit is actually newer.
+# On PR branches: cancel the superseded run instead — nothing gets pushed
+# from a PR anyway (see the "Build and push" step's push: condition), so
+# there's no completed-run guarantee to protect, only CI minutes to save
+# on rapid-fire pushes to the same PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   typecheck-and-lint:
     runs-on: ubuntu-latest
