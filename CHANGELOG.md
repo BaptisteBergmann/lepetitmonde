@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-08
 
+- `2e7a333` Queue CI runs on main, cancel superseded PR runs
 - `03a1de2` Push the CI-built Docker image to GHCR with build-push-action
 - `18a2b52` Disable all pages except Journal and Pronostics by default
 - `6775430` Add anecdotes page for family quotes and funny moments
