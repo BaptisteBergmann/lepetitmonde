@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { getUserCircleIds } from './circles'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { getBabyAdminIds } from './access'
@@ -40,10 +41,11 @@ export async function addComment(postId: string, babyId: string, body: string) {
     .eq('user_id', user.id)
     .single()
   const commenterProfile = Array.isArray(commenter?.users) ? commenter.users[0] : commenter?.users
-  const name = getDisplayName(commenterProfile, commenter?.nickname) || 'Quelqu\'un'
+  const t = await getTranslations('pushNotifications')
+  const name = getDisplayName(commenterProfile, commenter?.nickname) || t('someoneFallback')
   await notifyUsers(babyId, 'new_comment', {
-    title: 'Nouveau commentaire',
-    body: `${name} : ${body}`,
+    title: t('newComment.title'),
+    body: t('newComment.body', { name, body }),
     url: `/baby/${babyId}/feed`,
   }, recipients)
 }

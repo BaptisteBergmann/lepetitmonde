@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { getBabyAdminIds } from './access'
 import { notifyUsers } from './notify'
@@ -64,9 +65,10 @@ export async function joinBabyWithInvitation(formData: FormData) {
     .single()
 
   const adminIds = await getBabyAdminIds(babyId, user.id)
+  const t = await getTranslations('pushNotifications')
   await notifyUsers(babyId, 'new_member', {
-    title: 'Nouveau membre',
-    body: `${profile?.first_name ?? 'Un membre'} a rejoint la famille !`,
+    title: t('newMember.title'),
+    body: t('newMember.body', { name: profile?.first_name ?? t('newMember.unnamedFallback') }),
     url: `/baby/${babyId}/admin`,
   }, adminIds)
 

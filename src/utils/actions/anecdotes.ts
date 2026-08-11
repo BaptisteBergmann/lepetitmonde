@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
@@ -60,8 +61,9 @@ export async function createAnecdote(anecdote: NewAnecdote, circleIds: string[])
 
   const { data: { user } } = await supabase.auth.getUser()
   const recipients = await getVisibleUserIds(anecdote.baby_id, circleIds, user?.id)
+  const t = await getTranslations('pushNotifications')
   await notifyUsers(anecdote.baby_id, 'new_anecdote', {
-    title: 'Nouvelle anecdote',
+    title: t('newAnecdote.title'),
     body: anecdote.content.slice(0, 120),
     url: `/baby/${anecdote.baby_id}/anecdotes`,
   }, recipients)

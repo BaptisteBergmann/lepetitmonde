@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
 import { notifyUsers } from './notify'
@@ -121,11 +122,12 @@ export async function addUserToCircle(circleId: string, userId: string, babyId: 
     .eq('id', circleId)
     .single()
 
+  const t = await getTranslations('pushNotifications')
   await notifyUsers(babyId, 'circle_access_granted', {
-    title: 'Accès accordé',
+    title: t('circleAccessGranted.title'),
     body: circle?.name
-      ? `Vous avez été ajouté au groupe "${circle.name}" et pouvez maintenant voir son contenu.`
-      : 'Vous avez été ajouté à un groupe et pouvez maintenant voir son contenu.',
+      ? t('circleAccessGranted.bodyNamed', { circleName: circle.name })
+      : t('circleAccessGranted.bodyGeneric'),
     url: `/baby/${babyId}/feed`,
   }, [userId])
 

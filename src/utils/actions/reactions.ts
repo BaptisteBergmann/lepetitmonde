@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { REACTIONS } from '@utils/reactions'
 import { getDisplayName } from '@utils/users'
 import { notifyUsers } from './notify'
@@ -38,10 +39,11 @@ export async function addReaction(postId: string, babyId: string, emoji: string 
       .eq('user_id', user.id)
       .single()
     const reactorProfile = Array.isArray(reactor?.users) ? reactor.users[0] : reactor?.users
-    const name = getDisplayName(reactorProfile, reactor?.nickname) || 'Quelqu\'un'
+    const t = await getTranslations('pushNotifications')
+    const name = getDisplayName(reactorProfile, reactor?.nickname) || t('someoneFallback')
     await notifyUsers(babyId, 'new_reaction', {
-      title: 'Nouvelle réaction',
-      body: `${name} a réagi ${emoji} à votre publication`,
+      title: t('newReaction.title'),
+      body: t('newReaction.body', { name, emoji }),
       url: `/baby/${babyId}/feed`,
     }, [post.created_by])
   }

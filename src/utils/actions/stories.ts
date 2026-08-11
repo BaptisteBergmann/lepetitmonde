@@ -5,6 +5,7 @@ import { getAuthUser } from '@utils/supabase/auth'
 import { getDisplayName } from '@utils/users'
 import { Tables } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess, getNicknamesByBaby } from './users'
@@ -79,9 +80,10 @@ export async function createStory(story: NewStory, circleIds: string[]) {
 
   const { data: { user } } = await supabase.auth.getUser()
   const recipients = await getVisibleUserIds(story.baby_id, circleIds, user?.id)
+  const t = await getTranslations('pushNotifications')
   await notifyUsers(story.baby_id, 'new_story', {
-    title: 'Nouvelle story',
-    body: 'Une nouvelle story a été ajoutée au journal !',
+    title: t('newStory.title'),
+    body: t('newStory.body'),
     url: `/baby/${story.baby_id}/feed`,
   }, recipients)
 

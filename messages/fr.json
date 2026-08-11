@@ -689,6 +689,49 @@
     "later": "Plus tard",
     "editLaterNotice": "Vous pourrez toujours modifier ces informations plus tard."
   },
+  "email": {
+    "welcomeSubject": "Bienvenue sur Le petit monde",
+    "inviteSubject": "Invitation à rejoindre le journal de {babyName}"
+  },
+  "pushNotifications": {
+    "someoneFallback": "Quelqu'un",
+    "newComment": {
+      "title": "Nouveau commentaire",
+      "body": "{name} : {body}"
+    },
+    "newAnecdote": {
+      "title": "Nouvelle anecdote"
+    },
+    "newMember": {
+      "title": "Nouveau membre",
+      "body": "{name} a rejoint la famille !",
+      "unnamedFallback": "Un membre"
+    },
+    "newStory": {
+      "title": "Nouvelle story",
+      "body": "Une nouvelle story a été ajoutée au journal !"
+    },
+    "newLifeStage": {
+      "title": "Nouvelle étape !"
+    },
+    "newPronostic": {
+      "title": "Nouveau pronostic",
+      "body": "Un nouveau pronostic est disponible !"
+    },
+    "newPost": {
+      "title": "Nouvelle publication",
+      "bodyFallback": "Une nouvelle photo a été ajoutée au journal !"
+    },
+    "circleAccessGranted": {
+      "title": "Accès accordé",
+      "bodyNamed": "Vous avez été ajouté au groupe \"{circleName}\" et pouvez maintenant voir son contenu.",
+      "bodyGeneric": "Vous avez été ajouté à un groupe et pouvez maintenant voir son contenu."
+    },
+    "newReaction": {
+      "title": "Nouvelle réaction",
+      "body": "{name} a réagi {emoji} à votre publication"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",

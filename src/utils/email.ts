@@ -1,14 +1,17 @@
 import { Resend } from 'resend'
 import { readFile } from 'fs/promises'
 import path from 'path'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { logger } from '@/utils/logger'
 
 const siteUrl = process.env.SITE_URL!
 
 export async function sendWelcomeEmail(to: string, firstName: string) {
   const contextLogger = logger.child({ function: sendWelcomeEmail.name, to })
+  const locale = await getLocale()
+  const t = await getTranslations('email')
 
-  const templatePath = path.join(process.cwd(), 'public/emails/welcome.html')
+  const templatePath = path.join(process.cwd(), 'public/emails', locale, 'welcome.html')
   const template = await readFile(templatePath, 'utf-8')
   const html = template
     .replaceAll('{{FIRST_NAME}}', firstName)
@@ -18,7 +21,7 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
   const { error } = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to,
-    subject: 'Bienvenue sur Le petit monde',
+    subject: t('welcomeSubject'),
     html,
   })
 
@@ -29,8 +32,10 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
 
 export async function sendInviteEmail(to: string, babyName: string, inviteUrl: string) {
   const contextLogger = logger.child({ function: sendInviteEmail.name, to })
+  const locale = await getLocale()
+  const t = await getTranslations('email')
 
-  const templatePath = path.join(process.cwd(), 'public/emails/invite-member.html')
+  const templatePath = path.join(process.cwd(), 'public/emails', locale, 'invite-member.html')
   const template = await readFile(templatePath, 'utf-8')
   const html = template
     .replaceAll('{{BABY_NAME}}', babyName)
@@ -40,7 +45,7 @@ export async function sendInviteEmail(to: string, babyName: string, inviteUrl: s
   const { error } = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to,
-    subject: `Invitation à rejoindre le journal de ${babyName}`,
+    subject: t('inviteSubject', { babyName }),
     html,
   })
 

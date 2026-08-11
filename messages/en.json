@@ -689,6 +689,49 @@
     "later": "Later",
     "editLaterNotice": "You can always change this information later."
   },
+  "email": {
+    "welcomeSubject": "Welcome to Le petit monde",
+    "inviteSubject": "Invitation to join {babyName}'s journal"
+  },
+  "pushNotifications": {
+    "someoneFallback": "Someone",
+    "newComment": {
+      "title": "New comment",
+      "body": "{name}: {body}"
+    },
+    "newAnecdote": {
+      "title": "New anecdote"
+    },
+    "newMember": {
+      "title": "New member",
+      "body": "{name} joined the family!",
+      "unnamedFallback": "A member"
+    },
+    "newStory": {
+      "title": "New story",
+      "body": "A new story was added to the journal!"
+    },
+    "newLifeStage": {
+      "title": "New milestone!"
+    },
+    "newPronostic": {
+      "title": "New pronostic",
+      "body": "A new pronostic is available!"
+    },
+    "newPost": {
+      "title": "New post",
+      "bodyFallback": "A new photo was added to the journal!"
+    },
+    "circleAccessGranted": {
+      "title": "Access granted",
+      "bodyNamed": "You've been added to the \"{circleName}\" group and can now see its content.",
+      "bodyGeneric": "You've been added to a group and can now see its content."
+    },
+    "newReaction": {
+      "title": "New reaction",
+      "body": "{name} reacted {emoji} to your post"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

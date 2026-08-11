@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
 import { TablesInsert } from '@utils/supabase/database.types'
+import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { getUserAccess } from './users'
 import { assertIsAdmin, getAllBabyMemberIds } from './access'
@@ -100,9 +101,10 @@ export async function reviewQuestion(babyId: string, questionId: string, decisio
   if (decision === 'approved') {
     const { data: { user } } = await supabase.auth.getUser()
     const recipients = await getAllBabyMemberIds(babyId, user?.id)
+    const t = await getTranslations('pushNotifications')
     await notifyUsers(babyId, 'new_pronostic', {
-      title: 'Nouveau pronostic',
-      body: 'Un nouveau pronostic est disponible !',
+      title: t('newPronostic.title'),
+      body: t('newPronostic.body'),
       url: `/baby/${babyId}/guess`,
     }, recipients)
   }
@@ -253,9 +255,10 @@ export async function addQuestion(formData: NewGuess) {
 
   if (isAdmin) {
     const recipients = await getAllBabyMemberIds(formData.baby_id, user.id)
+    const t = await getTranslations('pushNotifications')
     await notifyUsers(formData.baby_id, 'new_pronostic', {
-      title: 'Nouveau pronostic',
-      body: 'Un nouveau pronostic est disponible !',
+      title: t('newPronostic.title'),
+      body: t('newPronostic.body'),
       url: `/baby/${formData.baby_id}/guess`,
     }, recipients)
   }

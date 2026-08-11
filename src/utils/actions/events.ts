@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Enums, Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
@@ -52,8 +53,9 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
   if (kind === 'life_stage') {
     const { data: { user } } = await supabase.auth.getUser()
     const recipients = await getVisibleUserIds(event.baby_id, circleIds, user?.id)
+    const t = await getTranslations('pushNotifications')
     await notifyUsers(event.baby_id, 'new_life_stage', {
-      title: 'Nouvelle étape !',
+      title: t('newLifeStage.title'),
       body: event.title,
       url: `/baby/${event.baby_id}/calendar`,
     }, recipients)

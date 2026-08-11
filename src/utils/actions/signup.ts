@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { sendWelcomeEmail } from '@/utils/email'
 import { getBabyAdminIds } from './access'
@@ -77,9 +78,10 @@ export async function signup(formData: FormData) {
   await sendWelcomeEmail(email, firstName)
 
   const adminIds = await getBabyAdminIds(invitation.data.baby_id, user.user.id)
+  const t = await getTranslations('pushNotifications')
   await notifyUsers(invitation.data.baby_id, 'new_member', {
-    title: 'Nouveau membre',
-    body: `${firstName} a rejoint la famille !`,
+    title: t('newMember.title'),
+    body: t('newMember.body', { name: firstName }),
     url: `/baby/${invitation.data.baby_id}/admin`,
   }, adminIds)
 
