@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `c2a2f71` Translate transactional emails and push notifications
 - `6d39d0c` Translate profile, settings, and onboarding
 - `819b3df` Translate buy-list, inventory, and anecdotes sections
 - `5925e64` Translate the admin (circles & access) section
