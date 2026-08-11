@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import {
   addMonths,
   subMonths,
@@ -52,6 +52,7 @@ export default function CalendarView({
   hasLaterActivity: boolean
 }) {
   const router = useRouter()
+  const t = useTranslations('calendar')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [isPending, startTransition] = useTransition()
   const [monthYear, monthIndex] = monthKey.split('-').map(Number)
@@ -62,6 +63,12 @@ export default function CalendarView({
   const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 })
   const gridEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 })
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd })
+  // 2024-01-01 is a Monday — used purely as a fixed reference week to derive
+  // locale-correct weekday abbreviations, independent of the displayed month.
+  const weekdayLabels = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => format(new Date(2024, 0, 1 + i), 'EEE', { locale: dateFnsLocale })),
+    [dateFnsLocale]
+  )
 
   const circleColor = useMemo(() => {
     const map = new Map<string, string>()
@@ -110,7 +117,7 @@ export default function CalendarView({
             className="rounded-2xl cursor-pointer"
             disabled={isPending}
             onClick={() => goToMonth(subMonths(month, 1))}
-            aria-label={hasEarlierActivity ? "Mois précédent (contient des événements)" : "Mois précédent"}
+            aria-label={hasEarlierActivity ? t('prevMonthWithEvents') : t('prevMonth')}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -128,7 +135,7 @@ export default function CalendarView({
             className="rounded-2xl cursor-pointer"
             disabled={isPending}
             onClick={() => goToMonth(addMonths(month, 1))}
-            aria-label={hasLaterActivity ? "Mois suivant (contient des événements)" : "Mois suivant"}
+            aria-label={hasLaterActivity ? t('nextMonthWithEvents') : t('nextMonth')}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -145,14 +152,14 @@ export default function CalendarView({
             onClick={() => setModalState({ date: format(new Date(), 'yyyy-MM-dd') })}
           >
             <Plus className="h-4 w-4" />
-            <span>Nouvel événement</span>
+            <span>{t('newEvent')}</span>
           </Button>
         </div>
       )}
 
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-landing-muted uppercase tracking-wider">
-        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
-          <div key={day} className="py-1">{day}</div>
+        {weekdayLabels.map((day, i) => (
+          <div key={i} className="py-1">{day}</div>
         ))}
       </div>
 

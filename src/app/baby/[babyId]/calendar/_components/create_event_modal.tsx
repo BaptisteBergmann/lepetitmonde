@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -16,15 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, CalendarPlus, X } from 'lucide-react'
-import { MILESTONE_LABELS } from './constants'
-
 type Circle = Tables<'circles'>
-
-const KIND_ITEMS: Record<Enums<'event_kind'>, string> = {
-  occasion: "Occasion",
-  life_stage: "Étape de vie",
-  medical: "Rendez-vous médical",
-}
 
 export default function CreateEventModal({
   babyId,
@@ -40,6 +33,23 @@ export default function CreateEventModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const t = useTranslations('calendar.eventForm')
+  const tKind = useTranslations('eventKinds')
+  const tMilestone = useTranslations('milestones')
+  const KIND_ITEMS: Record<Enums<'event_kind'>, string> = {
+    occasion: tKind('occasion'),
+    life_stage: tKind('life_stage'),
+    medical: tKind('medical'),
+  }
+  const MILESTONE_LABELS: Record<Enums<'milestone_type'>, string> = {
+    first_steps: tMilestone('first_steps'),
+    first_tooth: tMilestone('first_tooth'),
+    first_word: tMilestone('first_word'),
+    first_smile: tMilestone('first_smile'),
+    first_laugh: tMilestone('first_laugh'),
+    birthday: tMilestone('birthday'),
+    other: tMilestone('other'),
+  }
   const isEditing = Boolean(event)
 
   const [title, setTitle] = useState(event?.title ?? "")
@@ -87,7 +97,7 @@ export default function CreateEventModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la sauvegarde.")
+      alert(t('saveError'))
     } finally {
       setIsPending(false)
     }
@@ -106,7 +116,7 @@ export default function CreateEventModal({
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <CalendarPlus className="h-4.5 w-4.5 text-primary" />
-            {isEditing ? "Modifier l'événement" : "Nouvel événement"}
+            {isEditing ? t('editTitle') : t('newTitle')}
           </h2>
           <button
             onClick={onClose}
@@ -120,21 +130,21 @@ export default function CreateEventModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Titre
+              {t('titleLabel')}
             </Label>
             <Input
               type="text"
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Rendez-vous pédiatre"
+              placeholder={t('titlePlaceholder')}
               required
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Description (facultative)
+              {t('descriptionLabel')}
             </Label>
             <textarea
               id="description"
@@ -147,7 +157,7 @@ export default function CreateEventModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="event_date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Date
+              {t('dateLabel')}
             </Label>
             <Input
               type="date"
@@ -160,11 +170,11 @@ export default function CreateEventModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Type d&apos;événement
+              {t('kindLabel')}
             </Label>
             <Select items={KIND_ITEMS} value={kind} onValueChange={(value) => value && setKind(value as Enums<'event_kind'>)}>
               <SelectTrigger className="w-full text-foreground bg-input/50">
-                <SelectValue placeholder="Sélectionner le type" />
+                <SelectValue placeholder={t('kindPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -179,11 +189,11 @@ export default function CreateEventModal({
           {isLifeStage && (
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Étape de vie
+                {t('milestoneLabel')}
               </Label>
               <Select items={MILESTONE_LABELS} value={milestoneType} onValueChange={(value) => value && setMilestoneType(value as Enums<'milestone_type'>)}>
                 <SelectTrigger className="w-full text-foreground bg-input/50">
-                  <SelectValue placeholder="Sélectionner une étape" />
+                  <SelectValue placeholder={t('milestonePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -199,7 +209,7 @@ export default function CreateEventModal({
           {isMedical && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="event_time" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Heure (facultative)
+                {t('timeLabel')}
               </Label>
               <Input
                 type="time"
@@ -212,7 +222,7 @@ export default function CreateEventModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Visible par
+              {t('visibleByLabel')}
             </Label>
             <Select
               items={circleItems}
@@ -221,7 +231,7 @@ export default function CreateEventModal({
               onValueChange={(value) => setCircleIds(value as string[])}
             >
               <SelectTrigger className="w-full text-foreground bg-input/50">
-                <SelectValue placeholder="Masqué (aucun cercle)" />
+                <SelectValue placeholder={t('visibleByPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -232,7 +242,7 @@ export default function CreateEventModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Aucun cercle sélectionné = événement masqué, visible uniquement par les administrateurs.
+              {t('visibleByHint')}
             </p>
           </div>
 
@@ -244,7 +254,7 @@ export default function CreateEventModal({
             className="rounded-2xl cursor-pointer"
             onClick={onClose}
           >
-            Annuler
+            {t('cancel')}
           </Button>
           <Button
             disabled={!title.trim() || !eventDate || (isLifeStage && !milestoneType) || isPending}
@@ -254,10 +264,10 @@ export default function CreateEventModal({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Enregistrement...</span>
+                <span>{t('saving')}</span>
               </>
             ) : (
-              <span>Confirmer</span>
+              <span>{t('confirm')}</span>
             )}
           </Button>
         </div>

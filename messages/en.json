@@ -290,6 +290,56 @@
       "newHighlightPlaceholder": "New highlight"
     }
   },
+  "calendar": {
+    "eyebrow": "Page — The big milestones",
+    "title": "Calendar",
+    "subtitle": "Baby's events and milestones, past and upcoming.",
+    "prevMonth": "Previous month",
+    "prevMonthWithEvents": "Previous month (has events)",
+    "nextMonth": "Next month",
+    "nextMonthWithEvents": "Next month (has events)",
+    "newEvent": "New event",
+    "noEventsThisDay": "No events that day.",
+    "addEvent": "Add an event",
+    "circleFallback": "Circle",
+    "hiddenAdminOnly": "Hidden — admins only",
+    "deleteEventConfirm": "Delete this event? This action can't be undone.",
+    "deleteError": "Something went wrong while deleting.",
+    "eventForm": {
+      "newTitle": "New event",
+      "editTitle": "Edit event",
+      "titleLabel": "Title",
+      "titlePlaceholder": "E.g. Pediatrician appointment",
+      "descriptionLabel": "Description (optional)",
+      "dateLabel": "Date",
+      "kindLabel": "Event type",
+      "kindPlaceholder": "Select a type",
+      "milestoneLabel": "Milestone",
+      "milestonePlaceholder": "Select a milestone",
+      "timeLabel": "Time (optional)",
+      "visibleByLabel": "Visible to",
+      "visibleByPlaceholder": "Hidden (no circle)",
+      "visibleByHint": "No circle selected = hidden event, visible to admins only.",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "confirm": "Confirm",
+      "saveError": "Something went wrong while saving."
+    }
+  },
+  "eventKinds": {
+    "occasion": "Occasion",
+    "life_stage": "Milestone",
+    "medical": "Medical appointment"
+  },
+  "milestones": {
+    "first_steps": "First steps",
+    "first_tooth": "First tooth",
+    "first_word": "First word",
+    "first_smile": "First smile",
+    "first_laugh": "First laugh",
+    "birthday": "Birthday",
+    "other": "Other"
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

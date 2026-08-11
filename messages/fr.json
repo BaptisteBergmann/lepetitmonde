@@ -290,6 +290,56 @@
       "newHighlightPlaceholder": "Nouveau highlight"
     }
   },
+  "calendar": {
+    "eyebrow": "Page — Les grandes étapes",
+    "title": "Calendrier",
+    "subtitle": "Les événements et jalons de bébé, passés et à venir.",
+    "prevMonth": "Mois précédent",
+    "prevMonthWithEvents": "Mois précédent (contient des événements)",
+    "nextMonth": "Mois suivant",
+    "nextMonthWithEvents": "Mois suivant (contient des événements)",
+    "newEvent": "Nouvel événement",
+    "noEventsThisDay": "Aucun événement ce jour-là.",
+    "addEvent": "Ajouter un événement",
+    "circleFallback": "Cercle",
+    "hiddenAdminOnly": "Masqué — administrateurs uniquement",
+    "deleteEventConfirm": "Supprimer cet événement ? Cette action est irréversible.",
+    "deleteError": "Une erreur est survenue lors de la suppression.",
+    "eventForm": {
+      "newTitle": "Nouvel événement",
+      "editTitle": "Modifier l'événement",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Ex: Rendez-vous pédiatre",
+      "descriptionLabel": "Description (facultative)",
+      "dateLabel": "Date",
+      "kindLabel": "Type d'événement",
+      "kindPlaceholder": "Sélectionner le type",
+      "milestoneLabel": "Étape de vie",
+      "milestonePlaceholder": "Sélectionner une étape",
+      "timeLabel": "Heure (facultative)",
+      "visibleByLabel": "Visible par",
+      "visibleByPlaceholder": "Masqué (aucun cercle)",
+      "visibleByHint": "Aucun cercle sélectionné = événement masqué, visible uniquement par les administrateurs.",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "confirm": "Confirmer",
+      "saveError": "Une erreur est survenue lors de la sauvegarde."
+    }
+  },
+  "eventKinds": {
+    "occasion": "Occasion",
+    "life_stage": "Étape de vie",
+    "medical": "Rendez-vous médical"
+  },
+  "milestones": {
+    "first_steps": "Premiers pas",
+    "first_tooth": "Première dent",
+    "first_word": "Premier mot",
+    "first_smile": "Premier sourire",
+    "first_laugh": "Premier éclat de rire",
+    "birthday": "Anniversaire",
+    "other": "Autre"
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",

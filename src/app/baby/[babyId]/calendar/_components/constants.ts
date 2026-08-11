@@ -20,15 +20,10 @@ export const MILESTONE_ICONS: Record<Enums<'milestone_type'>, LucideIcon> = {
   other: Star,
 }
 
-export const MILESTONE_LABELS: Record<Enums<'milestone_type'>, string> = {
-  first_steps: "Premiers pas",
-  first_tooth: "Première dent",
-  first_word: "Premier mot",
-  first_smile: "Premier sourire",
-  first_laugh: "Premier éclat de rire",
-  birthday: "Anniversaire",
-  other: "Autre",
-}
+// Labels used to live here as a literal Record<type, string>; they're now
+// resolved from the `milestones.<type>` messages instead (useTranslations
+// in the two consumers below), so a locale switch doesn't need a code change
+// here.
 
 export const KIND_ICONS: Partial<Record<Enums<'event_kind'>, LucideIcon>> = {
   medical: Stethoscope,

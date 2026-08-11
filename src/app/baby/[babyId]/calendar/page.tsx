@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles } from "@/utils/actions/circles";
@@ -19,6 +20,7 @@ export default async function CalendarPage({
   const { babyId } = await params;
   const { month: monthParam } = await searchParams;
   const contextLogger = logger.child({ function: CalendarPage.name, babyId })
+  const t = await getTranslations('calendar')
 
   await assertPageAccess(babyId, 'calendar')
 
@@ -60,13 +62,13 @@ export default async function CalendarPage({
 
         <Reveal className="relative flex flex-col items-center gap-2 pb-2 text-center">
           <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-            Page — Les grandes étapes
+            {t('eyebrow')}
           </p>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-            Calendrier
+            {t('title')}
           </h1>
           <p className="max-w-xs text-sm text-landing-muted sm:text-base">
-            Les événements et jalons de bébé, passés et à venir.
+            {t('subtitle')}
           </p>
         </Reveal>
 
