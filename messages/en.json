@@ -616,6 +616,79 @@
       "editError": "Something went wrong while saving the changes."
     }
   },
+  "profile": {
+    "settingsLink": "Settings",
+    "greeting": "hello"
+  },
+  "settingsPage": {
+    "title": "Settings",
+    "subtitle": "Manage your account and app preferences.",
+    "myJournals": "My journals",
+    "account": {
+      "title": "Account",
+      "description": "Your personal information.",
+      "profileUpdated": "Profile updated.",
+      "profileUpdateError": "Something went wrong while updating the profile.",
+      "emailChangeSent": "A confirmation email has been sent to the new address.",
+      "emailChangeError": "Something went wrong while changing the email.",
+      "nameSection": "Name",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "save": "Save",
+      "emailSection": "Email",
+      "emailLabel": "Email address",
+      "changeEmail": "Change email",
+      "passwordSection": "Password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "changePassword": "Change password",
+      "logout": "Log out"
+    },
+    "babyCard": {
+      "description": "Your settings for this journal.",
+      "nicknameLabel": "What to call you",
+      "nicknamePlaceholder": "Grandma Jo, Uncle Marc...",
+      "relationLabel": "Your relation to {babySurname}",
+      "relationPlaceholder": "Mom, Dad, Grandma, Uncle...",
+      "save": "Save",
+      "saved": "Changes saved.",
+      "saveError": "Something went wrong while saving.",
+      "notifyMeFor": "Notify me for"
+    },
+    "notificationsCard": {
+      "title": "Notifications",
+      "description": "Get alerted on this device for important events.",
+      "unsupported": "Notifications aren't supported by this browser.",
+      "enabledOnDevice": "Notifications enabled on this device.",
+      "disable": "Disable",
+      "testNotification": "Test notification",
+      "testMessagePlaceholder": "Your message...",
+      "enable": "Enable notifications"
+    }
+  },
+  "installCard": {
+    "defaultTitle": "Install the app",
+    "defaultDescription": "Add the journal to your home screen for quick access.",
+    "install": "Install",
+    "iosStep1": "Open this page in <safari>Safari</safari>, then tap the <share>Share</share> button at the bottom of the screen.",
+    "iosStep2": "Scroll the menu and tap <highlight>\"Add to Home Screen\"</highlight>, then confirm with <highlight2>\"Add\"</highlight2>.",
+    "genericInstructions": "From your browser's menu, choose \"Install app\" or \"Add to Home screen\"."
+  },
+  "onboarding": {
+    "welcome": "Welcome!",
+    "introWithBaby": "Before joining {babySurname}'s journal, tell us who you are.",
+    "babyIdLabel": "Baby ID",
+    "nicknameLabel": "What should we call you?",
+    "nicknamePlaceholder": "Grandma Jo, Uncle Marc...",
+    "relationLabel": "Your relation to {babySurname}",
+    "relationPlaceholder": "Mom, Dad, Grandma, Uncle...",
+    "continue": "Continue",
+    "notifyTitle": "Don't miss a thing",
+    "notifyDescription": "Turn on notifications to get alerted about new posts, comments, and pronostics for {babySurname}.",
+    "notificationsEnabled": "Notifications enabled",
+    "later": "Later",
+    "editLaterNotice": "You can always change this information later."
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

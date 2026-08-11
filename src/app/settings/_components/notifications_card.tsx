@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { sendNotification } from '@utils/actions/notifications'
 import { usePushSubscription } from '@utils/hooks/use-push-subscription'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Bell, BellOff, Send } from 'lucide-react'
 
 export default function NotificationsCard() {
+  const t = useTranslations('settingsPage.notificationsCard')
   const { isSupported, subscription, isPending, subscribe, unsubscribe } = usePushSubscription()
   const [message, setMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -29,21 +31,21 @@ export default function NotificationsCard() {
       <CardHeader className="pb-3">
         <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Bell className="h-4.5 w-4.5 text-primary" />
-          Notifications
+          {t('title')}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          Recevez une alerte sur cet appareil pour les évènements importants.
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3.5">
         {!isSupported ? (
           <p className="text-sm text-landing-muted">
-            Les notifications ne sont pas prises en charge par ce navigateur.
+            {t('unsupported')}
           </p>
         ) : subscription ? (
           <>
             <div className="flex items-center justify-between gap-2 rounded-2xl border border-landing-border bg-landing-background px-3.5 py-2.5">
-              <p className="text-sm text-landing-foreground">Notifications activées sur cet appareil.</p>
+              <p className="text-sm text-landing-foreground">{t('enabledOnDevice')}</p>
               <Button
                 type="button"
                 variant="outline"
@@ -53,16 +55,16 @@ export default function NotificationsCard() {
                 disabled={isPending}
               >
                 <BellOff className="h-3.5 w-3.5" />
-                <span>Désactiver</span>
+                <span>{t('disable')}</span>
               </Button>
             </div>
             <div className="flex flex-col gap-1.5 pt-1">
-              <p className="text-xs font-semibold text-landing-muted">Notification de test</p>
+              <p className="text-xs font-semibold text-landing-muted">{t('testNotification')}</p>
               <div className="flex gap-2">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Votre message..."
+                  placeholder={t('testMessagePlaceholder')}
                   className="bg-input/40"
                 />
                 <Button
@@ -85,7 +87,7 @@ export default function NotificationsCard() {
             disabled={isPending}
           >
             <Bell className="h-4 w-4" />
-            <span>Activer les notifications</span>
+            <span>{t('enable')}</span>
           </Button>
         )}
       </CardContent>

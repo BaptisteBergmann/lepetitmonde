@@ -28,6 +28,7 @@ export default function BabySettingsCard({
   relationToBaby,
   isAdmin,
 }: BabySettingsCardProps) {
+  const t = useTranslations('settingsPage.babyCard')
   const tType = useTranslations('notificationTypes')
   const [isSaving, startTransition] = useTransition()
   const [disabledTypes, setDisabledTypes] = useState<Set<Enums<'notification_type'>>>(new Set())
@@ -40,9 +41,9 @@ export default function BabySettingsCard({
     startTransition(async () => {
       try {
         await updateBabyAccessSettings(babyId, formData)
-        toast.success('Modifications enregistrées.')
+        toast.success(t('saved'))
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.")
+        toast.error(err instanceof Error ? err.message : t('saveError'))
       }
     })
   }
@@ -66,33 +67,33 @@ export default function BabySettingsCard({
           {babySurname}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          Vos réglages pour ce journal.
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form action={handleSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={`nickname-${babyId}`}>Comment vous appeler</FieldLabel>
+              <FieldLabel htmlFor={`nickname-${babyId}`}>{t('nicknameLabel')}</FieldLabel>
               <Input
                 name="nickname"
                 id={`nickname-${babyId}`}
                 defaultValue={nickname}
-                placeholder="Mamie Jojo, Tonton Marc..."
+                placeholder={t('nicknamePlaceholder')}
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={`relation-${babyId}`}>Votre lien avec {babySurname}</FieldLabel>
+              <FieldLabel htmlFor={`relation-${babyId}`}>{t('relationLabel', { babySurname })}</FieldLabel>
               <Input
                 name="relationToBaby"
                 id={`relation-${babyId}`}
                 defaultValue={relationToBaby}
-                placeholder="Maman, Papa, Mamie, Tonton..."
+                placeholder={t('relationPlaceholder')}
               />
             </Field>
             <Field>
               <Button type="submit" size="sm" variant="outline" disabled={isSaving} className="cursor-pointer">
-                Enregistrer
+                {t('save')}
               </Button>
             </Field>
           </FieldGroup>
@@ -100,7 +101,7 @@ export default function BabySettingsCard({
 
         <div className="flex flex-col gap-1.5 border-t border-landing-border pt-4">
           <p className="text-xs font-semibold text-landing-muted flex items-center gap-1.5">
-            <Bell className="h-3.5 w-3.5" /> Me notifier pour
+            <Bell className="h-3.5 w-3.5" /> {t('notifyMeFor')}
           </p>
           {ALL_NOTIFICATION_TYPES.filter((type) => isAdmin || !ADMIN_ONLY_TYPES.includes(type)).map((type) => (
             <label key={type} className="flex items-center gap-2 text-sm cursor-pointer">

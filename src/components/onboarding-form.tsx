@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 import { Bell } from "lucide-react"
 import { Button } from "@components/ui/button"
 import { Card, CardContent } from "@components/ui/card"
@@ -31,6 +32,9 @@ export function OnboardingForm({
   relationToBaby,
 }: OnboardingFormProps) {
   const router = useRouter()
+  const t = useTranslations('onboarding')
+  const tAuth = useTranslations('auth.login')
+  const tNotif = useTranslations('notifications')
   const [step, setStep] = useState<'profile' | 'notifications'>('profile')
   const [isSaving, startTransition] = useTransition()
   const { isSupported, subscription, isPending: isSubscribing, subscribe } = usePushSubscription()
@@ -54,36 +58,36 @@ export function OnboardingForm({
             <form action={handleProfileSubmit} className="p-6 md:p-8">
               <FieldGroup>
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <h1 className="font-display text-2xl font-semibold">Bienvenue !</h1>
+                  <h1 className="font-display text-2xl font-semibold">{t('welcome')}</h1>
                   <p className="text-balance text-muted-foreground">
-                    Avant de rejoindre le journal de {babySurname}, dites-nous qui vous êtes.
+                    {t('introWithBaby', { babySurname })}
                   </p>
                 </div>
 
                 <Field hidden>
-                  <FieldLabel htmlFor="babyId">Baby ID</FieldLabel>
+                  <FieldLabel htmlFor="babyId">{t('babyIdLabel')}</FieldLabel>
                   <Input name="babyId" id="babyId" type="text" required value={babyId} readOnly />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="nickname">Comment vous appeler ?</FieldLabel>
+                  <FieldLabel htmlFor="nickname">{t('nicknameLabel')}</FieldLabel>
                   <Input
                     name="nickname"
                     id="nickname"
                     type="text"
-                    placeholder="Mamie Jojo, Tonton Marc..."
+                    placeholder={t('nicknamePlaceholder')}
                     defaultValue={nickname}
                     required
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="relationToBaby">Votre lien avec {babySurname}</FieldLabel>
+                  <FieldLabel htmlFor="relationToBaby">{t('relationLabel', { babySurname })}</FieldLabel>
                   <Input
                     name="relationToBaby"
                     id="relationToBaby"
                     type="text"
-                    placeholder="Maman, Papa, Mamie, Tonton..."
+                    placeholder={t('relationPlaceholder')}
                     defaultValue={relationToBaby}
                     required
                   />
@@ -91,7 +95,7 @@ export function OnboardingForm({
 
                 <Field>
                   <Button type="submit" disabled={isSaving} className="cursor-pointer">
-                    Continuer
+                    {t('continue')}
                   </Button>
                 </Field>
               </FieldGroup>
@@ -101,20 +105,20 @@ export function OnboardingForm({
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Bell className="h-6 w-6" />
               </div>
-              <h1 className="font-display text-2xl font-semibold">Ne manquez rien</h1>
+              <h1 className="font-display text-2xl font-semibold">{t('notifyTitle')}</h1>
               <p className="text-balance text-muted-foreground">
-                Activez les notifications pour être averti des nouvelles publications, commentaires et pronostics de {babySurname}.
+                {t('notifyDescription', { babySurname })}
               </p>
               <FieldGroup className="w-full gap-2 pt-2">
                 {!isSupported ? (
                   <InstallCard
-                    title="Installez l'application"
-                    description="Sur iPhone, les notifications ne sont disponibles qu'une fois le journal installé sur l'écran d'accueil."
+                    title={tNotif('installAppTitle')}
+                    description={tNotif('installAppDescription')}
                   />
                 ) : subscription ? (
                   <Button type="button" disabled className="gap-2">
                     <Bell className="h-4 w-4" />
-                    Notifications activées
+                    {t('notificationsEnabled')}
                   </Button>
                 ) : (
                   <Button
@@ -124,11 +128,11 @@ export function OnboardingForm({
                     disabled={isSubscribing}
                   >
                     <Bell className="h-4 w-4" />
-                    Activer les notifications
+                    {tNotif('enableNotifications')}
                   </Button>
                 )}
                 <Button type="button" variant="ghost" className="cursor-pointer" onClick={goToFeed}>
-                  {subscription ? 'Continuer' : 'Plus tard'}
+                  {subscription ? t('continue') : t('later')}
                 </Button>
               </FieldGroup>
             </div>
@@ -136,13 +140,13 @@ export function OnboardingForm({
           <div className="hidden flex-col items-center justify-center gap-4 bg-landing-background p-8 md:flex">
             <Image src="/logo_mark.svg" alt="" width={512} height={512} className="h-20 w-auto" unoptimized />
             <p className="text-balance text-center font-display text-lg italic text-landing-foreground">
-              Le journal de bébé, à partager en famille
+              {tAuth('tagline')}
             </p>
           </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        Vous pourrez toujours modifier ces informations plus tard.
+        {t('editLaterNotice')}
       </FieldDescription>
     </div>
   )

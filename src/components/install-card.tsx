@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Smartphone, Download, Share } from 'lucide-react'
@@ -16,9 +17,10 @@ interface InstallCardProps {
 }
 
 export default function InstallCard({
-  title = "Installer l'application",
-  description = "Ajoutez le journal à votre écran d'accueil pour un accès rapide.",
+  title,
+  description,
 }: InstallCardProps) {
+  const t = useTranslations('installCard')
   const [isIOS, setIsIOS] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
@@ -63,10 +65,10 @@ export default function InstallCard({
       <CardHeader className="pb-3">
         <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Smartphone className="h-4.5 w-4.5 text-rose" />
-          {title}
+          {title ?? t('defaultTitle')}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          {description}
+          {description ?? t('defaultDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -78,31 +80,31 @@ export default function InstallCard({
             disabled={isInstalling}
           >
             <Download className="h-4 w-4" />
-            <span>Installer</span>
+            <span>{t('install')}</span>
           </Button>
         ) : isIOS ? (
           <ol className="list-decimal space-y-1.5 pl-4 text-sm text-landing-muted">
             <li>
-              Ouvrez cette page dans <span className="font-medium text-landing-foreground">Safari</span>, puis
-              appuyez sur le bouton{' '}
-              <span className="inline-flex items-center gap-1 font-medium text-landing-foreground">
-                <Share className="h-3.5 w-3.5" aria-hidden />
-                Partager
-              </span>{' '}
-              en bas de l&apos;écran.
+              {t.rich('iosStep1', {
+                safari: (chunks) => <span className="font-medium text-landing-foreground">{chunks}</span>,
+                share: (chunks) => (
+                  <span className="inline-flex items-center gap-1 font-medium text-landing-foreground">
+                    <Share className="h-3.5 w-3.5" aria-hidden />
+                    {chunks}
+                  </span>
+                ),
+              })}
             </li>
             <li>
-              Faites défiler le menu et appuyez sur{' '}
-              <span className="font-medium text-landing-foreground">
-                &laquo;&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;&raquo;
-              </span>
-              , puis confirmez avec <span className="font-medium text-landing-foreground">&laquo;&nbsp;Ajouter&nbsp;&raquo;</span>.
+              {t.rich('iosStep2', {
+                highlight: (chunks) => <span className="font-medium text-landing-foreground">{chunks}</span>,
+                highlight2: (chunks) => <span className="font-medium text-landing-foreground">{chunks}</span>,
+              })}
             </li>
           </ol>
         ) : (
           <p className="text-sm text-landing-muted">
-            Depuis le menu de votre navigateur, choisissez &laquo;&nbsp;Installer l&apos;application&nbsp;&raquo;
-            ou &laquo;&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;&raquo;.
+            {t('genericInstructions')}
           </p>
         )}
       </CardContent>

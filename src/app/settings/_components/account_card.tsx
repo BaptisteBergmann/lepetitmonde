@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { logout } from '@utils/actions/logout'
 import { updateProfile, requestEmailChange } from '@utils/actions/users'
 import { updatePassword } from '@utils/actions/reset-password'
@@ -21,6 +22,7 @@ interface AccountCardProps {
 }
 
 export default function AccountCard({ initials, fullName, email, firstName, lastName }: AccountCardProps) {
+  const t = useTranslations('settingsPage.account')
   const [isSavingProfile, startProfileTransition] = useTransition()
   const [isSavingEmail, startEmailTransition] = useTransition()
 
@@ -28,9 +30,9 @@ export default function AccountCard({ initials, fullName, email, firstName, last
     startProfileTransition(async () => {
       try {
         await updateProfile(formData)
-        toast.success('Profil mis à jour.')
+        toast.success(t('profileUpdated'))
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour du profil.")
+        toast.error(err instanceof Error ? err.message : t('profileUpdateError'))
       }
     })
   }
@@ -39,9 +41,9 @@ export default function AccountCard({ initials, fullName, email, firstName, last
     startEmailTransition(async () => {
       try {
         await requestEmailChange(formData)
-        toast.success('Un email de confirmation a été envoyé à la nouvelle adresse.')
+        toast.success(t('emailChangeSent'))
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors du changement d'email.")
+        toast.error(err instanceof Error ? err.message : t('emailChangeError'))
       }
     })
   }
@@ -51,10 +53,10 @@ export default function AccountCard({ initials, fullName, email, firstName, last
       <CardHeader className="pb-3">
         <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <UserCircle className="h-4.5 w-4.5 text-primary" />
-          Compte
+          {t('title')}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          Vos informations personnelles.
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -72,20 +74,20 @@ export default function AccountCard({ initials, fullName, email, firstName, last
 
         <form action={handleProfileSubmit} className="border-t border-landing-border pt-4">
           <FieldGroup>
-            <p className="text-xs font-semibold text-landing-muted -mt-1">Nom</p>
+            <p className="text-xs font-semibold text-landing-muted -mt-1">{t('nameSection')}</p>
             <div className="grid grid-cols-2 gap-3">
               <Field>
-                <FieldLabel htmlFor="firstName">Prénom</FieldLabel>
+                <FieldLabel htmlFor="firstName">{t('firstNameLabel')}</FieldLabel>
                 <Input name="firstName" id="firstName" defaultValue={firstName} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="lastName">Nom</FieldLabel>
+                <FieldLabel htmlFor="lastName">{t('lastNameLabel')}</FieldLabel>
                 <Input name="lastName" id="lastName" defaultValue={lastName} />
               </Field>
             </div>
             <Field>
               <Button type="submit" size="sm" variant="outline" disabled={isSavingProfile} className="cursor-pointer">
-                Enregistrer
+                {t('save')}
               </Button>
             </Field>
           </FieldGroup>
@@ -93,14 +95,14 @@ export default function AccountCard({ initials, fullName, email, firstName, last
 
         <form action={handleEmailSubmit} className="border-t border-landing-border pt-4">
           <FieldGroup>
-            <p className="text-xs font-semibold text-landing-muted -mt-1">Email</p>
+            <p className="text-xs font-semibold text-landing-muted -mt-1">{t('emailSection')}</p>
             <Field>
-              <FieldLabel htmlFor="email">Adresse email</FieldLabel>
+              <FieldLabel htmlFor="email">{t('emailLabel')}</FieldLabel>
               <Input name="email" id="email" type="email" defaultValue={email} required />
             </Field>
             <Field>
               <Button type="submit" size="sm" variant="outline" disabled={isSavingEmail} className="cursor-pointer">
-                Changer d&apos;email
+                {t('changeEmail')}
               </Button>
             </Field>
           </FieldGroup>
@@ -108,18 +110,18 @@ export default function AccountCard({ initials, fullName, email, firstName, last
 
         <form action={updatePassword} className="border-t border-landing-border pt-4">
           <FieldGroup>
-            <p className="text-xs font-semibold text-landing-muted -mt-1">Mot de passe</p>
+            <p className="text-xs font-semibold text-landing-muted -mt-1">{t('passwordSection')}</p>
             <Field>
-              <FieldLabel htmlFor="password">Nouveau mot de passe</FieldLabel>
+              <FieldLabel htmlFor="password">{t('newPasswordLabel')}</FieldLabel>
               <PasswordInput name="password" id="password" required minLength={6} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="confirmPassword">Confirmer le mot de passe</FieldLabel>
+              <FieldLabel htmlFor="confirmPassword">{t('confirmPasswordLabel')}</FieldLabel>
               <PasswordInput name="confirmPassword" id="confirmPassword" required minLength={6} />
             </Field>
             <Field>
               <Button type="submit" size="sm" variant="outline" className="cursor-pointer">
-                Changer le mot de passe
+                {t('changePassword')}
               </Button>
             </Field>
           </FieldGroup>
@@ -128,7 +130,7 @@ export default function AccountCard({ initials, fullName, email, firstName, last
         <form action={logout} className="border-t border-landing-border pt-4">
           <Button type="submit" variant="destructive" className="w-full gap-2 cursor-pointer">
             <LogOut className="h-4 w-4" />
-            <span>Se déconnecter</span>
+            <span>{t('logout')}</span>
           </Button>
         </form>
       </CardContent>

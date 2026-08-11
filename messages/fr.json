@@ -616,6 +616,79 @@
       "editError": "Une erreur est survenue lors de la modification."
     }
   },
+  "profile": {
+    "settingsLink": "Paramètres",
+    "greeting": "bonjour"
+  },
+  "settingsPage": {
+    "title": "Paramètres",
+    "subtitle": "Gérez votre compte et les préférences de l'application.",
+    "myJournals": "Mes journaux",
+    "account": {
+      "title": "Compte",
+      "description": "Vos informations personnelles.",
+      "profileUpdated": "Profil mis à jour.",
+      "profileUpdateError": "Erreur lors de la mise à jour du profil.",
+      "emailChangeSent": "Un email de confirmation a été envoyé à la nouvelle adresse.",
+      "emailChangeError": "Erreur lors du changement d'email.",
+      "nameSection": "Nom",
+      "firstNameLabel": "Prénom",
+      "lastNameLabel": "Nom",
+      "save": "Enregistrer",
+      "emailSection": "Email",
+      "emailLabel": "Adresse email",
+      "changeEmail": "Changer d'email",
+      "passwordSection": "Mot de passe",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "changePassword": "Changer le mot de passe",
+      "logout": "Se déconnecter"
+    },
+    "babyCard": {
+      "description": "Vos réglages pour ce journal.",
+      "nicknameLabel": "Comment vous appeler",
+      "nicknamePlaceholder": "Mamie Jojo, Tonton Marc...",
+      "relationLabel": "Votre lien avec {babySurname}",
+      "relationPlaceholder": "Maman, Papa, Mamie, Tonton...",
+      "save": "Enregistrer",
+      "saved": "Modifications enregistrées.",
+      "saveError": "Erreur lors de l'enregistrement.",
+      "notifyMeFor": "Me notifier pour"
+    },
+    "notificationsCard": {
+      "title": "Notifications",
+      "description": "Recevez une alerte sur cet appareil pour les évènements importants.",
+      "unsupported": "Les notifications ne sont pas prises en charge par ce navigateur.",
+      "enabledOnDevice": "Notifications activées sur cet appareil.",
+      "disable": "Désactiver",
+      "testNotification": "Notification de test",
+      "testMessagePlaceholder": "Votre message...",
+      "enable": "Activer les notifications"
+    }
+  },
+  "installCard": {
+    "defaultTitle": "Installer l'application",
+    "defaultDescription": "Ajoutez le journal à votre écran d'accueil pour un accès rapide.",
+    "install": "Installer",
+    "iosStep1": "Ouvrez cette page dans <safari>Safari</safari>, puis appuyez sur le bouton <share>Partager</share> en bas de l'écran.",
+    "iosStep2": "Faites défiler le menu et appuyez sur <highlight>« Sur l'écran d'accueil »</highlight>, puis confirmez avec <highlight2>« Ajouter »</highlight2>.",
+    "genericInstructions": "Depuis le menu de votre navigateur, choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil »."
+  },
+  "onboarding": {
+    "welcome": "Bienvenue !",
+    "introWithBaby": "Avant de rejoindre le journal de {babySurname}, dites-nous qui vous êtes.",
+    "babyIdLabel": "Identifiant du bébé",
+    "nicknameLabel": "Comment vous appeler ?",
+    "nicknamePlaceholder": "Mamie Jojo, Tonton Marc...",
+    "relationLabel": "Votre lien avec {babySurname}",
+    "relationPlaceholder": "Maman, Papa, Mamie, Tonton...",
+    "continue": "Continuer",
+    "notifyTitle": "Ne manquez rien",
+    "notifyDescription": "Activez les notifications pour être averti des nouvelles publications, commentaires et pronostics de {babySurname}.",
+    "notificationsEnabled": "Notifications activées",
+    "later": "Plus tard",
+    "editLaterNotice": "Vous pourrez toujours modifier ces informations plus tard."
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",

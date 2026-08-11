@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { getBabiesList } from '@/utils/actions/baby'
@@ -8,6 +9,7 @@ import InstallCard from '@/components/install-card'
 
 export default async function SettingsPage() {
   const contextLogger = logger.child({ function: SettingsPage.name })
+  const t = await getTranslations('settingsPage')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,7 +21,8 @@ export default async function SettingsPage() {
     ? await supabase.from('users').select('first_name, last_name').eq('id', user.id).single()
     : { data: null }
 
-  const fullName = user?.user_metadata?.full_name || user?.email || 'Utilisateur'
+  const tNav = await getTranslations('nav')
+  const fullName = user?.user_metadata?.full_name || user?.email || tNav('unknownUser')
   const initials = fullName
     .split(/\s+/)
     .filter(Boolean)
@@ -34,10 +37,10 @@ export default async function SettingsPage() {
       <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
         <div className="border-b border-landing-border pb-6">
           <h1 className="font-display text-3xl font-semibold">
-            Paramètres
+            {t('title')}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
-            Gérez votre compte et les préférences de l&apos;application.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -52,7 +55,7 @@ export default async function SettingsPage() {
 
           {babies.length > 0 && (
             <div className="space-y-3">
-              <h2 className="font-display text-lg font-semibold">Mes journaux</h2>
+              <h2 className="font-display text-lg font-semibold">{t('myJournals')}</h2>
               <div className="space-y-3">
                 {babies.map((baby) => {
                   const access = baby.baby_access[0]
