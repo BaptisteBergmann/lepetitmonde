@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Search, Package, Tag } from "lucide-react";
 import { Tables } from "@utils/supabase/database.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +47,7 @@ export default function InventoryList({
   subtypesByKind: Partial<Record<ItemKind, string[]>>;
   sources: string[];
 }) {
+  const t = useTranslations('inventory');
   const locale = useLocale();
   const [viewMode, setViewMode] = useState<ViewMode>('article');
   const [onlyMissing, setOnlyMissing] = useState(false);
@@ -150,8 +151,8 @@ export default function InventoryList({
   if (items.length === 0) {
     return (
       <div className="text-center py-12 text-landing-muted border border-dashed border-landing-border rounded-2xl bg-landing-surface">
-        <p className="text-sm font-medium">Aucun article pour le moment.</p>
-        <p className="text-xs text-landing-muted mt-1">Cliquez sur &quot;Ajouter un article&quot; pour commencer l&apos;inventaire.</p>
+        <p className="text-sm font-medium">{t('empty')}</p>
+        <p className="text-xs text-landing-muted mt-1">{t('emptyHint')}</p>
       </div>
     );
   }
@@ -167,7 +168,7 @@ export default function InventoryList({
           }`}
         >
           <Package className="h-3.5 w-3.5" />
-          Par article
+          {t('byArticle')}
         </button>
         <button
           type="button"
@@ -177,7 +178,7 @@ export default function InventoryList({
           }`}
         >
           <Tag className="h-3.5 w-3.5" />
-          Par type
+          {t('byType')}
         </button>
       </div>
 
@@ -189,7 +190,7 @@ export default function InventoryList({
             onChange={(e) => setOnlyMissing(e.target.checked)}
             className="h-4 w-4 rounded border-landing-border accent-primary cursor-pointer"
           />
-          Reste à acheter
+          {t('onlyMissing')}
         </label>
 
         <div className="relative sm:w-64">
@@ -197,14 +198,14 @@ export default function InventoryList({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filtrer un article…"
+            placeholder={t('filterPlaceholder')}
             className="pl-8"
           />
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-wider text-landing-muted">Type</span>
+        <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-wider text-landing-muted">{t('typeLabel')}</span>
         <button
           type="button"
           onClick={() => setSelectedKinds(new Set())}
@@ -214,7 +215,7 @@ export default function InventoryList({
               : "border-landing-border bg-landing-background text-landing-muted hover:text-landing-foreground"
           }`}
         >
-          Tous
+          {t('all')}
         </button>
         {presentKinds.map((k) => {
           const active = selectedKinds.has(k);
@@ -237,7 +238,7 @@ export default function InventoryList({
       </div>
 
       {visibleGroups.length === 0 ? (
-        <p className="py-8 text-center text-sm text-landing-muted">Aucun article ne correspond.</p>
+        <p className="py-8 text-center text-sm text-landing-muted">{t('noMatch')}</p>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {visibleGroups.map(({ key, groupItems, visibleItems }) => {
@@ -263,7 +264,7 @@ export default function InventoryList({
                       </button>
                     </CardTitle>
                     <span className="shrink-0 text-xs font-semibold text-landing-muted">
-                      {totalOwned} au total{subtotal > 0 && ` · ${formatCurrency(subtotal, locale)}`}
+                      {t('totalOwned', { count: totalOwned })}{subtotal > 0 && ` · ${formatCurrency(subtotal, locale)}`}
                     </span>
                   </div>
                 </CardHeader>

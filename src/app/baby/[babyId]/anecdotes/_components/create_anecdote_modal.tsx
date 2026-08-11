@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ export default function CreateAnecdoteModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const t = useTranslations('anecdotes.form')
   const [anecdoteId] = useState(() => crypto.randomUUID())
 
   const [content, setContent] = useState("")
@@ -73,7 +75,7 @@ export default function CreateAnecdoteModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la publication.")
+      alert(t('publishError'))
     } finally {
       setIsPending(false)
     }
@@ -94,7 +96,7 @@ export default function CreateAnecdoteModal({
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <Sparkles className="h-4.5 w-4.5 text-primary" />
-            Nouvelle anecdote
+            {t('newTitle')}
           </h2>
           <button
             onClick={onClose}
@@ -108,14 +110,14 @@ export default function CreateAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="content" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Ce qu&apos;il a dit ou fait
+              {t('contentLabel')}
             </Label>
             <textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={3}
-              placeholder="Les nuages c'est du coton du ciel..."
+              placeholder={t('contentPlaceholder')}
               autoFocus
               className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
             />
@@ -123,7 +125,7 @@ export default function CreateAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Photo (facultative)
+              {t('photoLabel')}
             </Label>
             <Dropzone {...upload}>
               <DropzoneEmptyState />
@@ -133,7 +135,7 @@ export default function CreateAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="happened_at" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Date
+              {t('dateLabel')}
             </Label>
             <input
               type="date"
@@ -147,7 +149,7 @@ export default function CreateAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Visible par
+              {t('visibleByLabel')}
             </Label>
             <Select
               items={circleItems}
@@ -156,7 +158,7 @@ export default function CreateAnecdoteModal({
               onValueChange={(value) => setCircleIds(value as string[])}
             >
               <SelectTrigger className="w-full text-foreground bg-input/50">
-                <SelectValue placeholder="Masqué (aucun cercle)" />
+                <SelectValue placeholder={t('visibleByPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -167,7 +169,7 @@ export default function CreateAnecdoteModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Aucun cercle sélectionné = anecdote masquée, visible uniquement par les administrateurs.
+              {t('visibleByHint')}
             </p>
           </div>
 
@@ -179,7 +181,7 @@ export default function CreateAnecdoteModal({
             className="rounded-2xl cursor-pointer"
             onClick={onClose}
           >
-            Annuler
+            {t('cancel')}
           </Button>
           <Button
             disabled={!content.trim() || !happenedAt || hasFileErrors || isPending}
@@ -189,10 +191,10 @@ export default function CreateAnecdoteModal({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Publication...</span>
+                <span>{t('publishing')}</span>
               </>
             ) : (
-              <span>Publier</span>
+              <span>{t('publish')}</span>
             )}
           </Button>
         </div>

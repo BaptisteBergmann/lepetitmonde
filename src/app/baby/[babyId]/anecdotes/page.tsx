@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { Loader2, Sparkles, Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
@@ -18,6 +19,7 @@ export default async function AnecdotesPage({
 }) {
   const { babyId } = await params;
   const contextLogger = logger.child({ function: AnecdotesPage.name, babyId })
+  const t = await getTranslations('anecdotes')
 
   await assertPageAccess(babyId, 'anecdotes')
 
@@ -41,13 +43,13 @@ export default async function AnecdotesPage({
             <Sparkles className="h-5 w-5" />
           </span>
           <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-            Page — Ce qu&apos;il a dit, ce qu&apos;il a fait
+            {t('eyebrow')}
           </p>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-            Anecdotes
+            {t('title')}
           </h1>
           <p className="max-w-xs text-sm text-landing-muted sm:text-base">
-            Les petites phrases et moments rigolos du quotidien, à garder pour toujours.
+            {t('subtitle')}
           </p>
         </Reveal>
 
@@ -55,7 +57,7 @@ export default async function AnecdotesPage({
           fallback={
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm">Chargement des anecdotes...</p>
+              <p className="text-sm">{t('loading')}</p>
             </div>
           }
         >
@@ -95,16 +97,15 @@ async function AnecdotesContent({ babyId, isAdmin }: { babyId: string; isAdmin: 
   )
 }
 
-function PendingCircleAccessNotice() {
+async function PendingCircleAccessNotice() {
+  const t = await getTranslations('anecdotes')
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
         <Clock className="h-5 w-5" />
       </span>
       <p className="max-w-xs text-sm text-landing-muted">
-        Vous n&apos;êtes pas encore rattaché à un groupe de ce journal.
-        L&apos;administrateur a été notifié et vous aurez accès au contenu
-        dès qu&apos;il vous aura ajouté à un groupe.
+        {t('pendingAccess')}
       </p>
     </div>
   )

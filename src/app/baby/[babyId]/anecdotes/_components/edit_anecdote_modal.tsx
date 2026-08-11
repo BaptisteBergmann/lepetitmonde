@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ export default function EditAnecdoteModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const t = useTranslations('anecdotes.form')
 
   const [content, setContent] = useState(anecdote.content)
   const [happenedAt, setHappenedAt] = useState(format(parseISO(anecdote.happened_at), 'yyyy-MM-dd'))
@@ -51,7 +53,7 @@ export default function EditAnecdoteModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la modification.")
+      alert(t('editError'))
     } finally {
       setIsPending(false)
     }
@@ -70,7 +72,7 @@ export default function EditAnecdoteModal({
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <Pencil className="h-4.5 w-4.5 text-primary" />
-            Modifier l&apos;anecdote
+            {t('editTitle')}
           </h2>
           <button
             onClick={onClose}
@@ -84,7 +86,7 @@ export default function EditAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="content" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Ce qu&apos;il a dit ou fait
+              {t('contentLabel')}
             </Label>
             <textarea
               id="content"
@@ -97,7 +99,7 @@ export default function EditAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="happened_at" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Date
+              {t('dateLabel')}
             </Label>
             <input
               type="date"
@@ -111,7 +113,7 @@ export default function EditAnecdoteModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Visible par
+              {t('visibleByLabel')}
             </Label>
             <Select
               items={circleItems}
@@ -120,7 +122,7 @@ export default function EditAnecdoteModal({
               onValueChange={(value) => setCircleIds(value as string[])}
             >
               <SelectTrigger className="w-full text-foreground bg-input/50">
-                <SelectValue placeholder="Masqué (aucun cercle)" />
+                <SelectValue placeholder={t('visibleByPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -131,7 +133,7 @@ export default function EditAnecdoteModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Aucun cercle sélectionné = anecdote masquée, visible uniquement par les administrateurs.
+              {t('visibleByHint')}
             </p>
           </div>
 
@@ -143,7 +145,7 @@ export default function EditAnecdoteModal({
             className="rounded-2xl cursor-pointer"
             onClick={onClose}
           >
-            Annuler
+            {t('cancel')}
           </Button>
           <Button
             disabled={!content.trim() || !happenedAt || isPending}
@@ -153,10 +155,10 @@ export default function EditAnecdoteModal({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Enregistrement...</span>
+                <span>{t('saving')}</span>
               </>
             ) : (
-              <span>Enregistrer</span>
+              <span>{t('save')}</span>
             )}
           </Button>
         </div>

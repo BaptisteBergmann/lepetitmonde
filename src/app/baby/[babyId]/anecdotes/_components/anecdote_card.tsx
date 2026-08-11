@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
@@ -25,12 +25,13 @@ export default function AnecdoteCard({
   isAdmin: boolean
 }) {
   const router = useRouter()
+  const t = useTranslations('anecdotes')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
   const handleDelete = async () => {
-    if (!confirm("Supprimer cette anecdote ? Cette action est irréversible.")) return
+    if (!confirm(t('deleteConfirm'))) return
 
     setDeleting(true)
     try {
@@ -38,7 +39,7 @@ export default function AnecdoteCard({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la suppression.")
+      alert(t('deleteError'))
     } finally {
       setDeleting(false)
     }
@@ -79,11 +80,11 @@ export default function AnecdoteCard({
                 {anecdoteCircles.length > 0 ? (
                   anecdoteCircles.map((circle, index) => (
                     <Badge key={circle?.id ?? index} variant="secondary">
-                      {circle?.name ?? "Cercle"}
+                      {circle?.name ?? t('circleFallback')}
                     </Badge>
                   ))
                 ) : (
-                  <Badge variant="destructive">Administrateurs uniquement</Badge>
+                  <Badge variant="destructive">{t('adminOnly')}</Badge>
                 )}
               </div>
             )}

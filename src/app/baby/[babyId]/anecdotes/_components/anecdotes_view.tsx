@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
 import { AnecdoteWithDetails, getAnecdotes } from '@utils/actions/anecdotes'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,7 @@ export default function AnecdotesView({
   initialAnecdotes: AnecdoteWithDetails[]
   pageSize: number
 }) {
+  const t = useTranslations('anecdotes')
   const [anecdotes, setAnecdotes] = useState<AnecdoteWithDetails[]>(initialAnecdotes)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(initialAnecdotes.length === pageSize)
@@ -48,14 +50,14 @@ export default function AnecdotesView({
         <div className="flex justify-end">
           <Button className="gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
-            <span>Nouvelle anecdote</span>
+            <span>{t('newAnecdote')}</span>
           </Button>
         </div>
       )}
 
       {anecdotes.length === 0 && (
         <p className="text-sm text-landing-muted text-center py-12">
-          Aucune anecdote pour l&apos;instant.
+          {t('empty')}
         </p>
       )}
 
@@ -80,7 +82,7 @@ export default function AnecdotesView({
             disabled={loadingMore}
           >
             {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            <span>Charger plus</span>
+            <span>{t('loadMore')}</span>
           </Button>
         </div>
       )}

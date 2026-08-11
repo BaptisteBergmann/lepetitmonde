@@ -1,4 +1,4 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getInventoryItems } from "@/utils/actions/inventory";
 import InventoryItemModal from "./_components/inventory_item_modal";
@@ -14,6 +14,7 @@ export default async function InventoryPage({
 }) {
   const { babyId } = await params;
   const locale = await getLocale();
+  const t = await getTranslations('inventory');
 
   await assertPageAccess(babyId, 'inventory');
 
@@ -43,17 +44,17 @@ export default async function InventoryPage({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-                Page — Ce qu&apos;on a, ce qu&apos;il faut
+                {t('eyebrow')}
               </p>
               <h1 className="mt-1 font-display text-3xl font-semibold">
-                Inventaire
+                {t('title')}
               </h1>
               <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
-                Suivez ce que vous possédez déjà, ce qu&apos;il reste à acheter, et combien vous avez dépensé.
+                {t('subtitle')}
               </p>
               {totalSpent > 0 && (
                 <p className="mt-3 text-sm font-semibold text-landing-foreground">
-                  Total dépensé : {formatCurrency(totalSpent, locale)}
+                  {t('totalSpent', { amount: formatCurrency(totalSpent, locale) })}
                 </p>
               )}
             </div>

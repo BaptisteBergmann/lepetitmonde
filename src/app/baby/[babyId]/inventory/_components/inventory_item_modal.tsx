@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -40,6 +41,7 @@ export default function InventoryItemModal({
   trigger?: React.ReactNode
 }) {
   const router = useRouter()
+  const t = useTranslations('inventory.form')
   const isEditMode = !!item
   const [open, setOpen] = useState(false)
 
@@ -96,7 +98,7 @@ export default function InventoryItemModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : "Une erreur est survenue lors de la sauvegarde.")
+      alert(err instanceof Error ? err.message : t('saveError'))
     } finally {
       setIsPending(false)
     }
@@ -104,7 +106,7 @@ export default function InventoryItemModal({
 
   const handleDelete = async () => {
     if (!item) return
-    if (!confirm("Supprimer cet article ? Cette action est irréversible.")) return
+    if (!confirm(t('deleteConfirm'))) return
 
     setIsDeleting(true)
     try {
@@ -113,7 +115,7 @@ export default function InventoryItemModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : "Une erreur est survenue lors de la suppression.")
+      alert(err instanceof Error ? err.message : t('deleteError'))
     } finally {
       setIsDeleting(false)
     }
@@ -128,7 +130,7 @@ export default function InventoryItemModal({
       ) : (
         <Button onClick={() => setOpen(true)} className="gap-2 rounded-2xl cursor-pointer">
           <Plus className="h-4 w-4" />
-          <span>Ajouter un article</span>
+          <span>{t('addTitle')}</span>
         </Button>
       )}
 
@@ -145,7 +147,7 @@ export default function InventoryItemModal({
             <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
               <h2 className="font-display text-base font-semibold flex items-center gap-2">
                 {isEditMode ? <Pencil className="h-4.5 w-4.5 text-primary" /> : <Package className="h-4.5 w-4.5 text-primary" />}
-                {isEditMode ? "Modifier l'article" : "Ajouter un article"}
+                {isEditMode ? t('editTitle') : t('addTitle')}
               </h2>
               <button
                 onClick={() => setOpen(false)}
@@ -160,14 +162,14 @@ export default function InventoryItemModal({
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="kind" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Type d&apos;article
+                    {t('kindLabel')}
                   </Label>
                   <Input
                     id="kind"
                     list="inventory-kinds"
                     value={kind}
                     onChange={(e) => setKind(e.target.value)}
-                    placeholder="Ex: Vêtement, Repas, Bain…"
+                    placeholder={t('kindPlaceholder')}
                     required
                   />
                   <datalist id="inventory-kinds">
@@ -177,14 +179,14 @@ export default function InventoryItemModal({
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="size" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Sous-type (facultatif)
+                    {t('subtypeLabel')}
                   </Label>
                   <Input
                     id="size"
                     list="inventory-subtypes"
                     value={size}
                     onChange={(e) => setSize(e.target.value)}
-                    placeholder={kind === "Vêtement" ? "Ex: 0/3 mois" : "Ex: Chambre, Salle de bain…"}
+                    placeholder={kind === "Vêtement" ? t('subtypePlaceholderClothing') : t('subtypePlaceholderOther')}
                   />
                   <datalist id="inventory-subtypes">
                     {subtypeSuggestions.map((s) => <option key={s} value={s} />)}
@@ -193,32 +195,32 @@ export default function InventoryItemModal({
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Article
+                    {t('articleLabel')}
                   </Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Bonnet"
+                    placeholder={t('articlePlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="detail" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Détail (facultatif)
+                    {t('detailLabel')}
                   </Label>
                   <Input
                     id="detail"
                     value={detail}
                     onChange={(e) => setDetail(e.target.value)}
-                    placeholder="Ex: taille unique"
+                    placeholder={t('detailPlaceholder')}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="quantity_owned" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Quantité possédée
+                    {t('quantityOwnedLabel')}
                   </Label>
                   <Input
                     id="quantity_owned"
@@ -231,7 +233,7 @@ export default function InventoryItemModal({
 
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="quantity_target" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Quantité souhaitée
+                    {t('quantityTargetLabel')}
                   </Label>
                   <Input
                     id="quantity_target"
@@ -239,13 +241,13 @@ export default function InventoryItemModal({
                     min={0}
                     value={quantityTarget}
                     onChange={(e) => setQuantityTarget(e.target.value)}
-                    placeholder="Facultatif"
+                    placeholder={t('optional')}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="price_paid" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Prix payé (€)
+                    {t('pricePaidLabel')}
                   </Label>
                   <Input
                     id="price_paid"
@@ -254,13 +256,13 @@ export default function InventoryItemModal({
                     step={0.01}
                     value={pricePaid}
                     onChange={(e) => setPricePaid(e.target.value)}
-                    placeholder="Facultatif"
+                    placeholder={t('optional')}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    État
+                    {t('conditionLabel')}
                   </Label>
                   <Select value={condition} onValueChange={(value: string | null) => setCondition(value ?? UNSPECIFIED)}>
                     <SelectTrigger className="w-full text-foreground bg-input/50">
@@ -268,9 +270,9 @@ export default function InventoryItemModal({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value={UNSPECIFIED}>Non précisé</SelectItem>
-                        <SelectItem value="new">Neuf</SelectItem>
-                        <SelectItem value="secondhand">Occasion</SelectItem>
+                        <SelectItem value={UNSPECIFIED}>{t('conditionUnspecified')}</SelectItem>
+                        <SelectItem value="new">{t('conditionNew')}</SelectItem>
+                        <SelectItem value="secondhand">{t('conditionSecondhand')}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -278,14 +280,14 @@ export default function InventoryItemModal({
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <Label htmlFor="purchased_from" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Acheté chez / via (facultatif)
+                    {t('purchasedFromLabel')}
                   </Label>
                   <Input
                     id="purchased_from"
                     list="inventory-sources"
                     value={purchasedFrom}
                     onChange={(e) => setPurchasedFrom(e.target.value)}
-                    placeholder="Ex: Vinted, Kiabi, Cadeau de mamie"
+                    placeholder={t('purchasedFromPlaceholder')}
                   />
                   <datalist id="inventory-sources">
                     {sources.map((s) => <option key={s} value={s} />)}
@@ -304,7 +306,7 @@ export default function InventoryItemModal({
                   onClick={handleDelete}
                 >
                   {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                  <span>Supprimer</span>
+                  <span>{t('delete')}</span>
                 </Button>
               ) : <span />}
 
@@ -314,7 +316,7 @@ export default function InventoryItemModal({
                   className="rounded-2xl cursor-pointer"
                   onClick={() => setOpen(false)}
                 >
-                  Annuler
+                  {t('cancel')}
                 </Button>
                 <Button
                   disabled={!kind.trim() || !name.trim() || isPending || isDeleting}
@@ -324,10 +326,10 @@ export default function InventoryItemModal({
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>{isEditMode ? "Enregistrement..." : "Ajout..."}</span>
+                      <span>{isEditMode ? t('saving') : t('adding')}</span>
                     </>
                   ) : (
-                    <span>{isEditMode ? "Enregistrer" : "Ajouter"}</span>
+                    <span>{isEditMode ? t('save') : t('add')}</span>
                   )}
                 </Button>
               </div>

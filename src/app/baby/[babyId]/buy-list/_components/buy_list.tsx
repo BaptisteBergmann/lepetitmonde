@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { getDateFnsLocale } from "@utils/formatting";
 import { Loader2, Minus, Plus } from "lucide-react";
@@ -23,6 +23,7 @@ export default function BuyList({
   initialItems: BuyListItem[];
 }) {
   const router = useRouter();
+  const t = useTranslations('buyList');
   const dateFnsLocale = getDateFnsLocale(useLocale());
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -49,7 +50,7 @@ export default function BuyList({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Une erreur est survenue.");
+      alert(t('adjustError'));
     } finally {
       setPendingId(null);
     }
@@ -58,7 +59,7 @@ export default function BuyList({
   if (initialItems.length === 0) {
     return (
       <div className="text-center py-12 text-landing-muted border border-dashed border-landing-border rounded-2xl bg-landing-surface">
-        <p className="text-sm font-medium">Rien à acheter pour le moment 🎉</p>
+        <p className="text-sm font-medium">{t('empty')}</p>
       </div>
     );
   }
@@ -89,12 +90,12 @@ export default function BuyList({
                       {item.size && <span className="text-xs text-landing-muted">{item.size}</span>}
                       {item.detail && <span className="text-xs text-landing-muted">{item.detail}</span>}
                       <Badge variant="outline" className="border-landing-camel text-landing-camel">
-                        manque {missing}
+                        {t('missing', { count: missing })}
                       </Badge>
                     </div>
                     {item.updatedByName && (
                       <p className="mt-1 text-[10px] text-landing-muted">
-                        Coché par {item.updatedByName} le {format(new Date(item.updated_at), "d MMM 'à' HH:mm", { locale: dateFnsLocale })}
+                        {t('checkedBy', { name: item.updatedByName, date: format(new Date(item.updated_at), "d MMM 'à' HH:mm", { locale: dateFnsLocale }) })}
                       </p>
                     )}
                   </div>
@@ -107,7 +108,7 @@ export default function BuyList({
                       disabled={isPending || item.quantity_owned <= 0}
                       className="h-7 w-7 rounded-lg cursor-pointer"
                       onClick={() => handleAdjust(item.id, -1)}
-                      aria-label="Retirer un acheté"
+                      aria-label={t('removeOne')}
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </Button>
@@ -118,7 +119,7 @@ export default function BuyList({
                       disabled={isPending || atTarget}
                       className="h-7 w-7 rounded-lg cursor-pointer"
                       onClick={() => handleAdjust(item.id, 1)}
-                      aria-label="Marquer un acheté"
+                      aria-label={t('addOne')}
                     >
                       {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                     </Button>
