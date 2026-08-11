@@ -146,6 +146,68 @@
       "cta": "Commencer le journal"
     }
   },
+  "pages": {
+    "feed": {
+      "name": "Journal",
+      "eyebrow": "Page — Le quotidien",
+      "description": "Photos, vidéos et petits mots du jour, partagés en famille."
+    },
+    "calendar": {
+      "name": "Calendrier",
+      "eyebrow": "Page — Les grandes étapes",
+      "description": "Rendez-vous, poussées de croissance et jalons à venir."
+    },
+    "guess": {
+      "name": "Pronostics",
+      "eyebrow": "Page — Les paris de famille",
+      "description": "Prénom, poids, date de naissance : les paris de toute la famille."
+    },
+    "anecdotes": {
+      "name": "Anecdotes",
+      "eyebrow": "Page — Ce qu'il a dit, ce qu'il a fait",
+      "description": "Les petites phrases et moments rigolos du quotidien, à garder pour toujours."
+    },
+    "inventory": {
+      "name": "Inventaire",
+      "eyebrow": "Page — Ce qu'on a, ce qu'il faut",
+      "description": "Suivez ce que vous possédez déjà, ce qu'il reste à acheter, et combien vous avez dépensé."
+    },
+    "buy-list": {
+      "name": "Liste d'achats",
+      "eyebrow": "Page — On y va ensemble",
+      "description": "Ce qu'il reste à acheter. Cochez au fur et à mesure, tout le monde voit la mise à jour en direct."
+    },
+    "admin": {
+      "name": "Administration",
+      "eyebrow": "Page — Le cercle",
+      "description": "Gérez qui a accès au journal et organisez le cercle de partage."
+    },
+    "cannotConfigure": "Cette page ne peut pas être configurée",
+    "updateError": "Erreur lors de la mise à jour de la page."
+  },
+  "roles": {
+    "viewer": "Tout le monde",
+    "admin": "Administrateurs seulement"
+  },
+  "notificationTypes": {
+    "new_post": "Nouvelles publications",
+    "new_comment": "Nouveaux commentaires",
+    "new_pronostic": "Nouveaux pronostics",
+    "new_member": "Nouveaux membres",
+    "new_reaction": "Réactions sur vos publications",
+    "new_life_stage": "Nouvelles étapes du calendrier",
+    "circle_access_granted": "Accès à un groupe",
+    "new_story": "Nouvelles stories",
+    "new_anecdote": "Nouvelles anecdotes"
+  },
+  "babyHub": {
+    "eyebrow": "Le journal de",
+    "memberSince": "Membre depuis le {date}",
+    "chooseSection": "Choisissez une page à consulter.",
+    "emptyTitle": "Rien à afficher pour l'instant",
+    "emptyDescription": "Aucune section n'est encore disponible avec votre niveau d'accès.",
+    "footer": "Un journal privé, partagé uniquement avec votre famille"
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",

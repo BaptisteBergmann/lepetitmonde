@@ -15,7 +15,7 @@ import { usePushSubscription } from '@utils/hooks/use-push-subscription'
 import { Tables, Enums } from '@utils/supabase/database.types'
 import { getBabiesList } from '@utils/actions/baby'
 import { getUserAccess } from '@utils/actions/users'
-import { NOTIFICATION_LABELS, ADMIN_ONLY_TYPES, ALL_NOTIFICATION_TYPES as ALL_TYPES } from '@utils/notification-types'
+import { ADMIN_ONLY_TYPES, ALL_NOTIFICATION_TYPES as ALL_TYPES } from '@utils/notification-types'
 import {
   getMyNotifications,
   getUnreadNotificationCount,
@@ -36,6 +36,7 @@ type Device = { id: number; device_label: string | null; created_at: string; las
 
 export default function NotificationBell() {
   const t = useTranslations('notifications')
+  const tType = useTranslations('notificationTypes')
   const params = useParams<{ babyId?: string }>()
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -259,7 +260,7 @@ export default function NotificationBell() {
                       onChange={() => togglePreference(type)}
                       className="cursor-pointer"
                     />
-                    {NOTIFICATION_LABELS[type]}
+                    {tType(type)}
                   </label>
                 ))}
               </div>

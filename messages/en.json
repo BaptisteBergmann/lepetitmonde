@@ -146,6 +146,68 @@
       "cta": "Start the journal"
     }
   },
+  "pages": {
+    "feed": {
+      "name": "Journal",
+      "eyebrow": "Page — Everyday life",
+      "description": "Photos, videos, and little notes from the day, shared with family."
+    },
+    "calendar": {
+      "name": "Calendar",
+      "eyebrow": "Page — The big milestones",
+      "description": "Appointments, growth spurts, and upcoming milestones."
+    },
+    "guess": {
+      "name": "Pronostics",
+      "eyebrow": "Page — The family bets",
+      "description": "First name, weight, birth date: the whole family's bets."
+    },
+    "anecdotes": {
+      "name": "Anecdotes",
+      "eyebrow": "Page — What they said, what they did",
+      "description": "The little sayings and funny moments of everyday life, kept forever."
+    },
+    "inventory": {
+      "name": "Inventory",
+      "eyebrow": "Page — What we have, what we need",
+      "description": "Track what you already own, what's left to buy, and how much you've spent."
+    },
+    "buy-list": {
+      "name": "Shopping list",
+      "eyebrow": "Page — Let's do this together",
+      "description": "What's left to buy. Check items off as you go, everyone sees the update live."
+    },
+    "admin": {
+      "name": "Admin",
+      "eyebrow": "Page — The circle",
+      "description": "Manage who has access to the journal and organize the sharing circle."
+    },
+    "cannotConfigure": "This page can't be configured",
+    "updateError": "Error updating the page."
+  },
+  "roles": {
+    "viewer": "Everyone",
+    "admin": "Admins only"
+  },
+  "notificationTypes": {
+    "new_post": "New posts",
+    "new_comment": "New comments",
+    "new_pronostic": "New pronostics",
+    "new_member": "New members",
+    "new_reaction": "Reactions on your posts",
+    "new_life_stage": "New calendar milestones",
+    "circle_access_granted": "Access to a group",
+    "new_story": "New stories",
+    "new_anecdote": "New anecdotes"
+  },
+  "babyHub": {
+    "eyebrow": "The journal of",
+    "memberSince": "Member since {date}",
+    "chooseSection": "Choose a page to view.",
+    "emptyTitle": "Nothing to show yet",
+    "emptyDescription": "No section is available yet with your access level.",
+    "footer": "A private journal, shared only with your family"
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

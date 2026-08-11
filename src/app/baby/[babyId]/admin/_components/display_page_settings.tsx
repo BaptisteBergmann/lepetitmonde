@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Enums } from "@utils/supabase/database.types";
 import { updatePageSetting } from "@utils/actions/page_settings";
 import { PageId } from "@utils/page_registry";
@@ -20,12 +21,12 @@ type PageRow = {
   role: Enums<'role'>;
 };
 
-const ROLE_LABELS: Record<Enums<'role'>, string> = {
-  viewer: "Tout le monde",
-  admin: "Administrateurs seulement",
-};
-
 export default function DisplayPageSettings({ babyId, pages: initialPages }: { babyId: string; pages: PageRow[] }) {
+  const t = useTranslations();
+  const ROLE_LABELS: Record<Enums<'role'>, string> = {
+    viewer: t('roles.viewer'),
+    admin: t('roles.admin'),
+  };
   const [pages, setPages] = useState(initialPages);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -40,7 +41,7 @@ export default function DisplayPageSettings({ babyId, pages: initialPages }: { b
       if (previous) {
         setPages((prev) => prev.map((p) => (p.id === pageId ? previous : p)));
       }
-      toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour de la page.");
+      toast.error(err instanceof Error ? err.message : t('pages.updateError'));
     } finally {
       setPendingId(null);
     }

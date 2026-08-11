@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@utils/supabase/server'
 import { Enums } from '@utils/supabase/database.types'
 import { LucideIcon } from 'lucide-react'
@@ -42,16 +43,21 @@ async function fetchPageOverrides(babyId: string) {
 export async function getPageSettings(babyId: string): Promise<ResolvedPage[]> {
   const overrides = await pageOverridesCache.get(babyId, () => fetchPageOverrides(babyId))
   const overrideByPageId = new Map(overrides.map((row) => [row.page_id, row]))
+  const t = await getTranslations('pages')
 
   return PAGE_REGISTRY.map((page) => {
+    const name = t(`${page.id}.name`)
+    const eyebrow = t(`${page.id}.eyebrow`)
+    const description = t(`${page.id}.description`)
+
     // admin is always enabled/admin-only regardless of any DB row — defense
     // in depth even though the admin UI never offers to edit it.
     if (page.id === 'admin') {
       return {
         id: page.id,
-        name: page.name,
-        eyebrow: page.eyebrow,
-        description: page.description,
+        name,
+        eyebrow,
+        description,
         icon: page.icon,
         manageable: page.manageable,
         enabled: true,
@@ -62,9 +68,9 @@ export async function getPageSettings(babyId: string): Promise<ResolvedPage[]> {
     const override = overrideByPageId.get(page.id)
     return {
       id: page.id,
-      name: page.name,
-      eyebrow: page.eyebrow,
-      description: page.description,
+      name,
+      eyebrow,
+      description,
       icon: page.icon,
       manageable: page.manageable,
       enabled: override?.enabled ?? page.defaultEnabled,
@@ -80,7 +86,8 @@ export async function updatePageSetting(babyId: string, pageId: PageId, settings
 
   const entry = PAGE_REGISTRY.find((page) => page.id === pageId)
   if (!entry || !entry.manageable) {
-    throw new Error("Cette page ne peut pas être configurée")
+    const t = await getTranslations('pages')
+    throw new Error(t('cannotConfigure'))
   }
 
   const { error } = await supabase

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { Baby as BabyIcon, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { updateBabyAccessSettings } from '@utils/actions/users'
 import { getDisabledNotificationTypes, setNotificationPreference } from '@utils/actions/notifications'
-import { NOTIFICATION_LABELS, ADMIN_ONLY_TYPES, ALL_NOTIFICATION_TYPES } from '@utils/notification-types'
+import { ADMIN_ONLY_TYPES, ALL_NOTIFICATION_TYPES } from '@utils/notification-types'
 import { Enums } from '@utils/supabase/database.types'
 
 interface BabySettingsCardProps {
@@ -27,6 +28,7 @@ export default function BabySettingsCard({
   relationToBaby,
   isAdmin,
 }: BabySettingsCardProps) {
+  const tType = useTranslations('notificationTypes')
   const [isSaving, startTransition] = useTransition()
   const [disabledTypes, setDisabledTypes] = useState<Set<Enums<'notification_type'>>>(new Set())
 
@@ -108,7 +110,7 @@ export default function BabySettingsCard({
                 onChange={() => togglePreference(type)}
                 className="cursor-pointer"
               />
-              {NOTIFICATION_LABELS[type]}
+              {tType(type)}
             </label>
           ))}
         </div>

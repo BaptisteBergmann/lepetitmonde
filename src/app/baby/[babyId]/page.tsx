@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getDateFnsLocale } from "@utils/formatting";
 import { Reveal } from "@components/reveal";
 
@@ -17,7 +17,9 @@ export default async function BabyPage({
   params: Promise<{ babyId: string }>;
 }) {
   const { babyId } = await params;
-  const dateFnsLocale = getDateFnsLocale(await getLocale());
+  const locale = await getLocale();
+  const dateFnsLocale = getDateFnsLocale(locale);
+  const t = await getTranslations("babyHub");
   const baby = await getBaby(babyId);
   const access = await getUserAccess(babyId);
   const accessLevel = !Array.isArray(access) ? access?.access_level : undefined;
@@ -49,24 +51,24 @@ export default async function BabyPage({
             unoptimized
           />
           <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-            Le journal de
+            {t("eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-[clamp(3rem,9vw,4.5rem)] leading-none font-medium italic">
             {baby.baby_surname}
           </h1>
           <p className="mt-4 text-sm text-landing-muted">
-            Membre depuis le {format(new Date(baby.created_at), "d MMMM yyyy", { locale: dateFnsLocale })}
+            {t("memberSince", { date: format(new Date(baby.created_at), "d MMMM yyyy", { locale: dateFnsLocale }) })}
           </p>
-          <p className="mt-2 text-landing-muted">Choisissez une page à consulter.</p>
+          <p className="mt-2 text-landing-muted">{t("chooseSection")}</p>
         </Reveal>
 
         {sections.length === 0 ? (
           <Reveal delay={120} className="mt-10">
             <Card>
               <CardHeader>
-                <CardTitle>Rien à afficher pour l&apos;instant</CardTitle>
+                <CardTitle>{t("emptyTitle")}</CardTitle>
                 <CardDescription>
-                  Aucune section n&apos;est encore disponible avec votre niveau d&apos;accès.
+                  {t("emptyDescription")}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -100,7 +102,7 @@ export default async function BabyPage({
 
         <p className="mt-10 flex items-center justify-center gap-2 text-center text-sm text-landing-muted">
           <ShieldCheck className="size-[14px] text-landing-camel" />
-          Un journal privé, partagé uniquement avec votre famille
+          {t("footer")}
         </p>
       </div>
     </div>
