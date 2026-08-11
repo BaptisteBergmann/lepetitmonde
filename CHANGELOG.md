@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `24b66f8` Translate the feed section
 - `ce17e9c` Translate nav labels, notification types, and baby hub page
 - `96a1c87` Translate shared chrome, landing page, and auth flow
 - `d48f05b` Add locale-aware date/currency formatting, translate login error
