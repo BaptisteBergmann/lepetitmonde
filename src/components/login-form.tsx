@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { getTranslations } from "next-intl/server"
 import { cn } from "@utils/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -18,12 +19,13 @@ interface LoginFormProps extends React.ComponentProps<"div"> {
   redirectTo?: string
 }
 
-export function LoginForm({
+export async function LoginForm({
   message,
   redirectTo,
   className,
   ...props
 }: LoginFormProps) {
+  const t = await getTranslations("auth")
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden border-landing-border bg-landing-surface p-0">
@@ -34,16 +36,16 @@ export function LoginForm({
             )}
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="font-display text-2xl font-semibold">Bon retour</h1>
+                <h1 className="font-display text-2xl font-semibold">{t("login.title")}</h1>
                 <p className="text-balance text-muted-foreground">
-                  Connectez-vous à votre compte
+                  {t("login.subtitle")}
                 </p>
               </div>
               {message && (
                 <p className="text-sm text-center text-muted-foreground">{message}</p>
               )}
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">{t("login.emailLabel")}</FieldLabel>
                 <Input
                   name="email"
                   id="email"
@@ -54,21 +56,21 @@ export function LoginForm({
               </Field>
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+                  <FieldLabel htmlFor="password">{t("login.passwordLabel")}</FieldLabel>
                   <a
                     href="/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
-                    Mot de passe oublié ?
+                    {t("login.forgotPassword")}
                   </a>
                 </div>
                 <PasswordInput name="password" id="password" required />
               </Field>
               <Field>
-                <Button type="submit">Se connecter</Button>
+                <Button type="submit">{t("login.submit")}</Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-landing-surface">
-                Ou continuer avec
+                {t("login.orContinueWith")}
               </FieldSeparator>
               <Field className="grid grid-cols-3 gap-4">
                 <Button variant="outline" type="button">
@@ -78,7 +80,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Se connecter avec Apple</span>
+                  <span className="sr-only">{t("login.continueWithApple")}</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -87,7 +89,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Se connecter avec Google</span>
+                  <span className="sr-only">{t("login.continueWithGoogle")}</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -96,25 +98,27 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Se connecter avec Meta</span>
+                  <span className="sr-only">{t("login.continueWithMeta")}</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Vous n&apos;avez pas de compte ? <a href="/invite">Inscrivez-vous</a>
+                {t("login.noAccount")} <a href="/invite">{t("login.signUp")}</a>
               </FieldDescription>
             </FieldGroup>
           </form>
           <div className="hidden flex-col items-center justify-center gap-4 bg-landing-background p-8 md:flex">
             <Image src="/logo_mark.svg" alt="" width={512} height={512} className="h-20 w-auto" unoptimized />
             <p className="text-balance text-center font-display text-lg italic text-landing-foreground">
-              Le journal de bébé, à partager en famille
+              {t("login.tagline")}
             </p>
           </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        En continuant, vous acceptez nos <a href="#">Conditions d&apos;utilisation</a>{" "}
-        et notre <a href="#">Politique de confidentialité</a>.
+        {t.rich("legal.agreement", {
+          terms: (chunks) => <a href="#">{chunks}</a>,
+          privacy: (chunks) => <a href="#">{chunks}</a>,
+        })}
       </FieldDescription>
     </div>
   )

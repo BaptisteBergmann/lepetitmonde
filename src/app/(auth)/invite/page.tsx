@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { SignupForm } from "@components/signup-form"
 import { JoinBabyCard } from "@components/join-baby-card"
 import { getAuthUser } from "@utils/supabase/auth"
@@ -11,13 +12,15 @@ export default async function InvitePage({
   const params = await searchParams
   const token = params.token
   const message = params.message
+  const t = await getTranslations("auth.invite")
+  const tCommon = await getTranslations("common")
 
   if (!token) {
     return (
       <div className="max-w-md space-y-4 text-center mx-auto">
-        <h1 className="font-display text-2xl font-semibold text-destructive">Lien d&apos;invitation invalide</h1>
+        <h1 className="font-display text-2xl font-semibold text-destructive">{t("invalidTitle")}</h1>
         <p className="text-muted-foreground">
-          Vous devez utiliser un lien d&apos;invitation valide contenant un jeton sécurisé pour pouvoir créer un compte et rejoindre Le petit monde.
+          {t("invalidTokenDescription", { appName: tCommon("appName") })}
         </p>
       </div>
     )
@@ -42,8 +45,8 @@ export default async function InvitePage({
     if (expired) {
       return (
         <div className="max-w-md space-y-4 text-center mx-auto">
-          <h1 className="font-display text-2xl font-semibold text-destructive">Lien d&apos;invitation invalide</h1>
-          <p className="text-muted-foreground">Ce lien d&apos;invitation est invalide ou a expiré.</p>
+          <h1 className="font-display text-2xl font-semibold text-destructive">{t("invalidTitle")}</h1>
+          <p className="text-muted-foreground">{t("expiredDescription")}</p>
         </div>
       )
     }

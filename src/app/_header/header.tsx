@@ -3,6 +3,7 @@ import { getAllUserAccess } from '@/utils/actions/users';
 import { getPageSettings } from '@/utils/actions/page_settings';
 import { logger } from '@/utils/logger';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import PageSelector from './page_selector';
 import UserMenu from './user_menu';
 import MobileMenu from './mobile_menu';
@@ -12,6 +13,7 @@ import { Tables } from '@/utils/supabase/database.types';
 
 export default async function Header({ babies }: { babies: Tables<'babies'>[] }) {
   const contextLogger = logger.child({ function: Header.name });
+  const t = await getTranslations('nav');
   const supabase = await createClient();
 
   // Securely fetch the user from the Supabase database
@@ -37,7 +39,7 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
 
   contextLogger.debug(accesses, "User accesses");
 
-  const fullName = user?.user_metadata?.full_name || user?.email || 'Utilisateur';
+  const fullName = user?.user_metadata?.full_name || user?.email || t('unknownUser');
   const initials = fullName
     .split(/\s+/)
     .filter(Boolean)
@@ -83,7 +85,7 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
             href="/login"
             className="px-4 py-1.5 text-sm font-semibold text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-sm"
           >
-            Se connecter
+            {t('login')}
           </Link>
         )}
       </div>

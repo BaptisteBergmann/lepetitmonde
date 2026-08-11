@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { Bell, Settings2, ArrowLeft, Smartphone, Trash2, Moon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
@@ -34,6 +35,7 @@ const ENABLE_PROMPT_DECLINE_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 type Device = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
 export default function NotificationBell() {
+  const t = useTranslations('notifications')
   const params = useParams<{ babyId?: string }>()
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -67,11 +69,11 @@ export default function NotificationBell() {
     if (declinedAt && Date.now() - Number(declinedAt) < ENABLE_PROMPT_DECLINE_INTERVAL_MS) return
 
     const timeout = setTimeout(() => {
-      toast('Activez les notifications', {
-        description: 'Soyez averti des nouvelles publications, commentaires et pronostics.',
-        action: { label: 'Activer', onClick: () => subscribe() },
+      toast(t('enablePromptTitle'), {
+        description: t('enablePromptDescription'),
+        action: { label: t('enable'), onClick: () => subscribe() },
         cancel: {
-          label: 'Non',
+          label: t('decline'),
           onClick: () => localStorage.setItem(ENABLE_PROMPT_DECLINED_AT_KEY, String(Date.now())),
         },
         duration: 15000,
@@ -79,7 +81,7 @@ export default function NotificationBell() {
     }, 2000)
 
     return () => clearTimeout(timeout)
-  }, [isSupported, subscription, subscribe])
+  }, [isSupported, subscription, subscribe, t])
 
   // No baby switcher here: falls back to the caller's first baby when not
   // browsing a /baby/[babyId] route (e.g. from /settings). Fine for the
@@ -162,12 +164,12 @@ export default function NotificationBell() {
       <PopoverContent align="end" className="w-80 mt-2 max-h-[70vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <p className="font-display text-sm font-semibold">
-            {view === 'list' ? 'Notifications' : 'Réglages'}
+            {view === 'list' ? t('title') : t('settingsTitle')}
           </p>
           <div className="flex items-center gap-1">
             {view === 'list' && notifications.some((n) => !n.read_at) && (
               <Button variant="ghost" size="sm" className="text-xs cursor-pointer" onClick={handleMarkAllRead}>
-                Tout lire
+                {t('markAllRead')}
               </Button>
             )}
             <Button
@@ -184,7 +186,7 @@ export default function NotificationBell() {
         {view === 'list' ? (
           <div className="flex flex-col gap-1">
             {notifications.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">Rien de nouveau.</p>
+              <p className="text-sm text-muted-foreground py-4 text-center">{t('empty')}</p>
             ) : (
               notifications.map((notif) => (
                 <button
@@ -204,11 +206,11 @@ export default function NotificationBell() {
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <p className="text-xs font-semibold text-muted-foreground">Cet appareil</p>
+              <p className="text-xs font-semibold text-muted-foreground">{t('thisDevice')}</p>
               {!isSupported ? (
                 <InstallCard
-                  title="Installez l'application"
-                  description="Sur iPhone, les notifications ne sont disponibles qu'une fois le journal installé sur l'écran d'accueil."
+                  title={t('installAppTitle')}
+                  description={t('installAppDescription')}
                 />
               ) : (
                 <Button
@@ -219,19 +221,19 @@ export default function NotificationBell() {
                   onClick={subscription ? unsubscribe : subscribe}
                   disabled={isPending}
                 >
-                  {subscription ? 'Désactiver les notifications' : 'Activer les notifications'}
+                  {subscription ? t('disableNotifications') : t('enableNotifications')}
                 </Button>
               )}
             </div>
 
             {devices.length > 0 && (
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-semibold text-muted-foreground">Appareils enregistrés</p>
+                <p className="text-xs font-semibold text-muted-foreground">{t('registeredDevices')}</p>
                 {devices.map((device) => (
                   <div key={device.id} className="flex items-center justify-between gap-2 text-sm">
                     <span className="flex items-center gap-1.5 truncate">
                       <Smartphone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      {device.device_label ?? 'Appareil inconnu'}
+                      {device.device_label ?? t('unknownDevice')}
                     </span>
                     <Button
                       variant="ghost"
@@ -248,7 +250,7 @@ export default function NotificationBell() {
 
             {babyId && (
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-semibold text-muted-foreground">Me notifier pour</p>
+                <p className="text-xs font-semibold text-muted-foreground">{t('notifyMeFor')}</p>
                 {ALL_TYPES.filter((type) => isAdmin || !ADMIN_ONLY_TYPES.includes(type)).map((type) => (
                   <label key={type} className="flex items-center gap-2 text-sm cursor-pointer">
                     <input
@@ -265,23 +267,23 @@ export default function NotificationBell() {
 
             <div className="flex flex-col gap-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                <Moon className="h-3.5 w-3.5" /> Heures silencieuses
+                <Moon className="h-3.5 w-3.5" /> {t('quietHours')}
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground shrink-0 w-3">De</span>
+                <span className="text-xs text-muted-foreground shrink-0 w-3">{t('from')}</span>
                 <TimePicker value={quietStart || undefined} onChange={setQuietStart} />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground shrink-0 w-3">à</span>
+                <span className="text-xs text-muted-foreground shrink-0 w-3">{t('to')}</span>
                 <TimePicker value={quietEnd || undefined} onChange={setQuietEnd} />
                 <Button size="sm" variant="outline" className="shrink-0 cursor-pointer ml-auto" onClick={handleSaveQuietHours}>
-                  OK
+                  {t('save')}
                 </Button>
               </div>
             </div>
 
             <Link href="/settings" className="text-xs text-primary hover:underline text-center">
-              Plus de réglages
+              {t('moreSettings')}
             </Link>
           </div>
         )}

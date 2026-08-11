@@ -4,11 +4,13 @@ import { Tables } from '@/utils/supabase/database.types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { goToRoot } from '@/utils/pwa-navigation';
 
 type Baby = Tables<'babies'>;
 
 export default function SiteTitle({ babies }: { babies: Baby[] }) {
+  const t = useTranslations();
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -30,7 +32,7 @@ export default function SiteTitle({ babies }: { babies: Baby[] }) {
     >
       <Image src="/logo_mark.svg" alt="" width={512} height={512} className="h-7 w-auto sm:h-8" priority unoptimized />
       <span className="font-display text-lg sm:text-xl font-semibold text-primary tracking-tight truncate">
-        Le petit Monde{babyName ? ` de ${babyName}` : ''}
+        {babyName ? t('nav.siteTitleWithBaby', { appName: t('common.appName'), babyName }) : t('common.appName')}
       </span>
     </Link>
   );

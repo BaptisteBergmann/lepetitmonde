@@ -1,8 +1,172 @@
 {
   "common": {
-    "appName": "Le petit monde"
+    "appName": "Le petit monde",
+    "appDescription": "Un espace privé pour la famille"
   },
   "auth": {
-    "invalidCredentials": "Identifiants incorrects ou compte inexistant"
+    "invalidCredentials": "Identifiants incorrects ou compte inexistant",
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous à votre compte",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "orContinueWith": "Ou continuer avec",
+      "continueWithApple": "Se connecter avec Apple",
+      "continueWithGoogle": "Se connecter avec Google",
+      "continueWithMeta": "Se connecter avec Meta",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "Inscrivez-vous",
+      "tagline": "Le journal de bébé, à partager en famille"
+    },
+    "signup": {
+      "title": "Créer un compte",
+      "subtitle": "Inscrivez-vous pour commencer",
+      "tokenLabel": "Token",
+      "nameLabel": "Nom complet",
+      "namePlaceholder": "Jean Dupont",
+      "emailLabel": "Email",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Créez un mot de passe",
+      "submit": "S'inscrire",
+      "orContinueWith": "Ou continuer avec",
+      "continueWithApple": "Continuer avec Apple",
+      "continueWithGoogle": "Continuer avec Google",
+      "continueWithMeta": "Continuer avec Meta",
+      "alreadyHaveAccount": "Vous avez déjà un compte ?",
+      "logIn": "Connectez-vous"
+    },
+    "legal": {
+      "agreement": "En continuant, vous acceptez nos <terms>Conditions d'utilisation</terms> et notre <privacy>Politique de confidentialité</privacy>."
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Entrez votre email pour recevoir un lien de réinitialisation",
+      "emailLabel": "Email",
+      "submit": "Envoyer le lien",
+      "backToLogin": "Retour à la connexion"
+    },
+    "resetPassword": {
+      "title": "Nouveau mot de passe",
+      "subtitle": "Choisissez un nouveau mot de passe",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "submit": "Mettre à jour"
+    },
+    "invite": {
+      "invalidTitle": "Lien d'invitation invalide",
+      "invalidTokenDescription": "Vous devez utiliser un lien d'invitation valide contenant un jeton sécurisé pour pouvoir créer un compte et rejoindre {appName}.",
+      "expiredDescription": "Ce lien d'invitation est invalide ou a expiré.",
+      "alreadyMemberTitle": "Vous êtes déjà membre",
+      "alreadyMemberDescription": "Vous avez déjà accès au journal de {babySurname}.",
+      "accessJournal": "Accéder au journal",
+      "joinTitle": "Rejoindre {babySurname}",
+      "joinDescription": "Vous êtes déjà connecté. Rejoignez le journal de {babySurname} avec votre compte existant.",
+      "join": "Rejoindre"
+    }
+  },
+  "nav": {
+    "siteTitleWithBaby": "{appName} de {babyName}",
+    "login": "Se connecter",
+    "unknownUser": "Utilisateur",
+    "settings": "Paramètres",
+    "logout": "Se déconnecter",
+    "navigation": "Navigation"
+  },
+  "home": {
+    "greeting": "Bonjour, {firstName}.",
+    "greetingNoName": "Bonjour.",
+    "subtitle": "Choisissez le journal que vous souhaitez consulter.",
+    "noBabiesTitle": "Aucun bébé pour l'instant",
+    "noBabiesDescription": "Vous n'avez encore accès à aucun profil de bébé.",
+    "viewJournal": "Voir le journal",
+    "footer": "Chaque enfant a son propre journal, partagé en famille."
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Le journal de bébé, à partager en famille",
+      "title": "Chaque petit jour mérite <em>sa page</em>.",
+      "intro": "Le petit monde est le journal privé où vous notez les progrès, les photos et les vidéos de bébé — et où toute la famille peut venir tourner les pages, en douceur, sans jamais quitter la maison.",
+      "cta": "Ouvrir le journal",
+      "mockDate": "14 juillet · 8 mois",
+      "mockTitle": "Premier pas",
+      "mockCaption": "Jusqu'au canapé, sans tomber <em>une seule fois</em>. Mamie va être fière. 🎉",
+      "mockSeenBy": "Vu par 4 membres de la famille"
+    },
+    "pages": {
+      "title": "Un journal, trois pages",
+      "subtitle": "Pas de fonctionnalités à apprendre — juste les moments qu'une famille a envie de garder.",
+      "daily": {
+        "eyebrow": "Page — Le quotidien",
+        "title": "Une page par jour",
+        "text": "Une sieste, un sourire, un premier mot : notez-les avec des photos et des vidéos, classées toutes seules par date."
+      },
+      "calendar": {
+        "eyebrow": "Page — Les grandes étapes",
+        "title": "Un calendrier qui grandit",
+        "text": "Rendez-vous, poussées de croissance, premières fois : tout ce qui compte, à l'endroit où l'on pense à le regarder."
+      },
+      "guessing": {
+        "eyebrow": "Page — Les paris de famille",
+        "title": "Le jeu des pronostics",
+        "text": "Prénom, poids, date de naissance : papis, mamies et parrains tentent leur chance, parfois avant même le premier jour."
+      }
+    },
+    "steps": {
+      "title": "Comment ça marche",
+      "subtitle": "Quatre étapes, et le journal tourne tout seul.",
+      "stepLabel": "Étape {number}",
+      "create": {
+        "title": "Créez le journal de bébé",
+        "text": "Un espace privé qui lui est propre, prêt en quelques secondes — un seul journal par enfant."
+      },
+      "circles": {
+        "title": "Formez des cercles",
+        "text": "Grands-parents, parrains, cousins : chacun rejoint un ou plusieurs cercles, et ne voit que ce qui lui est destiné."
+      },
+      "publish": {
+        "title": "Publiez au fil des jours",
+        "text": "Photos, vidéos, petites phrases : chaque publication arrive dans le journal, classée par date, avec réactions et commentaires."
+      },
+      "calendar": {
+        "title": "Tenez le calendrier à jour",
+        "text": "Rendez-vous, poussées de croissance, premières fois : tout se retrouve au même endroit, visible par le bon cercle."
+      }
+    },
+    "night": {
+      "eyebrow": "Pas un réseau social",
+      "title": "Un journal qu'on referme, le soir.",
+      "text": "Pas de fil d'actualité, pas d'inconnus, pas de likes à collectionner. {appName} tourne sur votre propre serveur, pensé pour une seule famille à la fois — la vôtre.",
+      "hosted": "Hébergé par vos soins, pour votre tranquillité"
+    },
+    "finalCta": {
+      "title": "La première page vous attend.",
+      "text": "Ajoutez votre bébé, invitez la famille, et laissez le journal s'écrire au fil des jours.",
+      "cta": "Commencer le journal"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "settingsTitle": "Réglages",
+    "markAllRead": "Tout lire",
+    "empty": "Rien de nouveau.",
+    "thisDevice": "Cet appareil",
+    "installAppTitle": "Installez l'application",
+    "installAppDescription": "Sur iPhone, les notifications ne sont disponibles qu'une fois le journal installé sur l'écran d'accueil.",
+    "disableNotifications": "Désactiver les notifications",
+    "enableNotifications": "Activer les notifications",
+    "registeredDevices": "Appareils enregistrés",
+    "unknownDevice": "Appareil inconnu",
+    "notifyMeFor": "Me notifier pour",
+    "quietHours": "Heures silencieuses",
+    "from": "De",
+    "to": "à",
+    "save": "OK",
+    "moreSettings": "Plus de réglages",
+    "enablePromptTitle": "Activez les notifications",
+    "enablePromptDescription": "Soyez averti des nouvelles publications, commentaires et pronostics.",
+    "enable": "Activer",
+    "decline": "Non"
   }
 }

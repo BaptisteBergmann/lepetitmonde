@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { getTranslations } from "next-intl/server"
 import { Button } from "@components/ui/button"
 import { Card, CardContent } from "@components/ui/card"
 import {
@@ -18,12 +19,13 @@ interface SignupFormProps extends React.ComponentProps<"div"> {
   message?: string;
 }
 
-export function SignupForm({
+export async function SignupForm({
   token,
   message,
   className,
   ...props
 }: SignupFormProps) {
+  const t = await getTranslations("auth")
 
   return (
     <div className="flex flex-col gap-6" >
@@ -32,9 +34,9 @@ export function SignupForm({
           <form action={signup} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="font-display text-2xl font-semibold">Créer un compte</h1>
+                <h1 className="font-display text-2xl font-semibold">{t("signup.title")}</h1>
                 <p className="text-balance text-muted-foreground">
-                  Inscrivez-vous pour commencer
+                  {t("signup.subtitle")}
                 </p>
               </div>
 
@@ -44,22 +46,22 @@ export function SignupForm({
 
               {/* Ajout d'un champ Nom pour l'inscription */}
               <Field hidden>
-                <FieldLabel htmlFor="token">Token</FieldLabel>
+                <FieldLabel htmlFor="token">{t("signup.tokenLabel")}</FieldLabel>
                 <Input name="token" id="token" type="text" required value={token} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="name">Nom complet</FieldLabel>
+                <FieldLabel htmlFor="name">{t("signup.nameLabel")}</FieldLabel>
                 <Input
                   name="name"
                   id="name"
                   type="text"
-                  placeholder="Jean Dupont"
+                  placeholder={t("signup.namePlaceholder")}
                   required
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">{t("signup.emailLabel")}</FieldLabel>
                 <Input
                   name="email"
                   id="email"
@@ -70,22 +72,22 @@ export function SignupForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+                <FieldLabel htmlFor="password">{t("signup.passwordLabel")}</FieldLabel>
                 {/* Le lien "Mot de passe oublié" a été retiré pour l'inscription */}
                 <PasswordInput
                   name="password"
                   id="password"
-                  placeholder="Créez un mot de passe"
+                  placeholder={t("signup.passwordPlaceholder")}
                   required
                 />
               </Field>
 
               <Field>
-                <Button type="submit">S&apos;inscrire</Button>
+                <Button type="submit">{t("signup.submit")}</Button>
               </Field>
 
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-landing-surface">
-                Ou continuer avec
+                {t("signup.orContinueWith")}
               </FieldSeparator>
 
               <Field className="grid grid-cols-3 gap-4">
@@ -96,7 +98,7 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Continuer avec Apple</span>
+                  <span className="sr-only">{t("signup.continueWithApple")}</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -105,7 +107,7 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Continuer avec Google</span>
+                  <span className="sr-only">{t("signup.continueWithGoogle")}</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -114,26 +116,28 @@ export function SignupForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Continuer avec Meta</span>
+                  <span className="sr-only">{t("signup.continueWithMeta")}</span>
                 </Button>
               </Field>
 
               <FieldDescription className="text-center">
-                Vous avez déjà un compte ? <a href="/login">Connectez-vous</a>
+                {t("signup.alreadyHaveAccount")} <a href="/login">{t("signup.logIn")}</a>
               </FieldDescription>
             </FieldGroup>
           </form>
           <div className="hidden flex-col items-center justify-center gap-4 bg-landing-background p-8 md:flex">
             <Image src="/logo_mark.svg" alt="" width={512} height={512} className="h-20 w-auto" unoptimized />
             <p className="text-balance text-center font-display text-lg italic text-landing-foreground">
-              Le journal de bébé, à partager en famille
+              {t("login.tagline")}
             </p>
           </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        En continuant, vous acceptez nos <a href="#">Conditions d&apos;utilisation</a>{" "}
-        et notre <a href="#">Politique de confidentialité</a>.
+        {t.rich("legal.agreement", {
+          terms: (chunks) => <a href="#">{chunks}</a>,
+          privacy: (chunks) => <a href="#">{chunks}</a>,
+        })}
       </FieldDescription>
     </div>
   )

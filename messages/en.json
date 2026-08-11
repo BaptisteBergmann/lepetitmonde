@@ -1,8 +1,172 @@
 {
   "common": {
-    "appName": "Le petit monde"
+    "appName": "Le petit monde",
+    "appDescription": "A private space for the family"
   },
   "auth": {
-    "invalidCredentials": "Incorrect credentials or no such account"
+    "invalidCredentials": "Incorrect credentials or no such account",
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in to your account",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Log in",
+      "orContinueWith": "Or continue with",
+      "continueWithApple": "Log in with Apple",
+      "continueWithGoogle": "Log in with Google",
+      "continueWithMeta": "Log in with Meta",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "tagline": "The baby journal, shared with family"
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "Sign up to get started",
+      "tokenLabel": "Token",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Jane Doe",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Create a password",
+      "submit": "Sign up",
+      "orContinueWith": "Or continue with",
+      "continueWithApple": "Continue with Apple",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithMeta": "Continue with Meta",
+      "alreadyHaveAccount": "Already have an account?",
+      "logIn": "Log in"
+    },
+    "legal": {
+      "agreement": "By continuing, you agree to our <terms>Terms of Service</terms> and our <privacy>Privacy Policy</privacy>."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email to receive a reset link",
+      "emailLabel": "Email",
+      "submit": "Send link",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "New password",
+      "subtitle": "Choose a new password",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Update"
+    },
+    "invite": {
+      "invalidTitle": "Invalid invite link",
+      "invalidTokenDescription": "You need a valid invite link with a secure token to create an account and join {appName}.",
+      "expiredDescription": "This invite link is invalid or has expired.",
+      "alreadyMemberTitle": "You're already a member",
+      "alreadyMemberDescription": "You already have access to {babySurname}'s journal.",
+      "accessJournal": "Go to journal",
+      "joinTitle": "Join {babySurname}",
+      "joinDescription": "You're already logged in. Join {babySurname}'s journal with your existing account.",
+      "join": "Join"
+    }
+  },
+  "nav": {
+    "siteTitleWithBaby": "{appName} — {babyName}",
+    "login": "Log in",
+    "unknownUser": "User",
+    "settings": "Settings",
+    "logout": "Log out",
+    "navigation": "Navigation"
+  },
+  "home": {
+    "greeting": "Hello, {firstName}.",
+    "greetingNoName": "Hello.",
+    "subtitle": "Choose the journal you'd like to view.",
+    "noBabiesTitle": "No baby yet",
+    "noBabiesDescription": "You don't have access to any baby profile yet.",
+    "viewJournal": "View journal",
+    "footer": "Each child has their own journal, shared with family."
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "The baby journal, shared with family",
+      "title": "Every little day deserves <em>its own page</em>.",
+      "intro": "Le petit monde is the private journal where you note baby's progress, photos, and videos — and where the whole family can come turn the pages, gently, without ever leaving home.",
+      "cta": "Open the journal",
+      "mockDate": "July 14 · 8 months",
+      "mockTitle": "First steps",
+      "mockCaption": "All the way to the couch, without falling <em>even once</em>. Grandma is going to be so proud. 🎉",
+      "mockSeenBy": "Seen by 4 family members"
+    },
+    "pages": {
+      "title": "One journal, three pages",
+      "subtitle": "No features to learn — just the moments a family wants to keep.",
+      "daily": {
+        "eyebrow": "Page — Everyday life",
+        "title": "A page a day",
+        "text": "A nap, a smile, a first word: note them down with photos and videos, sorted automatically by date."
+      },
+      "calendar": {
+        "eyebrow": "Page — The big milestones",
+        "title": "A calendar that grows",
+        "text": "Appointments, growth spurts, firsts: everything that matters, right where you think to look for it."
+      },
+      "guessing": {
+        "eyebrow": "Page — The family bets",
+        "title": "The guessing game",
+        "text": "First name, weight, birth date: grandparents and godparents try their luck, sometimes before day one."
+      }
+    },
+    "steps": {
+      "title": "How it works",
+      "subtitle": "Four steps, and the journal runs itself.",
+      "stepLabel": "Step {number}",
+      "create": {
+        "title": "Create baby's journal",
+        "text": "A private space all their own, ready in seconds — one journal per child."
+      },
+      "circles": {
+        "title": "Form circles",
+        "text": "Grandparents, godparents, cousins: everyone joins one or more circles, and only sees what's meant for them."
+      },
+      "publish": {
+        "title": "Publish day by day",
+        "text": "Photos, videos, little notes: every post lands in the journal, sorted by date, with reactions and comments."
+      },
+      "calendar": {
+        "title": "Keep the calendar current",
+        "text": "Appointments, growth spurts, firsts: everything in one place, visible to the right circle."
+      }
+    },
+    "night": {
+      "eyebrow": "Not a social network",
+      "title": "A journal you close, at night.",
+      "text": "No news feed, no strangers, no likes to collect. {appName} runs on your own server, built for one family at a time — yours.",
+      "hosted": "Hosted by you, for your peace of mind"
+    },
+    "finalCta": {
+      "title": "The first page is waiting.",
+      "text": "Add your baby, invite the family, and let the journal write itself, day by day.",
+      "cta": "Start the journal"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "settingsTitle": "Settings",
+    "markAllRead": "Mark all read",
+    "empty": "Nothing new.",
+    "thisDevice": "This device",
+    "installAppTitle": "Install the app",
+    "installAppDescription": "On iPhone, notifications are only available once the journal is installed on the home screen.",
+    "disableNotifications": "Disable notifications",
+    "enableNotifications": "Enable notifications",
+    "registeredDevices": "Registered devices",
+    "unknownDevice": "Unknown device",
+    "notifyMeFor": "Notify me for",
+    "quietHours": "Quiet hours",
+    "from": "From",
+    "to": "to",
+    "save": "OK",
+    "moreSettings": "More settings",
+    "enablePromptTitle": "Enable notifications",
+    "enablePromptDescription": "Get notified about new posts, comments, and pronostics.",
+    "enable": "Enable",
+    "decline": "No"
   }
 }

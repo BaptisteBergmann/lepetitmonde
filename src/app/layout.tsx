@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, DM_Sans, Fraunces } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import "./globals.css";
 import { cn } from "@utils/utils";
 import { PwaRegistry } from './settings/pwaRegistry';
@@ -36,15 +36,18 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
-export const metadata: Metadata = {
-  title: 'Le petit monde',
-  description: 'Un espace privé pour la famille',
-  manifest: '/manifest.webmanifest', // Note: Next.js génère le lien si vous utilisez manifest.ts
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Le petit monde',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('common')
+  return {
+    title: t('appName'),
+    description: t('appDescription'),
+    manifest: '/manifest.webmanifest', // Note: Next.js génère le lien si vous utilisez manifest.ts
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: t('appName'),
+    },
+  }
 }
 
 export const viewport: Viewport = {

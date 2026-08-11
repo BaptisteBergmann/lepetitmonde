@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { LogOut, Settings } from 'lucide-react'
 
 interface UserMenuProps {
@@ -19,6 +20,7 @@ interface UserMenuProps {
 }
 
 export default function UserMenu({ initials, fullName, email }: UserMenuProps) {
+  const t = useTranslations('nav')
   const handleLogout = async () => {
     await logout()
   }
@@ -41,14 +43,14 @@ export default function UserMenu({ initials, fullName, email }: UserMenuProps) {
         <DropdownMenuItem className="cursor-pointer" render={<Link href="/settings" />}>
           <div className="flex items-center gap-2 w-full">
             <Settings className="h-4 w-4 text-muted-foreground" />
-            <span>Paramètres</span>
+            <span>{t('settings')}</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} variant="destructive" className="cursor-pointer">
           <div className="flex items-center gap-2 w-full">
             <LogOut className="h-4 w-4" />
-            <span>Se déconnecter</span>
+            <span>{t('logout')}</span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>

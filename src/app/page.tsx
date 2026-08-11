@@ -7,10 +7,12 @@ import Link from "next/link";
 import { cn } from "@utils/utils";
 import { Reveal } from "@components/reveal";
 import Landing from "./_home/landing";
+import { getTranslations } from "next-intl/server";
 
 const AVATAR_TONES = ["bg-primary", "bg-rose", "bg-sage"];
 
 export default async function Home() {
+  const t = await getTranslations("home");
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -39,10 +41,10 @@ export default async function Home() {
             unoptimized
           />
           <h1 className="font-display text-[clamp(1.9rem,4vw+1rem,2.75rem)] font-semibold">
-            {firstName ? `Bonjour, ${firstName}.` : "Bonjour."}
+            {firstName ? t('greeting', { firstName }) : t('greetingNoName')}
           </h1>
           <p className="mx-auto mt-3 max-w-xs text-landing-muted">
-            Choisissez le journal que vous souhaitez consulter.
+            {t('subtitle')}
           </p>
         </Reveal>
 
@@ -50,9 +52,9 @@ export default async function Home() {
           <Reveal delay={120} className="mt-10">
             <Card>
               <CardHeader>
-                <CardTitle>Aucun bébé pour l&apos;instant</CardTitle>
+                <CardTitle>{t('noBabiesTitle')}</CardTitle>
                 <CardDescription>
-                  Vous n&apos;avez encore accès à aucun profil de bébé.
+                  {t('noBabiesDescription')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -75,7 +77,7 @@ export default async function Home() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-display text-lg font-semibold">{baby.baby_surname}</span>
-                    <span className="block text-sm text-landing-muted">Voir le journal</span>
+                    <span className="block text-sm text-landing-muted">{t('viewJournal')}</span>
                   </span>
                   <ChevronRight className="size-[18px] shrink-0 text-landing-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
                 </Link>
@@ -85,7 +87,7 @@ export default async function Home() {
         )}
 
         <p className="relative mt-10 text-center text-xs text-landing-muted">
-          Chaque enfant a son propre journal, partagé en famille.
+          {t('footer')}
         </p>
       </div>
     </div>

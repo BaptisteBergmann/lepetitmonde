@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { LogOut, Settings, Menu } from 'lucide-react'
 import { AccessWithPages } from './types'
 import { PAGE_REGISTRY } from '@utils/page_registry'
@@ -33,6 +34,7 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ initials, fullName, email, accesses }: MobileMenuProps) {
+  const t = useTranslations('nav')
   const params = useParams()
   const pathname = usePathname()
   const currentBabyId = params?.babyId as string
@@ -73,7 +75,7 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="px-2.5 py-1 text-2xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Navigation
+              {t('navigation')}
             </DropdownMenuLabel>
             {allowedPages.map((page) => {
               const Icon = ICONS_BY_PAGE_ID.get(page.id) ?? Menu
@@ -98,14 +100,14 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
         <DropdownMenuItem className="cursor-pointer" render={<Link href="/settings" />}>
           <div className="flex items-center gap-2 w-full">
             <Settings className="h-4 w-4 text-muted-foreground" />
-            <span>Paramètres</span>
+            <span>{t('settings')}</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} variant="destructive" className="cursor-pointer">
           <div className="flex items-center gap-2 w-full">
             <LogOut className="h-4 w-4" />
-            <span>Se déconnecter</span>
+            <span>{t('logout')}</span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
