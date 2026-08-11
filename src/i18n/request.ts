@@ -1,10 +1,5 @@
 import { getRequestConfig } from 'next-intl/server'
-import { defaultLocale, locales, type Locale } from './config'
-
-function resolveLocale(): Locale {
-  const envLocale = process.env.DEFAULT_LOCALE
-  return (locales as readonly string[]).includes(envLocale ?? '') ? (envLocale as Locale) : defaultLocale
-}
+import { resolveLocale } from './config'
 
 export default getRequestConfig(async () => {
   const locale = resolveLocale()

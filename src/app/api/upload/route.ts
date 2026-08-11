@@ -1,10 +1,18 @@
 import convertHeic from 'heic-convert'
+import { createTranslator } from 'next-intl'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
 import { assertIsAdmin } from '@utils/actions/access'
 import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
+import { resolveLocale } from '@/i18n/config'
+
+async function getTranslator() {
+  const locale = resolveLocale()
+  const messages = (await import(`../../../../messages/${locale}.json`)).default
+  return createTranslator({ locale, messages, namespace: 'uploadApi' })
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -34,9 +42,11 @@ function withJpegExtension(path: string) {
 export async function POST(request: Request) {
   const contextLogger = logger.child({ function: 'POST', route: '/api/upload' })
 
+  const t = await getTranslator()
+
   const { data: { user } } = await getAuthUser()
   if (!user) {
-    return Response.json({ error: 'Non authentifié' }, { status: 401 })
+    return Response.json({ error: t('unauthenticated') }, { status: 401 })
   }
 
   const { searchParams } = new URL(request.url)
@@ -47,7 +57,7 @@ export async function POST(request: Request) {
   const contentType = request.headers.get('content-type') ?? 'application/octet-stream'
 
   if (!bucketName || !path || !request.body) {
-    return Response.json({ error: 'Requête invalide' }, { status: 400 })
+    return Response.json({ error: t('invalidRequest') }, { status: 400 })
   }
 
   const contextLoggerWithPath = contextLogger.child({ bucketName, path, userId: user.id })
@@ -57,7 +67,7 @@ export async function POST(request: Request) {
     await assertIsAdmin(supabase, bucketName)
   } catch {
     contextLoggerWithPath.warn('Rejected upload: not admin for baby')
-    return Response.json({ error: 'Non autorisé' }, { status: 403 })
+    return Response.json({ error: t('forbidden') }, { status: 403 })
   }
 
   const supabaseAdmin = createAdminClient()
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
     const contentLength = Number(request.headers.get('content-length') ?? 0)
     if (contentLength > MAX_HEIC_UPLOAD_BYTES) {
       contextLoggerWithPath.warn({ contentLength }, 'Rejected oversized HEIC upload')
-      return Response.json({ error: 'Fichier HEIC trop volumineux' }, { status: 413 })
+      return Response.json({ error: t('heicTooLarge') }, { status: 413 })
     }
 
     try {
@@ -85,7 +95,7 @@ export async function POST(request: Request) {
       uploadContentType = 'image/jpeg'
     } catch (err) {
       contextLoggerWithPath.error(err, 'Error converting HEIC/HEIF file to JPEG')
-      return Response.json({ error: "Impossible de convertir l'image HEIC" }, { status: 400 })
+      return Response.json({ error: t('heicConversionFailed') }, { status: 400 })
     }
   }
 

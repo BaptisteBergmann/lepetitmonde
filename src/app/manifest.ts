@@ -1,10 +1,16 @@
 import type { MetadataRoute } from 'next'
+import { createTranslator } from 'next-intl'
+import { resolveLocale } from '@/i18n/config'
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const locale = resolveLocale()
+  const messages = (await import(`../../messages/${locale}.json`)).default
+  const t = createTranslator({ locale, messages, namespace: 'common' })
+
   return {
-    name: 'Le petit monde',
-    short_name: 'Le petit monde',
-    description: 'Un espace privé pour la famille',
+    name: t('appName'),
+    short_name: t('appName'),
+    description: t('appDescription'),
     start_url: '/',
     display: 'standalone',
     background_color: '#fbf4ec',

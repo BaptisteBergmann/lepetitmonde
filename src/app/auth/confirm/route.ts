@@ -1,7 +1,9 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
+import { createTranslator } from 'next-intl'
 import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
+import { resolveLocale } from '@/i18n/config'
 
 // Redirects are built from SITE_URL rather than request.url: behind the
 // reverse proxy, the Host header the app sees doesn't reliably reflect the
@@ -28,5 +30,9 @@ export async function GET(request: NextRequest) {
     contextLogger.warn({ type }, "Missing token_hash or type on auth confirm link")
   }
 
-  return NextResponse.redirect(new URL('/login?message=Lien invalide ou expiré', siteUrl))
+  const locale = resolveLocale()
+  const messages = (await import(`../../../../messages/${locale}.json`)).default
+  const t = createTranslator({ locale, messages, namespace: 'auth' })
+
+  return NextResponse.redirect(new URL(`/login?message=${encodeURIComponent(t('invalidOrExpiredLink'))}`, siteUrl))
 }
