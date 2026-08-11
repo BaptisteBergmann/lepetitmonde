@@ -340,6 +340,105 @@
     "birthday": "Birthday",
     "other": "Other"
   },
+  "guess": {
+    "eyebrow": "Page — The family bets",
+    "title": "Family pronostics",
+    "subtitle": "Who'll guess right? Join the pronostics or create new ones to make the wait fun!",
+    "loading": "Loading pronostics...",
+    "manage": "Manage",
+    "empty": "No pronostics created yet.",
+    "emptyHint": "Click \"Suggest a pronostic\" to add one.",
+    "unknownUser": "User",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this pronostic? This action can't be undone.",
+    "deleteError": "Something went wrong while deleting.",
+    "edit": "Edit",
+    "tabs": {
+      "toGuess": "To guess",
+      "myPronostics": "My pronostics",
+      "refresh": "Refresh",
+      "allGuessedTitle": "Well done! You've guessed it all",
+      "allGuessedText": "You've answered every current question. Check back later for new ones!",
+      "noneValidatedTitle": "No pronostic validated yet",
+      "noneValidatedText": "You haven't validated any pronostic yet. Go to the \"To guess\" tab to get started!"
+    },
+    "myProposals": {
+      "title": "Your pending suggestions",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "question": {
+      "yourAnswer": "Your answer",
+      "sending": "Sending...",
+      "submit": "Submit my pronostic",
+      "submitError": "Something went wrong while sending your pronostic."
+    },
+    "answerTypes": {
+      "text": "Text",
+      "date": "Date",
+      "number": "Number",
+      "option": "Single choice"
+    },
+    "form": {
+      "newAdmin": "New pronostic",
+      "proposeGuest": "Suggest a pronostic",
+      "editTitle": "Edit pronostic",
+      "newAdminTitle": "Create a new pronostic",
+      "proposeTitle": "Suggest a pronostic",
+      "nonAdminNotice": "An admin will choose the expected answer type and approve your suggestion before it's visible to the family.",
+      "titleLabel": "Pronostic title",
+      "titlePlaceholder": "E.g. Guess the baby's name!",
+      "descriptionLabel": "Description (optional)",
+      "descriptionPlaceholder": "Add hints or details for the family...",
+      "answerTypeLabel": "Expected answer type",
+      "answerTypePlaceholder": "Select a type",
+      "choicesLabel": "Suggested options",
+      "choicePlaceholder": "Option {number}",
+      "addChoice": "Add an option",
+      "minLabel": "Minimum",
+      "minPlaceholder": "E.g. 2000",
+      "maxLabel": "Maximum",
+      "maxPlaceholder": "E.g. 5000",
+      "precisionLabel": "Decimal places",
+      "precisionPlaceholder": "Precision",
+      "precision0": "0 (e.g. 3200)",
+      "precision1": "0.0 (e.g. 3200.5)",
+      "precision2": "0.00 (e.g. 3200.50)",
+      "defaultMonthLabel": "Default displayed month (optional)",
+      "highlightedDateLabel": "Highlighted date (optional)",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "creating": "Creating...",
+      "save": "Save",
+      "confirm": "Confirm",
+      "saveError": "Something went wrong while saving."
+    },
+    "admin": {
+      "back": "Back to pronostics",
+      "title": "Pronostics administration",
+      "subtitle": "Create and review the pronostics offered to the family.",
+      "empty": "No pronostics created yet.",
+      "emptyHint": "Click \"New pronostic\" to add one.",
+      "noAnswersYet": "No answers yet."
+    },
+    "pendingQuestions": {
+      "titleWithCount": "Suggestions awaiting approval ({count})",
+      "proposedBy": "Suggested by {name}",
+      "reject": "Reject",
+      "approve": "Approve",
+      "reviewError": "Something went wrong."
+    },
+    "deleteGuess": {
+      "confirmTitle": "Delete this pronostic?",
+      "confirmDescription": "{userName}'s pronostic will be permanently deleted. This action can't be undone.",
+      "srDelete": "Delete {userName}'s pronostic"
+    },
+    "reorder": {
+      "moveUp": "Move pronostic up",
+      "moveDown": "Move pronostic down",
+      "moveError": "Something went wrong while moving."
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

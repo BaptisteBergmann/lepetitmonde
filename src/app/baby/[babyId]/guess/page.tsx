@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import QuestionsListWrapper from "./questions_list_wrapper";
 import { Loader2, Settings, Dices } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
@@ -15,6 +16,7 @@ export default async function GuessesPage({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
+  const t = await getTranslations('guess')
 
   await assertPageAccess(babyId, 'guess')
 
@@ -37,7 +39,7 @@ export default async function GuessesPage({
               <Link href={`/baby/${babyId}/guess/admin`}>
                 <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
                   <Settings className="h-4 w-4" />
-                  <span>Administrer</span>
+                  <span>{t('manage')}</span>
                 </Button>
               </Link>
             )}
@@ -49,13 +51,13 @@ export default async function GuessesPage({
             <Dices className="h-5 w-5" />
           </span>
           <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-            Page — Les paris de famille
+            {t('eyebrow')}
           </p>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-            Pronostics de la famille
+            {t('title')}
           </h1>
           <p className="max-w-xs text-sm text-landing-muted sm:text-base">
-            Qui verra juste ? Participez aux pronostics ou créez-en de nouveaux pour animer l&apos;attente !
+            {t('subtitle')}
           </p>
         </Reveal>
 
@@ -63,7 +65,7 @@ export default async function GuessesPage({
           fallback={
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm">Chargement des pronostics...</p>
+              <p className="text-sm">{t('loading')}</p>
             </div>
           }
         >

@@ -340,6 +340,105 @@
     "birthday": "Anniversaire",
     "other": "Autre"
   },
+  "guess": {
+    "eyebrow": "Page — Les paris de famille",
+    "title": "Pronostics de la famille",
+    "subtitle": "Qui verra juste ? Participez aux pronostics ou créez-en de nouveaux pour animer l'attente !",
+    "loading": "Chargement des pronostics...",
+    "manage": "Administrer",
+    "empty": "Aucun pronostic créé pour le moment.",
+    "emptyHint": "Cliquez sur \"Proposer un pronostic\" pour en ajouter un.",
+    "unknownUser": "Utilisateur",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce pronostic ? Cette action est irréversible.",
+    "deleteError": "Une erreur est survenue lors de la suppression.",
+    "edit": "Modifier",
+    "tabs": {
+      "toGuess": "À deviner",
+      "myPronostics": "Mes pronostics",
+      "refresh": "Rafraîchir",
+      "allGuessedTitle": "Bravo ! Tout est deviné",
+      "allGuessedText": "Vous avez répondu à toutes les questions en cours. Revenez plus tard s'il y en a de nouvelles !",
+      "noneValidatedTitle": "Aucun pronostic validé",
+      "noneValidatedText": "Vous n'avez pas encore validé de pronostic. Allez dans l'onglet 'À deviner' pour commencer !"
+    },
+    "myProposals": {
+      "title": "Vos propositions en attente",
+      "pending": "En attente",
+      "rejected": "Refusée"
+    },
+    "question": {
+      "yourAnswer": "Votre réponse",
+      "sending": "Envoi en cours...",
+      "submit": "Valider mon pronostic",
+      "submitError": "Une erreur est survenue lors de l'envoi de votre pronostic."
+    },
+    "answerTypes": {
+      "text": "Texte",
+      "date": "Date",
+      "number": "Nombre",
+      "option": "Choix unique"
+    },
+    "form": {
+      "newAdmin": "Nouveau pronostic",
+      "proposeGuest": "Proposer un pronostic",
+      "editTitle": "Modifier le pronostic",
+      "newAdminTitle": "Créer un nouveau pronostic",
+      "proposeTitle": "Proposer un pronostic",
+      "nonAdminNotice": "Un administrateur choisira le type de réponse attendu et validera votre proposition avant qu'elle soit visible par la famille.",
+      "titleLabel": "Titre du pronostic",
+      "titlePlaceholder": "Ex: Devinez le prénom du bébé !",
+      "descriptionLabel": "Description (facultative)",
+      "descriptionPlaceholder": "Ajoutez des indices ou des détails pour la famille...",
+      "answerTypeLabel": "Type de réponse attendu",
+      "answerTypePlaceholder": "Sélectionner le type",
+      "choicesLabel": "Options proposées",
+      "choicePlaceholder": "Option {number}",
+      "addChoice": "Ajouter une option",
+      "minLabel": "Minimum",
+      "minPlaceholder": "Ex: 2000",
+      "maxLabel": "Maximum",
+      "maxPlaceholder": "Ex: 5000",
+      "precisionLabel": "Chiffres après la virgule",
+      "precisionPlaceholder": "Précision",
+      "precision0": "0 (Ex: 3200)",
+      "precision1": "0,0 (Ex: 3200,5)",
+      "precision2": "0,00 (Ex: 3200,50)",
+      "defaultMonthLabel": "Mois affiché par défaut (facultatif)",
+      "highlightedDateLabel": "Date mise en avant (facultatif)",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "creating": "Création...",
+      "save": "Enregistrer",
+      "confirm": "Confirmer",
+      "saveError": "Une erreur est survenue lors de la sauvegarde."
+    },
+    "admin": {
+      "back": "Retour aux pronostics",
+      "title": "Administration des pronostics",
+      "subtitle": "Créez et consultez les pronostics proposés à la famille.",
+      "empty": "Aucun pronostic créé pour le moment.",
+      "emptyHint": "Cliquez sur \"Nouveau pronostic\" pour en ajouter un.",
+      "noAnswersYet": "Aucune réponse pour le moment."
+    },
+    "pendingQuestions": {
+      "titleWithCount": "Propositions en attente de validation ({count})",
+      "proposedBy": "Proposé par {name}",
+      "reject": "Refuser",
+      "approve": "Valider",
+      "reviewError": "Une erreur est survenue."
+    },
+    "deleteGuess": {
+      "confirmTitle": "Supprimer ce pronostic ?",
+      "confirmDescription": "Le pronostic de {userName} sera définitivement supprimé. Cette action est irréversible.",
+      "srDelete": "Supprimer le pronostic de {userName}"
+    },
+    "reorder": {
+      "moveUp": "Monter le pronostic",
+      "moveDown": "Descendre le pronostic",
+      "moveError": "Une erreur est survenue lors du déplacement."
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",

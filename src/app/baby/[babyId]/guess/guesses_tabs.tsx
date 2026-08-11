@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import QuestionWrapper, { QuestionWithGuess } from "./question_wrapper";
 import { HelpCircle, CheckCircle2, ClipboardList, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,7 @@ export default function GuessesTabs({
   babyId: string;
   isAdmin?: boolean;
 }) {
+  const t = useTranslations('guess.tabs');
   const [activeTab, setActiveTab] = useState<"pending" | "completed">("pending");
   const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -43,7 +45,7 @@ export default function GuessesTabs({
               }`}
           >
             <HelpCircle className="h-4 w-4" />
-            <span>À deviner</span>
+            <span>{t('toGuess')}</span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "pending"
               ? "bg-primary text-primary-foreground"
               : "bg-landing-background text-landing-muted"
@@ -60,7 +62,7 @@ export default function GuessesTabs({
               }`}
           >
             <CheckCircle2 className="h-4 w-4" />
-            <span>Mes pronostics</span>
+            <span>{t('myPronostics')}</span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "completed"
               ? "bg-emerald-500 text-white"
               : "bg-landing-background text-landing-muted"
@@ -74,7 +76,7 @@ export default function GuessesTabs({
           onClick={handleRefresh}
           disabled={isRefreshing}
           className="p-2 text-landing-muted hover:text-landing-foreground hover:bg-landing-surface rounded-xl transition-colors duration-200 disabled:opacity-50 cursor-pointer"
-          title="Rafraîchir"
+          title={t('refresh')}
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
         </button>
@@ -93,12 +95,10 @@ export default function GuessesTabs({
             </div>
             <div className="space-y-1">
               <h3 className="font-display text-base font-semibold">
-                {activeTab === "pending" ? "Bravo ! Tout est deviné" : "Aucun pronostic validé"}
+                {activeTab === "pending" ? t('allGuessedTitle') : t('noneValidatedTitle')}
               </h3>
               <p className="text-sm text-landing-muted max-w-sm">
-                {activeTab === "pending"
-                  ? "Vous avez répondu à toutes les questions en cours. Revenez plus tard s'il y en a de nouvelles !"
-                  : "Vous n'avez pas encore validé de pronostic. Allez dans l'onglet 'À deviner' pour commencer !"}
+                {activeTab === "pending" ? t('allGuessedText') : t('noneValidatedText')}
               </p>
             </div>
             {activeTab === "pending" && (

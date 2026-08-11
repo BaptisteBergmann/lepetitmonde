@@ -5,7 +5,7 @@ import { submitGuess } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
 import { Tables, Json } from "@/utils/supabase/database.types";
 import { useState, Dispatch, SetStateAction } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { getLocaleTag } from "@/utils/formatting";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { CheckCircle2, Send, Loader2 } from "lucide-react";
@@ -45,6 +45,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
   contextLogger.info(questionWithGuess, "Display question");
 
   const router = useRouter();
+  const t = useTranslations('guess.question');
   const localeTag = getLocaleTag(useLocale());
   const [value, setValue] = useState<number | string | Date | undefined>(
     // Non pré-rempli pour "date" : le Calendar attend un `Date | undefined`, jamais une chaîne vide.
@@ -68,7 +69,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Une erreur est survenue lors de l'envoi de votre pronostic.");
+      alert(t('submitError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -121,7 +122,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
           <div className="bg-emerald-500/10 dark:bg-emerald-500/[0.05] border border-emerald-500/20 dark:border-emerald-500/10 rounded-2xl p-4 flex items-center justify-between">
             <div className="space-y-0.5">
               <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
-                Votre réponse
+                {t('yourAnswer')}
               </span>
               <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
                 {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type, questionOptions)}
@@ -189,12 +190,12 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Envoi en cours...</span>
+                <span>{t('sending')}</span>
               </>
             ) : (
               <>
                 <Send className="h-4 w-4" />
-                <span>Valider mon pronostic</span>
+                <span>{t('submit')}</span>
               </>
             )}
           </Button>

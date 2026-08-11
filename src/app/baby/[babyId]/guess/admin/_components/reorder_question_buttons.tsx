@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { moveQuestion } from "@/utils/actions/guesses_questions";
@@ -17,6 +18,7 @@ export default function ReorderQuestionButtons({
   isFirst: boolean;
   isLast: boolean;
 }) {
+  const t = useTranslations('guess.reorder');
   const router = useRouter();
   const [pending, setPending] = useState<"up" | "down" | null>(null);
 
@@ -27,7 +29,7 @@ export default function ReorderQuestionButtons({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Une erreur est survenue lors du déplacement.");
+      alert(t('moveError'));
     } finally {
       setPending(null);
     }
@@ -42,7 +44,7 @@ export default function ReorderQuestionButtons({
         disabled={isFirst || pending !== null}
         className="h-6 w-6 rounded-lg cursor-pointer"
         onClick={() => handleMove("up")}
-        aria-label="Monter le pronostic"
+        aria-label={t('moveUp')}
       >
         {pending === "up" ? <Loader2 className="h-3 w-3 animate-spin" /> : <ChevronUp className="h-3.5 w-3.5" />}
       </Button>
@@ -53,7 +55,7 @@ export default function ReorderQuestionButtons({
         disabled={isLast || pending !== null}
         className="h-6 w-6 rounded-lg cursor-pointer"
         onClick={() => handleMove("down")}
-        aria-label="Descendre le pronostic"
+        aria-label={t('moveDown')}
       >
         {pending === "down" ? <Loader2 className="h-3 w-3 animate-spin" /> : <ChevronDown className="h-3.5 w-3.5" />}
       </Button>

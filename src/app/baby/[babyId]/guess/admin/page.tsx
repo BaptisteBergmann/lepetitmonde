@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getLocaleTag } from "@/utils/formatting";
 import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
@@ -17,16 +17,16 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@components/reveal";
 
-function getTypeMeta(type: string) {
+function getTypeMeta(type: string, tType: (key: string) => string) {
   switch (type) {
     case "date":
-      return { icon: <Calendar className="h-3.5 w-3.5 text-primary" />, label: "Date" };
+      return { icon: <Calendar className="h-3.5 w-3.5 text-primary" />, label: tType('date') };
     case "number":
-      return { icon: <Hash className="h-3.5 w-3.5 text-rose" />, label: "Nombre" };
+      return { icon: <Hash className="h-3.5 w-3.5 text-rose" />, label: tType('number') };
     case "option":
-      return { icon: <CircleDot className="h-3.5 w-3.5 text-violet-500" />, label: "Choix unique" };
+      return { icon: <CircleDot className="h-3.5 w-3.5 text-violet-500" />, label: tType('option') };
     default:
-      return { icon: <Type className="h-3.5 w-3.5 text-emerald-500" />, label: "Texte" };
+      return { icon: <Type className="h-3.5 w-3.5 text-emerald-500" />, label: tType('text') };
   }
 }
 
@@ -57,6 +57,9 @@ export default async function GuessAdminPage({
 }) {
   const { babyId } = await params;
   const localeTag = getLocaleTag(await getLocale());
+  const t = await getTranslations('guess');
+  const tAdmin = await getTranslations('guess.admin');
+  const tType = await getTranslations('guess.answerTypes');
   const contextLogger = logger.child({ function: GuessAdminPage.name, babyId });
 
   // Feature-level gate: can this member reach Pronostics at all.
@@ -81,7 +84,7 @@ export default async function GuessAdminPage({
   const userNameById = new Map(
     users
       .filter((u): u is NonNullable<typeof u> => !!u)
-      .map((u) => [u.id, [u.first_name, u.last_name].filter(Boolean).join(" ") || "Utilisateur"])
+      .map((u) => [u.id, [u.first_name, u.last_name].filter(Boolean).join(" ") || t('unknownUser')])
   );
 
   return (
@@ -93,18 +96,18 @@ export default async function GuessAdminPage({
             className="inline-flex items-center gap-1.5 text-sm text-landing-muted hover:text-landing-foreground transition-colors mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
-            Retour aux pronostics
+            {tAdmin('back')}
           </Link>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-                Page — Les paris de famille
+                {t('eyebrow')}
               </p>
               <h1 className="mt-1 font-display text-3xl font-semibold">
-                Administration des pronostics
+                {tAdmin('title')}
               </h1>
               <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
-                Créez et consultez les pronostics proposés à la famille.
+                {tAdmin('subtitle')}
               </p>
             </div>
             <div className="flex shrink-0">
@@ -117,13 +120,13 @@ export default async function GuessAdminPage({
 
         {questions.length === 0 ? (
           <div className="text-center py-12 text-landing-muted border border-dashed border-landing-border rounded-2xl bg-landing-surface">
-            <p className="text-sm font-medium">Aucun pronostic créé pour le moment.</p>
-            <p className="text-xs text-landing-muted mt-1">Cliquez sur &quot;Nouveau pronostic&quot; pour en ajouter un.</p>
+            <p className="text-sm font-medium">{tAdmin('empty')}</p>
+            <p className="text-xs text-landing-muted mt-1">{tAdmin('emptyHint')}</p>
           </div>
         ) : (
           <div className="space-y-3">
             {questions.map((question, index) => {
-              const { icon, label } = getTypeMeta(question.type);
+              const { icon, label } = getTypeMeta(question.type, tType);
               const questionGuesses = guesses.filter((g) => g.question_id === question.id);
               return (
                 <Card key={question.id} className="relative overflow-hidden border-landing-border bg-landing-surface">
@@ -154,7 +157,7 @@ export default async function GuessAdminPage({
                   <CardContent className="pt-0 pb-4">
                     {questionGuesses.length === 0 ? (
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs text-landing-muted italic">Aucune réponse pour le moment.</p>
+                        <p className="text-xs text-landing-muted italic">{tAdmin('noAnswersYet')}</p>
                         <div className="flex items-center gap-2">
                           <Modal
                             babyId={babyId}
@@ -168,7 +171,7 @@ export default async function GuessAdminPage({
                                 className="gap-1.5 rounded-2xl cursor-pointer"
                               >
                                 <Pencil className="h-3.5 w-3.5" />
-                                Modifier
+                                {t('edit')}
                               </Button>
                             }
                           />
@@ -178,7 +181,7 @@ export default async function GuessAdminPage({
                     ) : (
                       <div className="flex flex-col gap-1.5">
                         {questionGuesses.map((guess) => {
-                          const guessUserName = userNameById.get(guess.user_id) ?? "Utilisateur";
+                          const guessUserName = userNameById.get(guess.user_id) ?? t('unknownUser');
                           return (
                             <div
                               key={guess.id}

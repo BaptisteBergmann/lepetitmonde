@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteQuestion } from "@/utils/actions/guesses_questions";
 
 export default function DeleteQuestionButton({ babyId, questionId }: { babyId: string; questionId: string }) {
+  const t = useTranslations('guess');
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("Supprimer ce pronostic ? Cette action est irréversible.")) return;
+    if (!confirm(t('deleteConfirm'))) return;
 
     setIsDeleting(true);
     try {
@@ -19,7 +21,7 @@ export default function DeleteQuestionButton({ babyId, questionId }: { babyId: s
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Une erreur est survenue lors de la suppression.");
+      alert(t('deleteError'));
     } finally {
       setIsDeleting(false);
     }
@@ -35,7 +37,7 @@ export default function DeleteQuestionButton({ babyId, questionId }: { babyId: s
       onClick={handleDelete}
     >
       {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-      Supprimer
+      {t('delete')}
     </Button>
   );
 }

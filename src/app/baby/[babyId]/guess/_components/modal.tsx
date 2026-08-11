@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -31,6 +32,8 @@ export default function Modal({
   question?: GuessQuestion;
   trigger?: React.ReactNode;
 }) {
+  const t = useTranslations('guess.form')
+  const tType = useTranslations('guess.answerTypes')
   const searchParams = useSearchParams()
   const router = useRouter()
   const babyId = propBabyId || question?.baby_id || searchParams.get('babyId') || "XXX"
@@ -117,17 +120,17 @@ export default function Modal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : "Une erreur est survenue lors de la sauvegarde.")
+      alert(err instanceof Error ? err.message : t('saveError'))
     } finally {
       setIsPending(false)
     }
   }
 
   const items = [
-    { label: "Texte", value: "text" },
-    { label: "Date", value: "date" },
-    { label: "Nombre", value: "number" },
-    { label: "Choix unique", value: "option" },
+    { label: tType('text'), value: "text" },
+    { label: tType('date'), value: "date" },
+    { label: tType('number'), value: "number" },
+    { label: tType('option'), value: "option" },
   ]
 
   // Fonction de nettoyage lors du changement de type
@@ -159,7 +162,7 @@ export default function Modal({
           className="gap-2 rounded-2xl cursor-pointer"
         >
           <Plus className="h-4 w-4" />
-          <span>{isAdmin ? "Nouveau pronostic" : "Proposer un pronostic"}</span>
+          <span>{isAdmin ? t('newAdmin') : t('proposeGuest')}</span>
         </Button>
       )}
 
@@ -177,7 +180,7 @@ export default function Modal({
             <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
               <h2 className="font-display text-base font-semibold flex items-center gap-2">
                 <HelpCircle className="h-4.5 w-4.5 text-primary" />
-                {isEditMode ? "Modifier le pronostic" : isAdmin ? "Créer un nouveau pronostic" : "Proposer un pronostic"}
+                {isEditMode ? t('editTitle') : isAdmin ? t('newAdminTitle') : t('proposeTitle')}
               </h2>
               <button
                 onClick={() => setOpen(false)}
@@ -192,21 +195,21 @@ export default function Modal({
 
               {!isAdmin && (
                 <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
-                  Un administrateur choisira le type de réponse attendu et validera votre proposition avant qu&apos;elle soit visible par la famille.
+                  {t('nonAdminNotice')}
                 </p>
               )}
 
               {/* Champ Titre */}
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Titre du pronostic
+                  {t('titleLabel')}
                 </Label>
                 <Input
                   type="text"
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ex: Devinez le prénom du bébé !"
+                  placeholder={t('titlePlaceholder')}
                   required
                 />
               </div>
@@ -214,13 +217,13 @@ export default function Modal({
               {/* Champ Description */}
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Description (facultative)
+                  {t('descriptionLabel')}
                 </Label>
                 <textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Ajoutez des indices ou des détails pour la famille..."
+                  placeholder={t('descriptionPlaceholder')}
                   rows={3}
                   className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
                 />
@@ -230,11 +233,11 @@ export default function Modal({
               {isAdmin && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Type de réponse attendu
+                    {t('answerTypeLabel')}
                   </Label>
                   <Select value={selectValue} onValueChange={handleTypeChange}>
                     <SelectTrigger className="w-full text-foreground bg-input/50">
-                      <SelectValue placeholder="Sélectionner le type" />
+                      <SelectValue placeholder={t('answerTypePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -259,7 +262,7 @@ export default function Modal({
               {isAdmin && isOptionType && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Options proposées
+                    {t('choicesLabel')}
                   </Label>
                   <div className="flex flex-col gap-2">
                     {choices.map((choice, index) => (
@@ -268,7 +271,7 @@ export default function Modal({
                           type="text"
                           value={choice}
                           onChange={(e) => handleChoiceChange(index, e.target.value)}
-                          placeholder={`Option ${index + 1}`}
+                          placeholder={t('choicePlaceholder', { number: index + 1 })}
                           className="flex-1"
                         />
                         <button
@@ -289,7 +292,7 @@ export default function Modal({
                     onClick={handleAddChoice}
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    <span>Ajouter une option</span>
+                    <span>{t('addChoice')}</span>
                   </Button>
                 </div>
               )}
@@ -300,42 +303,42 @@ export default function Modal({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="min" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Minimum
+                        {t('minLabel')}
                       </Label>
                       <Input
                         type="number"
                         id="min"
                         value={minValue}
                         onChange={(e) => setMinValue(e.target.value)}
-                        placeholder="Ex: 2000"
+                        placeholder={t('minPlaceholder')}
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="max" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Maximum
+                        {t('maxLabel')}
                       </Label>
                       <Input
                         type="number"
                         id="max"
                         value={maxValue}
                         onChange={(e) => setMaxValue(e.target.value)}
-                        placeholder="Ex: 5000"
+                        placeholder={t('maxPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Chiffres après la virgule
+                      {t('precisionLabel')}
                     </Label>
                     <Select value={precision} onValueChange={(v) => v && setPrecision(v)}>
                       <SelectTrigger className="w-full text-foreground bg-input/50">
-                        <SelectValue placeholder="Précision" />
+                        <SelectValue placeholder={t('precisionPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value="0">0 (Ex: 3200)</SelectItem>
-                          <SelectItem value="1">0,0 (Ex: 3200,5)</SelectItem>
-                          <SelectItem value="2">0,00 (Ex: 3200,50)</SelectItem>
+                          <SelectItem value="0">{t('precision0')}</SelectItem>
+                          <SelectItem value="1">{t('precision1')}</SelectItem>
+                          <SelectItem value="2">{t('precision2')}</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -348,7 +351,7 @@ export default function Modal({
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="defaultMonth" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Mois affiché par défaut (facultatif)
+                      {t('defaultMonthLabel')}
                     </Label>
                     <Input
                       type="month"
@@ -359,7 +362,7 @@ export default function Modal({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="highlightedDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Date mise en avant (facultatif)
+                      {t('highlightedDateLabel')}
                     </Label>
                     <Input
                       type="date"
@@ -380,7 +383,7 @@ export default function Modal({
                 className="rounded-2xl cursor-pointer"
                 onClick={() => setOpen(false)}
               >
-                Annuler
+                {t('cancel')}
               </Button>
               <Button
                 disabled={
@@ -396,10 +399,10 @@ export default function Modal({
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{isEditMode ? "Enregistrement..." : "Création..."}</span>
+                    <span>{isEditMode ? t('saving') : t('creating')}</span>
                   </>
                 ) : (
-                  <span>{isEditMode ? "Enregistrer" : "Confirmer"}</span>
+                  <span>{isEditMode ? t('save') : t('confirm')}</span>
                 )}
               </Button>
             </div>

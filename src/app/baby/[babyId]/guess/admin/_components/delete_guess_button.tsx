@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -15,6 +16,8 @@ export default function DeleteGuessButton({
   guessId: string;
   userName: string;
 }) {
+  const t = useTranslations('guess');
+  const tDelete = useTranslations('guess.deleteGuess');
   const router = useRouter();
 
   const handleConfirm = async () => {
@@ -23,16 +26,16 @@ export default function DeleteGuessButton({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Une erreur est survenue lors de la suppression.");
+      alert(t('deleteError'));
       throw err;
     }
   };
 
   return (
     <ConfirmDialog
-      title="Supprimer ce pronostic ?"
-      description={`Le pronostic de ${userName} sera définitivement supprimé. Cette action est irréversible.`}
-      confirmLabel="Supprimer"
+      title={tDelete('confirmTitle')}
+      description={tDelete('confirmDescription', { userName })}
+      confirmLabel={t('delete')}
       trigger={
         <Button
           type="button"
@@ -41,7 +44,7 @@ export default function DeleteGuessButton({
           className="text-destructive hover:text-destructive"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          <span className="sr-only">Supprimer le pronostic de {userName}</span>
+          <span className="sr-only">{tDelete('srDelete', { userName })}</span>
         </Button>
       }
       onConfirm={handleConfirm}

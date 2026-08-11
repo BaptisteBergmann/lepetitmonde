@@ -1,4 +1,4 @@
-
+import { getTranslations } from "next-intl/server";
 import { getMyProposals, getQuestionsWithGuess, getQuestionsWithoutGuess } from "@/utils/actions/guesses_questions";
 import { getUserAccess } from "@/utils/actions/users";
 import GuessesTabs from "./guesses_tabs";
@@ -11,6 +11,7 @@ export default async function QuestionsListWrapper({
   babyId: string
 }) {
   const contextLogger = logger.child({ function: QuestionsListWrapper.name, babyId })
+  const t = await getTranslations('guess')
   const questionWithGuess = await getQuestionsWithGuess(babyId)
   contextLogger.debug(questionWithGuess, "Questions with guess")
   const questionWithoutGuess = await getQuestionsWithoutGuess(babyId)
@@ -23,8 +24,8 @@ export default async function QuestionsListWrapper({
   if (questionWithGuess.length === 0 && questionWithoutGuess.length === 0 && myProposals.length === 0) {
     return (
       <div className="text-center py-12 text-landing-muted border border-dashed border-landing-border rounded-2xl bg-landing-surface">
-        <p className="text-sm font-medium">Aucun pronostic créé pour le moment.</p>
-        <p className="text-xs text-landing-muted mt-1">Cliquez sur &quot;Proposer un pronostic&quot; pour en ajouter un.</p>
+        <p className="text-sm font-medium">{t('empty')}</p>
+        <p className="text-xs text-landing-muted mt-1">{t('emptyHint')}</p>
       </div>
     );
   }

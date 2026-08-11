@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Check, Loader2, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,8 @@ export default function PendingQuestions({
   questions: Tables<'guess_questions'>[];
   userNameById: Map<string, string>;
 }) {
+  const t = useTranslations('guess');
+  const tPending = useTranslations('guess.pendingQuestions');
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export default function PendingQuestions({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Une erreur est survenue.");
+      alert(tPending('reviewError'));
     } finally {
       setPendingId(null);
     }
@@ -39,7 +42,7 @@ export default function PendingQuestions({
   return (
     <div className="space-y-3 mb-8">
       <h2 className="font-display text-sm font-semibold text-landing-foreground px-1">
-        Propositions en attente de validation ({questions.length})
+        {tPending('titleWithCount', { count: questions.length })}
       </h2>
       <div className="space-y-3">
         {questions.map((question) => {
@@ -56,7 +59,7 @@ export default function PendingQuestions({
                   </CardDescription>
                 )}
                 <CardDescription className="text-xs mt-1">
-                  Proposé par {question.created_by ? userNameById.get(question.created_by) ?? "Utilisateur" : "Utilisateur"}
+                  {tPending('proposedBy', { name: question.created_by ? userNameById.get(question.created_by) ?? t('unknownUser') : t('unknownUser') })}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 flex gap-2 justify-end">
@@ -73,7 +76,7 @@ export default function PendingQuestions({
                       className="gap-1.5 rounded-2xl cursor-pointer"
                     >
                       <Pencil className="h-3.5 w-3.5" />
-                      Modifier
+                      {t('edit')}
                     </Button>
                   }
                 />
@@ -85,7 +88,7 @@ export default function PendingQuestions({
                   onClick={() => handleReview(question.id, "rejected")}
                 >
                   <X className="h-3.5 w-3.5" />
-                  Refuser
+                  {tPending('reject')}
                 </Button>
                 <Button
                   size="sm"
@@ -94,7 +97,7 @@ export default function PendingQuestions({
                   onClick={() => handleReview(question.id, "approved")}
                 >
                   {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                  Valider
+                  {tPending('approve')}
                 </Button>
               </CardContent>
             </Card>
