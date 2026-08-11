@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `5925e64` Translate the admin (circles & access) section
 - `723e967` Translate the guess (pronostics) section
 - `06b5045` Translate the calendar section
 - `24b66f8` Translate the feed section
