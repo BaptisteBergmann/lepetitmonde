@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Bug, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { submitBugReport } from '@utils/actions/bug_reports'
 
 export default function BugReportButton() {
+  const t = useTranslations('bugReport')
   const [isOpen, setIsOpen] = useState(false)
   const [isCapturing, setIsCapturing] = useState(false)
   const [isPending, setIsPending] = useState(false)
@@ -69,10 +71,10 @@ export default function BugReportButton() {
 
       await submitBugReport(formData)
       handleClose()
-      alert("Merci ! Le bug a bien été signalé.")
+      alert(t('submittedConfirmation'))
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de l'envoi du signalement.")
+      alert(t('submitError'))
     } finally {
       setIsPending(false)
     }
@@ -83,7 +85,7 @@ export default function BugReportButton() {
       <button
         onClick={handleOpen}
         disabled={isCapturing}
-        aria-label="Signaler un bug"
+        aria-label={t('openButton')}
         className="fixed bottom-4 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground border border-border shadow-lg hover:bg-muted transition-colors cursor-pointer disabled:opacity-60"
       >
         {isCapturing ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Bug className="h-4.5 w-4.5" />}
@@ -101,7 +103,7 @@ export default function BugReportButton() {
             <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
               <h2 className="font-display text-base font-semibold flex items-center gap-2">
                 <Bug className="h-4.5 w-4.5 text-primary" />
-                Signaler un bug
+                {t('title')}
               </h2>
               <button
                 onClick={handleClose}
@@ -117,12 +119,12 @@ export default function BugReportButton() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={previewUrl}
-                    alt="Aperçu de la capture d'écran"
+                    alt={t('screenshotAlt')}
                     className="w-full rounded-2xl border border-landing-border"
                   />
                   <button
                     onClick={handleRemoveScreenshot}
-                    aria-label="Retirer la capture d'écran"
+                    aria-label={t('removeScreenshot')}
                     className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -132,7 +134,7 @@ export default function BugReportButton() {
 
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="bug_description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Que s&apos;est-il passé ?
+                  {t('descriptionLabel')}
                 </label>
                 <textarea
                   id="bug_description"
@@ -140,7 +142,7 @@ export default function BugReportButton() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
                   autoFocus
-                  placeholder="Décrivez le problème rencontré..."
+                  placeholder={t('descriptionPlaceholder')}
                   className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
                 />
               </div>
@@ -153,7 +155,7 @@ export default function BugReportButton() {
                 onClick={handleClose}
                 disabled={isPending}
               >
-                Annuler
+                {t('cancel')}
               </Button>
               <Button
                 disabled={!description.trim() || isPending}
@@ -163,10 +165,10 @@ export default function BugReportButton() {
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Envoi...</span>
+                    <span>{t('sending')}</span>
                   </>
                 ) : (
-                  <span>Envoyer</span>
+                  <span>{t('send')}</span>
                 )}
               </Button>
             </div>

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDropzone, type FileError, type FileRejection } from 'react-dropzone'
+import { useTranslations } from 'next-intl'
 
 export async function uploadFile(
   bucketName: string,
   path: string,
   file: File | Blob,
-  options: { cacheControl: string; upsert: boolean }
+  options: { cacheControl: string; upsert: boolean },
+  formatStatusError: (status: number) => string = (status) => `Upload failed (${status})`
 ) {
   const params = new URLSearchParams({
     bucket: bucketName,
@@ -25,7 +27,7 @@ export async function uploadFile(
     const { error, filename } = await response.json()
     return { error: error ?? undefined, filename: filename ?? fallbackFilename }
   } catch {
-    return { error: `Échec de l'envoi (${response.status})`, filename: fallbackFilename }
+    return { error: formatStatusError(response.status), filename: fallbackFilename }
   }
 }
 
@@ -78,6 +80,7 @@ type UseSupabaseUploadOptions = {
 type UseSupabaseUploadReturn = ReturnType<typeof useSupabaseUpload>
 
 const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
+  const t = useTranslations('dropzone')
   const {
     bucketName,
     path,
@@ -156,7 +159,8 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           bucketName,
           !!path ? `${path}/${file.name}` : file.name,
           file,
-          { cacheControl: cacheControl.toString(), upsert }
+          { cacheControl: cacheControl.toString(), upsert },
+          (status) => t('uploadFailedWithStatus', { status })
         )
         if (error) {
           return { name: file.name, message: error, filename: undefined }

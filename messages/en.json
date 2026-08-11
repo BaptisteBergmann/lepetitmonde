@@ -1,10 +1,13 @@
 {
   "common": {
     "appName": "Le petit monde",
-    "appDescription": "A private space for the family"
+    "appDescription": "A private space for the family",
+    "dateAtTime": "{date} at {time}",
+    "userFallback": "User"
   },
   "auth": {
     "invalidCredentials": "Incorrect credentials or no such account",
+    "invalidOrExpiredLink": "Invalid or expired link",
     "login": {
       "title": "Welcome back",
       "subtitle": "Log in to your account",
@@ -64,7 +67,14 @@
       "joinTitle": "Join {babySurname}",
       "joinDescription": "You're already logged in. Join {babySurname}'s journal with your existing account.",
       "join": "Join"
-    }
+    },
+    "addAccessError": "Error adding access",
+    "createAccountError": "Error creating the account",
+    "resetLinkSentMessage": "If an account exists with this email, a reset link has been sent.",
+    "sessionExpiredMessage": "Session expired, please try again.",
+    "updatePasswordError": "Error updating the password",
+    "passwordUpdatedMessage": "Password updated, you can now log in",
+    "passwordMismatch": "Passwords don't match"
   },
   "nav": {
     "siteTitleWithBaby": "{appName} — {babyName}",
@@ -730,7 +740,69 @@
     "newReaction": {
       "title": "New reaction",
       "body": "{name} reacted {emoji} to your post"
+    },
+    "bugFixed": {
+      "title": "Le petit monde",
+      "body": "The bug you reported has been fixed. Thanks for reporting it!"
     }
+  },
+  "bugReport": {
+    "openButton": "Report a bug",
+    "title": "Report a bug",
+    "screenshotAlt": "Screenshot preview",
+    "removeScreenshot": "Remove screenshot",
+    "descriptionLabel": "What happened?",
+    "descriptionPlaceholder": "Describe the issue you ran into...",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "send": "Send",
+    "submittedConfirmation": "Thanks! Your bug report has been sent.",
+    "submitError": "Something went wrong while sending the report."
+  },
+  "serverErrors": {
+    "unauthorized": "Not authorized",
+    "unauthenticated": "Not authenticated",
+    "pollQuestionRequired": "The poll question is required",
+    "alreadyAnswered": "You've already answered this question",
+    "pollOptionsCount": "A poll must have between 2 and 6 options",
+    "pronosticNotFound": "Pronostic not found",
+    "describeIssue": "Please describe the issue.",
+    "cannotDeleteAnsweredPronostic": "Can't delete a pronostic that already has answers",
+    "cannotRemoveLastAdmin": "Can't remove the last admin of this journal.",
+    "cannotEditVotedPoll": "Can't edit a poll that already has votes",
+    "cannotEditAnsweredPronostic": "Can't edit a pronostic that already has answers",
+    "emailRequired": "Email address required",
+    "noSubscriptionFound": "No subscription found for this user",
+    "inviteError": "Error sending the invitation"
+  },
+  "uploadApi": {
+    "unauthenticated": "Not authenticated",
+    "invalidRequest": "Invalid request",
+    "forbidden": "Not authorized",
+    "heicTooLarge": "HEIC file too large",
+    "heicConversionFailed": "Couldn't convert the HEIC image"
+  },
+  "dropzone": {
+    "uploadedSuccess": "{count, plural, one {# file uploaded successfully} other {# files uploaded successfully}}",
+    "fileTooLarge": "File is larger than {maxSize} (size: {fileSize})",
+    "uploading": "Uploading file...",
+    "uploadFailed": "Upload failed: {error}",
+    "uploadFailedWithStatus": "Upload failed ({status})",
+    "uploadedOne": "File uploaded successfully",
+    "tooManyFiles": "{maxFiles, plural, one {You can only upload 1 file maximum} other {You can only upload # files maximum}}, please remove {excess}.",
+    "uploadOneFile": "Upload file",
+    "uploadManyFiles": "Upload {count} files",
+    "uploadFilesUnspecified": "Upload files",
+    "dragDropOne": "Drag and drop or <select>select a file</select> to upload",
+    "dragDropMany": "Drag and drop or <select>select files</select> to upload",
+    "maxFileSize": "Maximum file size: {size}"
+  },
+  "reactions": {
+    "bottle": "Bottle",
+    "baby": "Baby",
+    "sleep": "Sleep",
+    "celebration": "Celebration",
+    "heart": "Heart"
   },
   "notifications": {
     "title": "Notifications",

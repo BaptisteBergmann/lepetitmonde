@@ -25,6 +25,7 @@ export default function CommentList({
   onChanged: () => void
 }) {
   const t = useTranslations('feed.comments')
+  const tCommon = useTranslations('common')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBody, setEditBody] = useState("")
@@ -90,7 +91,10 @@ export default function CommentList({
               <span className="text-xs font-semibold text-landing-foreground">{author || t('unknownUser')}</span>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-[10px] text-landing-muted">
-                  {format(parseISO(comment.created_at), 'd MMM à HH:mm', { locale: dateFnsLocale })}
+                  {tCommon('dateAtTime', {
+                    date: format(parseISO(comment.created_at), 'd MMM', { locale: dateFnsLocale }),
+                    time: format(parseISO(comment.created_at), 'HH:mm', { locale: dateFnsLocale }),
+                  })}
                 </span>
                 {!isEditing && (isOwner || isAdmin) && (
                   <div className="flex items-center gap-0.5">

@@ -39,6 +39,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
     reviewed: t('statusReviewed'),
     fixed: t('statusFixed'),
   };
+  const tCommon = useTranslations('common');
   const dateFnsLocale = getDateFnsLocale(useLocale());
   const [bugReports, setBugReports] = useState(initialBugReports);
   const [openScreenshot, setOpenScreenshot] = useState<string | null>(null);
@@ -112,7 +113,12 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                 </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-landing-muted">
                   <span className="font-semibold">{reporterName}</span>
-                  <span>{format(new Date(report.created_at), "d MMM yyyy 'à' HH:mm", { locale: dateFnsLocale })}</span>
+                  <span>
+                    {tCommon('dateAtTime', {
+                      date: format(new Date(report.created_at), 'd MMM yyyy', { locale: dateFnsLocale }),
+                      time: format(new Date(report.created_at), 'HH:mm', { locale: dateFnsLocale }),
+                    })}
+                  </span>
                   {report.page_url && (
                     <a
                       href={report.page_url}

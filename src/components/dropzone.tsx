@@ -1,5 +1,6 @@
 import { CheckCircle, File, Upload, Video, X } from 'lucide-react'
 import { createContext, useCallback, useContext, type PropsWithChildren } from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from "@utils/utils"
 
@@ -62,6 +63,7 @@ const Dropzone = ({
   )
 }
 const DropzoneContent = ({ className }: { className?: string }) => {
+  const t = useTranslations('dropzone')
   const {
     files,
     setFiles,
@@ -87,7 +89,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
       <div className={cn('flex flex-row items-center gap-x-2 justify-center', className)}>
         <CheckCircle size={16} className="text-primary" />
         <p className="text-primary text-sm">
-          {files.length} fichier{files.length > 1 ? 's' : ''} téléversé{files.length > 1 ? 's' : ''} avec succès
+          {t('uploadedSuccess', { count: files.length })}
         </p>
       </div>
     )
@@ -127,17 +129,17 @@ const DropzoneContent = ({ className }: { className?: string }) => {
                   {file.errors
                     .map((e) =>
                       e.message.startsWith('File is larger than')
-                        ? `Le fichier est plus volumineux que ${formatBytes(maxFileSize, 2)} (taille : ${formatBytes(file.size, 2)})`
+                        ? t('fileTooLarge', { maxSize: formatBytes(maxFileSize, 2), fileSize: formatBytes(file.size, 2) })
                         : e.message
                     )
                     .join(', ')}
                 </p>
               ) : loading && !isSuccessfullyUploaded ? (
-                <p className="text-xs text-muted-foreground">Téléversement du fichier...</p>
+                <p className="text-xs text-muted-foreground">{t('uploading')}</p>
               ) : !!fileError ? (
-                <p className="text-xs text-destructive">Échec du téléversement : {fileError.message}</p>
+                <p className="text-xs text-destructive">{t('uploadFailed', { error: fileError.message })}</p>
               ) : isSuccessfullyUploaded ? (
-                <p className="text-xs text-primary">Fichier téléversé avec succès</p>
+                <p className="text-xs text-primary">{t('uploadedOne')}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">{formatBytes(file.size, 2)}</p>
               )}
@@ -158,7 +160,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
       })}
       {exceedMaxFiles && (
         <p className="text-sm text-left mt-2 text-destructive">
-          Vous ne pouvez téléverser que {maxFiles} fichier{maxFiles > 1 ? 's' : ''} maximum, veuillez en retirer {files.length - maxFiles}.
+          {t('tooManyFiles', { maxFiles, excess: files.length - maxFiles })}
         </p>
       )}
     </div>
@@ -166,33 +168,41 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 }
 
 const DropzoneEmptyState = ({ className }: { className?: string }) => {
+  const t = useTranslations('dropzone')
   const { maxFiles, maxFileSize, inputRef, isSuccess } = useDropzoneContext()
 
   if (isSuccess) {
     return null
   }
 
+  const uploadLabel = !maxFiles
+    ? t('uploadFilesUnspecified')
+    : maxFiles > 1
+      ? t('uploadManyFiles', { count: maxFiles })
+      : t('uploadOneFile')
+
   return (
     <div className={cn('flex flex-col items-center gap-y-2', className)}>
       <Upload size={20} className="text-muted-foreground" />
       <p className="text-sm">
-        Téléverser{!!maxFiles && maxFiles > 1 ? ` ${maxFiles}` : ''} fichier
-        {!maxFiles || maxFiles > 1 ? 's' : ''}
+        {uploadLabel}
       </p>
       <div className="flex flex-col items-center gap-y-1">
         <p className="text-xs text-muted-foreground">
-          Glissez-déposez ou{' '}
-          <a
-            onClick={() => inputRef.current?.click()}
-            className="underline cursor-pointer transition hover:text-foreground"
-          >
-            sélectionnez {maxFiles === 1 ? `un fichier` : 'des fichiers'}
-          </a>{' '}
-          à téléverser
+          {t.rich(maxFiles === 1 ? 'dragDropOne' : 'dragDropMany', {
+            select: (chunks) => (
+              <a
+                onClick={() => inputRef.current?.click()}
+                className="underline cursor-pointer transition hover:text-foreground"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         </p>
         {maxFileSize !== Number.POSITIVE_INFINITY && (
           <p className="text-xs text-muted-foreground">
-            Taille maximale du fichier : {formatBytes(maxFileSize, 2)}
+            {t('maxFileSize', { size: formatBytes(maxFileSize, 2) })}
           </p>
         )}
       </div>

@@ -24,6 +24,7 @@ export default function BuyList({
 }) {
   const router = useRouter();
   const t = useTranslations('buyList');
+  const tCommon = useTranslations('common');
   const dateFnsLocale = getDateFnsLocale(useLocale());
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -95,7 +96,13 @@ export default function BuyList({
                     </div>
                     {item.updatedByName && (
                       <p className="mt-1 text-[10px] text-landing-muted">
-                        {t('checkedBy', { name: item.updatedByName, date: format(new Date(item.updated_at), "d MMM 'à' HH:mm", { locale: dateFnsLocale }) })}
+                        {t('checkedBy', {
+                          name: item.updatedByName,
+                          date: tCommon('dateAtTime', {
+                            date: format(new Date(item.updated_at), 'd MMM', { locale: dateFnsLocale }),
+                            time: format(new Date(item.updated_at), 'HH:mm', { locale: dateFnsLocale }),
+                          }),
+                        })}
                       </p>
                     )}
                   </div>

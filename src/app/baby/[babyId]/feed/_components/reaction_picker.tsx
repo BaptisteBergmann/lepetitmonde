@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { addReaction, getReactions, removeReaction, ReactionsData } from '@utils/actions/reactions'
 import { REACTIONS } from '@utils/reactions'
 import { formatNamesPreview } from '@utils/users'
@@ -17,6 +18,7 @@ export default function ReactionPicker({
   babyId: string
   initialReactions: ReactionsData
 }) {
+  const t = useTranslations('reactions')
   const [reactions, setReactions] = useState(initialReactions)
   const [pending, setPending] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -57,12 +59,12 @@ export default function ReactionPicker({
           )}
         </PopoverTrigger>
         <PopoverContent align="start" className="w-auto flex-row gap-0.5 p-1.5">
-          {REACTIONS.map(({ emoji, label }) => (
+          {REACTIONS.map(({ emoji, key }) => (
             <button
               key={emoji}
               type="button"
               onClick={() => pick(emoji)}
-              title={label}
+              title={t(key)}
               className={cn(
                 "rounded-full p-1.5 text-xl leading-none transition-transform cursor-pointer hover:scale-110 hover:bg-landing-background",
                 reactions.myEmoji === emoji && "scale-110 bg-landing-background"
