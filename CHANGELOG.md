@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `489c929` Centralize server action error messages via actionError helper
 - `0505890` Translate manifest.ts and Route Handler error messages
 - `928b8f1` Translate dropzone, bug report button, reactions, and fix date-fns literal-text bug
 - `c2a2f71` Translate transactional emails and push notifications
