@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useLocale } from 'next-intl'
 import { format, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { getDateFnsLocale } from '@utils/formatting'
 import { updateComment, deleteComment } from '@utils/actions/comments'
 import { getDisplayName } from '@utils/users'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,7 @@ export default function CommentList({
   isAdmin: boolean
   onChanged: () => void
 }) {
+  const dateFnsLocale = getDateFnsLocale(useLocale())
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBody, setEditBody] = useState("")
   const [savingId, setSavingId] = useState<string | null>(null)
@@ -87,7 +89,7 @@ export default function CommentList({
               <span className="text-xs font-semibold text-landing-foreground">{author || "Utilisateur"}</span>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-[10px] text-landing-muted">
-                  {format(parseISO(comment.created_at), 'd MMM à HH:mm', { locale: fr })}
+                  {format(parseISO(comment.created_at), 'd MMM à HH:mm', { locale: dateFnsLocale })}
                 </span>
                 {!isEditing && (isOwner || isAdmin) && (
                   <div className="flex items-center gap-0.5">

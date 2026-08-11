@@ -1,5 +1,8 @@
 {
   "common": {
     "appName": "Le petit monde"
+  },
+  "auth": {
+    "invalidCredentials": "Incorrect credentials or no such account"
   }
 }

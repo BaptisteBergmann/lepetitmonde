@@ -1,9 +1,11 @@
+import { getLocale } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getInventoryItems } from "@/utils/actions/inventory";
 import InventoryItemModal from "./_components/inventory_item_modal";
 import InventoryList from "./_components/inventory_list";
 import { Reveal } from "@components/reveal";
 import { compareItemKinds, DEFAULT_ITEM_KINDS } from "@utils/inventory_kind";
+import { formatCurrency } from "@utils/formatting";
 
 export default async function InventoryPage({
   params,
@@ -11,6 +13,7 @@ export default async function InventoryPage({
   params: Promise<{ babyId: string }>;
 }) {
   const { babyId } = await params;
+  const locale = await getLocale();
 
   await assertPageAccess(babyId, 'inventory');
 
@@ -50,7 +53,7 @@ export default async function InventoryPage({
               </p>
               {totalSpent > 0 && (
                 <p className="mt-3 text-sm font-semibold text-landing-foreground">
-                  Total dépensé : {totalSpent.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
+                  Total dépensé : {formatCurrency(totalSpent, locale)}
                 </p>
               )}
             </div>

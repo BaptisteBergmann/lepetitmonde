@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateFnsLocale } from "@utils/formatting";
 import { toast } from "sonner";
 import { Tables, Enums } from "@utils/supabase/database.types";
 import { updateBugReportStatus } from "@utils/actions/bug_reports";
@@ -38,6 +39,7 @@ const STATUS_STYLES: Record<Enums<'bug_report_status'>, string> = {
 };
 
 export default function DisplayBugReports({ bugReports: initialBugReports, babyId }: DisplayBugReportsProps) {
+  const dateFnsLocale = getDateFnsLocale(useLocale());
   const [bugReports, setBugReports] = useState(initialBugReports);
   const [openScreenshot, setOpenScreenshot] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                 </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-landing-muted">
                   <span className="font-semibold">{reporterName}</span>
-                  <span>{format(new Date(report.created_at), "d MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                  <span>{format(new Date(report.created_at), "d MMM yyyy 'à' HH:mm", { locale: dateFnsLocale })}</span>
                   {report.page_url && (
                     <a
                       href={report.page_url}

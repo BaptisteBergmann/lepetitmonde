@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getLocale } from "next-intl/server";
+import { getLocaleTag } from "@/utils/formatting";
 import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
@@ -28,12 +30,12 @@ function getTypeMeta(type: string) {
   }
 }
 
-function formatAnswer(value: unknown, type: string, options?: unknown) {
+function formatAnswer(value: unknown, type: string, options: unknown, localeTag: string) {
   if (value === undefined || value === null || value === "") return "-";
   if (type === "date") {
     const d = new Date(value as string);
     if (!isNaN(d.getTime())) {
-      return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+      return d.toLocaleDateString(localeTag, { day: "numeric", month: "long", year: "numeric" });
     }
   }
   if (type === "number") {
@@ -41,7 +43,7 @@ function formatAnswer(value: unknown, type: string, options?: unknown) {
     if (!isNaN(num)) {
       const precision = (options as { precision?: number } | null)?.precision;
       if (typeof precision === "number") {
-        return num.toLocaleString("fr-FR", { minimumFractionDigits: precision, maximumFractionDigits: precision });
+        return num.toLocaleString(localeTag, { minimumFractionDigits: precision, maximumFractionDigits: precision });
       }
     }
   }
@@ -54,6 +56,7 @@ export default async function GuessAdminPage({
   params: Promise<{ babyId: string }>;
 }) {
   const { babyId } = await params;
+  const localeTag = getLocaleTag(await getLocale());
   const contextLogger = logger.child({ function: GuessAdminPage.name, babyId });
 
   // Feature-level gate: can this member reach Pronostics at all.
@@ -187,7 +190,7 @@ export default async function GuessAdminPage({
                               </span>
                               <div className="flex items-center gap-2">
                                 <span className="font-semibold text-landing-foreground">
-                                  {formatAnswer(guess.answer, question.type, question.options)}
+                                  {formatAnswer(guess.answer, question.type, question.options, localeTag)}
                                 </span>
                                 <DeleteGuessButton babyId={babyId} guessId={guess.id} userName={guessUserName} />
                               </div>

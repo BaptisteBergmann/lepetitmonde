@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
 // N'autorise que les chemins relatifs internes (évite les open redirects du type
 // "//evil.com" ou "/\evil.com" qui sont interprétés comme des URLs absolues par le navigateur).
@@ -29,7 +30,8 @@ export async function login(formData: FormData) {
 
   // S'il y a une erreur (mauvais mot de passe, etc.), on renvoie vers le login avec un message d'erreur
   if (error) {
-    const params = new URLSearchParams({ message: 'Identifiants incorrects ou compte inexistant' })
+    const t = await getTranslations('auth')
+    const params = new URLSearchParams({ message: t('invalidCredentials') })
     if (redirectTo !== '/') params.set('redirectTo', redirectTo)
     return redirect(`/login?${params.toString()}`)
   }

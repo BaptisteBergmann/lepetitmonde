@@ -5,6 +5,8 @@ import { submitGuess } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
 import { Tables, Json } from "@/utils/supabase/database.types";
 import { useState, Dispatch, SetStateAction } from "react";
+import { useLocale } from "next-intl";
+import { getLocaleTag } from "@/utils/formatting";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { CheckCircle2, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -43,6 +45,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
   contextLogger.info(questionWithGuess, "Display question");
 
   const router = useRouter();
+  const localeTag = getLocaleTag(useLocale());
   const [value, setValue] = useState<number | string | Date | undefined>(
     // Non pré-rempli pour "date" : le Calendar attend un `Date | undefined`, jamais une chaîne vide.
     questionWithGuess.type === "date" ? undefined : ""
@@ -77,7 +80,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
       try {
         const d = new Date(val as string | number);
         if (!isNaN(d.getTime())) {
-          return d.toLocaleDateString("fr-FR", {
+          return d.toLocaleDateString(localeTag, {
             day: "numeric",
             month: "long",
             year: "numeric",
@@ -88,7 +91,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
     if (type === "number") {
       const num = Number(val);
       if (!isNaN(num) && typeof options?.precision === "number") {
-        return num.toLocaleString("fr-FR", {
+        return num.toLocaleString(localeTag, {
           minimumFractionDigits: options.precision,
           maximumFractionDigits: options.precision,
         });

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Link2 } from "lucide-react";
+import { getLocaleTag } from "@utils/formatting";
 
 type Invitation = Tables<'invitations'>;
 
@@ -12,6 +14,7 @@ interface InvitationsListProps {
 }
 
 export default function InvitationsList({ invitations }: InvitationsListProps) {
+  const localeTag = getLocaleTag(useLocale());
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = async (id: string) => {
@@ -63,7 +66,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
                   </span>
                 </div>
                 <p className="text-[10px] text-landing-muted truncate">
-                  Expire le {new Date(invitation.expires_at).toLocaleString("fr-FR")}
+                  Expire le {new Date(invitation.expires_at).toLocaleString(localeTag)}
                 </p>
               </div>
             </div>

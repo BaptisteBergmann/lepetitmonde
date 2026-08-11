@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { format, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { deleteEvent, EventWithCircles } from '@utils/actions/events'
@@ -40,6 +41,7 @@ export default function DayDetailSheet({
   onEdit: (event: Event) => void
 }) {
   const router = useRouter()
+  const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const circleNames = (circleIds: string[]) =>
@@ -68,7 +70,7 @@ export default function DayDetailSheet({
 
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold capitalize">
-            {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: fr })}
+            {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: dateFnsLocale })}
           </h2>
           <button
             onClick={onClose}

@@ -3,8 +3,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateFnsLocale } from "@utils/formatting";
 import { toast } from "sonner";
 import { Tables, Enums } from "@utils/supabase/database.types";
 import { logger } from "@/utils/logger";
@@ -43,6 +44,7 @@ export default function RealtimeUsersList({
   isAdmin,
   devicesByUser,
 }: RealtimeUsersListProps) {
+  const dateFnsLocale = getDateFnsLocale(useLocale());
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [sendingUserId, setSendingUserId] = useState<string | null>(null);
@@ -137,7 +139,7 @@ export default function RealtimeUsersList({
         const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
         const isLastAdmin = user.access_level === "admin" && adminCount <= 1;
         const joinedDate = user.created_at
-          ? format(new Date(user.created_at), "d MMM yyyy", { locale: fr })
+          ? format(new Date(user.created_at), "d MMM yyyy", { locale: dateFnsLocale })
           : null;
         const devices = devicesByUser[user.id] ?? [];
         const hasPush = devices.length > 0;

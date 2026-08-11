@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import {
   addMonths,
   subMonths,
@@ -14,7 +15,7 @@ import {
   isSameMonth,
   isToday,
 } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { EventWithCircles } from '@utils/actions/events'
 import { PostWithDetails } from '@utils/actions/posts'
@@ -51,6 +52,7 @@ export default function CalendarView({
   hasLaterActivity: boolean
 }) {
   const router = useRouter()
+  const dateFnsLocale = getDateFnsLocale(useLocale())
   const [isPending, startTransition] = useTransition()
   const [monthYear, monthIndex] = monthKey.split('-').map(Number)
   const month = new Date(monthYear, monthIndex - 1, 1)
@@ -117,7 +119,7 @@ export default function CalendarView({
           )}
         </div>
         <h2 className="font-display text-lg font-semibold capitalize">
-          {format(month, 'MMMM yyyy', { locale: fr })}
+          {format(month, 'MMMM yyyy', { locale: dateFnsLocale })}
         </h2>
         <div className="relative">
           <Button

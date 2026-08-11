@@ -7,7 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getLocale } from "next-intl/server";
+import { getDateFnsLocale } from "@utils/formatting";
 import { Reveal } from "@components/reveal";
 
 export default async function BabyPage({
@@ -16,6 +17,7 @@ export default async function BabyPage({
   params: Promise<{ babyId: string }>;
 }) {
   const { babyId } = await params;
+  const dateFnsLocale = getDateFnsLocale(await getLocale());
   const baby = await getBaby(babyId);
   const access = await getUserAccess(babyId);
   const accessLevel = !Array.isArray(access) ? access?.access_level : undefined;
@@ -53,7 +55,7 @@ export default async function BabyPage({
             {baby.baby_surname}
           </h1>
           <p className="mt-4 text-sm text-landing-muted">
-            Membre depuis le {format(new Date(baby.created_at), "d MMMM yyyy", { locale: fr })}
+            Membre depuis le {format(new Date(baby.created_at), "d MMMM yyyy", { locale: dateFnsLocale })}
           </p>
           <p className="mt-2 text-landing-muted">Choisissez une page à consulter.</p>
         </Reveal>

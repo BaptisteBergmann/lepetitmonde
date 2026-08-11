@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { format, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { AnecdoteWithDetails, deleteAnecdote } from '@utils/actions/anecdotes'
 import { Trash2, Pencil, Loader2 } from 'lucide-react'
@@ -24,6 +25,7 @@ export default function AnecdoteCard({
   isAdmin: boolean
 }) {
   const router = useRouter()
+  const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -70,7 +72,7 @@ export default function AnecdoteCard({
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-landing-foreground capitalize">
-              {format(parseISO(anecdote.happened_at), 'EEEE d MMMM yyyy', { locale: fr })}
+              {format(parseISO(anecdote.happened_at), 'EEEE d MMMM yyyy', { locale: dateFnsLocale })}
             </p>
             {isAdmin && (
               <div className="flex flex-wrap items-center gap-1 mt-1">

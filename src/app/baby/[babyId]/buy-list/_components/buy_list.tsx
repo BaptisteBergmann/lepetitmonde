@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateFnsLocale } from "@utils/formatting";
 import { Loader2, Minus, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ export default function BuyList({
   initialItems: BuyListItem[];
 }) {
   const router = useRouter();
+  const dateFnsLocale = getDateFnsLocale(useLocale());
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   // Small, infrequently-changing list — a full router.refresh() on any
@@ -92,7 +94,7 @@ export default function BuyList({
                     </div>
                     {item.updatedByName && (
                       <p className="mt-1 text-[10px] text-landing-muted">
-                        Coché par {item.updatedByName} le {format(new Date(item.updated_at), "d MMM 'à' HH:mm", { locale: fr })}
+                        Coché par {item.updatedByName} le {format(new Date(item.updated_at), "d MMM 'à' HH:mm", { locale: dateFnsLocale })}
                       </p>
                     )}
                   </div>

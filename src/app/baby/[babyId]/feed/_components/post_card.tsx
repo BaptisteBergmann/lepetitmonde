@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { format, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { getComments } from '@utils/actions/comments'
@@ -35,6 +36,7 @@ export default function PostCard({
   currentUserId: string | null
 }) {
   const router = useRouter()
+  const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [statsOpen, setStatsOpen] = useState(false)
@@ -139,7 +141,7 @@ export default function PostCard({
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-landing-foreground capitalize">
-              {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: fr })}
+              {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: dateFnsLocale })}
             </p>
             {isAdmin && (
               <div className="flex flex-wrap items-center gap-1 mt-1">

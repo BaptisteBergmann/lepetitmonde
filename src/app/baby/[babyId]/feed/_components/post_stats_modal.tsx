@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLocale } from 'next-intl'
 import { format, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { getDateFnsLocale } from '@utils/formatting'
 import { BarChart3, X, Eye, SmilePlus, MessageCircle } from 'lucide-react'
 import { getPostStats, PostStats } from '@utils/actions/post_stats'
 import { PostWithDetails } from '@utils/actions/posts'
@@ -22,6 +23,7 @@ export default function PostStatsModal({
   circles: Circle[]
   onClose: () => void
 }) {
+  const dateFnsLocale = getDateFnsLocale(useLocale())
   const [stats, setStats] = useState<PostStats | null>(null)
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function PostStatsModal({
         <div className="p-5 space-y-5 flex-1 overflow-y-auto">
           <div>
             <p className="text-sm font-semibold capitalize">
-              {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: fr })}
+              {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: dateFnsLocale })}
             </p>
             {post.caption && (
               <p className="mt-1 text-sm text-landing-muted whitespace-pre-wrap">{post.caption}</p>

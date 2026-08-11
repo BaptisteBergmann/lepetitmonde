@@ -1,20 +1,18 @@
 'use client'
 
 import { useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { Search, Package, Tag } from "lucide-react";
 import { Tables } from "@utils/supabase/database.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { compareItemKinds, getItemKindIcon, ItemKind } from "@utils/inventory_kind";
+import { formatCurrency } from "@utils/formatting";
 import InventoryItemModal from "./inventory_item_modal";
 
 type InventoryItem = Tables<'inventory_items'>;
 
 type ViewMode = 'article' | 'type';
-
-function formatPrice(amount: number) {
-  return amount.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
-}
 
 const NO_SUBTYPE = "Sans sous-type";
 
@@ -49,6 +47,7 @@ export default function InventoryList({
   subtypesByKind: Partial<Record<ItemKind, string[]>>;
   sources: string[];
 }) {
+  const locale = useLocale();
   const [viewMode, setViewMode] = useState<ViewMode>('article');
   const [onlyMissing, setOnlyMissing] = useState(false);
   const [selectedKinds, setSelectedKinds] = useState<Set<ItemKind>>(new Set());
@@ -264,7 +263,7 @@ export default function InventoryList({
                       </button>
                     </CardTitle>
                     <span className="shrink-0 text-xs font-semibold text-landing-muted">
-                      {totalOwned} au total{subtotal > 0 && ` · ${formatPrice(subtotal)}`}
+                      {totalOwned} au total{subtotal > 0 && ` · ${formatCurrency(subtotal, locale)}`}
                     </span>
                   </div>
                 </CardHeader>
