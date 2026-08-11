@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `928b8f1` Translate dropzone, bug report button, reactions, and fix date-fns literal-text bug
 - `c2a2f71` Translate transactional emails and push notifications
 - `6d39d0c` Translate profile, settings, and onboarding
 - `819b3df` Translate buy-list, inventory, and anecdotes sections
