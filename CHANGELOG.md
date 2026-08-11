@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-11
+
+- `cf67869` Add next-intl foundations, no routing
+
 ## 2026-08-08
 
 - `752e538` Show circle-less members in the admin circles list
