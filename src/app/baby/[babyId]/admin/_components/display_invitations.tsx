@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Link2 } from "lucide-react";
@@ -14,6 +14,7 @@ interface InvitationsListProps {
 }
 
 export default function InvitationsList({ invitations }: InvitationsListProps) {
+  const t = useTranslations('admin.invitations');
   const localeTag = getLocaleTag(useLocale());
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -31,7 +32,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
   if (invitations.length === 0) {
     return (
       <div className="text-center py-10 text-landing-muted px-4">
-        <p className="text-sm font-medium">Aucun lien d&apos;invitation généré pour le moment.</p>
+        <p className="text-sm font-medium">{t('empty')}</p>
       </div>
     );
   }
@@ -62,11 +63,11 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
                         : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
-                    {isExpired ? "Expiré" : "Actif"}
+                    {isExpired ? t('expired') : t('active')}
                   </span>
                 </div>
                 <p className="text-[10px] text-landing-muted truncate">
-                  Expire le {new Date(invitation.expires_at).toLocaleString(localeTag)}
+                  {t('expiresOn', { date: new Date(invitation.expires_at).toLocaleString(localeTag) })}
                 </p>
               </div>
             </div>
@@ -77,7 +78,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
                 variant="outline"
                 size="xs"
                 className="rounded-xl flex items-center gap-1.5 cursor-pointer shrink-0"
-                title="Copier le lien"
+                title={t('copyTitle')}
               >
                 {copiedId === invitation.id ? (
                   <Check className="h-3.5 w-3.5 text-emerald-500" />

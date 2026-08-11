@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
 import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
 import { addUserToCircle, removeUserFromCircle, deleteCircle } from "@utils/actions/circles";
@@ -27,10 +28,10 @@ interface RealtimeCirclesListProps {
   isAdmin: boolean;
 }
 
-function getMemberLabel(user?: User) {
-  if (!user) return "Membre inconnu";
+function getMemberLabel(user: User | undefined, t: (key: string, values?: Record<string, string | number | Date>) => string) {
+  if (!user) return t('unknownMember');
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
-  return fullName || `Membre (${user.id.substring(0, 8)})`;
+  return fullName || t('memberFallback', { id: user.id.substring(0, 8) });
 }
 
 export default function RealtimeCirclesList({
@@ -40,6 +41,7 @@ export default function RealtimeCirclesList({
   babyId,
   isAdmin,
 }: RealtimeCirclesListProps) {
+  const t = useTranslations('admin.circles');
   const [circles, setCircles] = useState<Circle[]>(initialCircles);
   const [circlesAccess, setCirclesAccess] = useState<CircleAccess[]>(initialCirclesAccess);
   const [selectedUserByCircle, setSelectedUserByCircle] = useState<Record<string, string>>({});
@@ -94,7 +96,7 @@ export default function RealtimeCirclesList({
       setSelectedUserByCircle((prev) => ({ ...prev, [circleId]: "" }));
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de l'ajout du membre au cercle.");
+      alert(t('addMemberError'));
     } finally {
       setPendingCircleId(null);
     }
@@ -106,20 +108,20 @@ export default function RealtimeCirclesList({
       await removeUserFromCircle(circleId, userId, babyId);
     } catch (err) {
       console.error(err);
-      alert("Erreur lors du retrait du membre.");
+      alert(t('removeMemberError'));
     } finally {
       setPendingCircleId(null);
     }
   };
 
   const handleDeleteCircle = async (circle: Circle) => {
-    if (!confirm(`Supprimer le cercle "${circle.name}" ? Cette action est irréversible.`)) return;
+    if (!confirm(t('deleteConfirm', { name: circle.name ?? '' }))) return;
     setPendingCircleId(circle.id);
     try {
       await deleteCircle(circle.id, babyId);
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de la suppression du cercle.");
+      alert(t('deleteError'));
     } finally {
       setPendingCircleId(null);
     }
@@ -133,8 +135,8 @@ export default function RealtimeCirclesList({
     return (
       <div className="divide-y divide-landing-border">
         <div className="text-center py-10 text-landing-muted px-4">
-          <p className="text-sm font-medium">Aucun cercle de partage créé pour le moment.</p>
-          <p className="text-xs text-landing-muted mt-1">Utilisez le formulaire ci-contre pour créer votre premier groupe.</p>
+          <p className="text-sm font-medium">{t('empty')}</p>
+          <p className="text-xs text-landing-muted mt-1">{t('emptyHint')}</p>
         </div>
         {usersWithoutCircle.length > 0 && (
           <UsersWithoutCircle users={usersWithoutCircle} />
@@ -173,7 +175,7 @@ export default function RealtimeCirclesList({
                   variant="outline"
                   size="xs"
                   className="rounded-xl cursor-pointer text-destructive hover:text-destructive shrink-0"
-                  title="Supprimer le cercle"
+                  title={t('deleteTitle')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -187,13 +189,13 @@ export default function RealtimeCirclesList({
                     key={member.id}
                     className="inline-flex items-center gap-1.5 rounded-full bg-landing-background pl-2.5 pr-1 py-1 text-xs font-medium text-landing-foreground"
                   >
-                    {getMemberLabel(member)}
+                    {getMemberLabel(member, t)}
                     {isAdmin && (
                       <button
                         onClick={() => handleRemoveMember(circle.id, member.id)}
                         disabled={isPending}
                         className="rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive cursor-pointer"
-                        title="Retirer du cercle"
+                        title={t('removeTitle')}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -212,12 +214,12 @@ export default function RealtimeCirclesList({
                   }
                 >
                   <SelectTrigger size="sm" className="flex-1 min-w-0">
-                    <SelectValue placeholder="Ajouter un membre..." />
+                    <SelectValue placeholder={t('addMemberPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {getMemberLabel(user)}
+                        {getMemberLabel(user, t)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -230,7 +232,7 @@ export default function RealtimeCirclesList({
                   className="rounded-xl cursor-pointer gap-1 shrink-0"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  <span>Ajouter</span>
+                  <span>{t('add')}</span>
                 </Button>
               </div>
             )}
@@ -245,6 +247,7 @@ export default function RealtimeCirclesList({
 }
 
 function UsersWithoutCircle({ users }: { users: User[] }) {
+  const t = useTranslations('admin.circles');
   return (
     <div className="py-3.5 px-6 space-y-3">
       <div className="flex items-center gap-3">
@@ -252,8 +255,8 @@ function UsersWithoutCircle({ users }: { users: User[] }) {
           <CircleOff className="h-4 w-4" />
         </div>
         <div>
-          <p className="font-semibold text-sm text-landing-foreground">Sans cercle</p>
-          <p className="text-[10px] text-landing-muted">Membres ne faisant partie d&apos;aucun cercle</p>
+          <p className="font-semibold text-sm text-landing-foreground">{t('withoutCircle')}</p>
+          <p className="text-[10px] text-landing-muted">{t('withoutCircleDescription')}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5 pl-1">
@@ -262,7 +265,7 @@ function UsersWithoutCircle({ users }: { users: User[] }) {
             key={user.id}
             className="inline-flex items-center gap-1.5 rounded-full bg-landing-background pl-2.5 pr-2.5 py-1 text-xs font-medium text-landing-foreground"
           >
-            {getMemberLabel(user)}
+            {getMemberLabel(user, t)}
           </span>
         ))}
       </div>

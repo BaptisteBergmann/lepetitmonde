@@ -439,6 +439,92 @@
       "moveError": "Une erreur est survenue lors du déplacement."
     }
   },
+  "admin": {
+    "eyebrow": "Page — Le cercle",
+    "title": "Cercles & accès",
+    "subtitle": "Gérez la famille et les proches qui partagent la vie de votre bébé. Organisez les accès par cercles.",
+    "inviteByEmailTitle": "Inviter par e-mail",
+    "inviteByEmailDescription": "Envoyez un e-mail d'invitation pour rejoindre ce journal.",
+    "sendInvite": "Envoyer l'invitation",
+    "membersTitle": "Membres du journal",
+    "membersDescription": "Liste des personnes ayant accès à ce journal de bébé.",
+    "circlesTitle": "Cercles de partage",
+    "circlesDescription": "Groupes organisés pour structurer les droits d'accès.",
+    "invitationLinksTitle": "Liens d'invitation",
+    "invitationLinksDescription": "Historique des liens générés, actifs et expirés.",
+    "bugReportsTitle": "Signalements de bugs",
+    "bugReportsDescription": "Problèmes remontés par les membres du journal.",
+    "pagesAccessTitle": "Pages & accès",
+    "pagesAccessDescription": "Activez ou restreignez l'accès à chaque page de ce journal.",
+    "createCircle": {
+      "title": "Créer un cercle de partage",
+      "description": "Regroupez vos proches (ex: Famille proche, Amis) pour organiser les partages.",
+      "namePlaceholder": "Ex: Famille proche, Amis...",
+      "submit": "Créer le cercle"
+    },
+    "createInvite": {
+      "title": "Lien d'invitation unique",
+      "description": "Générez un lien d'accès temporaire valable 24h à envoyer par SMS ou messagerie.",
+      "generateError": "Erreur lors de la génération du lien.",
+      "generating": "Génération en cours...",
+      "generate": "Générer un lien de partage",
+      "copyTitle": "Copier le lien",
+      "copied": "Lien copié dans le presse-papiers !"
+    },
+    "circles": {
+      "unknownMember": "Membre inconnu",
+      "memberFallback": "Membre ({id})",
+      "deleteConfirm": "Supprimer le cercle \"{name}\" ? Cette action est irréversible.",
+      "addMemberError": "Erreur lors de l'ajout du membre au cercle.",
+      "removeMemberError": "Erreur lors du retrait du membre.",
+      "deleteError": "Erreur lors de la suppression du cercle.",
+      "empty": "Aucun cercle de partage créé pour le moment.",
+      "emptyHint": "Utilisez le formulaire ci-contre pour créer votre premier groupe.",
+      "deleteTitle": "Supprimer le cercle",
+      "removeTitle": "Retirer du cercle",
+      "addMemberPlaceholder": "Ajouter un membre...",
+      "add": "Ajouter",
+      "withoutCircle": "Sans cercle",
+      "withoutCircleDescription": "Membres ne faisant partie d'aucun cercle"
+    },
+    "bugReports": {
+      "statusNew": "Nouveau",
+      "statusReviewed": "En cours",
+      "statusFixed": "Corrigé",
+      "statusUpdatedNotified": "Statut mis à jour, le signaleur a été notifié.",
+      "statusUpdateError": "Erreur lors de la mise à jour du statut.",
+      "empty": "Aucun bug signalé pour le moment.",
+      "unknownReporter": "Utilisateur inconnu",
+      "screenshotAlt": "Capture d'écran du bug",
+      "screenshotAltLarge": "Capture d'écran du bug en grand",
+      "pageLink": "Page",
+      "close": "Fermer"
+    },
+    "users": {
+      "accessAdmin": "Administrateur",
+      "accessViewer": "Lecteur",
+      "updateAccessError": "Erreur lors de la mise à jour du niveau d'accès.",
+      "notificationSent": "Notification envoyée.",
+      "notificationError": "Erreur lors de l'envoi de la notification.",
+      "empty": "Aucun membre dans ce journal pour le moment.",
+      "emptyHint": "Invitez des proches à rejoindre l'aventure.",
+      "lastAdminNotice": "Impossible de retirer le dernier administrateur.",
+      "notify": "Notifier",
+      "registeredDevices": "Appareils enregistrés",
+      "unknownDevice": "Appareil inconnu",
+      "sending": "Envoi...",
+      "sendNotification": "Envoyer une notification",
+      "memberFallback": "Membre ({id})",
+      "memberSince": "Membre depuis le {date}"
+    },
+    "invitations": {
+      "empty": "Aucun lien d'invitation généré pour le moment.",
+      "expired": "Expiré",
+      "active": "Actif",
+      "expiresOn": "Expire le {date}",
+      "copyTitle": "Copier le lien"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",

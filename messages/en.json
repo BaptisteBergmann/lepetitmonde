@@ -439,6 +439,92 @@
       "moveError": "Something went wrong while moving."
     }
   },
+  "admin": {
+    "eyebrow": "Page — The circle",
+    "title": "Circles & access",
+    "subtitle": "Manage the family and friends who share your baby's life. Organize access by circles.",
+    "inviteByEmailTitle": "Invite by email",
+    "inviteByEmailDescription": "Send an email invitation to join this journal.",
+    "sendInvite": "Send invitation",
+    "membersTitle": "Journal members",
+    "membersDescription": "List of people with access to this baby's journal.",
+    "circlesTitle": "Sharing circles",
+    "circlesDescription": "Groups organized to structure access rights.",
+    "invitationLinksTitle": "Invite links",
+    "invitationLinksDescription": "History of generated links, active and expired.",
+    "bugReportsTitle": "Bug reports",
+    "bugReportsDescription": "Issues reported by journal members.",
+    "pagesAccessTitle": "Pages & access",
+    "pagesAccessDescription": "Enable or restrict access to each page of this journal.",
+    "createCircle": {
+      "title": "Create a sharing circle",
+      "description": "Group your family and friends (e.g. Close family, Friends) to organize sharing.",
+      "namePlaceholder": "E.g. Close family, Friends...",
+      "submit": "Create circle"
+    },
+    "createInvite": {
+      "title": "One-time invite link",
+      "description": "Generate a temporary access link valid for 24h to send by text or messaging app.",
+      "generateError": "Something went wrong while generating the link.",
+      "generating": "Generating...",
+      "generate": "Generate a share link",
+      "copyTitle": "Copy the link",
+      "copied": "Link copied to clipboard!"
+    },
+    "circles": {
+      "unknownMember": "Unknown member",
+      "memberFallback": "Member ({id})",
+      "deleteConfirm": "Delete the \"{name}\" circle? This action can't be undone.",
+      "addMemberError": "Something went wrong while adding the member to the circle.",
+      "removeMemberError": "Something went wrong while removing the member.",
+      "deleteError": "Something went wrong while deleting the circle.",
+      "empty": "No sharing circle created yet.",
+      "emptyHint": "Use the form to create your first group.",
+      "deleteTitle": "Delete circle",
+      "removeTitle": "Remove from circle",
+      "addMemberPlaceholder": "Add a member...",
+      "add": "Add",
+      "withoutCircle": "No circle",
+      "withoutCircleDescription": "Members not part of any circle"
+    },
+    "bugReports": {
+      "statusNew": "New",
+      "statusReviewed": "In progress",
+      "statusFixed": "Fixed",
+      "statusUpdatedNotified": "Status updated, the reporter has been notified.",
+      "statusUpdateError": "Something went wrong while updating the status.",
+      "empty": "No bugs reported yet.",
+      "unknownReporter": "Unknown user",
+      "screenshotAlt": "Bug screenshot",
+      "screenshotAltLarge": "Bug screenshot, enlarged",
+      "pageLink": "Page",
+      "close": "Close"
+    },
+    "users": {
+      "accessAdmin": "Admin",
+      "accessViewer": "Viewer",
+      "updateAccessError": "Something went wrong while updating the access level.",
+      "notificationSent": "Notification sent.",
+      "notificationError": "Something went wrong while sending the notification.",
+      "empty": "No members in this journal yet.",
+      "emptyHint": "Invite family and friends to join in.",
+      "lastAdminNotice": "Can't remove the last admin.",
+      "notify": "Notify",
+      "registeredDevices": "Registered devices",
+      "unknownDevice": "Unknown device",
+      "sending": "Sending...",
+      "sendNotification": "Send a notification",
+      "memberFallback": "Member ({id})",
+      "memberSince": "Member since {date}"
+    },
+    "invitations": {
+      "empty": "No invite link generated yet.",
+      "expired": "Expired",
+      "active": "Active",
+      "expiresOn": "Expires on {date}",
+      "copyTitle": "Copy the link"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

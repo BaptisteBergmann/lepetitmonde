@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { generateShortLivedLink } from "@utils/actions/invite";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Link2, Copy, Check, Loader2 } from "lucide-react";
 
 export default function CreateInvite({ babyId }: { babyId: string }) {
+  const t = useTranslations('admin.createInvite');
   const [link, setLink] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -21,7 +23,7 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
       }
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de la génération du lien.");
+      alert(t('generateError'));
     } finally {
       setIsLoading(false);
     }
@@ -43,10 +45,10 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
       <CardHeader className="pb-3">
         <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <Link2 className="h-4.5 w-4.5 text-primary" />
-          Lien d&apos;invitation unique
+          {t('title')}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          Générez un lien d&apos;accès temporaire valable 24h à envoyer par SMS ou messagerie.
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -59,12 +61,12 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Génération en cours...</span>
+                <span>{t('generating')}</span>
               </>
             ) : (
               <>
                 <Link2 className="h-4 w-4" />
-                <span>Générer un lien de partage</span>
+                <span>{t('generate')}</span>
               </>
             )}
           </Button>
@@ -79,7 +81,7 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
               onClick={handleCopy}
               variant="outline"
               className="rounded-2xl cursor-pointer shrink-0 h-8 w-8 flex items-center justify-center p-0"
-              title="Copier le lien"
+              title={t('copyTitle')}
             >
               {copied ? (
                 <Check className="h-4 w-4 text-emerald-500" />
@@ -91,7 +93,7 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
         )}
         {copied && (
           <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-            Lien copié dans le presse-papiers !
+            {t('copied')}
           </p>
         )}
       </CardContent>

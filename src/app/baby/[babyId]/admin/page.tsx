@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { sendInvite, getInvitations } from "@utils/actions/invite";
 import CreateCircle from "./_components/create_circle";
 import RealtimeCirclesList from "./_components/display_circles";
@@ -23,6 +24,7 @@ export default async function InviteForm({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
+  const t = await getTranslations('admin');
   const access = await getUserAccess(babyId);
   const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
   const users = await getUsers(babyId);
@@ -43,13 +45,13 @@ export default async function InviteForm({
         {/* Header Section */}
         <Reveal className="border-b border-landing-border pb-6">
           <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-            Page — Le cercle
+            {t('eyebrow')}
           </p>
           <h1 className="mt-1 font-display text-3xl font-semibold">
-            Cercles & accès
+            {t('title')}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
-            Gérez la famille et les proches qui partagent la vie de votre bébé. Organisez les accès par cercles.
+            {t('subtitle')}
           </p>
         </Reveal>
 
@@ -63,10 +65,10 @@ export default async function InviteForm({
                   <CardHeader className="pb-3">
                     <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
                       <UserPlus className="h-4.5 w-4.5 text-primary" />
-                      Inviter par e-mail
+                      {t('inviteByEmailTitle')}
                     </CardTitle>
                     <CardDescription className="text-xs text-landing-muted">
-                      Envoyez un e-mail d&apos;invitation pour rejoindre ce journal.
+                      {t('inviteByEmailDescription')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -83,7 +85,7 @@ export default async function InviteForm({
                       </div>
                       <Button type="submit" className="w-full rounded-2xl cursor-pointer gap-2">
                         <Mail className="h-4 w-4" />
-                        <span>Envoyer l&apos;invitation</span>
+                        <span>{t('sendInvite')}</span>
                       </Button>
                     </form>
                   </CardContent>
@@ -105,10 +107,10 @@ export default async function InviteForm({
               <CardHeader className="pb-3">
                 <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
                   <Users className="h-4.5 w-4.5 text-primary" />
-                  Membres du journal
+                  {t('membersTitle')}
                 </CardTitle>
                 <CardDescription className="text-xs text-landing-muted">
-                  Liste des personnes ayant accès à ce journal de bébé.
+                  {t('membersDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0 pb-2">
@@ -126,10 +128,10 @@ export default async function InviteForm({
               <CardHeader className="pb-3">
                 <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
                   <Users className="h-4.5 w-4.5 text-rose" />
-                  Cercles de partage
+                  {t('circlesTitle')}
                 </CardTitle>
                 <CardDescription className="text-xs text-landing-muted">
-                  Groupes organisés pour structurer les droits d&apos;accès.
+                  {t('circlesDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0 pb-2">
@@ -149,10 +151,10 @@ export default async function InviteForm({
                 <CardHeader className="pb-3">
                   <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
                     <ShieldCheck className="h-4.5 w-4.5 text-primary" />
-                    Liens d&apos;invitation
+                    {t('invitationLinksTitle')}
                   </CardTitle>
                   <CardDescription className="text-xs text-landing-muted">
-                    Historique des liens générés, actifs et expirés.
+                    {t('invitationLinksDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0 pb-2">
@@ -167,10 +169,10 @@ export default async function InviteForm({
                 <CardHeader className="pb-3">
                   <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
                     <Bug className="h-4.5 w-4.5 text-primary" />
-                    Signalements de bugs
+                    {t('bugReportsTitle')}
                   </CardTitle>
                   <CardDescription className="text-xs text-landing-muted">
-                    Problèmes remontés par les membres du journal.
+                    {t('bugReportsDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0 pb-2">
@@ -185,10 +187,10 @@ export default async function InviteForm({
                 <CardHeader className="pb-3">
                   <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
                     <LayoutGrid className="h-4.5 w-4.5 text-primary" />
-                    Pages & accès
+                    {t('pagesAccessTitle')}
                   </CardTitle>
                   <CardDescription className="text-xs text-landing-muted">
-                    Activez ou restreignez l&apos;accès à chaque page de ce journal.
+                    {t('pagesAccessDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0 pb-2">

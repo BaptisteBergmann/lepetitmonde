@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { getDateFnsLocale } from "@utils/formatting";
 import { toast } from "sonner";
@@ -26,12 +26,6 @@ interface DisplayBugReportsProps {
   babyId: string;
 }
 
-const STATUS_LABELS: Record<Enums<'bug_report_status'>, string> = {
-  new: "Nouveau",
-  reviewed: "En cours",
-  fixed: "Corrigé",
-};
-
 const STATUS_STYLES: Record<Enums<'bug_report_status'>, string> = {
   new: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   reviewed: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
@@ -39,6 +33,12 @@ const STATUS_STYLES: Record<Enums<'bug_report_status'>, string> = {
 };
 
 export default function DisplayBugReports({ bugReports: initialBugReports, babyId }: DisplayBugReportsProps) {
+  const t = useTranslations('admin.bugReports');
+  const STATUS_LABELS: Record<Enums<'bug_report_status'>, string> = {
+    new: t('statusNew'),
+    reviewed: t('statusReviewed'),
+    fixed: t('statusFixed'),
+  };
   const dateFnsLocale = getDateFnsLocale(useLocale());
   const [bugReports, setBugReports] = useState(initialBugReports);
   const [openScreenshot, setOpenScreenshot] = useState<string | null>(null);
@@ -51,14 +51,14 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
     try {
       await updateBugReportStatus(babyId, reportId, status);
       if (status === "fixed") {
-        toast.success("Statut mis à jour, le signaleur a été notifié.");
+        toast.success(t('statusUpdatedNotified'));
       }
     } catch (err) {
       console.error(err);
       if (previousStatus) {
         setBugReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status: previousStatus } : r)));
       }
-      toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour du statut.");
+      toast.error(err instanceof Error ? err.message : t('statusUpdateError'));
     } finally {
       setPendingId(null);
     }
@@ -67,7 +67,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
   if (bugReports.length === 0) {
     return (
       <div className="text-center py-10 text-landing-muted px-4">
-        <p className="text-sm font-medium">Aucun bug signalé pour le moment.</p>
+        <p className="text-sm font-medium">{t('empty')}</p>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
         {bugReports.map((report) => {
           const reporterName = [report.users?.first_name, report.users?.last_name]
             .filter(Boolean)
-            .join(" ") || report.nickname || "Utilisateur inconnu";
+            .join(" ") || report.nickname || t('unknownReporter');
           const screenshotUrl = report.screenshot_path
             ? `/api/bug-reports/${report.screenshot_path}`
             : null;
@@ -91,7 +91,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                   className="shrink-0 h-16 w-16 rounded-xl overflow-hidden border border-landing-border cursor-pointer"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={screenshotUrl} alt="Capture d'écran du bug" className="h-full w-full object-cover" />
+                  <img src={screenshotUrl} alt={t('screenshotAlt')} className="h-full w-full object-cover" />
                 </button>
               ) : (
                 <div className="shrink-0 h-16 w-16 rounded-xl border border-dashed border-landing-border flex items-center justify-center text-landing-muted">
@@ -121,7 +121,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                       className="inline-flex items-center gap-1 hover:text-landing-foreground transition-colors"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      Page
+                      {t('pageLink')}
                     </a>
                   )}
                 </div>
@@ -159,7 +159,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
         >
           <button
             onClick={() => setOpenScreenshot(null)}
-            aria-label="Fermer"
+            aria-label={t('close')}
             className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -167,7 +167,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={openScreenshot}
-            alt="Capture d'écran du bug en grand"
+            alt={t('screenshotAltLarge')}
             className="max-h-[90vh] max-w-full rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           />

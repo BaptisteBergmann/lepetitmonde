@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { createCircle } from "@utils/actions/circles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -5,15 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Plus, CircleDot } from "lucide-react";
 
 export default async function CreateCircle({ babyId }: { babyId: string }) {
+  const t = await getTranslations('admin.createCircle');
   return (
     <Card className="border-landing-border bg-landing-surface">
       <CardHeader className="pb-3">
         <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
           <CircleDot className="h-4.5 w-4.5 text-rose" />
-          Créer un cercle de partage
+          {t('title')}
         </CardTitle>
         <CardDescription className="text-xs text-landing-muted">
-          Regroupez vos proches (ex: Famille proche, Amis) pour organiser les partages.
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -24,7 +26,7 @@ export default async function CreateCircle({ babyId }: { babyId: string }) {
             <Input
               name="name"
               type="text"
-              placeholder="Ex: Famille proche, Amis..."
+              placeholder={t('namePlaceholder')}
               required
               className="w-full bg-input/40"
             />
@@ -32,7 +34,7 @@ export default async function CreateCircle({ babyId }: { babyId: string }) {
 
           <Button type="submit" className="w-full rounded-2xl cursor-pointer gap-2">
             <Plus className="h-4 w-4" />
-            <span>Créer le cercle</span>
+            <span>{t('submit')}</span>
           </Button>
         </form>
       </CardContent>

@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { getDateFnsLocale } from "@utils/formatting";
 import { toast } from "sonner";
@@ -33,17 +33,17 @@ interface RealtimeUsersListProps {
   devicesByUser: Record<string, MemberDevice[]>;
 }
 
-const ACCESS_LEVEL_LABELS: Record<Enums<'role'>, string> = {
-  admin: "Administrateur",
-  viewer: "Lecteur",
-};
-
 export default function RealtimeUsersList({
   initialUsers,
   babyId,
   isAdmin,
   devicesByUser,
 }: RealtimeUsersListProps) {
+  const t = useTranslations('admin.users');
+  const ACCESS_LEVEL_LABELS: Record<Enums<'role'>, string> = {
+    admin: t('accessAdmin'),
+    viewer: t('accessViewer'),
+  };
   const dateFnsLocale = getDateFnsLocale(useLocale());
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
@@ -95,7 +95,7 @@ export default function RealtimeUsersList({
           prev.map((u) => (u.id === userId ? { ...u, access_level: previousAccessLevel } : u))
         );
       }
-      alert(err instanceof Error ? err.message : "Erreur lors de la mise à jour du niveau d'accès.");
+      alert(err instanceof Error ? err.message : t('updateAccessError'));
     } finally {
       setPendingUserId(null);
     }
@@ -105,10 +105,10 @@ export default function RealtimeUsersList({
     setSendingUserId(userId);
     try {
       await sendNotification("hello", userId);
-      toast.success("Notification envoyée.");
+      toast.success(t('notificationSent'));
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Erreur lors de l'envoi de la notification.");
+      toast.error(err instanceof Error ? err.message : t('notificationError'));
     } finally {
       setSendingUserId(null);
     }
@@ -118,8 +118,8 @@ export default function RealtimeUsersList({
   if (users.length === 0) {
     return (
       <div className="text-center py-10 text-landing-muted px-4">
-        <p className="text-sm font-medium">Aucun membre dans ce journal pour le moment.</p>
-        <p className="text-xs text-landing-muted mt-1">Invitez des proches à rejoindre l&apos;aventure.</p>
+        <p className="text-sm font-medium">{t('empty')}</p>
+        <p className="text-xs text-landing-muted mt-1">{t('emptyHint')}</p>
       </div>
     );
   }
@@ -155,7 +155,7 @@ export default function RealtimeUsersList({
               </div>
               <div className="min-w-0">
                 <p className="font-semibold text-sm text-landing-foreground truncate">
-                  {fullName || `Membre (${user.id.substring(0, 8)})`}
+                  {fullName || t('memberFallback', { id: user.id.substring(0, 8) })}
                   {user.nickname && (
                     <span className="ml-1.5 font-normal text-landing-muted">
                       &laquo; {user.nickname} &raquo;
@@ -163,14 +163,14 @@ export default function RealtimeUsersList({
                   )}
                 </p>
                 <p className="text-[10px] text-landing-muted truncate">
-                  {joinedDate ? `Membre depuis le ${joinedDate}` : `ID: ${user.id}`}
+                  {joinedDate ? t('memberSince', { date: joinedDate }) : `ID: ${user.id}`}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
               {isAdmin ? (
-                <div title={isLastAdmin ? "Impossible de retirer le dernier administrateur." : undefined}>
+                <div title={isLastAdmin ? t('lastAdminNotice') : undefined}>
                   <Select
                     value={user.access_level}
                     onValueChange={(value: string | null) =>
@@ -205,19 +205,19 @@ export default function RealtimeUsersList({
                     )}
                   >
                     <Bell className="h-3.5 w-3.5 text-primary" />
-                    <span className="hidden sm:inline">Notifier</span>
+                    <span className="hidden sm:inline">{t('notify')}</span>
                     <span className="text-[10px] text-landing-muted">({devices.length})</span>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-64">
                     <div className="flex flex-col gap-2">
                       <p className="text-xs font-semibold text-muted-foreground">
-                        Appareils enregistrés
+                        {t('registeredDevices')}
                       </p>
                       <div className="flex flex-col gap-1.5">
                         {devices.map((device) => (
                           <div key={device.id} className="flex items-center gap-1.5 text-sm min-w-0">
                             <Smartphone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                            <span className="truncate">{device.device_label ?? "Appareil inconnu"}</span>
+                            <span className="truncate">{device.device_label ?? t('unknownDevice')}</span>
                           </div>
                         ))}
                       </div>
@@ -228,7 +228,7 @@ export default function RealtimeUsersList({
                         disabled={sendingUserId === user.id}
                       >
                         <Bell className="h-3.5 w-3.5" />
-                        {sendingUserId === user.id ? "Envoi..." : "Envoyer une notification"}
+                        {sendingUserId === user.id ? t('sending') : t('sendNotification')}
                       </Button>
                     </div>
                   </PopoverContent>
