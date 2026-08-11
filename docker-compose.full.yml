@@ -39,6 +39,7 @@ services:
       - "3000:3000"
     environment:
       SITE_URL: ${SITE_URL}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE}
       # Internal Kong gateway address — resolvable by service name since `app`
       # joins the same Compose project/network as the included Supabase stack.
       SUPABASE_URL: http://kong:8000

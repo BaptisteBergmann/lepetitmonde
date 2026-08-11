@@ -11,6 +11,7 @@ pnpm = "latest"
 
 [env]
 SITE_URL = "http://localhost:3000"
+DEFAULT_LOCALE = "fr"
 SUPABASE_URL = "http://localhost:8000"
 SUPABASE_PUBLISHABLE_KEY = ""
 SERVICE_ROLE_KEY = ""
