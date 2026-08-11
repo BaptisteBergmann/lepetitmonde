@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, getPosts } from '@utils/actions/posts'
 import { StoryGroup } from '@utils/actions/stories'
@@ -32,6 +33,7 @@ export default function FeedView({
   initialHighlights: HighlightWithStories[]
   initialStories: StoryGroup[]
 }) {
+  const t = useTranslations('feed')
   const [posts, setPosts] = useState<PostWithDetails[]>(initialPosts)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(initialPosts.length === pageSize)
@@ -65,14 +67,14 @@ export default function FeedView({
         <div className="flex justify-end">
           <Button className="gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
-            <span>Nouvelle publication</span>
+            <span>{t('newPost')}</span>
           </Button>
         </div>
       )}
 
       {posts.length === 0 && (
         <p className="text-sm text-landing-muted text-center py-12">
-          Aucune publication pour l&apos;instant.
+          {t('empty')}
         </p>
       )}
 
@@ -91,7 +93,7 @@ export default function FeedView({
             disabled={loadingMore}
           >
             {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            <span>Charger plus</span>
+            <span>{t('loadMore')}</span>
           </Button>
         </div>
       )}

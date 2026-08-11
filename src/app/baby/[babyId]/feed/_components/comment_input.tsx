@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { addComment } from '@utils/actions/comments'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,7 @@ export default function CommentInput({
   babyId: string
   onAdded: () => void
 }) {
+  const t = useTranslations('feed.comments')
   const [body, setBody] = useState("")
   const [isPending, setIsPending] = useState(false)
 
@@ -29,7 +31,7 @@ export default function CommentInput({
       onAdded()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de l'envoi du commentaire.")
+      alert(t('sendError'))
     } finally {
       setIsPending(false)
     }
@@ -41,7 +43,7 @@ export default function CommentInput({
         value={body}
         onChange={(e) => setBody(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
-        placeholder="Ajouter un commentaire..."
+        placeholder={t('inputPlaceholder')}
         className="flex-1"
       />
       <Button

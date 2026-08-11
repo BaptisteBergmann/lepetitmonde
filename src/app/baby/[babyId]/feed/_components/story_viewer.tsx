@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { X, ChevronLeft, ChevronRight, Eye, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
 import { cn } from '@utils/utils'
 import { StoryGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
@@ -28,6 +29,7 @@ export default function StoryViewer({
   onClose: () => void
   onChanged: () => void
 }) {
+  const t = useTranslations('feed')
   const isHighlight = target.kind === 'highlight'
   const stories: StoryWithUrl[] = isHighlight
     ? highlights[target.index]?.stories ?? []
@@ -147,7 +149,7 @@ export default function StoryViewer({
   }
 
   const handleDelete = async () => {
-    if (!confirm("Supprimer cette story ? Cette action est irréversible.")) return
+    if (!confirm(t('storyViewer.deleteConfirm'))) return
     await deleteStory(story.id, babyId)
     onChanged()
     goNext()
@@ -206,7 +208,7 @@ export default function StoryViewer({
 
       {highlightPickerOpen && (
         <div className="mx-4 mb-2 p-3 rounded-2xl bg-white/10 text-white space-y-2 shrink-0">
-          <p className="text-xs uppercase tracking-wider text-white/60">Ajouter aux highlights</p>
+          <p className="text-xs uppercase tracking-wider text-white/60">{t('storyViewer.addToHighlights')}</p>
           {highlights.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {highlights.map((h) => (
@@ -225,7 +227,7 @@ export default function StoryViewer({
               type="text"
               value={newHighlightName}
               onChange={(e) => setNewHighlightName(e.target.value)}
-              placeholder="Nouveau highlight"
+              placeholder={t('storyViewer.newHighlightPlaceholder')}
               className="flex-1 bg-white/10 rounded-xl px-3 py-1.5 text-sm placeholder:text-white/40 focus:outline-none"
             />
             <button
@@ -291,9 +293,9 @@ export default function StoryViewer({
         <div className="flex items-center gap-1.5 px-4 pb-4 text-white/70 text-xs shrink-0">
           <Eye className="h-3.5 w-3.5" />
           {views.count > 0 ? (
-            <span>Vu par {views.names.join(", ")}</span>
+            <span>{t('seenByNames', { names: views.names.join(", ") })}</span>
           ) : (
-            <span>Personne pour l&apos;instant</span>
+            <span>{t('nobodyYet')}</span>
           )}
         </div>
       )}

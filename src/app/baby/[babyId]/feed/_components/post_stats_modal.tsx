@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { BarChart3, X, Eye, SmilePlus, MessageCircle } from 'lucide-react'
@@ -23,6 +23,7 @@ export default function PostStatsModal({
   circles: Circle[]
   onClose: () => void
 }) {
+  const t = useTranslations('feed')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [stats, setStats] = useState<PostStats | null>(null)
 
@@ -44,7 +45,7 @@ export default function PostStatsModal({
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <BarChart3 className="h-4.5 w-4.5 text-primary" />
-            Statistiques
+            {t('postStats.title')}
           </h2>
           <button
             onClick={onClose}
@@ -65,27 +66,27 @@ export default function PostStatsModal({
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               {postCircles.length > 0 ? (
                 postCircles.map((circle, index) => (
-                  <Badge key={circle?.id ?? index} variant="secondary">{circle?.name ?? "Cercle"}</Badge>
+                  <Badge key={circle?.id ?? index} variant="secondary">{circle?.name ?? t('circleFallback')}</Badge>
                 ))
               ) : (
-                <Badge variant="destructive">Administrateurs uniquement</Badge>
+                <Badge variant="destructive">{t('adminOnly')}</Badge>
               )}
             </div>
           </div>
 
           {!stats ? (
-            <p className="text-sm text-landing-muted">Chargement...</p>
+            <p className="text-sm text-landing-muted">{t('postStats.loading')}</p>
           ) : (
             <>
-              <StatSection title="Vu par" icon={Eye}>
+              <StatSection title={t('postStats.seenBy')} icon={Eye}>
                 {stats.views.count > 0 ? (
                   <p className="text-sm text-landing-foreground">{stats.views.names.join(", ")}</p>
                 ) : (
-                  <p className="text-sm text-landing-muted">Personne pour l&apos;instant.</p>
+                  <p className="text-sm text-landing-muted">{t('nobodyYet')}</p>
                 )}
               </StatSection>
 
-              <StatSection title="Réactions" icon={SmilePlus}>
+              <StatSection title={t('postStats.reactions')} icon={SmilePlus}>
                 {stats.reactions.length > 0 ? (
                   <div className="space-y-1">
                     {stats.reactions.map(({ emoji, count, names }) => (
@@ -97,11 +98,11 @@ export default function PostStatsModal({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-landing-muted">Aucune réaction pour l&apos;instant.</p>
+                  <p className="text-sm text-landing-muted">{t('postStats.noReactions')}</p>
                 )}
               </StatSection>
 
-              <StatSection title="Commentaires" icon={MessageCircle}>
+              <StatSection title={t('postStats.comments')} icon={MessageCircle}>
                 <p className="text-sm text-landing-foreground">{stats.commentCount}</p>
               </StatSection>
             </>

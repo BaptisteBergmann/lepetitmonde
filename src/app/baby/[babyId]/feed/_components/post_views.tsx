@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Eye } from 'lucide-react'
 import { getPostViews, markPostViewed, PostViewsData } from '@utils/actions/views'
 import { formatNamesPreview } from '@utils/users'
@@ -19,6 +20,7 @@ export default function PostViews({
   isAdmin: boolean
   initialViews: PostViewsData
 }) {
+  const t = useTranslations('feed')
   const [views, setViews] = useState(initialViews)
   const [open, setOpen] = useState(false)
   // Always non-zero size (even with no children yet) so the IntersectionObserver
@@ -58,7 +60,7 @@ export default function PostViews({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-auto p-2">
             <p className="text-xs text-landing-foreground whitespace-nowrap">
-              Vu par {formatNamesPreview(views.names)}
+              {t('seenByNames', { names: formatNamesPreview(views.names) })}
             </p>
           </PopoverContent>
         </Popover>

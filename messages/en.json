@@ -208,6 +208,88 @@
     "emptyDescription": "No section is available yet with your access level.",
     "footer": "A private journal, shared only with your family"
   },
+  "feed": {
+    "eyebrow": "Page — Everyday life",
+    "title": "Journal",
+    "subtitle": "Baby's photos and memories, shared with family.",
+    "loading": "Loading the journal...",
+    "pendingAccess": "You're not attached to a group in this journal yet. The admin has been notified and you'll get access to the content once they add you to a group.",
+    "newPost": "New post",
+    "empty": "No posts yet.",
+    "loadMore": "Load more",
+    "adminOnly": "Admins only",
+    "circleFallback": "Circle",
+    "nobodyYet": "No one yet.",
+    "seenByNames": "Seen by {names}",
+    "postCard": {
+      "deleteConfirm": "Delete this post? This action can't be undone.",
+      "deleteError": "Something went wrong while deleting."
+    },
+    "comments": {
+      "empty": "No comments yet.",
+      "unknownUser": "User",
+      "inputPlaceholder": "Add a comment...",
+      "sendError": "Something went wrong while sending the comment.",
+      "editError": "Something went wrong while editing the comment.",
+      "deleteConfirm": "Delete this comment?",
+      "deleteError": "Something went wrong while deleting the comment."
+    },
+    "postStats": {
+      "title": "Stats",
+      "loading": "Loading...",
+      "seenBy": "Seen by",
+      "reactions": "Reactions",
+      "noReactions": "No reactions yet.",
+      "comments": "Comments"
+    },
+    "postForm": {
+      "newTitle": "New post",
+      "editTitle": "Edit post",
+      "photosVideosLabel": "Photos / videos",
+      "captionLabel": "Caption (optional)",
+      "photoDateLabel": "Photo date",
+      "visibleByLabel": "Visible to",
+      "visibleByPlaceholder": "Hidden (no circle)",
+      "visibleByHint": "No circle selected = hidden post, visible to admins only.",
+      "removePoll": "Remove poll",
+      "addPoll": "Add a poll",
+      "pollLockedNotice": "This poll already has votes, it can no longer be edited.",
+      "pollQuestionPlaceholder": "Who ate the most apples?",
+      "pollOptionPlaceholder": "Option {number}",
+      "addPollOption": "Add an option",
+      "cancel": "Cancel",
+      "publishing": "Publishing...",
+      "publish": "Publish",
+      "saving": "Saving...",
+      "save": "Save",
+      "publishError": "Something went wrong while publishing.",
+      "editError": "Something went wrong while saving the changes."
+    },
+    "storyForm": {
+      "title": "New story",
+      "photoVideoLabel": "Photo / video",
+      "groupLabel": "Group (optional)",
+      "groupPlaceholder": "e.g. Day at the beach",
+      "groupHint": "Stories sharing the same group name appear together, even if they come from different people.",
+      "durationLabel": "Duration",
+      "duration24h": "24 hours",
+      "duration3d": "3 days",
+      "duration7d": "7 days",
+      "durationNever": "Never expires",
+      "visibleByPlaceholder": "Hidden (no circle)",
+      "visibleByHint": "No circle selected = hidden story, visible to admins only.",
+      "uploadError": "File upload failed",
+      "publishError": "Something went wrong while publishing the story."
+    },
+    "storyTray": {
+      "add": "Add"
+    },
+    "storyViewer": {
+      "deleteConfirm": "Delete this story? This action can't be undone.",
+      "addToHighlights": "Add to highlights",
+      "newHighlightPlaceholder": "New highlight"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Settings",

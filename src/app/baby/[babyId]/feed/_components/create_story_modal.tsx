@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -20,13 +21,6 @@ import { Loader2, Sparkles, X } from 'lucide-react'
 
 type Circle = Tables<'circles'>
 
-const DURATION_LABELS: Record<string, string> = {
-  '24': '24 heures',
-  '72': '3 jours',
-  '168': '7 jours',
-  never: 'Ne expire jamais',
-}
-
 export default function CreateStoryModal({
   babyId,
   circles,
@@ -40,6 +34,14 @@ export default function CreateStoryModal({
   onClose: () => void
   onCreated: () => void
 }) {
+  const t = useTranslations('feed.storyForm')
+  const tShared = useTranslations('feed.postForm')
+  const DURATION_LABELS: Record<string, string> = {
+    '24': t('duration24h'),
+    '72': t('duration3d'),
+    '168': t('duration7d'),
+    never: t('durationNever'),
+  }
   const [storyId] = useState(() => crypto.randomUUID())
 
   const [caption, setCaption] = useState("")
@@ -70,7 +72,7 @@ export default function CreateStoryModal({
       const finalNames = { ...upload.finalNames, ...newlyUploaded }
       const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
       const file = upload.files.find((f) => successNames.has(f.name))
-      if (!file) throw new Error("Échec de l'envoi du fichier")
+      if (!file) throw new Error(t('uploadError'))
 
       const filename = finalNames[file.name] ?? file.name
       const mimeType = file.type || 'application/octet-stream'
@@ -105,7 +107,7 @@ export default function CreateStoryModal({
       onClose()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la publication de la story.")
+      alert(t('publishError'))
     } finally {
       setIsPending(false)
     }
@@ -126,7 +128,7 @@ export default function CreateStoryModal({
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <Sparkles className="h-4.5 w-4.5 text-primary" />
-            Nouvelle story
+            {t('title')}
           </h2>
           <button
             onClick={onClose}
@@ -140,7 +142,7 @@ export default function CreateStoryModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Photo / vidéo
+              {t('photoVideoLabel')}
             </Label>
             <Dropzone {...upload}>
               <DropzoneEmptyState />
@@ -150,7 +152,7 @@ export default function CreateStoryModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="story-caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Légende (facultative)
+              {tShared('captionLabel')}
             </Label>
             <textarea
               id="story-caption"
@@ -163,7 +165,7 @@ export default function CreateStoryModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="story-group" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Groupe (facultatif)
+              {t('groupLabel')}
             </Label>
             <input
               type="text"
@@ -171,7 +173,7 @@ export default function CreateStoryModal({
               list="story-group-labels"
               value={groupLabel}
               onChange={(e) => setGroupLabel(e.target.value)}
-              placeholder="ex: Journée à la plage"
+              placeholder={t('groupPlaceholder')}
               className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
             />
             <datalist id="story-group-labels">
@@ -180,13 +182,13 @@ export default function CreateStoryModal({
               ))}
             </datalist>
             <p className="text-xs text-muted-foreground">
-              Les stories partageant le même nom de groupe apparaissent ensemble, même si elles viennent de plusieurs personnes.
+              {t('groupHint')}
             </p>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Durée
+              {t('durationLabel')}
             </Label>
             <Select items={DURATION_LABELS} value={duration} onValueChange={(value) => value && setDuration(value as string)}>
               <SelectTrigger className="w-full text-foreground bg-input/50">
@@ -204,7 +206,7 @@ export default function CreateStoryModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Visible par
+              {tShared('visibleByLabel')}
             </Label>
             <Select
               items={circleItems}
@@ -213,7 +215,7 @@ export default function CreateStoryModal({
               onValueChange={(value) => setCircleIds(value as string[])}
             >
               <SelectTrigger className="w-full text-foreground bg-input/50">
-                <SelectValue placeholder="Masqué (aucun cercle)" />
+                <SelectValue placeholder={t('visibleByPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -224,7 +226,7 @@ export default function CreateStoryModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Aucun cercle sélectionné = story masquée, visible uniquement par les administrateurs.
+              {t('visibleByHint')}
             </p>
           </div>
 
@@ -236,7 +238,7 @@ export default function CreateStoryModal({
             className="rounded-2xl cursor-pointer"
             onClick={onClose}
           >
-            Annuler
+            {tShared('cancel')}
           </Button>
           <Button
             disabled={upload.files.length !== 1 || hasFileErrors || isPending}
@@ -246,10 +248,10 @@ export default function CreateStoryModal({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Publication...</span>
+                <span>{tShared('publishing')}</span>
               </>
             ) : (
-              <span>Publier</span>
+              <span>{tShared('publish')}</span>
             )}
           </Button>
         </div>

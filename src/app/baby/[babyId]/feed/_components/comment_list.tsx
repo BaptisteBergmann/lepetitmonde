@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { updateComment, deleteComment } from '@utils/actions/comments'
@@ -24,6 +24,7 @@ export default function CommentList({
   isAdmin: boolean
   onChanged: () => void
 }) {
+  const t = useTranslations('feed.comments')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBody, setEditBody] = useState("")
@@ -31,7 +32,7 @@ export default function CommentList({
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   if (comments.length === 0) {
-    return <p className="text-xs text-landing-muted">Aucun commentaire pour l&apos;instant.</p>
+    return <p className="text-xs text-landing-muted">{t('empty')}</p>
   }
 
   const startEditing = (comment: Comment) => {
@@ -55,14 +56,14 @@ export default function CommentList({
       onChanged()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la modification du commentaire.")
+      alert(t('editError'))
     } finally {
       setSavingId(null)
     }
   }
 
   const handleDelete = async (comment: Comment) => {
-    if (!confirm("Supprimer ce commentaire ?")) return
+    if (!confirm(t('deleteConfirm'))) return
 
     setDeletingId(comment.id)
     try {
@@ -70,7 +71,7 @@ export default function CommentList({
       onChanged()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la suppression du commentaire.")
+      alert(t('deleteError'))
     } finally {
       setDeletingId(null)
     }
@@ -79,14 +80,14 @@ export default function CommentList({
   return (
     <div className="flex flex-col gap-2">
       {comments.map((comment) => {
-        const author = getDisplayName(comment.users, comment.nickname) || "Utilisateur"
+        const author = getDisplayName(comment.users, comment.nickname) || t('unknownUser')
         const isOwner = currentUserId !== null && comment.user_id === currentUserId
         const isEditing = editingId === comment.id
 
         return (
           <div key={comment.id} className="rounded-2xl bg-landing-background px-3 py-2">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-semibold text-landing-foreground">{author || "Utilisateur"}</span>
+              <span className="text-xs font-semibold text-landing-foreground">{author || t('unknownUser')}</span>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-[10px] text-landing-muted">
                   {format(parseISO(comment.created_at), 'd MMM à HH:mm', { locale: dateFnsLocale })}

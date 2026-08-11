@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -32,6 +33,7 @@ export default function EditPostModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const t = useTranslations('feed.postForm')
 
   const [caption, setCaption] = useState(post.caption ?? "")
   const [takenAt, setTakenAt] = useState(format(parseISO(post.taken_at), 'yyyy-MM-dd'))
@@ -82,7 +84,7 @@ export default function EditPostModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la modification.")
+      alert(t('editError'))
     } finally {
       setIsPending(false)
     }
@@ -113,7 +115,7 @@ export default function EditPostModal({
         <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
           <h2 className="font-display text-base font-semibold flex items-center gap-2">
             <Pencil className="h-4.5 w-4.5 text-primary" />
-            Modifier la publication
+            {t('editTitle')}
           </h2>
           <button
             onClick={onClose}
@@ -127,7 +129,7 @@ export default function EditPostModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Légende (facultative)
+              {t('captionLabel')}
             </Label>
             <textarea
               id="caption"
@@ -140,7 +142,7 @@ export default function EditPostModal({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="taken_at" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Date de la photo
+              {t('photoDateLabel')}
             </Label>
             <input
               type="date"
@@ -154,7 +156,7 @@ export default function EditPostModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Visible par
+              {t('visibleByLabel')}
             </Label>
             <Select
               items={circleItems}
@@ -163,7 +165,7 @@ export default function EditPostModal({
               onValueChange={(value) => setCircleIds(value as string[])}
             >
               <SelectTrigger className="w-full text-foreground bg-input/50">
-                <SelectValue placeholder="Masqué (aucun cercle)" />
+                <SelectValue placeholder={t('visibleByPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -174,7 +176,7 @@ export default function EditPostModal({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Aucun cercle sélectionné = publication masquée, visible uniquement par les administrateurs.
+              {t('visibleByHint')}
             </p>
           </div>
 
@@ -186,12 +188,12 @@ export default function EditPostModal({
               className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <BarChart3 className="h-3.5 w-3.5" />
-              {pollEnabled ? "Retirer le sondage" : "Ajouter un sondage"}
+              {pollEnabled ? t('removePoll') : t('addPoll')}
             </button>
 
             {pollHasVotes && (
               <p className="text-xs text-muted-foreground">
-                Ce sondage a déjà des votes, il ne peut plus être modifié.
+                {t('pollLockedNotice')}
               </p>
             )}
 
@@ -202,7 +204,7 @@ export default function EditPostModal({
                   value={pollQuestion}
                   onChange={(e) => setPollQuestion(e.target.value)}
                   disabled={pollHasVotes}
-                  placeholder="Qui a mangé le plus de pommes ?"
+                  placeholder={t('pollQuestionPlaceholder')}
                   className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
                 />
                 <div className="flex flex-col gap-1.5">
@@ -213,7 +215,7 @@ export default function EditPostModal({
                         value={option}
                         onChange={(e) => updatePollOption(index, e.target.value)}
                         disabled={pollHasVotes}
-                        placeholder={`Option ${index + 1}`}
+                        placeholder={t('pollOptionPlaceholder', { number: index + 1 })}
                         className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
                       />
                       <button
@@ -234,7 +236,7 @@ export default function EditPostModal({
                   className="flex items-center gap-1 self-start text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Ajouter une option
+                  {t('addPollOption')}
                 </button>
               </div>
             )}
@@ -248,7 +250,7 @@ export default function EditPostModal({
             className="rounded-2xl cursor-pointer"
             onClick={onClose}
           >
-            Annuler
+            {t('cancel')}
           </Button>
           <Button
             disabled={!takenAt || !pollValid || isPending}
@@ -258,10 +260,10 @@ export default function EditPostModal({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Enregistrement...</span>
+                <span>{t('saving')}</span>
               </>
             ) : (
-              <span>Enregistrer</span>
+              <span>{t('save')}</span>
             )}
           </Button>
         </div>

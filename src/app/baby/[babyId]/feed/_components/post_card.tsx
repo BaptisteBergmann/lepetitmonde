@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
@@ -36,6 +36,7 @@ export default function PostCard({
   currentUserId: string | null
 }) {
   const router = useRouter()
+  const t = useTranslations('feed')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -48,7 +49,7 @@ export default function PostCard({
   }, [post.id, babyId])
 
   const handleDelete = async () => {
-    if (!confirm("Supprimer cette publication ? Cette action est irréversible.")) return
+    if (!confirm(t('postCard.deleteConfirm'))) return
 
     setDeleting(true)
     try {
@@ -56,7 +57,7 @@ export default function PostCard({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Une erreur est survenue lors de la suppression.")
+      alert(t('postCard.deleteError'))
     } finally {
       setDeleting(false)
     }
@@ -148,11 +149,11 @@ export default function PostCard({
                 {postCircles.length > 0 ? (
                   postCircles.map((circle, index) => (
                     <Badge key={circle?.id ?? index} variant="secondary">
-                      {circle?.name ?? "Cercle"}
+                      {circle?.name ?? t('circleFallback')}
                     </Badge>
                   ))
                 ) : (
-                  <Badge variant="destructive">Administrateurs uniquement</Badge>
+                  <Badge variant="destructive">{t('adminOnly')}</Badge>
                 )}
               </div>
             )}

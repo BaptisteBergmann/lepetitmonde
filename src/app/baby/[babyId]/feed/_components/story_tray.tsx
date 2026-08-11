@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus, Film } from 'lucide-react'
 import { Tables } from '@utils/supabase/database.types'
 import { StoryGroup, StoryWithUrl, getActiveStories } from '@utils/actions/stories'
@@ -66,6 +67,7 @@ export default function StoryTray({
   initialHighlights: HighlightWithStories[]
   initialStories: StoryGroup[]
 }) {
+  const t = useTranslations('feed.storyTray')
   const [highlights, setHighlights] = useState(initialHighlights)
   const [groups, setGroups] = useState(initialStories)
   const [createOpen, setCreateOpen] = useState(false)
@@ -120,7 +122,7 @@ export default function StoryTray({
               <span className="flex size-14 items-center justify-center rounded-full border-2 border-dashed border-landing-border text-landing-muted hover:text-primary hover:border-primary transition-colors">
                 <Plus className="h-5 w-5" />
               </span>
-              <span className="text-xs text-landing-muted">Ajouter</span>
+              <span className="text-xs text-landing-muted">{t('add')}</span>
             </button>
           )}
 

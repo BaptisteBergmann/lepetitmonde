@@ -208,6 +208,88 @@
     "emptyDescription": "Aucune section n'est encore disponible avec votre niveau d'accès.",
     "footer": "Un journal privé, partagé uniquement avec votre famille"
   },
+  "feed": {
+    "eyebrow": "Page — Le quotidien",
+    "title": "Journal",
+    "subtitle": "Les photos et souvenirs de bébé, partagés en famille.",
+    "loading": "Chargement du journal...",
+    "pendingAccess": "Vous n'êtes pas encore rattaché à un groupe de ce journal. L'administrateur a été notifié et vous aurez accès au contenu dès qu'il vous aura ajouté à un groupe.",
+    "newPost": "Nouvelle publication",
+    "empty": "Aucune publication pour l'instant.",
+    "loadMore": "Charger plus",
+    "adminOnly": "Administrateurs uniquement",
+    "circleFallback": "Cercle",
+    "nobodyYet": "Personne pour l'instant.",
+    "seenByNames": "Vu par {names}",
+    "postCard": {
+      "deleteConfirm": "Supprimer cette publication ? Cette action est irréversible.",
+      "deleteError": "Une erreur est survenue lors de la suppression."
+    },
+    "comments": {
+      "empty": "Aucun commentaire pour l'instant.",
+      "unknownUser": "Utilisateur",
+      "inputPlaceholder": "Ajouter un commentaire...",
+      "sendError": "Une erreur est survenue lors de l'envoi du commentaire.",
+      "editError": "Une erreur est survenue lors de la modification du commentaire.",
+      "deleteConfirm": "Supprimer ce commentaire ?",
+      "deleteError": "Une erreur est survenue lors de la suppression du commentaire."
+    },
+    "postStats": {
+      "title": "Statistiques",
+      "loading": "Chargement...",
+      "seenBy": "Vu par",
+      "reactions": "Réactions",
+      "noReactions": "Aucune réaction pour l'instant.",
+      "comments": "Commentaires"
+    },
+    "postForm": {
+      "newTitle": "Nouvelle publication",
+      "editTitle": "Modifier la publication",
+      "photosVideosLabel": "Photos / vidéos",
+      "captionLabel": "Légende (facultative)",
+      "photoDateLabel": "Date de la photo",
+      "visibleByLabel": "Visible par",
+      "visibleByPlaceholder": "Masqué (aucun cercle)",
+      "visibleByHint": "Aucun cercle sélectionné = publication masquée, visible uniquement par les administrateurs.",
+      "removePoll": "Retirer le sondage",
+      "addPoll": "Ajouter un sondage",
+      "pollLockedNotice": "Ce sondage a déjà des votes, il ne peut plus être modifié.",
+      "pollQuestionPlaceholder": "Qui a mangé le plus de pommes ?",
+      "pollOptionPlaceholder": "Option {number}",
+      "addPollOption": "Ajouter une option",
+      "cancel": "Annuler",
+      "publishing": "Publication...",
+      "publish": "Publier",
+      "saving": "Enregistrement...",
+      "save": "Enregistrer",
+      "publishError": "Une erreur est survenue lors de la publication.",
+      "editError": "Une erreur est survenue lors de la modification."
+    },
+    "storyForm": {
+      "title": "Nouvelle story",
+      "photoVideoLabel": "Photo / vidéo",
+      "groupLabel": "Groupe (facultatif)",
+      "groupPlaceholder": "ex: Journée à la plage",
+      "groupHint": "Les stories partageant le même nom de groupe apparaissent ensemble, même si elles viennent de plusieurs personnes.",
+      "durationLabel": "Durée",
+      "duration24h": "24 heures",
+      "duration3d": "3 jours",
+      "duration7d": "7 jours",
+      "durationNever": "N'expire jamais",
+      "visibleByPlaceholder": "Masqué (aucun cercle)",
+      "visibleByHint": "Aucun cercle sélectionné = story masquée, visible uniquement par les administrateurs.",
+      "uploadError": "Échec de l'envoi du fichier",
+      "publishError": "Une erreur est survenue lors de la publication de la story."
+    },
+    "storyTray": {
+      "add": "Ajouter"
+    },
+    "storyViewer": {
+      "deleteConfirm": "Supprimer cette story ? Cette action est irréversible.",
+      "addToHighlights": "Ajouter aux highlights",
+      "newHighlightPlaceholder": "Nouveau highlight"
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "settingsTitle": "Réglages",
