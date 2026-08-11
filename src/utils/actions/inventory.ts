@@ -7,6 +7,7 @@ import { logger } from '../logger'
 import { getDisplayName } from '../users'
 import { assertIsAdmin } from './access'
 import { getUserAccess, getNicknamesByBaby } from './users'
+import { actionError } from './errors'
 
 export async function getInventoryItems(babyId: string) {
   const supabase = await createClient()
@@ -105,10 +106,10 @@ export async function getBuyListItems(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const contextLogger = logger.child({ function: getBuyListItems.name, babyId })
 
@@ -143,10 +144,10 @@ export async function adjustInventoryOwned(babyId: string, itemId: string, delta
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const contextLogger = logger.child({ function: adjustInventoryOwned.name, babyId, itemId, delta })
 

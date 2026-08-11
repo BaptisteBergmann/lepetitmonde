@@ -3,15 +3,17 @@
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { assertIsAdmin } from './access'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { getDisplayName } from '../users'
 import { logger } from '../logger'
+import { actionError } from './errors'
 
-function assertValidOptions(options: string[]) {
+async function assertValidOptions(options: string[]) {
   const trimmed = options.map((option) => option.trim()).filter(Boolean)
   if (trimmed.length < 2 || trimmed.length > 6) {
-    throw new Error("Un sondage doit avoir entre 2 et 6 options")
+    throw await actionError('pollOptionsCount')
   }
   return trimmed
 }
@@ -23,8 +25,8 @@ export async function createPoll(postId: string, babyId: string, question: strin
   await assertIsAdmin(supabase, babyId)
 
   const trimmedQuestion = question.trim()
-  if (!trimmedQuestion) throw new Error("La question du sondage est requise")
-  const trimmedOptions = assertValidOptions(options)
+  if (!trimmedQuestion) throw await actionError('pollQuestionRequired')
+  const trimmedOptions = await assertValidOptions(options)
 
   const { data: poll, error } = await supabase
     .from('polls')
@@ -57,11 +59,11 @@ export async function updatePoll(pollId: string, postId: string, babyId: string,
     .eq('poll_id', pollId)
 
   if (voteCountError) { contextLogger.error(voteCountError, "Error checking poll votes"); throw voteCountError }
-  if (voteCount && voteCount > 0) throw new Error("Impossible de modifier un sondage ayant déjà des votes")
+  if (voteCount && voteCount > 0) throw await actionError('cannotEditVotedPoll')
 
   const trimmedQuestion = question.trim()
-  if (!trimmedQuestion) throw new Error("La question du sondage est requise")
-  const trimmedOptions = assertValidOptions(options)
+  if (!trimmedQuestion) throw await actionError('pollQuestionRequired')
+  const trimmedOptions = await assertValidOptions(options)
 
   const { error } = await supabase
     .from('polls')
@@ -109,10 +111,10 @@ export async function votePoll(pollId: string, babyId: string, optionId: string)
   const contextLogger = logger.child({ function: votePoll.name, pollId, babyId, optionId })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('poll_votes')
@@ -151,6 +153,7 @@ export async function getPollWithResults(postId: string, babyId: string): Promis
   if (error) { contextLogger.error(error, "Error fetching poll"); return null }
   if (!data) return null
 
+  const tCommon = await getTranslations('common')
   const sortedOptions = [...data.poll_options].sort((a, b) => a.position - b.position)
 
   let myOptionId: string | null = null
@@ -158,7 +161,7 @@ export async function getPollWithResults(postId: string, babyId: string): Promis
     if (user && option.poll_votes.some((vote) => vote.user_id === user.id)) myOptionId = option.id
     const voterNames = option.poll_votes.map(({ user_id, users: voterOrList }) => {
       const voter = Array.isArray(voterOrList) ? voterOrList[0] : voterOrList
-      return getDisplayName(voter, nicknames[user_id]) || "Utilisateur"
+      return getDisplayName(voter, nicknames[user_id]) || tCommon('userFallback')
     })
     return { id: option.id, label: option.label, count: option.poll_votes.length, voterNames }
   })
@@ -188,6 +191,7 @@ export async function getPollsForPosts(postIds: string[], babyId: string): Promi
 
   if (error) { contextLogger.error(error, "Error fetching polls for posts"); return byPost }
 
+  const tCommon = await getTranslations('common')
   for (const poll of data) {
     const sortedOptions = [...poll.poll_options].sort((a, b) => a.position - b.position)
 
@@ -196,7 +200,7 @@ export async function getPollsForPosts(postIds: string[], babyId: string): Promi
       if (user && option.poll_votes.some((vote) => vote.user_id === user.id)) myOptionId = option.id
       const voterNames = option.poll_votes.map(({ user_id, users: voterOrList }) => {
         const voter = Array.isArray(voterOrList) ? voterOrList[0] : voterOrList
-        return getDisplayName(voter, nicknames[user_id]) || "Utilisateur"
+        return getDisplayName(voter, nicknames[user_id]) || tCommon('userFallback')
       })
       return { id: option.id, label: option.label, count: option.poll_votes.length, voterNames }
     })

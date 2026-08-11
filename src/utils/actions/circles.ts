@@ -8,6 +8,7 @@ import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
 import { notifyUsers } from './notify'
+import { actionError } from './errors'
 
 type NewCircle = TablesInsert<'circles'>;
 
@@ -55,7 +56,7 @@ export async function getCircles(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const rep = await supabase
     .from('circles')
@@ -71,7 +72,7 @@ export async function getCirclesAccess(babyId: string, userId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const rep = await supabase
     .from('circles_access')
@@ -94,7 +95,7 @@ export async function getAllCirclesAccess(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const rep = await supabase
     .from('circles_access')

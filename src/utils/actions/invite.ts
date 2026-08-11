@@ -5,6 +5,7 @@ import { logger } from '@/utils/logger'
 import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
 import { sendInviteEmail } from '@/utils/email'
+import { actionError } from './errors'
 
 export async function sendInvite(formData: FormData) {
   const babyId = formData.get('babyId') as string
@@ -14,7 +15,7 @@ export async function sendInvite(formData: FormData) {
   const supabase = await createClient()
   await assertIsAdmin(supabase, babyId)
 
-  if (!email) throw new Error("L'e-mail est requis")
+  if (!email) throw await actionError('emailRequired')
 
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + 24);
@@ -27,7 +28,7 @@ export async function sendInvite(formData: FormData) {
 
   if (babyError) {
     contextLogger.error(babyError, "Error fetching baby for invite email")
-    throw new Error("Erreur lors de l'invitation")
+    throw await actionError('inviteError')
   }
 
   const { data: invitation, error } = await supabase
@@ -38,7 +39,7 @@ export async function sendInvite(formData: FormData) {
 
   if (error) {
     contextLogger.error(error, "Error creating invitation")
-    throw new Error("Erreur lors de l'invitation")
+    throw await actionError('inviteError')
   }
 
   const inviteUrl = `${process.env.SITE_URL}/invite?token=${invitation.id}`

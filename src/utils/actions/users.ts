@@ -8,6 +8,7 @@ import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger';
 import { assertIsAdmin } from './access'
 import { createTtlCache } from '../cache/ttl-cache'
+import { actionError } from './errors'
 
 // Every comment/reaction/poll/view read (and the media proxy) checks
 // getUserAccess, often several times per page load and again for every
@@ -126,7 +127,7 @@ export async function updateUserAccessLevel(babyId: string, userId: string, acce
       if (countError) { contextLogger.error(countError, "Error counting admins"); throw countError }
 
       if ((count ?? 0) <= 1) {
-        throw new Error("Impossible de retirer le dernier administrateur de ce journal.")
+        throw await actionError('cannotRemoveLastAdmin')
       }
     }
   }
@@ -149,7 +150,7 @@ export async function updateProfile(formData: FormData) {
   const contextLogger = logger.child({ function: updateProfile.name })
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const firstName = (formData.get('firstName') as string || '').trim()
   const lastName = (formData.get('lastName') as string || '').trim()
@@ -177,10 +178,10 @@ export async function requestEmailChange(formData: FormData) {
   const contextLogger = logger.child({ function: requestEmailChange.name })
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const email = (formData.get('email') as string || '').trim()
-  if (!email) throw new Error("Adresse email requise")
+  if (!email) throw await actionError('emailRequired')
 
   const { error } = await supabase.auth.updateUser({ email })
   if (error) { contextLogger.error(error, "Error requesting email change"); throw error }
@@ -193,7 +194,7 @@ export async function updateBabyAccessSettings(babyId: string, formData: FormDat
   const contextLogger = logger.child({ function: updateBabyAccessSettings.name, babyId })
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const nickname = (formData.get('nickname') as string || '').trim()
   const relationToBaby = (formData.get('relationToBaby') as string || '').trim()

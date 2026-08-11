@@ -8,15 +8,16 @@ import { logger } from '../logger'
 import { getUserAccess } from './users'
 import { assertIsAdmin, getAllBabyMemberIds } from './access'
 import { notifyUsers } from './notify'
+import { actionError } from './errors'
 
 export async function getQuestions(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const contextLogger = logger.child({
     module: 'guess-action',
@@ -60,10 +61,10 @@ export async function getMyProposals(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const contextLogger = logger.child({ function: getMyProposals.name, babyId, user: user.id })
 
@@ -123,7 +124,7 @@ export async function deleteQuestion(babyId: string, questionId: string) {
 
   if (countError) { contextLogger.error(countError, "Error checking guesses before deletion"); throw countError }
   if (count && count > 0) {
-    throw new Error("Impossible de supprimer un pronostic ayant déjà des réponses")
+    throw await actionError('cannotDeleteAnsweredPronostic')
   }
 
   const { error } = await supabase
@@ -155,7 +156,7 @@ export async function moveQuestion(babyId: string, questionId: string, direction
   if (error) { contextLogger.error(error, "Error fetching questions before reorder"); throw error }
 
   const index = questions.findIndex((q) => q.id === questionId)
-  if (index === -1) throw new Error("Pronostic introuvable")
+  if (index === -1) throw await actionError('pronosticNotFound')
 
   const swapIndex = direction === 'up' ? index - 1 : index + 1
   if (swapIndex < 0 || swapIndex >= questions.length) return
@@ -191,7 +192,7 @@ export async function updateQuestion(babyId: string, questionId: string, formDat
 
   if (countError) { contextLogger.error(countError, "Error checking guesses before update"); throw countError }
   if (count && count > 0) {
-    throw new Error("Impossible de modifier un pronostic ayant déjà des réponses")
+    throw await actionError('cannotEditAnsweredPronostic')
   }
 
   const { error } = await supabase
@@ -218,12 +219,12 @@ export async function addQuestion(formData: NewGuess) {
   const contextLogger = logger.child({ function: addQuestion.name, babyId: formData.baby_id })
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(formData.baby_id)
   if (Array.isArray(access)) {
     contextLogger.warn({ user: user.id }, "User without baby access attempted to create a question")
-    throw new Error("Non autorisé")
+    throw await actionError('unauthorized')
   }
 
   const isAdmin = access.access_level === "admin"
@@ -271,10 +272,10 @@ export async function getQuestionsWithGuess(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const contextLogger = logger.child({
     function: getQuestionsWithGuess.name,
@@ -301,10 +302,10 @@ export async function getQuestionsWithoutGuess(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const contextLogger = logger.child({
     function: getQuestionsWithoutGuess.name,

@@ -6,19 +6,21 @@ import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Enums } from '@utils/supabase/database.types'
+import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { ensureBugReportsBucket } from './storage'
 import { assertIsAdmin } from './access'
 import { getNicknamesByBaby } from './users'
+import { actionError } from './errors'
 
 export async function submitBugReport(formData: FormData) {
   const contextLogger = logger.child({ function: submitBugReport.name })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non authentifié")
+  if (!user) throw await actionError('unauthenticated')
 
   const description = (formData.get('description') as string | null)?.trim()
-  if (!description) throw new Error("Merci de décrire le problème.")
+  if (!description) throw await actionError('describeIssue')
 
   const pageUrl = (formData.get('pageUrl') as string | null) || null
   const userAgent = (formData.get('userAgent') as string | null) || null
@@ -126,9 +128,10 @@ async function notifyBugReportFixed(userId: string) {
 
     if (!devices || devices.length === 0) return
 
+    const t = await getTranslations('pushNotifications.bugFixed')
     const payload = JSON.stringify({
-      title: 'Le petit monde',
-      body: 'Le bug que vous avez signalé a été corrigé. Merci pour votre signalement !',
+      title: t('title'),
+      body: t('body'),
       icon: '/favicon-96x96.png',
     })
 

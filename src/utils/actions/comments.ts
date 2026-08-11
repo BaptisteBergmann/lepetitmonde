@@ -10,16 +10,17 @@ import { getBabyAdminIds } from './access'
 import { notifyUsers } from './notify'
 import { getDisplayName } from '@utils/users'
 import { logger } from '../logger'
+import { actionError } from './errors'
 
 export async function addComment(postId: string, babyId: string, body: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addComment.name, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const circleIds = await getUserCircleIds(babyId, user.id)
 
@@ -55,7 +56,7 @@ export async function updateComment(commentId: string, postId: string, babyId: s
   const contextLogger = logger.child({ function: updateComment.name, commentId, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { data, error } = await supabase
     .from('post_comments')
@@ -66,7 +67,7 @@ export async function updateComment(commentId: string, postId: string, babyId: s
     .select('id')
 
   if (error) { contextLogger.error(error, "Error updating comment"); throw error }
-  if (data.length === 0) { contextLogger.warn("Non-owner attempted to update comment"); throw new Error("Non autorisé") }
+  if (data.length === 0) { contextLogger.warn("Non-owner attempted to update comment"); throw await actionError('unauthorized') }
 
   contextLogger.info("Comment updated")
 
@@ -78,7 +79,7 @@ export async function deleteComment(commentId: string, postId: string, babyId: s
   const contextLogger = logger.child({ function: deleteComment.name, commentId, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
   const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
@@ -89,7 +90,7 @@ export async function deleteComment(commentId: string, postId: string, babyId: s
   const { data, error } = await query.select('id')
 
   if (error) { contextLogger.error(error, "Error deleting comment"); throw error }
-  if (data.length === 0) { contextLogger.warn("Unauthorized attempt to delete comment"); throw new Error("Non autorisé") }
+  if (data.length === 0) { contextLogger.warn("Unauthorized attempt to delete comment"); throw await actionError('unauthorized') }
 
   contextLogger.info("Comment deleted")
 

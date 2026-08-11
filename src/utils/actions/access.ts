@@ -1,10 +1,11 @@
 'use server'
 
 import { createClient } from '@utils/supabase/server'
+import { actionError } from './errors'
 
 export async function assertIsAdmin(supabase: Awaited<ReturnType<typeof createClient>>, babyId: string) {
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { data: access, error } = await supabase
     .from('baby_access')
@@ -14,7 +15,7 @@ export async function assertIsAdmin(supabase: Awaited<ReturnType<typeof createCl
     .single()
 
   if (error || !access || access.access_level !== 'admin') {
-    throw new Error("Non autorisé")
+    throw await actionError('unauthorized')
   }
 }
 

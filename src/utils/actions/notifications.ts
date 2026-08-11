@@ -5,6 +5,7 @@ import { createAdminClient } from '@utils/supabase/admin';
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
+import { actionError } from './errors'
 
 export type MemberDevice = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
@@ -20,7 +21,7 @@ export async function subscribeUser(sub: PushSubscription, deviceLabel?: string)
   const contextLogger = logger.child({ function: subscribeUser.name })
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Non authentifié')
+  if (!user) throw await actionError('unauthenticated')
 
   // onConflict on `endpoint` (not `user_id`): a user can have several
   // devices, so re-subscribing the same browser must update its row in
@@ -116,7 +117,7 @@ export async function removeDevice(subscriptionId: number) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: removeDevice.name, subscriptionId })
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('push_subscriptions')
@@ -132,7 +133,7 @@ export async function renameDevice(subscriptionId: number, label: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: renameDevice.name, subscriptionId })
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('push_subscriptions')
@@ -169,7 +170,7 @@ export async function setNotificationPreference(babyId: string, type: Enums<'not
   const supabase = await createClient()
   const contextLogger = logger.child({ function: setNotificationPreference.name, babyId, type, enabled })
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   if (enabled) {
     const { error } = await supabase
@@ -216,7 +217,7 @@ export async function setQuietHours(start: string | null, end: string | null) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: setQuietHours.name })
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('notification_settings')
@@ -269,7 +270,7 @@ export async function getUnreadNotificationCount() {
 export async function markNotificationRead(notificationId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('notifications')
@@ -284,7 +285,7 @@ export async function markNotificationRead(notificationId: string) {
 export async function markAllNotificationsRead(babyId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('notifications')
@@ -302,7 +303,7 @@ export async function sendNotification(message: string, targetUserId?: string) {
   const contextLogger = logger.child({ function: sendNotification.name })
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   if (!targetUserId) targetUserId = user.id
 
@@ -327,7 +328,7 @@ export async function sendNotification(message: string, targetUserId?: string) {
 
     if (!sharedAdminBaby) {
       contextLogger.warn({ targetUserId }, "Non-admin attempted to send a notification to another user")
-      throw new Error("Non autorisé")
+      throw await actionError('unauthorized')
     }
   }
 
@@ -337,7 +338,7 @@ export async function sendNotification(message: string, targetUserId?: string) {
     .eq('user_id', targetUserId)
 
   if (!devices || devices.length === 0) {
-    throw new Error('Aucun abonnement trouvé pour cet utilisateur')
+    throw await actionError('noSubscriptionFound')
   }
 
   const payload = JSON.stringify({

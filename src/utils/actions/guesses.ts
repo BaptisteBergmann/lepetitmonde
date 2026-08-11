@@ -6,6 +6,7 @@ import { logger } from '../logger'
 import { TablesInsert } from '../supabase/database.types'
 import { getUserAccess } from './users'
 import { assertIsAdmin } from './access'
+import { actionError } from './errors'
 
 type InsertGuess = TablesInsert<"guesses">
 
@@ -15,10 +16,10 @@ export async function submitGuess(guess: InsertGuess) {
 
   // 3. Récupérer l'utilisateur courant pour la sécurité
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(guess.baby_id)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   // Un pronostic est définitif : on vérifie qu'aucune réponse n'existe déjà
   // pour empêcher un utilisateur de changer son pronostic après coup.
@@ -30,7 +31,7 @@ export async function submitGuess(guess: InsertGuess) {
     .maybeSingle()
 
   if (existingError) throw existingError
-  if (existing) throw new Error("Vous avez déjà répondu à cette question")
+  if (existing) throw await actionError('alreadyAnswered')
 
   contextLogger.debug(guess, "User sending guess")
   // 4. Insérer dans la base de données
@@ -49,7 +50,7 @@ export async function getGuesses() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   contextLogger.debug(user, "Get user")
 
@@ -70,10 +71,10 @@ export async function getAllGuesses(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const { data, error } = await supabase
     .from('guesses')
