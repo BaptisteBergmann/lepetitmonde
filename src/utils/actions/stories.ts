@@ -176,6 +176,7 @@ export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
 
   const nicknames = await getNicknamesByBaby(babyId)
   const viewedIds = await getViewedStoryIds(visibleRows.map((row) => row.id), user?.id)
+  const tCommon = await getTranslations('common')
 
   const byKey = new Map<string, { title: string; isLabeled: boolean; stories: StoryWithUrl[] }>()
   for (const row of visibleRows) {
@@ -186,7 +187,7 @@ export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
     const isLabeled = !!story.group_label
     const key = isLabeled ? `label:${story.group_label}` : `author:${authorId}`
     const group = byKey.get(key) ?? {
-      title: isLabeled ? story.group_label! : (getDisplayName(author, nicknames[authorId]) || "Utilisateur"),
+      title: isLabeled ? story.group_label! : (getDisplayName(author, nicknames[authorId]) || tCommon('userFallback')),
       isLabeled,
       stories: [] as StoryWithUrl[],
     }
@@ -252,10 +253,11 @@ export async function getStoryViews(storyId: string, babyId: string, excludeUser
 
   if (error) { contextLogger.error(error, "Error fetching story views"); return { count: 0, names: [] } }
 
+  const tCommon = await getTranslations('common')
   const others = data.filter((row) => row.user_id !== excludeUserId)
   const names = others.map(({ user_id, users: viewerOrList }) => {
     const viewer = Array.isArray(viewerOrList) ? viewerOrList[0] : viewerOrList
-    return getDisplayName(viewer, nicknames[user_id]) || "Utilisateur"
+    return getDisplayName(viewer, nicknames[user_id]) || tCommon('userFallback')
   })
 
   return { count: others.length, names }

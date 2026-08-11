@@ -16,6 +16,7 @@ export async function joinBabyWithInvitation(formData: FormData) {
   const contextLogger = logger.child({ function: joinBabyWithInvitation.name })
 
   const supabase = await createClient()
+  const tAuth = await getTranslations('auth')
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -29,11 +30,11 @@ export async function joinBabyWithInvitation(formData: FormData) {
     .single()
 
   if (invitation.error || !invitation.data) {
-    return redirect('/invite?message=Lien d\'invitation invalide ou expiré')
+    return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
   }
 
   if (new Date(invitation.data.expires_at) < new Date()) {
-    return redirect('/invite?message=Lien d\'invitation invalide ou expiré')
+    return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
   }
 
   const babyId = invitation.data.baby_id
@@ -55,7 +56,7 @@ export async function joinBabyWithInvitation(formData: FormData) {
 
   if (accessError) {
     contextLogger.error(accessError, "Error adding baby access for existing user")
-    return redirect(`/invite?token=${token}&message=Erreur lors de l\'ajout de l\'accès`)
+    return redirect(`/invite?token=${token}&message=${encodeURIComponent(tAuth('addAccessError'))}`)
   }
 
   const { data: profile } = await supabase

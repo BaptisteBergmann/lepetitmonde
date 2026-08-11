@@ -19,6 +19,7 @@ export async function signup(formData: FormData) {
   const token = formData.get('token') as string
 
   const contextLogger = logger.child({ function: signup.name })
+  const tAuth = await getTranslations('auth')
 
   const invitation = await supabase
     .from('invitations')
@@ -29,11 +30,11 @@ export async function signup(formData: FormData) {
   contextLogger.info(invitation, "Get invitation data")
 
   if (invitation.error || !invitation.data) {
-    return redirect('/invite?message=Lien d\'invitation invalide ou expiré')
+    return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
   }
 
   if (new Date(invitation.data.expires_at) < new Date()) {
-    return redirect('/invite?message=Lien d\'invitation invalide ou expiré')
+    return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
   }
 
   // On tente de créer le compte via Supabase
@@ -50,7 +51,7 @@ export async function signup(formData: FormData) {
   // S'il y a une erreur (email déjà utilisé, mot de passe trop faible, etc.)
   if (error || !user.user) {
     contextLogger.error(error, "Signup failed")
-    return redirect(`/invite?token=${token}&message=Erreur lors de la création du compte`)
+    return redirect(`/invite?token=${token}&message=${encodeURIComponent(tAuth('createAccountError'))}`)
   }
 
   const [firstName, ...rest] = name.trim().split(" ")

@@ -3,6 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { getDisplayName } from '@utils/users'
+import { getTranslations } from 'next-intl/server'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { logger } from '../logger'
 
@@ -44,10 +45,11 @@ export async function getPostViews(postId: string, excludeUserId: string | null 
 
   if (error) { contextLogger.error(error, "Error fetching post views"); return { count: 0, names: [] } }
 
+  const tCommon = await getTranslations('common')
   const others = data.filter((row) => row.user_id !== excludeUserId)
   const names = others.map(({ user_id, users: viewerOrList }) => {
     const viewer = Array.isArray(viewerOrList) ? viewerOrList[0] : viewerOrList
-    return getDisplayName(viewer, nicknames[user_id]) || "Utilisateur"
+    return getDisplayName(viewer, nicknames[user_id]) || tCommon('userFallback')
   })
 
   return { count: others.length, names }
@@ -80,11 +82,12 @@ export async function getPostViewsForPosts(
 
   if (error) { contextLogger.error(error, "Error fetching post views for posts"); return byPost }
 
+  const tCommon = await getTranslations('common')
   const excludeByPost = new Map(posts.map((p) => [p.id, p.created_by]))
   for (const row of data) {
     if (row.user_id === excludeByPost.get(row.post_id)) continue
     const viewer = Array.isArray(row.users) ? row.users[0] : row.users
-    const name = getDisplayName(viewer, nicknames[row.user_id]) || "Utilisateur"
+    const name = getDisplayName(viewer, nicknames[row.user_id]) || tCommon('userFallback')
     const entry = byPost[row.post_id]
     entry.count += 1
     entry.names.push(name)

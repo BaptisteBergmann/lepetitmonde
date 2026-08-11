@@ -9,16 +9,17 @@ import { getDisplayName } from '@utils/users'
 import { notifyUsers } from './notify'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { logger } from '../logger'
+import { actionError } from './errors'
 
 export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addReaction.name, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('post_reactions')
@@ -54,10 +55,10 @@ export async function removeReaction(postId: string, babyId: string) {
   const contextLogger = logger.child({ function: removeReaction.name, postId, babyId })
 
   const { data: { user } } = await getAuthUser()
-  if (!user) throw new Error("Non autorisé")
+  if (!user) throw await actionError('unauthorized')
 
   const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw new Error("Non autorisé")
+  if (Array.isArray(access)) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('post_reactions')
@@ -93,10 +94,11 @@ export async function getReactions(postId: string, babyId: string): Promise<Reac
 
   if (error) { contextLogger.error(error, "Error fetching reactions"); return { breakdown: [], myEmoji: null } }
 
+  const tCommon = await getTranslations('common')
   const namesByEmoji = new Map<string, string[]>()
   data.forEach(({ emoji, user_id, users: reactorOrList }) => {
     const reactor = Array.isArray(reactorOrList) ? reactorOrList[0] : reactorOrList
-    const name = getDisplayName(reactor, nicknames[user_id]) || "Utilisateur"
+    const name = getDisplayName(reactor, nicknames[user_id]) || tCommon('userFallback')
     namesByEmoji.set(emoji, [...(namesByEmoji.get(emoji) ?? []), name])
   })
 
@@ -129,11 +131,12 @@ export async function getReactionsForPosts(postIds: string[], babyId: string): P
 
   if (error) { contextLogger.error(error, "Error fetching reactions for posts"); return byPost }
 
+  const tCommon = await getTranslations('common')
   const namesByPostEmoji = new Map<string, Map<string, string[]>>()
   const myEmojiByPost = new Map<string, string>()
   data.forEach(({ post_id, emoji, user_id, users: reactorOrList }) => {
     const reactor = Array.isArray(reactorOrList) ? reactorOrList[0] : reactorOrList
-    const name = getDisplayName(reactor, nicknames[user_id]) || "Utilisateur"
+    const name = getDisplayName(reactor, nicknames[user_id]) || tCommon('userFallback')
     const namesByEmoji = namesByPostEmoji.get(post_id) ?? new Map<string, string[]>()
     namesByEmoji.set(emoji, [...(namesByEmoji.get(emoji) ?? []), name])
     namesByPostEmoji.set(post_id, namesByEmoji)
