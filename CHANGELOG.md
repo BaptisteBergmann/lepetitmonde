@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `06b5045` Translate the calendar section
 - `24b66f8` Translate the feed section
 - `ce17e9c` Translate nav labels, notification types, and baby hub page
 - `96a1c87` Translate shared chrome, landing page, and auth flow
