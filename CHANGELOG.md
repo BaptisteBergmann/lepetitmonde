@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-11
 
+- `d48f05b` Add locale-aware date/currency formatting, translate login error
 - `cf67869` Add next-intl foundations, no routing
 
 ## 2026-08-08
