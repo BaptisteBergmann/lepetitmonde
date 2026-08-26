@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-26
+
+- `c3f69af` Add emoji reactions on comments
+
 ## 2026-08-11
 
 - `8623c85` Translate auth redirect messages and display-name fallbacks
