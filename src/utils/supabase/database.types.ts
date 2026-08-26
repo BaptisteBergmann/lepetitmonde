@@ -272,6 +272,45 @@ export type Database = {
           },
         ]
       }
+      comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          emoji: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          emoji?: string
+          id?: number
+          user_id?: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          emoji?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           baby_id: string
@@ -1373,6 +1412,7 @@ export type Database = {
         | "circle_access_granted"
         | "new_story"
         | "new_anecdote"
+        | "new_comment_reaction"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -1523,6 +1563,7 @@ export const Constants = {
         "circle_access_granted",
         "new_story",
         "new_anecdote",
+        "new_comment_reaction",
       ],
       role: ["admin", "viewer"],
     },

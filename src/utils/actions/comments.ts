@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server'
 import { getUserCircleIds } from './circles'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { getBabyAdminIds } from './access'
+import { getCommentReactionsForComments } from './comment_reactions'
 import { notifyUsers } from './notify'
 import { getDisplayName } from '@utils/users'
 import { logger } from '../logger'
@@ -123,9 +124,12 @@ export async function getComments(postId: string, babyId: string) {
     .filter((comment) => isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id)))
     .map((comment) => ({ ...comment, nickname: nicknames[comment.user_id] ?? null }))
 
-  contextLogger.debug({ count: visible.length }, "Comments received")
+  const reactions = await getCommentReactionsForComments(visible.map((comment) => comment.id), babyId)
+  const withReactions = visible.map((comment) => ({ ...comment, reactions: reactions[comment.id] ?? { breakdown: [], myEmoji: null } }))
 
-  return visible
+  contextLogger.debug({ count: withReactions.length }, "Comments received")
+
+  return withReactions
 }
 
 export type Comment = Awaited<ReturnType<typeof getComments>>[number]
@@ -157,9 +161,17 @@ export async function getCommentsForPosts(postIds: string[], babyId: string): Pr
 
   if (error) { contextLogger.error(error, "Error fetching comments for posts"); return byPost }
 
-  for (const comment of data) {
-    if (!(isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id)))) continue
-    byPost[comment.post_id]?.push({ ...comment, nickname: nicknames[comment.user_id] ?? null })
+  const visible = data.filter((comment) =>
+    isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id))
+  )
+  const reactions = await getCommentReactionsForComments(visible.map((comment) => comment.id), babyId)
+
+  for (const comment of visible) {
+    byPost[comment.post_id]?.push({
+      ...comment,
+      nickname: nicknames[comment.user_id] ?? null,
+      reactions: reactions[comment.id] ?? { breakdown: [], myEmoji: null },
+    })
   }
 
   contextLogger.debug({ postCount: postIds.length }, "Comments for posts received")

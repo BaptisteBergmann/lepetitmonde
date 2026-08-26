@@ -9,6 +9,7 @@ import { getDisplayName } from '@utils/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
+import CommentReactionPicker from './comment_reaction_picker'
 import type { Comment } from '@utils/actions/comments'
 
 export default function CommentList({
@@ -152,6 +153,13 @@ export default function CommentList({
             ) : (
               <p className="text-sm text-landing-foreground whitespace-pre-wrap">{comment.body}</p>
             )}
+
+            <CommentReactionPicker
+              commentId={comment.id}
+              babyId={babyId}
+              initialReactions={comment.reactions}
+              onChanged={onChanged}
+            />
           </div>
         )
       })}

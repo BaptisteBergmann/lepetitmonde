@@ -208,7 +208,8 @@
     "new_life_stage": "Nouvelles étapes du calendrier",
     "circle_access_granted": "Accès à un groupe",
     "new_story": "Nouvelles stories",
-    "new_anecdote": "Nouvelles anecdotes"
+    "new_anecdote": "Nouvelles anecdotes",
+    "new_comment_reaction": "Réactions sur vos commentaires"
   },
   "babyHub": {
     "eyebrow": "Le journal de",
@@ -740,6 +741,10 @@
     "newReaction": {
       "title": "Nouvelle réaction",
       "body": "{name} a réagi {emoji} à votre publication"
+    },
+    "newCommentReaction": {
+      "title": "Nouvelle réaction",
+      "body": "{name} a réagi {emoji} à votre commentaire"
     },
     "bugFixed": {
       "title": "Le petit monde",
