@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-08-30
+
+- `5676305` Show existing stock while typing the item name
+
 ## 2026-08-26
 
 - `c3f69af` Add emoji reactions on comments
