@@ -192,7 +192,24 @@ export async function updateQuestion(babyId: string, questionId: string, formDat
 
   if (countError) { contextLogger.error(countError, "Error checking guesses before update"); throw countError }
   if (count && count > 0) {
-    throw await actionError('cannotEditAnsweredPronostic')
+    // Answers already exist: the question's structure (type/options) must stay
+    // stable so existing answers remain interpretable, but the wording (title,
+    // description) is safe to correct at any time.
+    const { data: existing, error: fetchError } = await supabase
+      .from('guess_questions')
+      .select('type, options')
+      .eq('id', questionId)
+      .eq('baby_id', babyId)
+      .single()
+
+    if (fetchError) { contextLogger.error(fetchError, "Error fetching question before update"); throw fetchError }
+
+    const structureChanged = existing.type !== formData.type
+      || JSON.stringify(existing.options) !== JSON.stringify(formData.options ?? null)
+
+    if (structureChanged) {
+      throw await actionError('cannotEditAnsweredPronostic')
+    }
   }
 
   const { error } = await supabase

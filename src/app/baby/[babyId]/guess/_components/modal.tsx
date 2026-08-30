@@ -26,11 +26,16 @@ export default function Modal({
   isAdmin = false,
   question,
   trigger,
+  lockStructure = false,
 }: {
   babyId?: string;
   isAdmin?: boolean;
   question?: GuessQuestion;
   trigger?: React.ReactNode;
+  /** When true (a question that already has answers), the answer type and its
+   * options can't be changed — only the title/description are editable —
+   * since existing answers depend on that structure staying stable. */
+  lockStructure?: boolean;
 }) {
   const t = useTranslations('guess.form')
   const tType = useTranslations('guess.answerTypes')
@@ -229,8 +234,14 @@ export default function Modal({
                 />
               </div>
 
+              {lockStructure && (
+                <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
+                  {t('lockStructureNotice')}
+                </p>
+              )}
+
               {/* Sélecteur du Type de Réponse attendu (réservé à l'admin : les propositions sont typées lors de la validation) */}
-              {isAdmin && (
+              {isAdmin && !lockStructure && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {t('answerTypeLabel')}
@@ -259,7 +270,7 @@ export default function Modal({
               )}
 
               {/* Options prédéfinies (uniquement pour le type "Choix unique") */}
-              {isAdmin && isOptionType && (
+              {isAdmin && !lockStructure && isOptionType && (
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {t('choicesLabel')}
@@ -298,7 +309,7 @@ export default function Modal({
               )}
 
               {/* Étalonnage (uniquement pour le type "Nombre") */}
-              {isAdmin && isNumberType && (
+              {isAdmin && !lockStructure && isNumberType && (
                 <div className="flex flex-col gap-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
@@ -347,7 +358,7 @@ export default function Modal({
               )}
 
               {/* Réglages du calendrier (uniquement pour le type "Date") */}
-              {isAdmin && isDateType && (
+              {isAdmin && !lockStructure && isDateType && (
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="defaultMonth" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

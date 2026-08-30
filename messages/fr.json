@@ -398,6 +398,7 @@
       "newAdminTitle": "Créer un nouveau pronostic",
       "proposeTitle": "Proposer un pronostic",
       "nonAdminNotice": "Un administrateur choisira le type de réponse attendu et validera votre proposition avant qu'elle soit visible par la famille.",
+      "lockStructureNotice": "Des réponses ont déjà été soumises : le type de réponse et les options ne peuvent plus être modifiés, seuls le titre et la description le peuvent.",
       "titleLabel": "Titre du pronostic",
       "titlePlaceholder": "Ex: Devinez le prénom du bébé !",
       "descriptionLabel": "Description (facultative)",

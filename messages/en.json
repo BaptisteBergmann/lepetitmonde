@@ -398,6 +398,7 @@
       "newAdminTitle": "Create a new pronostic",
       "proposeTitle": "Suggest a pronostic",
       "nonAdminNotice": "An admin will choose the expected answer type and approve your suggestion before it's visible to the family.",
+      "lockStructureNotice": "Answers have already been submitted, so the answer type and options can't be changed — only the title and description.",
       "titleLabel": "Pronostic title",
       "titlePlaceholder": "E.g. Guess the baby's name!",
       "descriptionLabel": "Description (optional)",

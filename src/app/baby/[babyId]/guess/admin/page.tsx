@@ -179,27 +179,48 @@ export default async function GuessAdminPage({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-1.5">
-                        {questionGuesses.map((guess) => {
-                          const guessUserName = userNameById.get(guess.user_id) ?? t('unknownUser');
-                          return (
-                            <div
-                              key={guess.id}
-                              className="flex items-center justify-between gap-3 rounded-xl bg-landing-background px-3 py-2 text-sm"
-                            >
-                              <span className="flex items-center gap-1.5 text-landing-muted">
-                                <User className="h-3.5 w-3.5" />
-                                {guessUserName}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-landing-foreground">
-                                  {formatAnswer(guess.answer, question.type, question.options, localeTag)}
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-1.5">
+                          {questionGuesses.map((guess) => {
+                            const guessUserName = userNameById.get(guess.user_id) ?? t('unknownUser');
+                            return (
+                              <div
+                                key={guess.id}
+                                className="flex items-center justify-between gap-3 rounded-xl bg-landing-background px-3 py-2 text-sm"
+                              >
+                                <span className="flex items-center gap-1.5 text-landing-muted">
+                                  <User className="h-3.5 w-3.5" />
+                                  {guessUserName}
                                 </span>
-                                <DeleteGuessButton babyId={babyId} guessId={guess.id} userName={guessUserName} />
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-landing-foreground">
+                                    {formatAnswer(guess.answer, question.type, question.options, localeTag)}
+                                  </span>
+                                  <DeleteGuessButton babyId={babyId} guessId={guess.id} userName={guessUserName} />
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-end">
+                          <Modal
+                            babyId={babyId}
+                            isAdmin
+                            question={question}
+                            lockStructure
+                            trigger={
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 rounded-2xl cursor-pointer"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                                {t('edit')}
+                              </Button>
+                            }
+                          />
+                        </div>
                       </div>
                     )}
                   </CardContent>
