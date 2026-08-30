@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -27,6 +27,7 @@ const UNSPECIFIED = "unspecified"
 
 export default function InventoryItemModal({
   babyId,
+  items,
   kindOptions,
   subtypesByKind,
   sources,
@@ -34,6 +35,7 @@ export default function InventoryItemModal({
   trigger,
 }: {
   babyId: string
+  items: InventoryItem[]
   kindOptions: string[]
   subtypesByKind: Partial<Record<ItemKind, string[]>>
   sources: string[]
@@ -59,6 +61,20 @@ export default function InventoryItemModal({
   const [isDeleting, setIsDeleting] = useState(false)
 
   const subtypeSuggestions = subtypesByKind[kind] ?? []
+
+  // Existing items whose name matches what's being typed, so the family can
+  // see stock they already have before adding a possible duplicate. Rendered
+  // as plain text rather than a <datalist> popup: iOS Safari never shows
+  // datalist suggestions for text inputs, which is why this was invisible on
+  // mobile even though the "kind"/"size"/"purchased_from" fields use that
+  // pattern.
+  const trimmedName = name.trim().toLowerCase()
+  const nameMatches = useMemo(() => {
+    if (!trimmedName) return []
+    return items
+      .filter((i) => i.id !== item?.id && i.name.toLowerCase().includes(trimmedName))
+      .slice(0, 5)
+  }, [items, trimmedName, item?.id])
 
   const resetForm = () => {
     setKind(DEFAULT_ITEM_KINDS[0])
@@ -204,6 +220,23 @@ export default function InventoryItemModal({
                     placeholder={t('articlePlaceholder')}
                     required
                   />
+                  {nameMatches.length > 0 && (
+                    <div className="flex flex-col gap-1 rounded-lg border border-landing-border bg-landing-background p-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-landing-muted">
+                        {t('existingStockLabel')}
+                      </p>
+                      {nameMatches.map((match) => (
+                        <div key={match.id} className="flex items-center justify-between gap-2 text-xs">
+                          <span className="truncate text-landing-foreground">
+                            {match.name}{match.size ? ` · ${match.size}` : ''}
+                          </span>
+                          <span className="shrink-0 font-semibold text-landing-camel">
+                            {t('existingStockCount', { count: match.quantity_owned })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5 col-span-2">

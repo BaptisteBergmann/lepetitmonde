@@ -572,6 +572,8 @@
       "subtypePlaceholderOther": "E.g. Bedroom, Bathroom…",
       "articleLabel": "Item",
       "articlePlaceholder": "E.g. Beanie",
+      "existingStockLabel": "Already in your inventory:",
+      "existingStockCount": "{count} owned",
       "detailLabel": "Detail (optional)",
       "detailPlaceholder": "E.g. one size",
       "quantityOwnedLabel": "Quantity owned",

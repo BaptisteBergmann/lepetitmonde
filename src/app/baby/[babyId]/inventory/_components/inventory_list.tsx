@@ -126,6 +126,7 @@ export default function InventoryList({
       <InventoryItemModal
         key={item.id}
         babyId={babyId}
+        items={items}
         kindOptions={kindOptions}
         subtypesByKind={subtypesByKind}
         sources={sources}

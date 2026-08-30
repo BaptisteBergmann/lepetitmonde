@@ -59,7 +59,7 @@ export default async function InventoryPage({
               )}
             </div>
             <div className="flex shrink-0">
-              <InventoryItemModal babyId={babyId} kindOptions={kindOptions} subtypesByKind={subtypesByKind} sources={sources} />
+              <InventoryItemModal babyId={babyId} items={items} kindOptions={kindOptions} subtypesByKind={subtypesByKind} sources={sources} />
             </div>
           </div>
         </Reveal>

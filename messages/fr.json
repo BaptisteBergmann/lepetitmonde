@@ -572,6 +572,8 @@
       "subtypePlaceholderOther": "Ex: Chambre, Salle de bain…",
       "articleLabel": "Article",
       "articlePlaceholder": "Ex: Bonnet",
+      "existingStockLabel": "Déjà dans l'inventaire :",
+      "existingStockCount": "{count} possédé(s)",
       "detailLabel": "Détail (facultatif)",
       "detailPlaceholder": "Ex: taille unique",
       "quantityOwnedLabel": "Quantité possédée",
