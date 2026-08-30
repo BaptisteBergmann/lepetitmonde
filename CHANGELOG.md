@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-08-30
 
+- `a9cacc3` Allow editing a pronostic's title after answers are submitted
 - `4d7dc97` Flag posts shared only with empty groups as effectively admin-only
 - `5676305` Show existing stock while typing the item name
 
