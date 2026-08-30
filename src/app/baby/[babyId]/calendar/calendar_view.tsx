@@ -38,6 +38,7 @@ export default function CalendarView({
   events,
   posts,
   circles,
+  circleMemberCounts,
   hasEarlierActivity,
   hasLaterActivity,
 }: {
@@ -48,6 +49,7 @@ export default function CalendarView({
   events: Event[]
   posts: Post[]
   circles: Circle[]
+  circleMemberCounts: Record<string, number>
   hasEarlierActivity: boolean
   hasLaterActivity: boolean
 }) {
@@ -237,6 +239,7 @@ export default function CalendarView({
           events={selectedDayEvents}
           posts={selectedDayPosts}
           circles={circles}
+          circleMemberCounts={circleMemberCounts}
           isAdmin={isAdmin}
           currentUserId={currentUserId}
           onClose={() => setSelectedDate(null)}

@@ -230,6 +230,7 @@
     "loadMore": "Load more",
     "adminOnly": "Admins only",
     "circleFallback": "Circle",
+    "emptyCircleSuffix": "no members",
     "nobodyYet": "No one yet.",
     "seenByNames": "Seen by {names}",
     "postCard": {

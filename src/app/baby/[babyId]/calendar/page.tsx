@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
-import { getCircles } from "@/utils/actions/circles";
+import { getCircles, getCircleMemberCounts } from "@/utils/actions/circles";
 import { getEvents, getEventActivityBeyond } from "@/utils/actions/events";
 import { getPostsForRange, getPostActivityBeyond } from "@/utils/actions/posts";
 import { getAuthUser } from "@/utils/supabase/auth";
@@ -40,9 +40,10 @@ export default async function CalendarPage({
   const rangeFrom = formatISO(gridStart, { representation: "date" })
   const rangeTo = formatISO(gridEnd, { representation: "date" })
 
-  const [{ data: { user } }, circles, events, posts, eventActivity, postActivity] = await Promise.all([
+  const [{ data: { user } }, circles, circleMemberCounts, events, posts, eventActivity, postActivity] = await Promise.all([
     getAuthUser(),
     getCircles(babyId),
+    getCircleMemberCounts(babyId),
     getEvents(babyId, { from: rangeFrom, to: rangeTo }),
     getPostsForRange(babyId, rangeFrom, rangeTo),
     getEventActivityBeyond(babyId, rangeFrom, rangeTo),
@@ -80,6 +81,7 @@ export default async function CalendarPage({
           events={events}
           posts={posts}
           circles={circles}
+          circleMemberCounts={circleMemberCounts}
           hasEarlierActivity={hasEarlierActivity}
           hasLaterActivity={hasLaterActivity}
         />

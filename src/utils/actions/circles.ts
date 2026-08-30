@@ -91,6 +91,26 @@ export async function getUserCircleIds(babyId: string, userId: string) {
   return access.map((a) => a.circle_id)
 }
 
+export async function getCircleMemberCounts(babyId: string): Promise<Record<string, number>> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await getAuthUser()
+  if (!user) throw await actionError('unauthorized')
+
+  const rep = await supabase
+    .from('circles_access')
+    .select('circle_id')
+    .eq('baby_id', babyId)
+
+  if (rep.error) throw rep.error
+
+  const counts: Record<string, number> = {}
+  for (const { circle_id } of rep.data) {
+    counts[circle_id] = (counts[circle_id] ?? 0) + 1
+  }
+  return counts
+}
+
 export async function getAllCirclesAccess(babyId: string) {
   const supabase = await createClient()
 

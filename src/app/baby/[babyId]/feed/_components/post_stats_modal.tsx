@@ -16,11 +16,13 @@ export default function PostStatsModal({
   babyId,
   post,
   circles,
+  circleMemberCounts,
   onClose,
 }: {
   babyId: string
   post: PostWithDetails
   circles: Circle[]
+  circleMemberCounts: Record<string, number>
   onClose: () => void
 }) {
   const t = useTranslations('feed')
@@ -65,9 +67,15 @@ export default function PostStatsModal({
             )}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               {postCircles.length > 0 ? (
-                postCircles.map((circle, index) => (
-                  <Badge key={circle?.id ?? index} variant="secondary">{circle?.name ?? t('circleFallback')}</Badge>
-                ))
+                postCircles.map((circle, index) => {
+                  const isEmpty = !!circle && (circleMemberCounts[circle.id] ?? 0) === 0
+                  return (
+                    <Badge key={circle?.id ?? index} variant={isEmpty ? "destructive" : "secondary"}>
+                      {circle?.name ?? t('circleFallback')}
+                      {isEmpty && ` (${t('emptyCircleSuffix')})`}
+                    </Badge>
+                  )
+                })
               ) : (
                 <Badge variant="destructive">{t('adminOnly')}</Badge>
               )}

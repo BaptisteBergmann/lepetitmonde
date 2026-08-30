@@ -26,12 +26,14 @@ export default function PostCard({
   babyId,
   post,
   circles,
+  circleMemberCounts,
   isAdmin,
   currentUserId,
 }: {
   babyId: string
   post: PostWithDetails
   circles: Circle[]
+  circleMemberCounts: Record<string, number>
   isAdmin: boolean
   currentUserId: string | null
 }) {
@@ -134,6 +136,7 @@ export default function PostCard({
           babyId={babyId}
           post={post}
           circles={circles}
+          circleMemberCounts={circleMemberCounts}
           onClose={() => setStatsOpen(false)}
         />
       )}
@@ -147,11 +150,15 @@ export default function PostCard({
             {isAdmin && (
               <div className="flex flex-wrap items-center gap-1 mt-1">
                 {postCircles.length > 0 ? (
-                  postCircles.map((circle, index) => (
-                    <Badge key={circle?.id ?? index} variant="secondary">
-                      {circle?.name ?? t('circleFallback')}
-                    </Badge>
-                  ))
+                  postCircles.map((circle, index) => {
+                    const isEmpty = !!circle && (circleMemberCounts[circle.id] ?? 0) === 0
+                    return (
+                      <Badge key={circle?.id ?? index} variant={isEmpty ? "destructive" : "secondary"}>
+                        {circle?.name ?? t('circleFallback')}
+                        {isEmpty && ` (${t('emptyCircleSuffix')})`}
+                      </Badge>
+                    )
+                  })
                 ) : (
                   <Badge variant="destructive">{t('adminOnly')}</Badge>
                 )}

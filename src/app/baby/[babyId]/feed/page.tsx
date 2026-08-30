@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Loader2, BookOpen, Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
-import { getCircles, getUserCircleIds } from "@/utils/actions/circles";
+import { getCircles, getCircleMemberCounts, getUserCircleIds } from "@/utils/actions/circles";
 import { getPosts } from "@/utils/actions/posts";
 import { getActiveStories } from "@/utils/actions/stories";
 import { getHighlights } from "@/utils/actions/story_highlights";
@@ -83,8 +83,9 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
     }
   }
 
-  const { result: [circles, posts, highlights, stories], durationMs } = await withTiming(() => Promise.all([
+  const { result: [circles, circleMemberCounts, posts, highlights, stories], durationMs } = await withTiming(() => Promise.all([
     getCircles(babyId),
+    getCircleMemberCounts(babyId),
     getPosts(babyId, { limit: PAGE_SIZE }),
     getHighlights(babyId),
     getActiveStories(babyId),
@@ -97,6 +98,7 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
       isAdmin={isAdmin}
       currentUserId={user.id}
       circles={circles}
+      circleMemberCounts={circleMemberCounts}
       initialPosts={posts}
       pageSize={PAGE_SIZE}
       initialHighlights={highlights}

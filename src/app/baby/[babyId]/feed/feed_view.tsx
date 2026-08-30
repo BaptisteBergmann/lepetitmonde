@@ -19,6 +19,7 @@ export default function FeedView({
   isAdmin,
   currentUserId,
   circles,
+  circleMemberCounts,
   initialPosts,
   pageSize,
   initialHighlights,
@@ -28,6 +29,7 @@ export default function FeedView({
   isAdmin: boolean
   currentUserId: string | null
   circles: Circle[]
+  circleMemberCounts: Record<string, number>
   initialPosts: PostWithDetails[]
   pageSize: number
   initialHighlights: HighlightWithStories[]
@@ -80,7 +82,7 @@ export default function FeedView({
 
       <div className="flex flex-col gap-4">
         {posts.map((post) => (
-          <PostCard key={post.id} babyId={babyId} post={post} circles={circles} isAdmin={isAdmin} currentUserId={currentUserId} />
+          <PostCard key={post.id} babyId={babyId} post={post} circles={circles} circleMemberCounts={circleMemberCounts} isAdmin={isAdmin} currentUserId={currentUserId} />
         ))}
       </div>
 
