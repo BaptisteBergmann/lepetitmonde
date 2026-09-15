@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-15
 
+- `89c43b0` Add fallback website link to invite and new-post emails
 - `b010b1a` Add website link to broadcast email
 - `d426ccb` Deep-link notifications and email to the specific post, add admin share button
 - `53cc04f` Add an optional email notification when creating a post
