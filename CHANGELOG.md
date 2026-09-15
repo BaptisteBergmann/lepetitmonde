@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-15
 
+- `53cc04f` Add an optional email notification when creating a post
 - `6959b8f` Allow Tailscale IP as a Next.js dev origin
 - `a3a508e` Scope broadcast email recipients to circles
 - `91335c2` Generalize faire-part into a generic broadcast email
