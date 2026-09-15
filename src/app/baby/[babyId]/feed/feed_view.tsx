@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, getPosts } from '@utils/actions/posts'
@@ -22,8 +22,10 @@ export default function FeedView({
   circleMemberCounts,
   initialPosts,
   pageSize,
+  initialHasMore,
   initialHighlights,
   initialStories,
+  highlightPostId,
 }: {
   babyId: string
   isAdmin: boolean
@@ -32,14 +34,31 @@ export default function FeedView({
   circleMemberCounts: Record<string, number>
   initialPosts: PostWithDetails[]
   pageSize: number
+  initialHasMore: boolean
   initialHighlights: HighlightWithStories[]
   initialStories: StoryGroup[]
+  highlightPostId?: string
 }) {
   const t = useTranslations('feed')
   const [posts, setPosts] = useState<PostWithDetails[]>(initialPosts)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(initialPosts.length === pageSize)
+  const [hasMore, setHasMore] = useState(initialHasMore)
   const [createOpen, setCreateOpen] = useState(false)
+  const [highlightedId, setHighlightedId] = useState(highlightPostId)
+  const scrolledRef = useRef(false)
+
+  // Scroll to and briefly highlight the post a notification deep-linked to.
+  // Guarded to run at most once, so a later `loadMore` re-render (which also
+  // changes `posts`) doesn't re-trigger the scroll.
+  useEffect(() => {
+    if (!highlightPostId || scrolledRef.current) return
+    const el = document.getElementById(`post-${highlightPostId}`)
+    if (!el) return
+    scrolledRef.current = true
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const timeout = setTimeout(() => setHighlightedId(undefined), 3000)
+    return () => clearTimeout(timeout)
+  }, [highlightPostId, posts])
 
   const loadMore = async () => {
     if (posts.length === 0) return
@@ -82,7 +101,16 @@ export default function FeedView({
 
       <div className="flex flex-col gap-4">
         {posts.map((post) => (
-          <PostCard key={post.id} babyId={babyId} post={post} circles={circles} circleMemberCounts={circleMemberCounts} isAdmin={isAdmin} currentUserId={currentUserId} />
+          <PostCard
+            key={post.id}
+            babyId={babyId}
+            post={post}
+            circles={circles}
+            circleMemberCounts={circleMemberCounts}
+            isAdmin={isAdmin}
+            currentUserId={currentUserId}
+            highlighted={post.id === highlightedId}
+          />
         ))}
       </div>
 

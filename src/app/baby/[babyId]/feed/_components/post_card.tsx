@@ -3,12 +3,13 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { getComments } from '@utils/actions/comments'
-import { Trash2, Pencil, Loader2, Play, BarChart3 } from 'lucide-react'
+import { Trash2, Pencil, Loader2, Play, BarChart3, Share2 } from 'lucide-react'
 import { cn } from '@utils/utils'
 import { Badge } from '@components/ui/badge'
 import CommentList from './comment_list'
@@ -29,6 +30,7 @@ export default function PostCard({
   circleMemberCounts,
   isAdmin,
   currentUserId,
+  highlighted = false,
 }: {
   babyId: string
   post: PostWithDetails
@@ -36,6 +38,7 @@ export default function PostCard({
   circleMemberCounts: Record<string, number>
   isAdmin: boolean
   currentUserId: string | null
+  highlighted?: boolean
 }) {
   const router = useRouter()
   const t = useTranslations('feed')
@@ -67,8 +70,32 @@ export default function PostCard({
 
   const postCircles = post.circle_ids.map((id) => circles.find((c) => c.id === id))
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/baby/${babyId}/feed?postId=${post.id}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ url: shareUrl })
+      } catch {
+        // User cancelled the native share sheet — not an error.
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success(t('postCard.linkCopied'))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   return (
-    <div className="rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden">
+    <div
+      id={`post-${post.id}`}
+      className={cn(
+        "rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden transition-shadow duration-700",
+        highlighted && "ring-2 ring-primary ring-offset-2 ring-offset-landing-background"
+      )}
+    >
       {post.photos.length > 0 && (
         <div className={cn(
           "grid gap-0.5",
@@ -167,6 +194,13 @@ export default function PostCard({
           </div>
           {isAdmin && (
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={handleShare}
+                title={t('postCard.shareTitle')}
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+              </button>
               <button
                 onClick={() => setStatsOpen(true)}
                 className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"

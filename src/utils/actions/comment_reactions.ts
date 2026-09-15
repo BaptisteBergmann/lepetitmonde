@@ -32,7 +32,7 @@ export async function addCommentReaction(commentId: string, babyId: string, emoj
 
   revalidatePath(`/baby/${babyId}/feed`)
 
-  const { data: comment } = await supabase.from('post_comments').select('user_id').eq('id', commentId).single()
+  const { data: comment } = await supabase.from('post_comments').select('user_id, post_id').eq('id', commentId).single()
   if (comment?.user_id && comment.user_id !== user.id) {
     const { data: reactor } = await supabase
       .from('baby_access')
@@ -46,7 +46,7 @@ export async function addCommentReaction(commentId: string, babyId: string, emoj
     await notifyUsers(babyId, 'new_comment_reaction', {
       title: t('newCommentReaction.title'),
       body: t('newCommentReaction.body', { name, emoji }),
-      url: `/baby/${babyId}/feed`,
+      url: `/baby/${babyId}/feed?postId=${comment.post_id}`,
     }, [comment.user_id])
   }
 }

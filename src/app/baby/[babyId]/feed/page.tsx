@@ -4,7 +4,7 @@ import { Loader2, BookOpen, Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles, getCircleMemberCounts, getUserCircleIds } from "@/utils/actions/circles";
-import { getPosts } from "@/utils/actions/posts";
+import { getPosts, getPostById } from "@/utils/actions/posts";
 import { getActiveStories } from "@/utils/actions/stories";
 import { getHighlights } from "@/utils/actions/story_highlights";
 import { getAuthUser } from "@/utils/supabase/auth";
@@ -17,10 +17,13 @@ const PAGE_SIZE = 10;
 
 export default async function FeedPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ babyId: string }>
+  searchParams: Promise<{ postId?: string }>
 }) {
   const { babyId } = await params;
+  const { postId } = await searchParams;
   const contextLogger = logger.child({ function: FeedPage.name, babyId })
   const t = await getTranslations('feed')
 
@@ -64,14 +67,14 @@ export default async function FeedPage({
             </div>
           }
         >
-          <FeedContent babyId={babyId} isAdmin={isAdmin} />
+          <FeedContent babyId={babyId} isAdmin={isAdmin} highlightPostId={postId} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boolean }) {
+async function FeedContent({ babyId, isAdmin, highlightPostId }: { babyId: string; isAdmin: boolean; highlightPostId?: string }) {
   const contextLogger = logger.child({ function: FeedContent.name, babyId })
   const { data: { user } } = await getAuthUser()
   if (!user) return null
@@ -83,14 +86,24 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
     }
   }
 
-  const { result: [circles, circleMemberCounts, posts, highlights, stories], durationMs } = await withTiming(() => Promise.all([
+  const { result: [circles, circleMemberCounts, posts, highlights, stories, targetPost], durationMs } = await withTiming(() => Promise.all([
     getCircles(babyId),
     getCircleMemberCounts(babyId),
     getPosts(babyId, { limit: PAGE_SIZE }),
     getHighlights(babyId),
     getActiveStories(babyId),
+    highlightPostId ? getPostById(highlightPostId, babyId) : Promise.resolve(null),
   ]))
-  contextLogger.info({ durationMs, postCount: posts.length }, "Feed content loaded")
+
+  // If the deep-linked post isn't already on the first page, prepend it so
+  // it's in the DOM to scroll to — but keep `hasMore` derived from the
+  // original page size, not the prepended length (see feed_view.tsx).
+  const initialHasMore = posts.length === PAGE_SIZE
+  const initialPosts = targetPost && !posts.some((post) => post.id === targetPost.id)
+    ? [targetPost, ...posts]
+    : posts
+
+  contextLogger.info({ durationMs, postCount: initialPosts.length, highlightPostId }, "Feed content loaded")
 
   return (
     <FeedView
@@ -99,10 +112,12 @@ async function FeedContent({ babyId, isAdmin }: { babyId: string; isAdmin: boole
       currentUserId={user.id}
       circles={circles}
       circleMemberCounts={circleMemberCounts}
-      initialPosts={posts}
+      initialPosts={initialPosts}
       pageSize={PAGE_SIZE}
+      initialHasMore={initialHasMore}
       initialHighlights={highlights}
       initialStories={stories}
+      highlightPostId={targetPost ? targetPost.id : undefined}
     />
   )
 }

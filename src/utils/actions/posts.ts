@@ -65,7 +65,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
   await notifyUsers(post.baby_id, 'new_post', {
     title: t('newPost.title'),
     body,
-    url: `/baby/${post.baby_id}/feed`,
+    url: `/baby/${post.baby_id}/feed?postId=${data.id}`,
   }, recipients)
 
   if (sendEmail) {
@@ -79,7 +79,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
       contextLogger.error(babyError, "Error fetching baby for new-post email")
     } else {
       const emails = await getEmailsForUserIds(recipients)
-      const postUrl = `${process.env.SITE_URL}/baby/${post.baby_id}/feed`
+      const postUrl = `${process.env.SITE_URL}/baby/${post.baby_id}/feed?postId=${data.id}`
       await Promise.all(emails.map((to) => sendNewPostEmail(to, baby.baby_surname, body, postUrl)))
     }
   }
@@ -247,6 +247,31 @@ export async function getPosts(
   contextLogger.debug({ count: visible.length }, "Posts received")
 
   return visible
+}
+
+// Used to deep-link a notification straight to the post it concerns, even
+// when that post isn't on the feed's first page. Returns null (not an
+// error) when the post is missing/deleted or not visible to the caller, so
+// callers can silently fall back to the normal feed.
+export async function getPostById(postId: string, babyId: string): Promise<PostWithDetails | null> {
+  const contextLogger = logger.child({ function: getPostById.name, postId, babyId })
+  const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
+
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*, posts_circles (circle_id), post_photos (*)')
+    .eq('id', postId)
+    .eq('baby_id', babyId)
+    .maybeSingle()
+
+  if (error) { contextLogger.error(error, "Error fetching post by id"); return null }
+  if (!data) return null
+
+  const visible = isAdmin || data.posts_circles.some((pc: { circle_id: string }) => userCircleIds.has(pc.circle_id))
+  if (!visible) return null
+
+  const [withDetails] = await attachInteractionData(babyId, [await toPostWithDetails(data)])
+  return withDetails
 }
 
 export async function getPostsForRange(babyId: string, from: string, to: string): Promise<PostWithDetails[]> {

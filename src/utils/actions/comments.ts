@@ -48,7 +48,7 @@ export async function addComment(postId: string, babyId: string, body: string) {
   await notifyUsers(babyId, 'new_comment', {
     title: t('newComment.title'),
     body: t('newComment.body', { name, body }),
-    url: `/baby/${babyId}/feed`,
+    url: `/baby/${babyId}/feed?postId=${postId}`,
   }, recipients)
 }
 

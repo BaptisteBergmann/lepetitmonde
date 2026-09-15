@@ -235,7 +235,9 @@
     "seenByNames": "Vu par {names}",
     "postCard": {
       "deleteConfirm": "Supprimer cette publication ? Cette action est irréversible.",
-      "deleteError": "Une erreur est survenue lors de la suppression."
+      "deleteError": "Une erreur est survenue lors de la suppression.",
+      "shareTitle": "Partager cette publication",
+      "linkCopied": "Lien copié"
     },
     "comments": {
       "empty": "Aucun commentaire pour l'instant.",

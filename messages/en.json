@@ -235,7 +235,9 @@
     "seenByNames": "Seen by {names}",
     "postCard": {
       "deleteConfirm": "Delete this post? This action can't be undone.",
-      "deleteError": "Something went wrong while deleting."
+      "deleteError": "Something went wrong while deleting.",
+      "shareTitle": "Share this post",
+      "linkCopied": "Link copied"
     },
     "comments": {
       "empty": "No comments yet.",
