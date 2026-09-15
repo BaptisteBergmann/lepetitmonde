@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { Megaphone } from 'lucide-react'
@@ -8,19 +8,55 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Tables } from '@utils/supabase/database.types'
 import { sendBroadcast } from '@utils/actions/broadcast_email'
+
+type Circle = Tables<'circles'>
+type CircleAccess = Tables<'circles_access'>
 
 interface SendBroadcastEmailProps {
   babyId: string
-  memberCount: number
+  circles: Circle[]
+  circlesAccess: CircleAccess[]
+  adminUserIds: string[]
 }
 
-export default function SendBroadcastEmail({ babyId, memberCount }: SendBroadcastEmailProps) {
+export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adminUserIds }: SendBroadcastEmailProps) {
   const t = useTranslations('admin')
   const [isSending, startTransition] = useTransition()
+  const [circleIds, setCircleIds] = useState<string[]>([])
+
+  const circleItems = useMemo(
+    () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
+    [circles]
+  )
+
+  // Mirrors getVisibleUserIds in access.ts: no circle selected = admins
+  // only, otherwise admins + members of the selected circles. Computed
+  // client-side from data the admin page already fetched, just to preview
+  // the recipient count in the confirm dialog below.
+  const recipientCount = useMemo(() => {
+    const ids = new Set(adminUserIds)
+    if (circleIds.length > 0) {
+      for (const access of circlesAccess) {
+        if (circleIds.includes(access.circle_id)) ids.add(access.user_id)
+      }
+    }
+    return ids.size
+  }, [adminUserIds, circlesAccess, circleIds])
 
   function handleSubmit(formData: FormData) {
-    if (!window.confirm(t('broadcastConfirm', { count: memberCount }))) return
+    for (const circleId of circleIds) formData.append('circleIds', circleId)
+
+    if (!window.confirm(t('broadcastConfirm', { count: recipientCount }))) return
 
     startTransition(async () => {
       try {
@@ -70,6 +106,31 @@ export default function SendBroadcastEmail({ babyId, memberCount }: SendBroadcas
               rows={4}
               className="w-full rounded-md border border-input bg-input/40 px-3 py-2 text-sm resize-none"
             />
+          </Field>
+          <Field>
+            <FieldLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t('broadcastCirclesLabel')}
+            </FieldLabel>
+            <Select
+              items={circleItems}
+              multiple
+              value={circleIds}
+              onValueChange={(value) => setCircleIds(value as string[])}
+            >
+              <SelectTrigger className="w-full text-foreground bg-input/40">
+                <SelectValue placeholder={t('broadcastCirclesPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {circles.map((circle) => (
+                    <SelectItem key={circle.id} value={circle.id}>{circle.name}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {t('broadcastCirclesHint')}
+            </p>
           </Field>
           <FieldGroup>
             <Field>

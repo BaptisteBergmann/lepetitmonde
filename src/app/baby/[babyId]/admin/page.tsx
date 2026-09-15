@@ -29,6 +29,8 @@ export default async function InviteForm({
   const access = await getUserAccess(babyId);
   const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
   const users = await getUsers(babyId);
+  const circles = await getCircles(babyId);
+  const circlesAccess = await getAllCirclesAccess(babyId);
   const devicesByUser = isAdmin ? await getMembersDevices(babyId) : {};
   const bugReports = isAdmin ? await getBugReports(babyId) : [];
   // Plain objects only — this is passed into DisplayPageSettings, a Client
@@ -96,7 +98,12 @@ export default async function InviteForm({
                 <CreateInvite babyId={babyId} />
 
                 {/* Form: Broadcast email */}
-                <SendBroadcastEmail babyId={babyId} memberCount={users.length} />
+                <SendBroadcastEmail
+                  babyId={babyId}
+                  circles={circles}
+                  circlesAccess={circlesAccess}
+                  adminUserIds={users.filter((u) => u.access_level === 'admin').map((u) => u.id)}
+                />
 
                 {/* Form: Create Circle */}
                 <CreateCircle babyId={babyId} />
@@ -141,8 +148,8 @@ export default async function InviteForm({
               <CardContent className="px-0 pb-2">
                 <RealtimeCirclesList
                   babyId={babyId}
-                  initialCircles={await getCircles(babyId)}
-                  initialCirclesAccess={await getAllCirclesAccess(babyId)}
+                  initialCircles={circles}
+                  initialCirclesAccess={circlesAccess}
                   users={users}
                   isAdmin={isAdmin}
                 />

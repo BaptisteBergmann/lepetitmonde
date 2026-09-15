@@ -71,16 +71,15 @@ export async function getAllBabyMemberIds(babyId: string, excludeUserId?: string
     .filter((userId) => userId !== excludeUserId)
 }
 
-// Email addresses of every member of a baby — `public.users` has no `email`
+// Email addresses for a set of user ids — `public.users` has no `email`
 // column (only `auth.users` does), so this goes through the Auth admin API
 // instead of a table select. Used for broadcast emails from the admin page
 // rather than in-app notifications.
-export async function getBabyMemberEmails(babyId: string): Promise<string[]> {
-  const memberIds = await getAllBabyMemberIds(babyId)
+export async function getEmailsForUserIds(userIds: string[]): Promise<string[]> {
   const adminClient = createAdminClient()
 
   const emails = await Promise.all(
-    memberIds.map(async (userId) => {
+    userIds.map(async (userId) => {
       const { data } = await adminClient.auth.admin.getUserById(userId)
       return data.user?.email ?? null
     })
