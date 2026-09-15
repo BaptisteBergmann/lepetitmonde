@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-15
 
+- `6959b8f` Allow Tailscale IP as a Next.js dev origin
+- `a3a508e` Scope broadcast email recipients to circles
 - `91335c2` Generalize faire-part into a generic broadcast email
 - `c046e02` Send a faire-part birth announcement email to journal members
 
