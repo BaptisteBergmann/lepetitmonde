@@ -5,11 +5,12 @@ import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
-import { assertIsAdmin, getVisibleUserIds } from './access'
+import { assertIsAdmin, getVisibleUserIds, getEmailsForUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
+import { sendNewPostEmail } from '@/utils/email'
 import { Comment, getCommentsForPosts } from './comments'
 import { ReactionsData, getReactionsForPosts } from './reactions'
 import { PollWithResults, getPollsForPosts } from './polls'
@@ -27,7 +28,7 @@ export type PostWithDetails = Tables<'posts'> & {
   views: PostViewsData
 }
 
-export async function createPost(post: NewPost, circleIds: string[]) {
+export async function createPost(post: NewPost, circleIds: string[], sendEmail: boolean) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: createPost.name, babyId: post.baby_id })
 
@@ -60,11 +61,28 @@ export async function createPost(post: NewPost, circleIds: string[]) {
   const { data: { user } } = await supabase.auth.getUser()
   const recipients = await getVisibleUserIds(post.baby_id, circleIds, user?.id)
   const t = await getTranslations('pushNotifications')
+  const body = post.caption || t('newPost.bodyFallback')
   await notifyUsers(post.baby_id, 'new_post', {
     title: t('newPost.title'),
-    body: post.caption || t('newPost.bodyFallback'),
+    body,
     url: `/baby/${post.baby_id}/feed`,
   }, recipients)
+
+  if (sendEmail) {
+    const { data: baby, error: babyError } = await supabase
+      .from('babies')
+      .select('baby_surname')
+      .eq('id', post.baby_id)
+      .single()
+
+    if (babyError) {
+      contextLogger.error(babyError, "Error fetching baby for new-post email")
+    } else {
+      const emails = await getEmailsForUserIds(recipients)
+      const postUrl = `${process.env.SITE_URL}/baby/${post.baby_id}/feed`
+      await Promise.all(emails.map((to) => sendNewPostEmail(to, baby.baby_surname, body, postUrl)))
+    }
+  }
 
   return data.id
 }

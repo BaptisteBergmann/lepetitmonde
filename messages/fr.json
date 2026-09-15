@@ -263,6 +263,8 @@
       "visibleByLabel": "Visible par",
       "visibleByPlaceholder": "Masqué (aucun cercle)",
       "visibleByHint": "Aucun cercle sélectionné = publication masquée, visible uniquement par les administrateurs.",
+      "sendEmailLabel": "Envoyer un e-mail",
+      "sendEmailHint": "Prévient par e-mail les personnes qui peuvent voir cette publication (voir « Visible par » ci-dessus).",
       "removePoll": "Retirer le sondage",
       "addPoll": "Ajouter un sondage",
       "pollLockedNotice": "Ce sondage a déjà des votes, il ne peut plus être modifié.",
@@ -717,7 +719,8 @@
   },
   "email": {
     "welcomeSubject": "Bienvenue sur Le petit monde",
-    "inviteSubject": "Invitation à rejoindre le journal de {babyName}"
+    "inviteSubject": "Invitation à rejoindre le journal de {babyName}",
+    "newPostSubject": "Nouvelle publication dans le journal de {babyName}"
   },
   "pushNotifications": {
     "someoneFallback": "Quelqu'un",

@@ -263,6 +263,8 @@
       "visibleByLabel": "Visible to",
       "visibleByPlaceholder": "Hidden (no circle)",
       "visibleByHint": "No circle selected = hidden post, visible to admins only.",
+      "sendEmailLabel": "Send an email",
+      "sendEmailHint": "Notifies by email whoever can see this post (see \"Visible to\" above).",
       "removePoll": "Remove poll",
       "addPoll": "Add a poll",
       "pollLockedNotice": "This poll already has votes, it can no longer be edited.",
@@ -717,7 +719,8 @@
   },
   "email": {
     "welcomeSubject": "Welcome to Le petit monde",
-    "inviteSubject": "Invitation to join {babyName}'s journal"
+    "inviteSubject": "Invitation to join {babyName}'s journal",
+    "newPostSubject": "New post in {babyName}'s journal"
   },
   "pushNotifications": {
     "someoneFallback": "Someone",

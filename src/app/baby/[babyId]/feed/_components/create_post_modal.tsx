@@ -40,6 +40,7 @@ export default function CreatePostModal({
   const [caption, setCaption] = useState("")
   const [takenAt, setTakenAt] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [circleIds, setCircleIds] = useState<string[]>([])
+  const [sendEmail, setSendEmail] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
   const [pollEnabled, setPollEnabled] = useState(false)
@@ -65,7 +66,7 @@ export default function CreatePostModal({
   const handleConfirm = async () => {
     setIsPending(true)
     try {
-      await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds)
+      await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds, sendEmail)
 
       if (pollEnabled && pollValid) {
         await createPoll(postId, babyId, pollQuestion, pollOptions)
@@ -215,6 +216,19 @@ export default function CreatePostModal({
               {t('visibleByHint')}
             </p>
           </div>
+
+          <label className="flex items-start gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={sendEmail}
+              onChange={(e) => setSendEmail(e.target.checked)}
+              className="mt-0.5 cursor-pointer"
+            />
+            <span className="flex flex-col gap-0.5">
+              <span>{t('sendEmailLabel')}</span>
+              <span className="text-xs text-muted-foreground">{t('sendEmailHint')}</span>
+            </span>
+          </label>
 
           <div className="flex flex-col gap-2">
             <button
