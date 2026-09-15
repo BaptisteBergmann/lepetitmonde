@@ -53,3 +53,46 @@ export async function sendInviteEmail(to: string, babyName: string, inviteUrl: s
     contextLogger.error(error, "Invite email failed to send")
   }
 }
+
+function escapeHtml(text: string) {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+export async function sendFairePartEmail(
+  to: string,
+  babyName: string,
+  message: string,
+  photo?: { filename: string; content: Buffer },
+) {
+  const contextLogger = logger.child({ function: sendFairePartEmail.name, to })
+  const locale = await getLocale()
+  const t = await getTranslations('email')
+
+  const templatePath = path.join(process.cwd(), 'public/emails', locale, 'faire-part.html')
+  const template = await readFile(templatePath, 'utf-8')
+  // `message` is free-form text from an admin's textarea — the only email
+  // template that interpolates user-authored content rather than
+  // server-generated strings, so it must be escaped before going into HTML.
+  const escapedMessage = escapeHtml(message).replaceAll('\n', '<br>')
+  const html = template
+    .replaceAll('{{BABY_NAME}}', babyName)
+    .replaceAll('{{MESSAGE}}', escapedMessage)
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const { error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to,
+    subject: t('fairePartSubject', { babyName }),
+    html,
+    attachments: photo ? [{ filename: photo.filename, content: photo.content }] : undefined,
+  })
+
+  if (error) {
+    contextLogger.error(error, "Faire-part email failed to send")
+  }
+}

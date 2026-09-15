@@ -459,6 +459,13 @@
     "inviteByEmailTitle": "Invite by email",
     "inviteByEmailDescription": "Send an email invitation to join this journal.",
     "sendInvite": "Send invitation",
+    "fairePartTitle": "Birth announcement",
+    "fairePartDescription": "Send an announcement email to every journal member, with an optional photo attached.",
+    "fairePartMessagePlaceholder": "Baby arrived on... weighing... and doing wonderfully!",
+    "fairePartSend": "Send the announcement",
+    "fairePartSending": "Sending...",
+    "fairePartConfirm": "Send this announcement to {count} journal member(s)?",
+    "fairePartSent": "Announcement sent to {count} member(s).",
     "membersTitle": "Journal members",
     "membersDescription": "List of people with access to this baby's journal.",
     "circlesTitle": "Sharing circles",
@@ -706,7 +713,8 @@
   },
   "email": {
     "welcomeSubject": "Welcome to Le petit monde",
-    "inviteSubject": "Invitation to join {babyName}'s journal"
+    "inviteSubject": "Invitation to join {babyName}'s journal",
+    "fairePartSubject": "{babyName} has arrived!"
   },
   "pushNotifications": {
     "someoneFallback": "Someone",
@@ -782,7 +790,9 @@
     "cannotEditAnsweredPronostic": "Can't edit a pronostic that already has answers",
     "emailRequired": "Email address required",
     "noSubscriptionFound": "No subscription found for this user",
-    "inviteError": "Error sending the invitation"
+    "inviteError": "Error sending the invitation",
+    "fairePartMessageRequired": "Please write a message.",
+    "fairePartError": "Something went wrong while sending the announcement."
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",

@@ -4,6 +4,7 @@ import CreateCircle from "./_components/create_circle";
 import RealtimeCirclesList from "./_components/display_circles";
 import { getCircles, getAllCirclesAccess } from "@utils/actions/circles";
 import CreateInvite from "./_components/create_invite";
+import SendFairePart from "./_components/send_faire_part";
 import RealtimeUsersList from "./_components/display_users";
 import InvitationsList from "./_components/display_invitations";
 import { getUsers, getUserAccess } from "@/utils/actions/users";
@@ -93,6 +94,9 @@ export default async function InviteForm({
 
                 {/* Card: Shareable Link */}
                 <CreateInvite babyId={babyId} />
+
+                {/* Form: Faire-part */}
+                <SendFairePart babyId={babyId} memberCount={users.length} />
 
                 {/* Form: Create Circle */}
                 <CreateCircle babyId={babyId} />

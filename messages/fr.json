@@ -459,6 +459,13 @@
     "inviteByEmailTitle": "Inviter par e-mail",
     "inviteByEmailDescription": "Envoyez un e-mail d'invitation pour rejoindre ce journal.",
     "sendInvite": "Envoyer l'invitation",
+    "fairePartTitle": "Faire-part de naissance",
+    "fairePartDescription": "Envoyez un e-mail d'annonce à tous les membres du journal, avec une photo en pièce jointe si vous le souhaitez.",
+    "fairePartMessagePlaceholder": "Bébé est arrivé·e le... Il/elle pèse... et se porte à merveille !",
+    "fairePartSend": "Envoyer le faire-part",
+    "fairePartSending": "Envoi en cours...",
+    "fairePartConfirm": "Envoyer ce faire-part à {count} membre(s) du journal ?",
+    "fairePartSent": "Faire-part envoyé à {count} membre(s).",
     "membersTitle": "Membres du journal",
     "membersDescription": "Liste des personnes ayant accès à ce journal de bébé.",
     "circlesTitle": "Cercles de partage",
@@ -706,7 +713,8 @@
   },
   "email": {
     "welcomeSubject": "Bienvenue sur Le petit monde",
-    "inviteSubject": "Invitation à rejoindre le journal de {babyName}"
+    "inviteSubject": "Invitation à rejoindre le journal de {babyName}",
+    "fairePartSubject": "{babyName} est arrivé·e !"
   },
   "pushNotifications": {
     "someoneFallback": "Quelqu'un",
@@ -782,7 +790,9 @@
     "cannotEditAnsweredPronostic": "Impossible de modifier un pronostic ayant déjà des réponses",
     "emailRequired": "Adresse email requise",
     "noSubscriptionFound": "Aucun abonnement trouvé pour cet utilisateur",
-    "inviteError": "Erreur lors de l'invitation"
+    "inviteError": "Erreur lors de l'invitation",
+    "fairePartMessageRequired": "Merci d'écrire un message.",
+    "fairePartError": "Erreur lors de l'envoi du faire-part."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",

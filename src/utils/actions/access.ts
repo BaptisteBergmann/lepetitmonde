@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@utils/supabase/server'
+import { createAdminClient } from '@utils/supabase/admin'
 import { actionError } from './errors'
 
 export async function assertIsAdmin(supabase: Awaited<ReturnType<typeof createClient>>, babyId: string) {
@@ -68,6 +69,24 @@ export async function getAllBabyMemberIds(babyId: string, excludeUserId?: string
   return (access ?? [])
     .map((row) => row.user_id)
     .filter((userId) => userId !== excludeUserId)
+}
+
+// Email addresses of every member of a baby — `public.users` has no `email`
+// column (only `auth.users` does), so this goes through the Auth admin API
+// instead of a table select. Used for broadcast emails (e.g. the faire-part
+// announcement) rather than in-app notifications.
+export async function getBabyMemberEmails(babyId: string): Promise<string[]> {
+  const memberIds = await getAllBabyMemberIds(babyId)
+  const adminClient = createAdminClient()
+
+  const emails = await Promise.all(
+    memberIds.map(async (userId) => {
+      const { data } = await adminClient.auth.admin.getUserById(userId)
+      return data.user?.email ?? null
+    })
+  )
+
+  return emails.filter((email): email is string => !!email)
 }
 
 // Every admin of a baby — e.g. to notify about a new member joining.
