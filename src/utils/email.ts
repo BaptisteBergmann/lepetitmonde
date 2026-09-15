@@ -85,6 +85,7 @@ export async function sendBroadcastEmail(
     .replaceAll('{{BABY_NAME}}', babyName)
     .replaceAll('{{SUBJECT}}', escapedSubject)
     .replaceAll('{{MESSAGE}}', escapedMessage)
+    .replaceAll('{{SITE_URL}}', siteUrl)
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
