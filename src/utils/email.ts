@@ -40,6 +40,7 @@ export async function sendInviteEmail(to: string, babyName: string, inviteUrl: s
   const html = template
     .replaceAll('{{BABY_NAME}}', babyName)
     .replaceAll('{{INVITE_URL}}', inviteUrl)
+    .replaceAll('{{SITE_URL}}', siteUrl)
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
@@ -119,6 +120,7 @@ export async function sendNewPostEmail(to: string, babyName: string, body: strin
     .replaceAll('{{BABY_NAME}}', babyName)
     .replaceAll('{{BODY}}', escapedBody)
     .replaceAll('{{POST_URL}}', postUrl)
+    .replaceAll('{{SITE_URL}}', siteUrl)
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
