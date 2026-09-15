@@ -63,36 +63,42 @@ function escapeHtml(text: string) {
     .replaceAll("'", '&#39;')
 }
 
-export async function sendFairePartEmail(
+export async function sendBroadcastEmail(
   to: string,
   babyName: string,
+  subject: string,
   message: string,
   photo?: { filename: string; content: Buffer },
 ) {
-  const contextLogger = logger.child({ function: sendFairePartEmail.name, to })
+  const contextLogger = logger.child({ function: sendBroadcastEmail.name, to })
   const locale = await getLocale()
-  const t = await getTranslations('email')
 
-  const templatePath = path.join(process.cwd(), 'public/emails', locale, 'faire-part.html')
+  const templatePath = path.join(process.cwd(), 'public/emails', locale, 'broadcast.html')
   const template = await readFile(templatePath, 'utf-8')
-  // `message` is free-form text from an admin's textarea — the only email
-  // template that interpolates user-authored content rather than
-  // server-generated strings, so it must be escaped before going into HTML.
+  // Both `subject` and `message` are free-form text from an admin's form —
+  // the only email template that interpolates user-authored content rather
+  // than server-generated strings, so both must be escaped before going
+  // into HTML.
+  const escapedSubject = escapeHtml(subject)
   const escapedMessage = escapeHtml(message).replaceAll('\n', '<br>')
   const html = template
     .replaceAll('{{BABY_NAME}}', babyName)
+    .replaceAll('{{SUBJECT}}', escapedSubject)
     .replaceAll('{{MESSAGE}}', escapedMessage)
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to,
-    subject: t('fairePartSubject', { babyName }),
+    // Unlike the other templates, this subject is admin-typed rather than
+    // server-generated — strip CR/LF so it can't smuggle extra headers into
+    // the outgoing email.
+    subject: subject.replace(/[\r\n]+/g, ' '),
     html,
     attachments: photo ? [{ filename: photo.filename, content: photo.content }] : undefined,
   })
 
   if (error) {
-    contextLogger.error(error, "Faire-part email failed to send")
+    contextLogger.error(error, "Broadcast email failed to send")
   }
 }

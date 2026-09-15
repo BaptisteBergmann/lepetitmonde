@@ -73,8 +73,8 @@ export async function getAllBabyMemberIds(babyId: string, excludeUserId?: string
 
 // Email addresses of every member of a baby — `public.users` has no `email`
 // column (only `auth.users` does), so this goes through the Auth admin API
-// instead of a table select. Used for broadcast emails (e.g. the faire-part
-// announcement) rather than in-app notifications.
+// instead of a table select. Used for broadcast emails from the admin page
+// rather than in-app notifications.
 export async function getBabyMemberEmails(babyId: string): Promise<string[]> {
   const memberIds = await getAllBabyMemberIds(babyId)
   const adminClient = createAdminClient()

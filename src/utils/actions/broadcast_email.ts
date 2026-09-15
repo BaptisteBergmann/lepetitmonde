@@ -3,19 +3,21 @@
 import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { assertIsAdmin, getBabyMemberEmails } from './access'
-import { sendFairePartEmail } from '@/utils/email'
+import { sendBroadcastEmail } from '@/utils/email'
 import { actionError } from './errors'
 
-export async function sendFairePart(formData: FormData) {
+export async function sendBroadcast(formData: FormData) {
   const babyId = formData.get('babyId') as string
+  const subject = (formData.get('subject') as string | null)?.trim()
   const message = (formData.get('message') as string | null)?.trim()
   const photo = formData.get('photo') as File | null
-  const contextLogger = logger.child({ function: sendFairePart.name, babyId })
+  const contextLogger = logger.child({ function: sendBroadcast.name, babyId })
 
   const supabase = await createClient()
   await assertIsAdmin(supabase, babyId)
 
-  if (!message) throw await actionError('fairePartMessageRequired')
+  if (!subject) throw await actionError('broadcastSubjectRequired')
+  if (!message) throw await actionError('broadcastMessageRequired')
 
   const { data: baby, error: babyError } = await supabase
     .from('babies')
@@ -24,8 +26,8 @@ export async function sendFairePart(formData: FormData) {
     .single()
 
   if (babyError) {
-    contextLogger.error(babyError, "Error fetching baby for faire-part email")
-    throw await actionError('fairePartError')
+    contextLogger.error(babyError, "Error fetching baby for broadcast email")
+    throw await actionError('broadcastError')
   }
 
   const recipients = await getBabyMemberEmails(babyId)
@@ -35,10 +37,10 @@ export async function sendFairePart(formData: FormData) {
     : undefined
 
   await Promise.all(
-    recipients.map((to) => sendFairePartEmail(to, baby.baby_surname, message, attachment))
+    recipients.map((to) => sendBroadcastEmail(to, baby.baby_surname, subject, message, attachment))
   )
 
-  contextLogger.info({ sentCount: recipients.length }, "Faire-part emails sent")
+  contextLogger.info({ sentCount: recipients.length }, "Broadcast emails sent")
 
   return { sentCount: recipients.length }
 }

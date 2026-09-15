@@ -459,13 +459,14 @@
     "inviteByEmailTitle": "Inviter par e-mail",
     "inviteByEmailDescription": "Envoyez un e-mail d'invitation pour rejoindre ce journal.",
     "sendInvite": "Envoyer l'invitation",
-    "fairePartTitle": "Faire-part de naissance",
-    "fairePartDescription": "Envoyez un e-mail d'annonce à tous les membres du journal, avec une photo en pièce jointe si vous le souhaitez.",
-    "fairePartMessagePlaceholder": "Bébé est arrivé·e le... Il/elle pèse... et se porte à merveille !",
-    "fairePartSend": "Envoyer le faire-part",
-    "fairePartSending": "Envoi en cours...",
-    "fairePartConfirm": "Envoyer ce faire-part à {count} membre(s) du journal ?",
-    "fairePartSent": "Faire-part envoyé à {count} membre(s).",
+    "broadcastTitle": "Envoyer un e-mail",
+    "broadcastDescription": "Envoyez un e-mail à tous les membres du journal, avec une photo en pièce jointe si vous le souhaitez.",
+    "broadcastSubjectPlaceholder": "Objet de l'e-mail",
+    "broadcastMessagePlaceholder": "Votre message...",
+    "broadcastSend": "Envoyer l'e-mail",
+    "broadcastSending": "Envoi en cours...",
+    "broadcastConfirm": "Envoyer cet e-mail à {count} membre(s) du journal ?",
+    "broadcastSent": "E-mail envoyé à {count} membre(s).",
     "membersTitle": "Membres du journal",
     "membersDescription": "Liste des personnes ayant accès à ce journal de bébé.",
     "circlesTitle": "Cercles de partage",
@@ -713,8 +714,7 @@
   },
   "email": {
     "welcomeSubject": "Bienvenue sur Le petit monde",
-    "inviteSubject": "Invitation à rejoindre le journal de {babyName}",
-    "fairePartSubject": "{babyName} est arrivé·e !"
+    "inviteSubject": "Invitation à rejoindre le journal de {babyName}"
   },
   "pushNotifications": {
     "someoneFallback": "Quelqu'un",
@@ -791,8 +791,9 @@
     "emailRequired": "Adresse email requise",
     "noSubscriptionFound": "Aucun abonnement trouvé pour cet utilisateur",
     "inviteError": "Erreur lors de l'invitation",
-    "fairePartMessageRequired": "Merci d'écrire un message.",
-    "fairePartError": "Erreur lors de l'envoi du faire-part."
+    "broadcastSubjectRequired": "Merci de renseigner un objet.",
+    "broadcastMessageRequired": "Merci d'écrire un message.",
+    "broadcastError": "Erreur lors de l'envoi de l'e-mail."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",
