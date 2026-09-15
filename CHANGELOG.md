@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-15
+
+- `c046e02` Send a faire-part birth announcement email to journal members
+
 ## 2026-08-30
 
 - `a9cacc3` Allow editing a pronostic's title after answers are submitted
