@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-16
 
+- `3e37b5e` Mark albums plan implemented and move to done
 - `511a094` Add photo albums page with group visibility and public share links
 - `ca769aa` Extract PhotoLightbox into a shared component
 - `361f3c8` Stop unthrottled bulk sends from hitting Resend's rate limit
