@@ -177,6 +177,11 @@
       "eyebrow": "Page — Ce qu'il a dit, ce qu'il a fait",
       "description": "Les petites phrases et moments rigolos du quotidien, à garder pour toujours."
     },
+    "albums": {
+      "name": "Albums",
+      "eyebrow": "Page — Albums photo",
+      "description": "Regroupez les photos en albums et partagez-les en famille, ou avec un lien à envoyer à qui vous voulez."
+    },
     "inventory": {
       "name": "Inventaire",
       "eyebrow": "Page — Ce qu'on a, ce qu'il faut",
@@ -646,6 +651,78 @@
       "publishError": "Une erreur est survenue lors de la publication.",
       "editError": "Une erreur est survenue lors de la modification."
     }
+  },
+  "albums": {
+    "eyebrow": "Page — Albums photo",
+    "title": "Albums",
+    "subtitle": "Organisez les photos en albums et partagez-les en famille — même avec des personnes sans compte.",
+    "loading": "Chargement des albums...",
+    "pendingAccess": "Vous n'êtes pas encore rattaché à un groupe de ce journal. L'administrateur a été notifié et vous aurez accès au contenu dès qu'il vous aura ajouté à un groupe.",
+    "tabAllPhotos": "Toutes les photos",
+    "tabAlbums": "Albums",
+    "newAlbum": "Nouvel album",
+    "empty": "Aucun album pour l'instant.",
+    "emptyPhotos": "Aucune photo pour l'instant.",
+    "circleFallback": "Cercle",
+    "adminOnly": "Administrateurs uniquement",
+    "photoCount": "{count} photos",
+    "addPhotos": "Ajouter des photos",
+    "backToAlbums": "Retour aux albums",
+    "deleteAlbumConfirm": "Supprimer cet album et toutes ses photos ? Cette action est irréversible.",
+    "deleteAlbumError": "Une erreur est survenue lors de la suppression de l'album.",
+    "deletePhotoConfirm": "Supprimer cette photo ?",
+    "deletePhotoError": "Une erreur est survenue lors de la suppression de la photo.",
+    "form": {
+      "newTitle": "Nouvel album",
+      "editTitle": "Modifier l'album",
+      "nameLabel": "Nom de l'album",
+      "namePlaceholder": "Ex. Visite de Mamie",
+      "photosLabel": "Photos",
+      "visibleByLabel": "Visible par",
+      "visibleByPlaceholder": "Masqué (aucun cercle)",
+      "visibleByHint": "Aucun cercle sélectionné = album masqué, visible uniquement par les administrateurs.",
+      "cancel": "Annuler",
+      "publishing": "Création...",
+      "publish": "Créer l'album",
+      "saving": "Enregistrement...",
+      "save": "Enregistrer",
+      "publishError": "Une erreur est survenue lors de la création de l'album.",
+      "editError": "Une erreur est survenue lors de la modification."
+    },
+    "addPhotosForm": {
+      "title": "Ajouter des photos",
+      "photosLabel": "Photos",
+      "cancel": "Annuler",
+      "uploading": "Envoi...",
+      "upload": "Ajouter",
+      "uploadError": "Une erreur est survenue lors de l'envoi."
+    },
+    "share": {
+      "title": "Partager l'album",
+      "description": "Toute personne disposant de ce lien peut voir les photos de cet album, même sans compte.",
+      "generate": "Générer un lien",
+      "generating": "Génération...",
+      "durationLabel": "Lien valable",
+      "duration24h": "24 heures",
+      "duration7d": "7 jours",
+      "duration30d": "30 jours",
+      "copy": "Copier le lien",
+      "copied": "Lien copié",
+      "linkError": "Une erreur est survenue lors de la génération du lien.",
+      "activeLinks": "Liens actifs",
+      "noActiveLinks": "Aucun lien actif.",
+      "expiresOn": "Expire le {date}",
+      "expired": "Expiré",
+      "revoke": "Révoquer",
+      "revokeConfirm": "Révoquer ce lien ? Toute personne l'utilisant perdra immédiatement l'accès.",
+      "revokeError": "Une erreur est survenue lors de la révocation du lien.",
+      "close": "Fermer"
+    }
+  },
+  "shareAlbum": {
+    "invalidTitle": "Lien indisponible",
+    "invalidDescription": "Ce lien est invalide ou a expiré. Demandez un nouveau lien à la personne qui vous l'a envoyé.",
+    "photoCount": "{count} photos"
   },
   "profile": {
     "settingsLink": "Paramètres",

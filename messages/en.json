@@ -177,6 +177,11 @@
       "eyebrow": "Page — What they said, what they did",
       "description": "The little sayings and funny moments of everyday life, kept forever."
     },
+    "albums": {
+      "name": "Albums",
+      "eyebrow": "Page — Photo albums",
+      "description": "Group photos into albums and share them with the family, or with anyone via a link."
+    },
     "inventory": {
       "name": "Inventory",
       "eyebrow": "Page — What we have, what we need",
@@ -646,6 +651,78 @@
       "publishError": "Something went wrong while publishing.",
       "editError": "Something went wrong while saving the changes."
     }
+  },
+  "albums": {
+    "eyebrow": "Page — Photo albums",
+    "title": "Albums",
+    "subtitle": "Organize photos into albums and share them with family — even people without an account.",
+    "loading": "Loading albums...",
+    "pendingAccess": "You're not attached to a group in this journal yet. The admin has been notified and you'll get access to the content once they add you to a group.",
+    "tabAllPhotos": "All photos",
+    "tabAlbums": "Albums",
+    "newAlbum": "New album",
+    "empty": "No albums yet.",
+    "emptyPhotos": "No photos yet.",
+    "circleFallback": "Circle",
+    "adminOnly": "Admins only",
+    "photoCount": "{count} photos",
+    "addPhotos": "Add photos",
+    "backToAlbums": "Back to albums",
+    "deleteAlbumConfirm": "Delete this album and all its photos? This action can't be undone.",
+    "deleteAlbumError": "Something went wrong while deleting the album.",
+    "deletePhotoConfirm": "Delete this photo?",
+    "deletePhotoError": "Something went wrong while deleting the photo.",
+    "form": {
+      "newTitle": "New album",
+      "editTitle": "Edit album",
+      "nameLabel": "Album name",
+      "namePlaceholder": "e.g. Grandma's visit",
+      "photosLabel": "Photos",
+      "visibleByLabel": "Visible to",
+      "visibleByPlaceholder": "Hidden (no circle)",
+      "visibleByHint": "No circle selected = hidden album, visible to admins only.",
+      "cancel": "Cancel",
+      "publishing": "Creating...",
+      "publish": "Create album",
+      "saving": "Saving...",
+      "save": "Save",
+      "publishError": "Something went wrong while creating the album.",
+      "editError": "Something went wrong while saving the changes."
+    },
+    "addPhotosForm": {
+      "title": "Add photos",
+      "photosLabel": "Photos",
+      "cancel": "Cancel",
+      "uploading": "Uploading...",
+      "upload": "Add",
+      "uploadError": "Something went wrong while uploading."
+    },
+    "share": {
+      "title": "Share album",
+      "description": "Anyone with this link can view the photos in this album, even without an account.",
+      "generate": "Generate a link",
+      "generating": "Generating...",
+      "durationLabel": "Link valid for",
+      "duration24h": "24 hours",
+      "duration7d": "7 days",
+      "duration30d": "30 days",
+      "copy": "Copy link",
+      "copied": "Link copied",
+      "linkError": "Something went wrong while generating the link.",
+      "activeLinks": "Active links",
+      "noActiveLinks": "No active links.",
+      "expiresOn": "Expires {date}",
+      "expired": "Expired",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke this link? Anyone using it will immediately lose access.",
+      "revokeError": "Something went wrong while revoking the link.",
+      "close": "Close"
+    }
+  },
+  "shareAlbum": {
+    "invalidTitle": "Link unavailable",
+    "invalidDescription": "This link is invalid or has expired. Ask whoever sent it to you for a new one.",
+    "photoCount": "{count} photos"
   },
   "profile": {
     "settingsLink": "Settings",
