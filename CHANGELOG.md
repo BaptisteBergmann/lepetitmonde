@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-16
 
+- `27b5614` Generate real photo thumbnails on upload
 - `3a9d5fc` Pluralize the albums photo count string correctly
 - `dd51793` Note that database.types.ts was re-verified against a real regeneration
 - `d309cd3` Regenerate database.types.ts for real
