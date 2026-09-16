@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@utils/utils'
-import { PostPhotoWithUrl } from '@utils/actions/posts'
+
+// Structural — any photo-with-resolved-url shape works here (post photos,
+// album photos, ...), not just `PostPhotoWithUrl`.
+export type LightboxPhoto = {
+  id: string
+  url: string | null
+  thumbnailUrl: string | null
+  mime_type?: string | null
+}
 
 const SWIPE_THRESHOLD = 50
 const MIN_SCALE = 1
@@ -26,7 +34,7 @@ export default function PhotoLightbox({
   alt,
   onClose,
 }: {
-  photos: PostPhotoWithUrl[]
+  photos: LightboxPhoto[]
   initialIndex: number
   alt: string
   onClose: () => void
