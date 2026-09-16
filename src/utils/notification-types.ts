@@ -15,6 +15,7 @@ export const ALL_NOTIFICATION_TYPES: Enums<'notification_type'>[] = [
   'new_story',
   'new_anecdote',
   'new_comment_reaction',
+  'new_story_reaction',
 ]
 
 export const ADMIN_ONLY_TYPES: Enums<'notification_type'>[] = ['new_member']

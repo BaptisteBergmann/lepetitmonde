@@ -6,6 +6,7 @@ import { X, ChevronLeft, ChevronRight, Eye, Plus as PlusIcon, Sparkles, Trash2 }
 import { cn } from '@utils/utils'
 import { StoryGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
 import { HighlightWithStories, createHighlight, addStoryToHighlight } from '@utils/actions/story_highlights'
+import StoryReactionPicker from './story_reaction_picker'
 import type { ViewerTarget } from './story_tray'
 
 const PHOTO_DURATION_MS = 5000
@@ -288,6 +289,15 @@ export default function StoryViewer({
       {story.caption && (
         <p className="px-4 py-3 text-sm text-white shrink-0">{story.caption}</p>
       )}
+
+      <div className={cn("px-4 shrink-0", story.caption ? "pb-3" : "pt-3 pb-3")}>
+        <StoryReactionPicker
+          storyId={story.id}
+          babyId={babyId}
+          initialReactions={story.reactions}
+          onChanged={onChanged}
+        />
+      </div>
 
       {isAdmin && !isHighlight && views && (
         <div className="flex items-center gap-1.5 px-4 pb-4 text-white/70 text-xs shrink-0">

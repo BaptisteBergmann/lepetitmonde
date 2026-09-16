@@ -11,12 +11,15 @@ import { getUserCircleIds } from './circles'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
+import { getStoryReactionsForStories } from './story_reactions'
+import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
 
 export type StoryWithUrl = Tables<'stories'> & {
   url: string
   thumbnailUrl: string | null
   circleIds: string[]
+  reactions: ReactionsData
 }
 // A tray bubble: either one author's stream (key = "author:<id>") or a
 // shared, cross-author group_label like "Beach day" (key = "label:<label>").
@@ -174,8 +177,12 @@ export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
   )
   if (visibleRows.length === 0) return []
 
-  const nicknames = await getNicknamesByBaby(babyId)
-  const viewedIds = await getViewedStoryIds(visibleRows.map((row) => row.id), user?.id)
+  const storyIds = visibleRows.map((row) => row.id)
+  const [nicknames, viewedIds, reactionsByStory] = await Promise.all([
+    getNicknamesByBaby(babyId),
+    getViewedStoryIds(storyIds, user?.id),
+    getStoryReactionsForStories(storyIds, babyId),
+  ])
   const tCommon = await getTranslations('common')
 
   const byKey = new Map<string, { title: string; isLabeled: boolean; stories: StoryWithUrl[] }>()
@@ -196,6 +203,7 @@ export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
       circleIds: stories_circles.map((sc: { circle_id: string }) => sc.circle_id),
       url: toStoryUrl(babyId, story.media_path),
       thumbnailUrl: story.thumbnail_path ? toStoryUrl(babyId, story.thumbnail_path) : null,
+      reactions: reactionsByStory[story.id] ?? { breakdown: [], myEmoji: null },
     })
     byKey.set(key, group)
   }

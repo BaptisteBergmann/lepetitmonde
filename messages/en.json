@@ -209,7 +209,8 @@
     "circle_access_granted": "Access to a group",
     "new_story": "New stories",
     "new_anecdote": "New anecdotes",
-    "new_comment_reaction": "Reactions on your comments"
+    "new_comment_reaction": "Reactions on your comments",
+    "new_story_reaction": "Reactions on your stories"
   },
   "babyHub": {
     "eyebrow": "The journal of",
@@ -765,6 +766,10 @@
     "newCommentReaction": {
       "title": "New reaction",
       "body": "{name} reacted {emoji} to your comment"
+    },
+    "newStoryReaction": {
+      "title": "New reaction",
+      "body": "{name} reacted {emoji} to your story"
     },
     "bugFixed": {
       "title": "Le petit monde",
