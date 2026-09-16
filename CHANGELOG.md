@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-16
+
+- `8a11af8` Add emoji reactions to stories
+
 ## 2026-09-15
 
 - `e1c5b47` Bump pnpm off broken 11.12.0 release
