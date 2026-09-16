@@ -1577,6 +1577,8 @@ export type Database = {
         Returns: boolean
       }
       shares_baby_with: { Args: { target_user_id: string }; Returns: boolean }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       bug_report_status: "new" | "reviewed" | "fixed"
