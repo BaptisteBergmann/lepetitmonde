@@ -10,7 +10,7 @@ import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
-import { sendNewPostEmail } from '@/utils/email'
+import { sendNewPostEmails } from '@/utils/email'
 import { Comment, getCommentsForPosts } from './comments'
 import { ReactionsData, getReactionsForPosts } from './reactions'
 import { PollWithResults, getPollsForPosts } from './polls'
@@ -80,7 +80,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
     } else {
       const emails = await getEmailsForUserIds(recipients)
       const postUrl = `${process.env.SITE_URL}/baby/${post.baby_id}/feed?postId=${data.id}`
-      await Promise.all(emails.map((to) => sendNewPostEmail(to, baby.baby_surname, body, postUrl)))
+      await sendNewPostEmails(emails, baby.baby_surname, body, postUrl)
     }
   }
 

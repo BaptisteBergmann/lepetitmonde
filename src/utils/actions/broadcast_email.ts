@@ -3,7 +3,7 @@
 import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { assertIsAdmin, getVisibleUserIds, getEmailsForUserIds } from './access'
-import { sendBroadcastEmail } from '@/utils/email'
+import { sendBroadcastEmail, sendThrottled } from '@/utils/email'
 import { actionError } from './errors'
 
 export async function sendBroadcast(formData: FormData) {
@@ -40,9 +40,7 @@ export async function sendBroadcast(formData: FormData) {
     ? { filename: photo.name, content: Buffer.from(await photo.arrayBuffer()) }
     : undefined
 
-  await Promise.all(
-    recipients.map((to) => sendBroadcastEmail(to, baby.baby_surname, subject, message, attachment))
-  )
+  await sendThrottled(recipients, (to) => sendBroadcastEmail(to, baby.baby_surname, subject, message, attachment))
 
   contextLogger.info({ sentCount: recipients.length }, "Broadcast emails sent")
 
