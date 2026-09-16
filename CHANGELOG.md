@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-16
 
+- `361f3c8` Stop unthrottled bulk sends from hitting Resend's rate limit
 - `8a11af8` Add emoji reactions to stories
 
 ## 2026-09-15
