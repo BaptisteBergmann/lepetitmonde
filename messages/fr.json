@@ -665,7 +665,7 @@
     "emptyPhotos": "Aucune photo pour l'instant.",
     "circleFallback": "Cercle",
     "adminOnly": "Administrateurs uniquement",
-    "photoCount": "{count} photos",
+    "photoCount": "{count, plural, one {# photo} other {# photos}}",
     "addPhotos": "Ajouter des photos",
     "backToAlbums": "Retour aux albums",
     "deleteAlbumConfirm": "Supprimer cet album et toutes ses photos ? Cette action est irréversible.",
@@ -722,7 +722,7 @@
   "shareAlbum": {
     "invalidTitle": "Lien indisponible",
     "invalidDescription": "Ce lien est invalide ou a expiré. Demandez un nouveau lien à la personne qui vous l'a envoyé.",
-    "photoCount": "{count} photos"
+    "photoCount": "{count, plural, one {# photo} other {# photos}}"
   },
   "profile": {
     "settingsLink": "Paramètres",
