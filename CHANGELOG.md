@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-16
 
+- `3a9d5fc` Pluralize the albums photo count string correctly
 - `dd51793` Note that database.types.ts was re-verified against a real regeneration
 - `d309cd3` Regenerate database.types.ts for real
 - `3e37b5e` Mark albums plan implemented and move to done
