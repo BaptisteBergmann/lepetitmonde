@@ -26,13 +26,15 @@ Deviations from the original plan:
   `/api/share/[token]/[photoId]` route (full-size image for grid thumbnails
   too), instead of a distinct thumbnail variant. Simpler for v1; a real
   thumbnail would need its own route param or a `?thumb=1` query flag.
-- **`database.types.ts` was hand-edited, not regenerated** — `mise run
-  update_types` requires a local container runtime (podman/docker via
-  `supabase gen types`) which wasn't available in the environment this was
-  built in. The four new table entries were added by hand, mirroring the
-  exact shape/ordering of the existing generated entries. **Recommend
-  running `mise run update_types` for real** next time it's convenient, to
-  confirm the hand-written types match what the CLI actually generates.
+- **`database.types.ts` was initially hand-edited, not regenerated** —
+  `mise run update_types` requires a local container runtime (podman/docker
+  via `supabase gen types`) which wasn't available in that session. Docker
+  was installed afterwards (`apt install docker.io`, this being a real VM
+  with systemd, not an ephemeral sandbox — mise itself can't install a
+  working engine, only client-only stubs like `podman-remote`/`docker-cli`)
+  and `mise run update_types` was re-run for real: zero diff on the four new
+  tables, confirming the hand-written entries were accurate. Docker is now
+  installed and enabled on this machine, so this shouldn't come up again.
 - **No live click-through against the real database** — same reasoning as
   the Anecdotes plan: the dev server would be the user's own authenticated
   session against real family data, and creating test albums/photos would
