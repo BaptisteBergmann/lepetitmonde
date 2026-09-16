@@ -1,15 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
-import { AlbumWithDetails, AlbumPhotoWithAlbum } from '@utils/actions/albums'
+import { AlbumWithDetails, AlbumPhotoWithAlbum, deletePhoto } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { cn } from '@utils/utils'
-import { Plus, Images as ImagesIcon } from 'lucide-react'
+import { Plus, ImagePlus, FolderPlus, Trash2, Loader2, Images as ImagesIcon } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import CreateAlbumModal from './create_album_modal'
+import AddPhotosModal from './add_photos_modal'
+import AssignToAlbumModal from './assign_to_album_modal'
 
 type Circle = Tables<'circles'>
 type Tab = 'photos' | 'albums'
@@ -27,10 +30,28 @@ export default function AlbumsView({
   albums: AlbumWithDetails[]
   allPhotos: AlbumPhotoWithAlbum[]
 }) {
+  const router = useRouter()
   const t = useTranslations('albums')
   const [tab, setTab] = useState<Tab>('photos')
   const [createOpen, setCreateOpen] = useState(false)
+  const [addPhotosOpen, setAddPhotosOpen] = useState(false)
+  const [assigningPhotoId, setAssigningPhotoId] = useState<string | null>(null)
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!confirm(t('deletePhotoConfirm'))) return
+    setDeletingPhotoId(photoId)
+    try {
+      await deletePhoto(photoId, babyId)
+      router.refresh()
+    } catch (err) {
+      console.error(err)
+      alert(t('deletePhotoError'))
+    } finally {
+      setDeletingPhotoId(null)
+    }
+  }
 
   return (
     <div className="relative space-y-4">
@@ -57,10 +78,16 @@ export default function AlbumsView({
         </div>
 
         {isAdmin && (
-          <Button className="gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            <span>{t('newAlbum')}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer" onClick={() => setAddPhotosOpen(true)}>
+              <ImagePlus className="h-4 w-4" />
+              <span>{t('addPhotos')}</span>
+            </Button>
+            <Button className="gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              <span>{t('newAlbum')}</span>
+            </Button>
+          </div>
         )}
       </div>
 
@@ -70,23 +97,41 @@ export default function AlbumsView({
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
             {allPhotos.map((photo, index) => (
-              <Link
-                key={photo.id}
-                href={`/baby/${babyId}/albums/${photo.albumId}`}
-                onClick={(e) => { e.preventDefault(); setLightboxIndex(index) }}
-                className="relative aspect-square overflow-hidden rounded-xl bg-landing-background"
-              >
-                {(photo.thumbnailUrl ?? photo.url) && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photo.thumbnailUrl ?? photo.url ?? undefined}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover contain-paint"
-                  />
+              <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
+                <button
+                  onClick={() => setLightboxIndex(index)}
+                  className="absolute inset-0 cursor-pointer"
+                >
+                  {(photo.thumbnailUrl ?? photo.url) && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={photo.thumbnailUrl ?? photo.url ?? undefined}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover contain-paint"
+                    />
+                  )}
+                </button>
+                {isAdmin && photo.albumId === null && (
+                  <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setAssigningPhotoId(photo.id)}
+                      title={t('addToAlbum')}
+                      className="p-1 rounded-full bg-black/50 text-white cursor-pointer"
+                    >
+                      <FolderPlus className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePhoto(photo.id)}
+                      disabled={deletingPhotoId === photo.id}
+                      className="p-1 rounded-full bg-black/50 text-white cursor-pointer"
+                    >
+                      {deletingPhotoId === photo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
                 )}
-              </Link>
+              </div>
             ))}
           </div>
         )
@@ -139,6 +184,23 @@ export default function AlbumsView({
           babyId={babyId}
           circles={circles}
           onClose={() => setCreateOpen(false)}
+        />
+      )}
+
+      {addPhotosOpen && (
+        <AddPhotosModal
+          babyId={babyId}
+          albumId={null}
+          onClose={() => setAddPhotosOpen(false)}
+        />
+      )}
+
+      {assigningPhotoId && (
+        <AssignToAlbumModal
+          babyId={babyId}
+          photoId={assigningPhotoId}
+          albums={albums}
+          onClose={() => setAssigningPhotoId(null)}
         />
       )}
     </div>

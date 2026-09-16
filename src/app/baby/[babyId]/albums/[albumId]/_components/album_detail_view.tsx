@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@components/ui/badge'
 import { Plus, Pencil, Trash2, Share2, Loader2, X } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
-import AddPhotosModal from './add_photos_modal'
+import AddPhotosModal from '../../_components/add_photos_modal'
 import EditAlbumModal from './edit_album_modal'
 import ShareAlbumModal from './share_album_modal'
 
@@ -55,7 +55,7 @@ export default function AlbumDetailView({
     if (!confirm(t('deletePhotoConfirm'))) return
     setDeletingPhotoId(photoId)
     try {
-      await deletePhoto(photoId, album.id, babyId)
+      await deletePhoto(photoId, babyId)
       router.refresh()
     } catch (err) {
       console.error(err)

@@ -11,7 +11,8 @@ export type Database = {
     Tables: {
       album_photos: {
         Row: {
-          album_id: string
+          album_id: string | null
+          baby_id: string
           created_at: string
           id: string
           mime_type: string
@@ -20,7 +21,8 @@ export type Database = {
           thumbnail_path: string | null
         }
         Insert: {
-          album_id: string
+          album_id?: string | null
+          baby_id: string
           created_at?: string
           id?: string
           mime_type: string
@@ -29,7 +31,8 @@ export type Database = {
           thumbnail_path?: string | null
         }
         Update: {
-          album_id?: string
+          album_id?: string | null
+          baby_id?: string
           created_at?: string
           id?: string
           mime_type?: string
@@ -43,6 +46,13 @@ export type Database = {
             columns: ["album_id"]
             isOneToOne: false
             referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_photos_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
         ]

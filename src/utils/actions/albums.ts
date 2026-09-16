@@ -16,7 +16,7 @@ export type AlbumWithDetails = Tables<'albums'> & {
   photos: AlbumPhotoWithUrl[]
   coverUrl: string | null
 }
-export type AlbumPhotoWithAlbum = AlbumPhotoWithUrl & { albumId: string; albumName: string }
+export type AlbumPhotoWithAlbum = AlbumPhotoWithUrl & { albumId: string | null; albumName: string | null }
 
 function toStorageUrl(babyId: string, path: string) {
   return `/api/storage/${babyId}/${path.split('/').map(encodeURIComponent).join('/')}`
@@ -63,25 +63,19 @@ export async function createAlbum(id: string, babyId: string, name: string, circ
   return data.id
 }
 
-export async function attachAlbumPhotos(
-  albumId: string,
-  babyId: string,
-  files: { filename: string; mimeType: string; thumbnailFilename?: string }[]
-) {
+type NewPhotoFile = { filename: string; mimeType: string; thumbnailFilename?: string }
+
+// Shared by attachAlbumPhotos and attachUnsortedPhotos: inserts rows appended
+// after whatever's already in that scope (album, or the baby's unsorted
+// pile), so re-opening "add photos" never reshuffles/overwrites positions.
+async function insertPhotoRows(babyId: string, albumId: string | null, folder: string, files: NewPhotoFile[]) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: attachAlbumPhotos.name, albumId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  let countQuery = supabase.from('album_photos').select('id', { count: 'exact', head: true })
+  countQuery = albumId ? countQuery.eq('album_id', albumId) : countQuery.eq('baby_id', babyId).is('album_id', null)
+  const { count, error: countError } = await countQuery
 
-  // New photos are appended after whatever's already in the album (rather
-  // than always starting at 0), so re-opening "add photos" on an existing
-  // album doesn't reshuffle/overwrite existing positions.
-  const { count, error: countError } = await supabase
-    .from('album_photos')
-    .select('id', { count: 'exact', head: true })
-    .eq('album_id', albumId)
-
-  if (countError) { contextLogger.error(countError, "Error counting existing album photos"); throw countError }
+  if (countError) throw countError
 
   const baseIndex = count ?? 0
 
@@ -89,15 +83,81 @@ export async function attachAlbumPhotos(
     .from('album_photos')
     .insert(files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
       album_id: albumId,
-      storage_path: `albums/${albumId}/${filename}`,
-      thumbnail_path: thumbnailFilename ? `albums/${albumId}/thumbnails/${thumbnailFilename}` : null,
+      baby_id: babyId,
+      storage_path: `${folder}/${filename}`,
+      thumbnail_path: thumbnailFilename ? `${folder}/thumbnails/${thumbnailFilename}` : null,
       position: baseIndex + index,
       mime_type: mimeType,
     })))
 
-  if (error) { contextLogger.error(error, "Error attaching album photos"); throw error }
+  if (error) throw error
+}
+
+export async function attachAlbumPhotos(albumId: string, babyId: string, files: NewPhotoFile[]) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: attachAlbumPhotos.name, albumId, babyId })
+
+  await assertIsAdmin(supabase, babyId)
+
+  try {
+    await insertPhotoRows(babyId, albumId, `albums/${albumId}`, files)
+  } catch (error) {
+    contextLogger.error(error, "Error attaching album photos")
+    throw error
+  }
 
   contextLogger.info({ count: files.length }, "Album photos attached")
+
+  revalidatePath(`/baby/${babyId}/albums`)
+  revalidatePath(`/baby/${babyId}/albums/${albumId}`)
+}
+
+// Photos with no album yet ("unsorted") — visible only to admins, same as
+// an album with no circles assigned, until assignPhotoToAlbum below gives
+// them one (which also makes them subject to that album's circles).
+export async function attachUnsortedPhotos(babyId: string, files: NewPhotoFile[]) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: attachUnsortedPhotos.name, babyId })
+
+  await assertIsAdmin(supabase, babyId)
+  await ensureBabyBucket(babyId)
+
+  try {
+    await insertPhotoRows(babyId, null, `photos/${babyId}`, files)
+  } catch (error) {
+    contextLogger.error(error, "Error attaching unsorted photos")
+    throw error
+  }
+
+  contextLogger.info({ count: files.length }, "Unsorted photos attached")
+
+  revalidatePath(`/baby/${babyId}/albums`)
+}
+
+// Storage paths keep their `photos/${babyId}/...` prefix even after this —
+// only the DB row's album_id changes, no need to move the underlying object.
+export async function assignPhotoToAlbum(photoId: string, albumId: string, babyId: string) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: assignPhotoToAlbum.name, photoId, albumId, babyId })
+
+  await assertIsAdmin(supabase, babyId)
+
+  const { count, error: countError } = await supabase
+    .from('album_photos')
+    .select('id', { count: 'exact', head: true })
+    .eq('album_id', albumId)
+
+  if (countError) { contextLogger.error(countError, "Error counting target album photos"); throw countError }
+
+  const { error } = await supabase
+    .from('album_photos')
+    .update({ album_id: albumId, position: count ?? 0 })
+    .eq('id', photoId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error assigning photo to album"); throw error }
+
+  contextLogger.info("Photo assigned to album")
 
   revalidatePath(`/baby/${babyId}/albums`)
   revalidatePath(`/baby/${babyId}/albums/${albumId}`)
@@ -138,17 +198,20 @@ export async function updateAlbum(albumId: string, babyId: string, name: string,
   revalidatePath(`/baby/${babyId}/albums/${albumId}`)
 }
 
-export async function deletePhoto(photoId: string, albumId: string, babyId: string) {
+// Scoped by babyId rather than albumId, since a photo may not have an album
+// (unsorted) — deleting from the All Photos view and from an album detail
+// page are the same operation.
+export async function deletePhoto(photoId: string, babyId: string) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: deletePhoto.name, photoId, albumId, babyId })
+  const contextLogger = logger.child({ function: deletePhoto.name, photoId, babyId })
 
   await assertIsAdmin(supabase, babyId)
 
   const { data: photo, error: fetchError } = await supabase
     .from('album_photos')
-    .select('storage_path, thumbnail_path')
+    .select('album_id, storage_path, thumbnail_path')
     .eq('id', photoId)
-    .eq('album_id', albumId)
+    .eq('baby_id', babyId)
     .single()
 
   if (fetchError) { contextLogger.error(fetchError, "Error fetching photo before delete"); throw fetchError }
@@ -160,14 +223,14 @@ export async function deletePhoto(photoId: string, albumId: string, babyId: stri
     .from('album_photos')
     .delete()
     .eq('id', photoId)
-    .eq('album_id', albumId)
+    .eq('baby_id', babyId)
 
   if (error) { contextLogger.error(error, "Error deleting photo"); throw error }
 
   contextLogger.info("Photo deleted")
 
   revalidatePath(`/baby/${babyId}/albums`)
-  revalidatePath(`/baby/${babyId}/albums/${albumId}`)
+  if (photo.album_id) revalidatePath(`/baby/${babyId}/albums/${photo.album_id}`)
 }
 
 export async function deleteAlbum(albumId: string, babyId: string) {
@@ -250,16 +313,36 @@ export async function getAlbums(babyId: string): Promise<AlbumWithDetails[]> {
   return visible
 }
 
+// Queries album_photos directly (rather than flattening getAlbums) so
+// unsorted photos (album_id null) are included too — those are admin-only,
+// same as the "no circle assigned" rule for a photo's actual album.
 export async function getAllAlbumPhotos(babyId: string): Promise<AlbumPhotoWithAlbum[]> {
   const contextLogger = logger.child({ function: getAllAlbumPhotos.name, babyId })
-  const albums = await getAlbums(babyId)
+  const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
 
-  const photos = albums.flatMap((album) =>
-    album.photos.map((photo) => ({ ...photo, albumId: album.id, albumName: album.name }))
-  )
-  photos.sort((a, b) => b.created_at.localeCompare(a.created_at))
+  const { data, error } = await supabase
+    .from('album_photos')
+    .select('*, albums (id, name, albums_circles (circle_id))')
+    .eq('baby_id', babyId)
+    .order('created_at', { ascending: false })
 
-  contextLogger.debug({ count: photos.length }, "Flattened album photos received")
+  if (error) { contextLogger.error(error, "Error fetching all album photos"); return [] }
+
+  const visible = data.filter((row) => {
+    if (!row.albums) return isAdmin
+    return isAdmin || row.albums.albums_circles.some((ac: { circle_id: string }) => userCircleIds.has(ac.circle_id))
+  })
+
+  const photos = visible.map((row) => {
+    const { albums, ...photo } = row
+    return {
+      ...toAlbumPhotoWithUrl(babyId, photo),
+      albumId: albums?.id ?? null,
+      albumName: albums?.name ?? null,
+    }
+  })
+
+  contextLogger.debug({ count: photos.length }, "All album photos received")
 
   return photos
 }

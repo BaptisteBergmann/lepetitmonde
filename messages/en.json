@@ -667,6 +667,7 @@
     "adminOnly": "Admins only",
     "photoCount": "{count, plural, one {# photo} other {# photos}}",
     "addPhotos": "Add photos",
+    "addToAlbum": "Add to album",
     "backToAlbums": "Back to albums",
     "deleteAlbumConfirm": "Delete this album and all its photos? This action can't be undone.",
     "deleteAlbumError": "Something went wrong while deleting the album.",
@@ -696,6 +697,17 @@
       "uploading": "Uploading...",
       "upload": "Add",
       "uploadError": "Something went wrong while uploading."
+    },
+    "assignToAlbumForm": {
+      "title": "Add to album",
+      "existingLabel": "Choose an album",
+      "existingPlaceholder": "Select an album",
+      "add": "Add",
+      "orDivider": "or",
+      "newAlbumLabel": "Create a new album",
+      "newAlbumPlaceholder": "e.g. Grandma's visit",
+      "createAndAdd": "Create & add",
+      "error": "Something went wrong."
     },
     "share": {
       "title": "Share album",

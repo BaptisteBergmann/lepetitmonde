@@ -6,26 +6,30 @@ import { useTranslations } from 'next-intl'
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
 import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
 import { generateImageThumbnail } from '@utils/image-thumbnail'
-import { attachAlbumPhotos } from '@utils/actions/albums'
+import { attachAlbumPhotos, attachUnsortedPhotos } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { Loader2, Plus, X } from 'lucide-react'
 
+// `albumId: null` uploads unsorted photos (no album yet) — from the main
+// Albums page's "Add photos" button — instead of adding to a specific album.
 export default function AddPhotosModal({
   babyId,
   albumId,
   onClose,
 }: {
   babyId: string
-  albumId: string
+  albumId: string | null
   onClose: () => void
 }) {
   const router = useRouter()
   const t = useTranslations('albums.addPhotosForm')
   const [isPending, setIsPending] = useState(false)
 
+  const uploadPath = albumId ? `albums/${albumId}` : `photos/${babyId}`
+
   const upload = useSupabaseUpload({
     bucketName: babyId,
-    path: `albums/${albumId}`,
+    path: uploadPath,
     maxFiles: 30,
     maxFileSize: 50 * 1024 * 1024,
     allowedMimeTypes: ['image/*'],
@@ -50,7 +54,7 @@ export default function AddPhotosModal({
           const thumbName = `${filename}.jpg`
           const { error } = await uploadFile(
             babyId,
-            `albums/${albumId}/thumbnails/${thumbName}`,
+            `${uploadPath}/thumbnails/${thumbName}`,
             thumbnailBlob,
             { cacheControl: '3600', upsert: false }
           )
@@ -61,7 +65,11 @@ export default function AddPhotosModal({
       }))
 
       if (uploadedFiles.length > 0) {
-        await attachAlbumPhotos(albumId, babyId, uploadedFiles)
+        if (albumId) {
+          await attachAlbumPhotos(albumId, babyId, uploadedFiles)
+        } else {
+          await attachUnsortedPhotos(babyId, uploadedFiles)
+        }
       }
 
       onClose()
