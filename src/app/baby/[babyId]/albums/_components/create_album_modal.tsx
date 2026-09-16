@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
-import { useSupabaseUpload } from '@utils/actions/use-supabase-upload'
+import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
+import { generateImageThumbnail } from '@utils/image-thumbnail'
 import { createAlbum, attachAlbumPhotos } from '@utils/actions/albums'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
@@ -62,9 +63,24 @@ export default function CreateAlbumModal({
         const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
         const successFiles = upload.files.filter((f) => successNames.has(f.name))
 
-        const uploadedFiles = successFiles.map((f) => ({
-          filename: finalNames[f.name] ?? f.name,
-          mimeType: f.type || 'application/octet-stream',
+        const uploadedFiles = await Promise.all(successFiles.map(async (f) => {
+          const filename = finalNames[f.name] ?? f.name
+          const mimeType = f.type || 'application/octet-stream'
+
+          let thumbnailFilename: string | undefined
+          const thumbnailBlob = await generateImageThumbnail(f)
+          if (thumbnailBlob) {
+            const thumbName = `${filename}.jpg`
+            const { error } = await uploadFile(
+              babyId,
+              `albums/${albumId}/thumbnails/${thumbName}`,
+              thumbnailBlob,
+              { cacheControl: '3600', upsert: false }
+            )
+            if (!error) thumbnailFilename = thumbName
+          }
+
+          return { filename, mimeType, thumbnailFilename }
         }))
 
         if (uploadedFiles.length > 0) {

@@ -16,10 +16,10 @@ export default function SharedAlbumView({ album }: { album: AlbumWithDetails }) 
             onClick={() => setLightboxIndex(index)}
             className="relative aspect-square overflow-hidden rounded-xl bg-landing-background cursor-pointer"
           >
-            {photo.url && (
+            {(photo.thumbnailUrl ?? photo.url) && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={photo.url}
+                src={photo.thumbnailUrl ?? photo.url ?? undefined}
                 alt=""
                 loading="lazy"
                 decoding="async"

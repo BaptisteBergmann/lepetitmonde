@@ -16,7 +16,8 @@ export async function GET(
   const { token, photoId } = await params
   const contextLogger = logger.child({ function: 'GET', route: '/api/share/[token]/[photoId]', photoId })
 
-  const resolved = await resolveSharedPhoto(token, photoId)
+  const wantsThumbnail = new URL(request.url).searchParams.get('thumb') === '1'
+  const resolved = await resolveSharedPhoto(token, photoId, wantsThumbnail)
   if (!resolved) {
     return Response.json({ error: 'Introuvable' }, { status: 404 })
   }

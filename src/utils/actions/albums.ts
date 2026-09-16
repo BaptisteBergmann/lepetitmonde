@@ -399,7 +399,7 @@ export async function getSharedAlbum(token: string): Promise<AlbumWithDetails | 
     photos: sortedPhotos.map((photo) => ({
       ...photo,
       url: `/api/share/${token}/${photo.id}`,
-      thumbnailUrl: `/api/share/${token}/${photo.id}`,
+      thumbnailUrl: photo.thumbnail_path ? `/api/share/${token}/${photo.id}?thumb=1` : null,
     })),
     coverUrl: null,
   }
@@ -408,7 +408,10 @@ export async function getSharedAlbum(token: string): Promise<AlbumWithDetails | 
 // Re-validates the token exactly like getSharedAlbum, then confirms photoId
 // actually belongs to that share's album — a valid token for album A must
 // not double as a way to fetch photo ids guessed/leaked from album B.
-export async function resolveSharedPhoto(token: string, photoId: string) {
+// `wantsThumbnail` serves the smaller thumbnail_path when the caller asked
+// for it and one exists, falling back to the full-size storage_path
+// otherwise (older photos, or thumbnail generation failed client-side).
+export async function resolveSharedPhoto(token: string, photoId: string, wantsThumbnail: boolean) {
   const contextLogger = logger.child({ function: resolveSharedPhoto.name, photoId })
 
   const valid = await getValidShare(token)
@@ -425,12 +428,14 @@ export async function resolveSharedPhoto(token: string, photoId: string) {
 
   const { data: photo, error: photoError } = await supabase
     .from('album_photos')
-    .select('storage_path')
+    .select('storage_path, thumbnail_path')
     .eq('id', photoId)
     .eq('album_id', albumId)
     .single()
 
   if (photoError || !photo) { contextLogger.warn("Photo not part of shared album"); return null }
 
-  return { babyId: album.baby_id, storagePath: photo.storage_path }
+  const storagePath = (wantsThumbnail && photo.thumbnail_path) ? photo.thumbnail_path : photo.storage_path
+
+  return { babyId: album.baby_id, storagePath }
 }
