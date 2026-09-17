@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-17
+
+- `5f5a8ba` Expose per-story viewed flag from getActiveStories
+
 ## 2026-09-16
 
 - `211014e` Allow uploading photos without an album
