@@ -3,6 +3,8 @@ import { sendInvite, getInvitations } from "@utils/actions/invite";
 import CreateCircle from "./_components/create_circle";
 import RealtimeCirclesList from "./_components/display_circles";
 import { getCircles, getAllCirclesAccess } from "@utils/actions/circles";
+import { getAlbums } from "@utils/actions/albums";
+import DisplayCircleAccess from "./_components/display_circle_access";
 import CreateInvite from "./_components/create_invite";
 import SendBroadcastEmail from "./_components/send_broadcast_email";
 import RealtimeUsersList from "./_components/display_users";
@@ -14,7 +16,7 @@ import { getPageSettings } from "@/utils/actions/page_settings";
 import DisplayBugReports from "./_components/display_bug_reports";
 import DisplayPageSettings from "./_components/display_page_settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Mail, ShieldCheck, Bug, LayoutGrid } from "lucide-react";
+import { Users, UserPlus, Mail, ShieldCheck, Bug, LayoutGrid, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Reveal } from "@components/reveal";
@@ -33,6 +35,7 @@ export default async function InviteForm({
   const circlesAccess = await getAllCirclesAccess(babyId);
   const devicesByUser = isAdmin ? await getMembersDevices(babyId) : {};
   const bugReports = isAdmin ? await getBugReports(babyId) : [];
+  const albums = isAdmin ? await getAlbums(babyId) : [];
   // Plain objects only — this is passed into DisplayPageSettings, a Client
   // Component, and ResolvedPage's `icon` (a function reference) can't cross
   // that boundary. See the note on NavPage in _header/types.ts.
@@ -155,6 +158,24 @@ export default async function InviteForm({
                 />
               </CardContent>
             </Card>
+
+            {/* Group Access Card (admin only) */}
+            {isAdmin && (
+              <Card className="border-landing-border bg-landing-surface">
+                <CardHeader className="pb-3">
+                  <CardTitle className="font-display text-base font-semibold flex items-center gap-2">
+                    <Eye className="h-4.5 w-4.5 text-primary" />
+                    {t('groupAccessTitle')}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-landing-muted">
+                    {t('groupAccessDescription')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-0 pb-2">
+                  <DisplayCircleAccess babyId={babyId} circles={circles} albums={albums} />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Invitations List Card (admin only) */}
             {isAdmin && (
