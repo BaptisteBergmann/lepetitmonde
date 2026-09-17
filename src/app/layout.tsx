@@ -92,7 +92,7 @@ export default async function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col overflow-x-hidden">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <HeaderWrapper />
 
