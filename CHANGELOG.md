@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-17
 
+- `077186c` Contain decorative hero blur within page bounds
 - `fc5b53d` Resume story viewer at first unseen story, add middle-tap pause
 - `5f5a8ba` Expose per-story viewed flag from getActiveStories
 
