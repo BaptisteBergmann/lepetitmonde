@@ -25,7 +25,7 @@ export default async function GuessesPage({
   contextLogger.debug(access, "User Access")
 
   return (
-    <div className="bg-landing-background text-landing-foreground">
+    <div className="overflow-hidden bg-landing-background text-landing-foreground">
       <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
         <div
           aria-hidden

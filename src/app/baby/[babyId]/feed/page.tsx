@@ -37,7 +37,7 @@ export default async function FeedPage({
   const isAdmin = access.access_level === "admin"
 
   return (
-    <div className="bg-landing-background text-landing-foreground">
+    <div className="overflow-hidden bg-landing-background text-landing-foreground">
       <div className="relative mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
         <div
           aria-hidden
