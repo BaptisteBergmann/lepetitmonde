@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-17
 
+- `290228b` Mark albums-mobile-overflow plan as implemented
 - `280036e` Prevent page-level horizontal scroll
 - `8ad2be1` Allow site title to truncate on narrow viewports
 - `077186c` Contain decorative hero blur within page bounds
