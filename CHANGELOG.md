@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-17
 
+- `e62d3aa` Add DisplayCircleAccess component
 - `9cb0187` Add i18n keys for group access viewer
 - `290228b` Mark albums-mobile-overflow plan as implemented
 - `280036e` Prevent page-level horizontal scroll
