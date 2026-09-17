@@ -1,5 +1,24 @@
 # Albums page mobile overflow — plan
 
+## Status: implemented
+
+Shipped all four fixes from the plan: `overflow-hidden` on the hero wrapper
+across all five pages sharing the decorative-blur pattern (Albums, Feed,
+Guess, Calendar, Anecdotes), removed `shrink-0` from the header's `SiteTitle`
+Link (and moved it to the logo image instead) so the truncate span can
+actually shrink, and a defensive `overflow-x-hidden` on `<body>` in
+`src/app/layout.tsx`.
+
+Deviation from the original plan:
+- **No live devtools/phone repro before or after the fix** — no browser tool
+  is available in this environment, and the dev server would run against the
+  user's own authenticated session/real family data (same reasoning as prior
+  plans' deviation notes). Verified structurally instead: `tsc --noEmit`,
+  `eslint`, and `next build` all clean. The fix is a static-analysis-backed
+  best guess at the three candidates identified during planning, not a
+  confirmed root-cause fix — worth a quick manual check on an actual phone
+  before considering this fully closed.
+
 ## Context
 
 Reported bug: on the Albums page (`/baby/[babyId]/albums`), content near the top

@@ -1,5 +1,29 @@
 # Admin: group → album/photo access viewer — plan
 
+## Status: implemented
+
+Shipped exactly as planned: reused the existing `getAlbums(babyId)` action
+(no new server action needed, since admins already get every album
+unfiltered), added a new `DisplayCircleAccess` client component with a
+single-select circle picker that filters the album list client-side, and a
+new "Access by group" card on `/baby/[babyId]/admin` next to the existing
+Circles card. i18n keys added to both `messages/en.json` and
+`messages/fr.json` under `admin.groupAccessTitle`/`groupAccessDescription`
+(card header) and a nested `admin.groupAccess.*` namespace (component
+strings), reused `albums.photoCount` for the pluralized count string.
+
+Deviations from the original plan:
+- **Admin-only albums (no circle assigned) are not surfaced anywhere in this
+  view** — the "open item" in the original plan about showing an "admin
+  only" pseudo-option was left out of v1, since the ask was specifically
+  "what does this group have access to," not a full access audit.
+- **No live click-through against the real database** — same reasoning as
+  prior plans (Albums, Anecdotes): the dev server would run against the
+  user's own authenticated session and real family data. Verified
+  structurally instead (`tsc --noEmit`, `eslint`, `next build` all clean).
+  The select → filtered album list flow should get a manual pass from the
+  user.
+
 ## Context
 
 Feature request: as an admin, a way to pick a group (called a "Circle" in
