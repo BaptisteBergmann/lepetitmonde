@@ -20,6 +20,7 @@ export type StoryWithUrl = Tables<'stories'> & {
   thumbnailUrl: string | null
   circleIds: string[]
   reactions: ReactionsData
+  viewed: boolean
 }
 // A tray bubble: either one author's stream (key = "author:<id>") or a
 // shared, cross-author group_label like "Beach day" (key = "label:<label>").
@@ -204,6 +205,7 @@ export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
       url: toStoryUrl(babyId, story.media_path),
       thumbnailUrl: story.thumbnail_path ? toStoryUrl(babyId, story.thumbnail_path) : null,
       reactions: reactionsByStory[story.id] ?? { breakdown: [], myEmoji: null },
+      viewed: viewedIds.has(story.id),
     })
     byKey.set(key, group)
   }
