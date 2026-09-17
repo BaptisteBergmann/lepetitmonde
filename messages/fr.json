@@ -484,6 +484,8 @@
     "membersDescription": "Liste des personnes ayant accès à ce journal de bébé.",
     "circlesTitle": "Cercles de partage",
     "circlesDescription": "Groupes organisés pour structurer les droits d'accès.",
+    "groupAccessTitle": "Accès par groupe",
+    "groupAccessDescription": "Voir à quels albums un groupe a accès.",
     "invitationLinksTitle": "Liens d'invitation",
     "invitationLinksDescription": "Historique des liens générés, actifs et expirés.",
     "bugReportsTitle": "Signalements de bugs",
@@ -520,6 +522,11 @@
       "add": "Ajouter",
       "withoutCircle": "Sans cercle",
       "withoutCircleDescription": "Membres ne faisant partie d'aucun cercle"
+    },
+    "groupAccess": {
+      "selectPlaceholder": "Sélectionner un groupe...",
+      "empty": "Sélectionnez un groupe pour voir à quoi il a accès.",
+      "noAlbums": "Ce groupe n'a aucun album assigné pour le moment."
     },
     "bugReports": {
       "statusNew": "Nouveau",

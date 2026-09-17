@@ -484,6 +484,8 @@
     "membersDescription": "List of people with access to this baby's journal.",
     "circlesTitle": "Sharing circles",
     "circlesDescription": "Groups organized to structure access rights.",
+    "groupAccessTitle": "Access by group",
+    "groupAccessDescription": "See which albums a group has access to.",
     "invitationLinksTitle": "Invite links",
     "invitationLinksDescription": "History of generated links, active and expired.",
     "bugReportsTitle": "Bug reports",
@@ -520,6 +522,11 @@
       "add": "Add",
       "withoutCircle": "No circle",
       "withoutCircleDescription": "Members not part of any circle"
+    },
+    "groupAccess": {
+      "selectPlaceholder": "Select a group...",
+      "empty": "Select a group to see what it has access to.",
+      "noAlbums": "This group has no album assigned yet."
     },
     "bugReports": {
       "statusNew": "New",
