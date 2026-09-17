@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-17
 
+- `df4f8ae` Mark admin-group-album-access plan as implemented
 - `30df7a0` Wire up group access viewer on admin page
 - `e62d3aa` Add DisplayCircleAccess component
 - `9cb0187` Add i18n keys for group access viewer
