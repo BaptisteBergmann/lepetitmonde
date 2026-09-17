@@ -12,6 +12,10 @@ import type { ViewerTarget } from './story_tray'
 const PHOTO_DURATION_MS = 5000
 // Press-and-hold pauses without navigating; anything shorter is a tap.
 const HOLD_THRESHOLD_MS = 200
+// Tap zones, as a fraction of screen width: left → prev, right → next,
+// the middle band in between → toggle pause.
+const LEFT_ZONE = 0.3
+const RIGHT_ZONE = 0.7
 
 export default function StoryViewer({
   babyId,
@@ -39,8 +43,24 @@ export default function StoryViewer({
     ? highlights[target.index]?.name ?? ''
     : groups[target.index]?.title ?? ''
 
-  const [index, setIndex] = useState(0)
-  const [paused, setPaused] = useState(false)
+  // Resume where the user left off: land on the first unseen story in the
+  // group rather than always restarting at 0. Highlights have no view-
+  // tracking (see the reset effect below), so they always start at 0.
+  // StoryViewer is only ever mounted fresh when a bubble is tapped
+  // (story_tray.tsx renders it conditionally with no `key`), so a lazy
+  // initializer is enough — it never needs to react to `target` changing
+  // under an already-mounted instance.
+  const [index, setIndex] = useState(() => {
+    if (isHighlight) return 0
+    const firstUnseen = stories.findIndex((s) => !s.viewed)
+    return firstUnseen === -1 ? 0 : firstUnseen
+  })
+  // Momentary pause from press-and-hold; resets on release.
+  const [holdPaused, setHoldPaused] = useState(false)
+  // Sticky pause toggled by a tap in the middle zone; resets when the
+  // story changes so autoplay resumes automatically on next/prev.
+  const [manuallyPaused, setManuallyPaused] = useState(false)
+  const paused = holdPaused || manuallyPaused
   const [videoProgress, setVideoProgress] = useState(0)
   const [views, setViews] = useState<StoryViewsData | null>(null)
   const [highlightPickerOpen, setHighlightPickerOpen] = useState(false)
@@ -89,6 +109,7 @@ export default function StoryViewer({
     setVideoProgress(0)
     setViews(null)
     setHighlightPickerOpen(false)
+    setManuallyPaused(false)
     if (!story) return
     if (!isHighlight) {
       markStoryViewed(story.id, babyId)
@@ -120,18 +141,20 @@ export default function StoryViewer({
     wasHeld.current = false
     holdTimer.current = setTimeout(() => {
       wasHeld.current = true
-      setPaused(true)
+      setHoldPaused(true)
     }, HOLD_THRESHOLD_MS)
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (holdTimer.current) clearTimeout(holdTimer.current)
     if (wasHeld.current) {
-      setPaused(false)
+      setHoldPaused(false)
       return
     }
-    if (e.clientX < window.innerWidth / 2) goPrev()
-    else goNext()
+    const ratio = e.clientX / window.innerWidth
+    if (ratio < LEFT_ZONE) goPrev()
+    else if (ratio > RIGHT_ZONE) goNext()
+    else setManuallyPaused((v) => !v)
   }
 
   const handleAddToHighlight = async (highlightId: string) => {
