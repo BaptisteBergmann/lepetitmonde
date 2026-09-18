@@ -33,8 +33,10 @@ export default function PullToRefresh({ children }: { children: React.ReactNode 
       if (!pulling.current || touchStartY.current === null) return
       const delta = e.touches[0].clientY - touchStartY.current
       if (delta <= 0) {
-        pulling.current = false
-        setDragging(false)
+        // Don't cancel the gesture here: a single noisy touchmove sample can
+        // report delta <= 0 right at the start of a real downward swipe. Just
+        // collapse the indicator; `pulling` stays true so tracking resumes if
+        // the finger keeps moving down. It only ends on touchend/touchcancel.
         setPullDistance(0)
         return
       }
@@ -73,8 +75,20 @@ export default function PullToRefresh({ children }: { children: React.ReactNode 
     setPullDistance(0)
   }
 
+  const handleTouchCancel = () => {
+    pulling.current = false
+    touchStartY.current = null
+    setDragging(false)
+    setPullDistance(0)
+  }
+
   return (
-    <div ref={containerRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+    >
       <div
         className={cn(
           'flex items-center justify-center overflow-hidden',
