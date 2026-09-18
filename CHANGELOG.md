@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-18
 
+- `af68e94` Add source_post_id/source_story_id to album_photos
 - `6a17e8f` Stop touch jitter from permanently cancelling the pull-to-refresh gesture
 - `1b1564d` Stop overfetching for the Albums grid, cache circle lookups
 - `883d51d` Generate photo thumbnails server-side instead of in-browser
