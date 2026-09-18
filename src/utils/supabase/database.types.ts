@@ -17,6 +17,8 @@ export type Database = {
           id: string
           mime_type: string
           position: number
+          source_post_id: string | null
+          source_story_id: string | null
           storage_path: string
           thumbnail_path: string | null
         }
@@ -27,6 +29,8 @@ export type Database = {
           id?: string
           mime_type: string
           position?: number
+          source_post_id?: string | null
+          source_story_id?: string | null
           storage_path: string
           thumbnail_path?: string | null
         }
@@ -37,6 +41,8 @@ export type Database = {
           id?: string
           mime_type?: string
           position?: number
+          source_post_id?: string | null
+          source_story_id?: string | null
           storage_path?: string
           thumbnail_path?: string | null
         }
@@ -53,6 +59,20 @@ export type Database = {
             columns: ["baby_id"]
             isOneToOne: false
             referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_photos_source_post_id_fkey"
+            columns: ["source_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_photos_source_story_id_fkey"
+            columns: ["source_story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
             referencedColumns: ["id"]
           },
         ]
