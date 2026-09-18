@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-18
 
+- `3b8fab1` Use server-generated thumbnails for post and story images
 - `ef4649b` Mirror post and story photos onto the Photos page
 - `af68e94` Add source_post_id/source_story_id to album_photos
 - `6a17e8f` Stop touch jitter from permanently cancelling the pull-to-refresh gesture
