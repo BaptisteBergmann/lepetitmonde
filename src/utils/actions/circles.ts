@@ -1,5 +1,6 @@
 'use server' // Obligatoire pour définir que ce fichier contient des Server Actions
 
+import { cache } from 'react'
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables, TablesInsert } from '@utils/supabase/database.types'
@@ -9,6 +10,7 @@ import { logger } from '../logger'
 import { assertIsAdmin } from './access'
 import { notifyUsers } from './notify'
 import { actionError } from './errors'
+import { createTtlCache } from '../cache/ttl-cache'
 
 type NewCircle = TablesInsert<'circles'>;
 
@@ -68,11 +70,16 @@ export async function getCircles(babyId: string) {
   return rep.data
 }
 
-export async function getCirclesAccess(babyId: string, userId: string) {
-  const supabase = await createClient()
+// Called from every visibility-filtered list across the app (feed, albums,
+// anecdotes, events, comments, stories — see grep for getUserCircleIds),
+// often several times per page load. Cached the same way as getUserAccess
+// (users.ts): React's cache() dedupes within one request, a short
+// cross-request TTL absorbs a burst of viewers/actions hitting it within
+// the same few seconds.
+const circlesAccessCache = createTtlCache<Awaited<ReturnType<typeof fetchCirclesAccess>>>(5_000)
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
+async function fetchCirclesAccess(babyId: string, userId: string) {
+  const supabase = await createClient()
 
   const rep = await supabase
     .from('circles_access')
@@ -81,10 +88,16 @@ export async function getCirclesAccess(babyId: string, userId: string) {
     .eq('user_id', userId)
     ;
 
-
   if (rep.error) throw rep.error
   return rep.data
 }
+
+export const getCirclesAccess = cache(async (babyId: string, userId: string) => {
+  const { data: { user } } = await getAuthUser()
+  if (!user) throw await actionError('unauthorized')
+
+  return circlesAccessCache.get(`${babyId}:${userId}`, () => fetchCirclesAccess(babyId, userId))
+})
 
 export async function getUserCircleIds(babyId: string, userId: string) {
   const access = await getCirclesAccess(babyId, userId)

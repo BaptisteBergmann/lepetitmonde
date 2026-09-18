@@ -16,6 +16,15 @@ export type AlbumWithDetails = Tables<'albums'> & {
   photos: AlbumPhotoWithUrl[]
   coverUrl: string | null
 }
+// Lighter shape for the Albums grid (getAlbums below) — a cover photo + count,
+// not every photo row in every album, unlike AlbumWithDetails which backs the
+// single-album detail page (getAlbum) where the full photo list is actually
+// rendered.
+export type AlbumSummary = Tables<'albums'> & {
+  circleIds: string[]
+  coverUrl: string | null
+  photoCount: number
+}
 export type AlbumPhotoWithAlbum = AlbumPhotoWithUrl & { albumId: string | null; albumName: string | null }
 
 function toStorageUrl(babyId: string, path: string) {
@@ -292,13 +301,36 @@ function toAlbumWithDetails(babyId: string, row: {
   }
 }
 
-export async function getAlbums(babyId: string): Promise<AlbumWithDetails[]> {
+// Cover + count per album via a small `limit(1)` query per visible album,
+// instead of embedding every album_photos row (all columns, every photo) in
+// the main query just to read photos[0] and photos.length off it — that
+// scaled with total photo count across every album, not with album count.
+// `count: 'exact'` reports the album's true row count independent of the
+// `limit(1)`, same pattern already used elsewhere in this file (e.g.
+// insertPhotoRows/assignPhotoToAlbum below).
+async function getAlbumCover(supabase: Awaited<ReturnType<typeof createClient>>, babyId: string, albumId: string) {
+  const { data, count, error } = await supabase
+    .from('album_photos')
+    .select('storage_path, thumbnail_path', { count: 'exact' })
+    .eq('album_id', albumId)
+    .order('position', { ascending: true })
+    .limit(1)
+
+  if (error) throw error
+
+  const cover = data[0]
+  const coverUrl = cover ? (cover.thumbnail_path ? toStorageUrl(babyId, cover.thumbnail_path) : toStorageUrl(babyId, cover.storage_path)) : null
+
+  return { coverUrl, photoCount: count ?? 0 }
+}
+
+export async function getAlbums(babyId: string): Promise<AlbumSummary[]> {
   const contextLogger = logger.child({ function: getAlbums.name, babyId })
   const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
 
   const { data, error } = await supabase
     .from('albums')
-    .select('*, albums_circles (circle_id), album_photos (*)')
+    .select('*, albums_circles (circle_id)')
     .eq('baby_id', babyId)
     .order('created_at', { ascending: false })
 
@@ -306,11 +338,22 @@ export async function getAlbums(babyId: string): Promise<AlbumWithDetails[]> {
 
   const visible = data
     .filter((row) => isAdmin || row.albums_circles.some((ac: { circle_id: string }) => userCircleIds.has(ac.circle_id)))
-    .map((row) => toAlbumWithDetails(babyId, row))
 
-  contextLogger.debug({ count: visible.length }, "Albums received")
+  const withCovers = await Promise.all(visible.map(async (row) => {
+    const { albums_circles, ...album } = row
+    const { coverUrl, photoCount } = await getAlbumCover(supabase, babyId, row.id)
 
-  return visible
+    return {
+      ...(album as Tables<'albums'>),
+      circleIds: albums_circles.map((ac: { circle_id: string }) => ac.circle_id),
+      coverUrl,
+      photoCount,
+    }
+  }))
+
+  contextLogger.debug({ count: withCovers.length }, "Albums received")
+
+  return withCovers
 }
 
 // Queries album_photos directly (rather than flattening getAlbums) so

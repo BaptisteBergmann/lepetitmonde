@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
-import { AlbumWithDetails, AlbumPhotoWithAlbum, deletePhoto } from '@utils/actions/albums'
+import { AlbumSummary, AlbumPhotoWithAlbum, deletePhoto } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { cn } from '@utils/utils'
 import { Plus, ImagePlus, FolderPlus, Trash2, Loader2, Images as ImagesIcon } from 'lucide-react'
@@ -27,7 +27,7 @@ export default function AlbumsView({
   babyId: string
   isAdmin: boolean
   circles: Circle[]
-  albums: AlbumWithDetails[]
+  albums: AlbumSummary[]
   allPhotos: AlbumPhotoWithAlbum[]
 }) {
   const router = useRouter()
@@ -162,7 +162,7 @@ export default function AlbumsView({
                 </div>
                 <div className="p-3">
                   <p className="text-sm font-semibold text-landing-foreground truncate">{album.name}</p>
-                  <p className="text-xs text-landing-muted">{t('photoCount', { count: album.photos.length })}</p>
+                  <p className="text-xs text-landing-muted">{t('photoCount', { count: album.photoCount })}</p>
                 </div>
               </Link>
             ))}

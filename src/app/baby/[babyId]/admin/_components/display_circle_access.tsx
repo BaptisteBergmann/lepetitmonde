@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
-import { AlbumWithDetails } from "@utils/actions/albums";
+import { AlbumSummary } from "@utils/actions/albums";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ type Circle = Tables<'circles'>;
 interface DisplayCircleAccessProps {
   babyId: string;
   circles: Circle[];
-  albums: AlbumWithDetails[];
+  albums: AlbumSummary[];
 }
 
 export default function DisplayCircleAccess({ babyId, circles, albums }: DisplayCircleAccessProps) {
@@ -74,7 +74,7 @@ export default function DisplayCircleAccess({ babyId, circles, albums }: Display
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-landing-foreground truncate">{album.name}</p>
-                <p className="text-xs text-landing-muted">{tAlbums('photoCount', { count: album.photos.length })}</p>
+                <p className="text-xs text-landing-muted">{tAlbums('photoCount', { count: album.photoCount })}</p>
               </div>
             </Link>
           ))}

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AlbumWithDetails, assignPhotoToAlbum, createAlbum } from '@utils/actions/albums'
+import { AlbumSummary, assignPhotoToAlbum, createAlbum } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Loader2, FolderPlus, X } from 'lucide-react'
@@ -24,7 +24,7 @@ export default function AssignToAlbumModal({
 }: {
   babyId: string
   photoId: string
-  albums: AlbumWithDetails[]
+  albums: AlbumSummary[]
   onClose: () => void
 }) {
   const router = useRouter()
