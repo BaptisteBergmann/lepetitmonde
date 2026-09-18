@@ -75,14 +75,18 @@ export default function CreatePostModal({
       if (upload.files.length > 0) {
         const newlyUploaded = await upload.onUpload()
         const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
+        const finalThumbnails = { ...upload.finalThumbnails, ...newlyUploaded.thumbnails }
+        const finalContentTypes = { ...upload.finalContentTypes, ...newlyUploaded.contentTypes }
         const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
         const successFiles = upload.files.filter((f) => successNames.has(f.name))
 
         const uploadedFiles = await Promise.all(successFiles.map(async (f) => {
           const filename = finalNames[f.name] ?? f.name
-          const mimeType = f.type || 'application/octet-stream'
+          const mimeType = finalContentTypes[f.name] ?? (f.type || 'application/octet-stream')
 
-          let thumbnailFilename: string | undefined
+          // Images already get a server-generated thumbnail from /api/upload
+          // (finalThumbnails); only videos need the client-side capture below.
+          let thumbnailFilename: string | undefined = finalThumbnails[f.name]
           if (mimeType.startsWith('video/')) {
             const thumbnailBlob = await captureVideoThumbnail(f)
             if (thumbnailBlob) {

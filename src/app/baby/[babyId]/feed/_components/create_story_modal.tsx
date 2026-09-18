@@ -70,14 +70,18 @@ export default function CreateStoryModal({
     try {
       const newlyUploaded = await upload.onUpload()
       const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
+      const finalThumbnails = { ...upload.finalThumbnails, ...newlyUploaded.thumbnails }
+      const finalContentTypes = { ...upload.finalContentTypes, ...newlyUploaded.contentTypes }
       const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
       const file = upload.files.find((f) => successNames.has(f.name))
       if (!file) throw new Error(t('uploadError'))
 
       const filename = finalNames[file.name] ?? file.name
-      const mimeType = file.type || 'application/octet-stream'
+      const mimeType = finalContentTypes[file.name] ?? (file.type || 'application/octet-stream')
 
-      let thumbnailFilename: string | undefined
+      // Images already get a server-generated thumbnail from /api/upload
+      // (finalThumbnails); only videos need the client-side capture below.
+      let thumbnailFilename: string | undefined = finalThumbnails[file.name]
       if (mimeType.startsWith('video/')) {
         const thumbnailBlob = await captureVideoThumbnail(file)
         if (thumbnailBlob) {
