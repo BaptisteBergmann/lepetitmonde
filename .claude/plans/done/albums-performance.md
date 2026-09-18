@@ -1,5 +1,41 @@
 # Albums page performance — plan
 
+## Status: implemented
+
+Shipped in three commits, close to plan:
+
+- `883d51d` — V1, the actual thumbnail fix.
+- `1b1564d` — V2, the query cleanup.
+- Backfill for the 5 pre-existing thumbnail-less photos, run manually
+  (not a committed script — see below).
+
+Deviations from the original plan:
+- **V2's cover-photo query used the "small `limit(1)` query per album"
+  option**, not the lateral-join-view alternative — `getAlbums` now does
+  one `.limit(1)` (with `count: 'exact'`, unaffected by the limit) per
+  visible album via `Promise.all`, verified against the real album_photos
+  table's count-independent-of-range behavior during the original
+  investigation. Introduced a narrower `AlbumSummary` type
+  (`{coverUrl, photoCount}` instead of a full `photos[]`) for the three
+  consumers that only ever read those two fields off `getAlbums`' result
+  (`albums_view.tsx`, `assign_to_album_modal.tsx`, and — not anticipated
+  in the plan — admin's `display_circle_access.tsx`, found via typecheck
+  after the first pass). `AlbumWithDetails` (full `photos[]`) still backs
+  `getAlbum`/`getSharedAlbum`, which do need every photo.
+- **The `getAlbums`/`getAllAlbumPhotos` double-fetch-on-every-load and
+  lack of pagination were left as-is**, exactly as the plan scoped them
+  ("out of scope", "revisit ... if this page ever gets a load-more
+  treatment") — not part of what shipped.
+- **The backfill was a one-off script (`backfill-album-thumbnails.mjs`),
+  run once via `mise exec -- node ...` against production directly (REST
+  API + service-role key), then deleted** rather than committed — per the
+  plan's original "Open items", re-uploading was the alternative on the
+  table; scripting won out since it also fixed the 5 rows' stale
+  `mime_type: 'image/heic'` (corrected to the real `image/jpeg`) as a
+  byproduct, verified after the fact via the same `curl .../rest/v1/album_photos`
+  check used during the investigation, plus a direct download+`file` check
+  on one of the new thumbnail objects.
+
 ## Context
 
 Investigated why `/baby/[babyId]/albums` feels slow. Checked the live DB
