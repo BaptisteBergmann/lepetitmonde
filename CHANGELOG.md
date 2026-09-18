@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-18
 
+- `1b1564d` Stop overfetching for the Albums grid, cache circle lookups
 - `883d51d` Generate photo thumbnails server-side instead of in-browser
 - `37f174e` Live-update story tray via realtime relay
 
