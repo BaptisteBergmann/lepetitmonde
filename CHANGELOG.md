@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-18
+
+- `37f174e` Live-update story tray via realtime relay
+
 ## 2026-09-17
 
 - `df4f8ae` Mark admin-group-album-access plan as implemented
