@@ -674,7 +674,7 @@
     "adminOnly": "Admins only",
     "photoCount": "{count, plural, one {# photo} other {# photos}}",
     "addPhotos": "Add photos",
-    "addToAlbum": "Add to album",
+    "photoInfo": "Photo info",
     "backToAlbums": "Back to albums",
     "deleteAlbumConfirm": "Delete this album and all its photos? This action can't be undone.",
     "deleteAlbumError": "Something went wrong while deleting the album.",
@@ -705,16 +705,23 @@
       "upload": "Add",
       "uploadError": "Something went wrong while uploading."
     },
-    "assignToAlbumForm": {
-      "title": "Add to album",
-      "existingLabel": "Choose an album",
+    "photoInfoForm": {
+      "title": "Photo info",
+      "addedLabel": "Added",
+      "sourcePost": "From a post",
+      "sourceStory": "From a story",
+      "albumLabel": "Album",
+      "unsortedOption": "Unsorted",
+      "move": "Move",
       "existingPlaceholder": "Select an album",
-      "add": "Add",
       "orDivider": "or",
       "newAlbumLabel": "Create a new album",
       "newAlbumPlaceholder": "e.g. Grandma's visit",
       "createAndAdd": "Create & add",
-      "error": "Something went wrong."
+      "moveError": "Something went wrong while moving the photo.",
+      "circlesLabel": "Visible to",
+      "circlesNone": "Admins only",
+      "deletePhoto": "Delete photo"
     },
     "share": {
       "title": "Share album",

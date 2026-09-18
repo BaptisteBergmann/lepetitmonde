@@ -674,7 +674,7 @@
     "adminOnly": "Administrateurs uniquement",
     "photoCount": "{count, plural, one {# photo} other {# photos}}",
     "addPhotos": "Ajouter des photos",
-    "addToAlbum": "Ajouter à un album",
+    "photoInfo": "Infos de la photo",
     "backToAlbums": "Retour aux albums",
     "deleteAlbumConfirm": "Supprimer cet album et toutes ses photos ? Cette action est irréversible.",
     "deleteAlbumError": "Une erreur est survenue lors de la suppression de l'album.",
@@ -705,16 +705,23 @@
       "upload": "Ajouter",
       "uploadError": "Une erreur est survenue lors de l'envoi."
     },
-    "assignToAlbumForm": {
-      "title": "Ajouter à un album",
-      "existingLabel": "Choisir un album",
+    "photoInfoForm": {
+      "title": "Infos de la photo",
+      "addedLabel": "Ajoutée le",
+      "sourcePost": "Provient d'une publication",
+      "sourceStory": "Provient d'une story",
+      "albumLabel": "Album",
+      "unsortedOption": "Non classée",
+      "move": "Déplacer",
       "existingPlaceholder": "Sélectionner un album",
-      "add": "Ajouter",
       "orDivider": "ou",
       "newAlbumLabel": "Créer un nouvel album",
       "newAlbumPlaceholder": "Ex. Visite de Mamie",
       "createAndAdd": "Créer et ajouter",
-      "error": "Une erreur est survenue."
+      "moveError": "Une erreur est survenue lors du déplacement de la photo.",
+      "circlesLabel": "Visible par",
+      "circlesNone": "Administrateurs uniquement",
+      "deletePhoto": "Supprimer la photo"
     },
     "share": {
       "title": "Partager l'album",

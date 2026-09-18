@@ -256,6 +256,39 @@ export async function assignPhotoToAlbum(photoId: string, albumId: string, babyI
   revalidatePath(`/baby/${babyId}/albums/${albumId}`)
 }
 
+// Mirrors assignPhotoToAlbum but sends the photo back to the "unsorted"
+// pool — used by the photo info modal's "remove from album" action.
+export async function unassignPhotoFromAlbum(photoId: string, babyId: string) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: unassignPhotoFromAlbum.name, photoId, babyId })
+
+  await assertIsAdmin(supabase, babyId)
+
+  const { data: photo, error: fetchError } = await supabase
+    .from('album_photos')
+    .select('album_id')
+    .eq('id', photoId)
+    .eq('baby_id', babyId)
+    .single()
+
+  if (fetchError) { contextLogger.error(fetchError, "Error fetching photo before unassign"); throw fetchError }
+
+  const position = await nextUnsortedPosition(supabase, babyId)
+
+  const { error } = await supabase
+    .from('album_photos')
+    .update({ album_id: null, position })
+    .eq('id', photoId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error unassigning photo from album"); throw error }
+
+  contextLogger.info("Photo unassigned from album")
+
+  revalidatePath(`/baby/${babyId}/albums`)
+  if (photo.album_id) revalidatePath(`/baby/${babyId}/albums/${photo.album_id}`)
+}
+
 export async function updateAlbum(albumId: string, babyId: string, name: string, circleIds: string[]) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updateAlbum.name, albumId, babyId })

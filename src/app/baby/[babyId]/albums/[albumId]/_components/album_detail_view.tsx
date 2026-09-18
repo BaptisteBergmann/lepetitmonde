@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
-import { AlbumWithDetails, deleteAlbum, deletePhoto } from '@utils/actions/albums'
+import { AlbumSummary, AlbumWithDetails, deleteAlbum } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@components/ui/badge'
-import { Plus, Pencil, Trash2, Share2, Loader2, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Share2, Loader2, Info } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import AddPhotosModal from '../../_components/add_photos_modal'
+import PhotoInfoModal from '../../_components/photo_info_modal'
 import EditAlbumModal from './edit_album_modal'
 import ShareAlbumModal from './share_album_modal'
 
@@ -19,11 +20,13 @@ export default function AlbumDetailView({
   babyId,
   isAdmin,
   circles,
+  albums,
   album,
 }: {
   babyId: string
   isAdmin: boolean
   circles: Circle[]
+  albums: AlbumSummary[]
   album: AlbumWithDetails
 }) {
   const router = useRouter()
@@ -33,7 +36,9 @@ export default function AlbumDetailView({
   const [editOpen, setEditOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [deletingAlbum, setDeletingAlbum] = useState(false)
-  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
+  const [infoPhotoId, setInfoPhotoId] = useState<string | null>(null)
+
+  const infoPhoto = infoPhotoId ? album.photos.find((photo) => photo.id === infoPhotoId) ?? null : null
 
   const albumCircles = album.circleIds.map((id) => circles.find((c) => c.id === id))
 
@@ -48,20 +53,6 @@ export default function AlbumDetailView({
       console.error(err)
       alert(t('deleteAlbumError'))
       setDeletingAlbum(false)
-    }
-  }
-
-  const handleDeletePhoto = async (photoId: string) => {
-    if (!confirm(t('deletePhotoConfirm'))) return
-    setDeletingPhotoId(photoId)
-    try {
-      await deletePhoto(photoId, babyId)
-      router.refresh()
-    } catch (err) {
-      console.error(err)
-      alert(t('deletePhotoError'))
-    } finally {
-      setDeletingPhotoId(null)
     }
   }
 
@@ -135,11 +126,11 @@ export default function AlbumDetailView({
               </button>
               {isAdmin && (
                 <button
-                  onClick={() => handleDeletePhoto(photo.id)}
-                  disabled={deletingPhotoId === photo.id}
+                  onClick={() => setInfoPhotoId(photo.id)}
+                  title={t('photoInfo')}
                   className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
-                  {deletingPhotoId === photo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                  <Info className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
@@ -178,6 +169,18 @@ export default function AlbumDetailView({
           babyId={babyId}
           albumId={album.id}
           onClose={() => setShareOpen(false)}
+        />
+      )}
+
+      {infoPhoto && (
+        <PhotoInfoModal
+          babyId={babyId}
+          photo={infoPhoto}
+          currentAlbumId={album.id}
+          currentAlbumName={album.name}
+          albums={albums}
+          circles={circles}
+          onClose={() => setInfoPhotoId(null)}
         />
       )}
     </div>

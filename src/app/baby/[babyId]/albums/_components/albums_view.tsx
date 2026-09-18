@@ -1,18 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
-import { AlbumSummary, AlbumPhotoWithAlbum, deletePhoto } from '@utils/actions/albums'
+import { AlbumSummary, AlbumPhotoWithAlbum } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { cn } from '@utils/utils'
-import { Plus, ImagePlus, FolderPlus, Trash2, Loader2, Images as ImagesIcon } from 'lucide-react'
+import { Plus, ImagePlus, Info, Images as ImagesIcon } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import CreateAlbumModal from './create_album_modal'
 import AddPhotosModal from './add_photos_modal'
-import AssignToAlbumModal from './assign_to_album_modal'
+import PhotoInfoModal from './photo_info_modal'
 
 type Circle = Tables<'circles'>
 type Tab = 'photos' | 'albums'
@@ -30,28 +29,14 @@ export default function AlbumsView({
   albums: AlbumSummary[]
   allPhotos: AlbumPhotoWithAlbum[]
 }) {
-  const router = useRouter()
   const t = useTranslations('albums')
   const [tab, setTab] = useState<Tab>('photos')
   const [createOpen, setCreateOpen] = useState(false)
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
-  const [assigningPhotoId, setAssigningPhotoId] = useState<string | null>(null)
-  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
+  const [infoPhotoId, setInfoPhotoId] = useState<string | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
-  const handleDeletePhoto = async (photoId: string) => {
-    if (!confirm(t('deletePhotoConfirm'))) return
-    setDeletingPhotoId(photoId)
-    try {
-      await deletePhoto(photoId, babyId)
-      router.refresh()
-    } catch (err) {
-      console.error(err)
-      alert(t('deletePhotoError'))
-    } finally {
-      setDeletingPhotoId(null)
-    }
-  }
+  const infoPhoto = infoPhotoId ? allPhotos.find((photo) => photo.id === infoPhotoId) ?? null : null
 
   return (
     <div className="relative space-y-4">
@@ -113,23 +98,14 @@ export default function AlbumsView({
                     />
                   )}
                 </button>
-                {isAdmin && photo.albumId === null && (
-                  <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => setAssigningPhotoId(photo.id)}
-                      title={t('addToAlbum')}
-                      className="p-1 rounded-full bg-black/50 text-white cursor-pointer"
-                    >
-                      <FolderPlus className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePhoto(photo.id)}
-                      disabled={deletingPhotoId === photo.id}
-                      className="p-1 rounded-full bg-black/50 text-white cursor-pointer"
-                    >
-                      {deletingPhotoId === photo.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
+                {isAdmin && (
+                  <button
+                    onClick={() => setInfoPhotoId(photo.id)}
+                    title={t('photoInfo')}
+                    className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
                 )}
               </div>
             ))}
@@ -195,12 +171,15 @@ export default function AlbumsView({
         />
       )}
 
-      {assigningPhotoId && (
-        <AssignToAlbumModal
+      {infoPhoto && (
+        <PhotoInfoModal
           babyId={babyId}
-          photoId={assigningPhotoId}
+          photo={infoPhoto}
+          currentAlbumId={infoPhoto.albumId}
+          currentAlbumName={infoPhoto.albumName}
           albums={albums}
-          onClose={() => setAssigningPhotoId(null)}
+          circles={circles}
+          onClose={() => setInfoPhotoId(null)}
         />
       )}
     </div>
