@@ -9,6 +9,7 @@ import { assertIsAdmin, getVisibleUserIds, getEmailsForUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
+import { linkPostPhotos } from './albums'
 import { notifyUsers } from './notify'
 import { sendNewPostEmails } from '@/utils/email'
 import { Comment, getCommentsForPosts } from './comments'
@@ -136,21 +137,30 @@ export async function attachPostPhotos(
 
   await assertIsAdmin(supabase, babyId)
 
-  const { error } = await supabase
-    .from('post_photos')
-    .insert(files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
-      post_id: postId,
-      storage_path: `posts/${postId}/${filename}`,
-      thumbnail_path: thumbnailFilename ? `posts/${postId}/thumbnails/${thumbnailFilename}` : null,
-      position: index,
-      mime_type: mimeType,
-    })))
+  const photoRows = files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
+    post_id: postId,
+    storage_path: `posts/${postId}/${filename}`,
+    thumbnail_path: thumbnailFilename ? `posts/${postId}/thumbnails/${thumbnailFilename}` : null,
+    position: index,
+    mime_type: mimeType,
+  }))
+
+  const { error } = await supabase.from('post_photos').insert(photoRows)
 
   if (error) { contextLogger.error(error, "Error attaching post photos"); throw error }
 
   contextLogger.info({ count: files.length }, "Post photos attached")
 
+  // Mirror onto the Photos page (see .claude/plans/post-story-photos-to-photo-page.md)
+  // — shares the same storage objects just inserted above, no re-upload.
+  await linkPostPhotos(postId, babyId, photoRows.map(({ storage_path, thumbnail_path, mime_type }) => ({
+    storagePath: storage_path,
+    thumbnailPath: thumbnail_path,
+    mimeType: mime_type,
+  })))
+
   revalidatePath(`/baby/${babyId}/feed`)
+  revalidatePath(`/baby/${babyId}/albums`)
 }
 
 async function withVisibility(babyId: string) {
@@ -345,4 +355,5 @@ export async function deletePost(postId: string, babyId: string) {
   contextLogger.info("Post deleted")
 
   revalidatePath(`/baby/${babyId}/feed`)
+  revalidatePath(`/baby/${babyId}/albums`)
 }

@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
-import { ensureBabyBucket, removeStorageObjects } from './storage'
+import { ensureBabyBucket, removeStorageObjects, copyStorageObject } from './storage'
 import { logger } from '../logger'
 
 export type AlbumPhotoWithUrl = Tables<'album_photos'> & { url: string | null; thumbnailUrl: string | null }
@@ -143,6 +143,90 @@ export async function attachUnsortedPhotos(babyId: string, files: NewPhotoFile[]
   revalidatePath(`/baby/${babyId}/albums`)
 }
 
+async function nextUnsortedPosition(supabase: Awaited<ReturnType<typeof createClient>>, babyId: string) {
+  const { count, error } = await supabase
+    .from('album_photos')
+    .select('id', { count: 'exact', head: true })
+    .eq('baby_id', babyId)
+    .is('album_id', null)
+
+  if (error) throw error
+  return count ?? 0
+}
+
+// Called by posts.ts's attachPostPhotos, right after its own post_photos
+// insert succeeds. The mirrored row shares the post's actual
+// storage_path/thumbnail_path — no second upload, no duplicated storage —
+// landing in the same "unsorted" pool as directly-uploaded photos.
+// source_post_id is ON DELETE CASCADE (see the migration), so deleting the
+// post removes this row automatically, at the same time its storage goes
+// (deletePost already removes that separately).
+export async function linkPostPhotos(
+  postId: string,
+  babyId: string,
+  files: { storagePath: string; thumbnailPath: string | null; mimeType: string }[]
+) {
+  const supabase = await createClient()
+  const baseIndex = await nextUnsortedPosition(supabase, babyId)
+
+  const { error } = await supabase
+    .from('album_photos')
+    .insert(files.map(({ storagePath, thumbnailPath, mimeType }, index) => ({
+      album_id: null,
+      baby_id: babyId,
+      storage_path: storagePath,
+      thumbnail_path: thumbnailPath,
+      position: baseIndex + index,
+      mime_type: mimeType,
+      source_post_id: postId,
+    })))
+
+  if (error) throw error
+}
+
+// Called by stories.ts's createStory. Makes a real, independent copy of the
+// story's media (and thumbnail, if any) into photos/${babyId}/${storyId}/...
+// — deliberately NOT a shared reference like linkPostPhotos above — so the
+// Photos-page entry survives the story disappearing (expiry via
+// pruneExpiredStories in stories.ts, or an explicit delete). source_story_id
+// is ON DELETE SET NULL: purely an informational backlink, never a reason
+// to remove this row.
+export async function copyStoryPhotoToLibrary(
+  storyId: string,
+  babyId: string,
+  file: { storagePath: string; thumbnailPath: string | null; mimeType: string }
+) {
+  const supabase = await createClient()
+
+  const folder = `photos/${babyId}/${storyId}`
+  const mediaFilename = file.storagePath.split('/').pop()!
+  const newStoragePath = `${folder}/${mediaFilename}`
+  await copyStorageObject(babyId, file.storagePath, newStoragePath)
+
+  let newThumbnailPath: string | null = null
+  if (file.thumbnailPath) {
+    const thumbnailFilename = file.thumbnailPath.split('/').pop()!
+    newThumbnailPath = `${folder}/thumbnails/${thumbnailFilename}`
+    await copyStorageObject(babyId, file.thumbnailPath, newThumbnailPath)
+  }
+
+  const position = await nextUnsortedPosition(supabase, babyId)
+
+  const { error } = await supabase
+    .from('album_photos')
+    .insert([{
+      album_id: null,
+      baby_id: babyId,
+      storage_path: newStoragePath,
+      thumbnail_path: newThumbnailPath,
+      position,
+      mime_type: file.mimeType,
+      source_story_id: storyId,
+    }])
+
+  if (error) throw error
+}
+
 // Storage paths keep their `photos/${babyId}/...` prefix even after this —
 // only the DB row's album_id changes, no need to move the underlying object.
 export async function assignPhotoToAlbum(photoId: string, albumId: string, babyId: string) {
@@ -218,15 +302,24 @@ export async function deletePhoto(photoId: string, babyId: string) {
 
   const { data: photo, error: fetchError } = await supabase
     .from('album_photos')
-    .select('album_id, storage_path, thumbnail_path')
+    .select('album_id, storage_path, thumbnail_path, source_post_id')
     .eq('id', photoId)
     .eq('baby_id', babyId)
     .single()
 
   if (fetchError) { contextLogger.error(fetchError, "Error fetching photo before delete"); throw fetchError }
 
-  const paths = photo.thumbnail_path ? [photo.storage_path, photo.thumbnail_path] : [photo.storage_path]
-  await removeStorageObjects(babyId, paths)
+  // A photo linked from a post (source_post_id) shares its storage object
+  // with that post's own post_photos row — removing it here would break the
+  // still-live post. Only unlink it from the Photos page; the post's delete
+  // flow (deletePost) is what actually removes that storage, and cascades
+  // this row away at the same time. Story-derived photos own an independent
+  // copy (copyStoryPhotoToLibrary) and directly-uploaded ones always did —
+  // both are safe to remove normally.
+  if (!photo.source_post_id) {
+    const paths = photo.thumbnail_path ? [photo.storage_path, photo.thumbnail_path] : [photo.storage_path]
+    await removeStorageObjects(babyId, paths)
+  }
 
   const { error } = await supabase
     .from('album_photos')
@@ -250,14 +343,16 @@ export async function deleteAlbum(albumId: string, babyId: string) {
 
   const { data: photos, error: fetchError } = await supabase
     .from('album_photos')
-    .select('storage_path, thumbnail_path')
+    .select('storage_path, thumbnail_path, source_post_id')
     .eq('album_id', albumId)
 
   if (fetchError) { contextLogger.error(fetchError, "Error fetching album photos before delete"); throw fetchError }
 
-  const paths = photos.flatMap((photo) =>
-    photo.thumbnail_path ? [photo.storage_path, photo.thumbnail_path] : [photo.storage_path]
-  )
+  // Same reasoning as deletePhoto above: never remove storage for a photo
+  // linked from a post — it's shared with that post's own post_photos row.
+  const paths = photos
+    .filter((photo) => !photo.source_post_id)
+    .flatMap((photo) => (photo.thumbnail_path ? [photo.storage_path, photo.thumbnail_path] : [photo.storage_path]))
   if (paths.length > 0) await removeStorageObjects(babyId, paths)
 
   const { error } = await supabase

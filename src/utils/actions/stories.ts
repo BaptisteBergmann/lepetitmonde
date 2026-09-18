@@ -10,6 +10,7 @@ import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
+import { copyStoryPhotoToLibrary } from './albums'
 import { notifyUsers } from './notify'
 import { getStoryReactionsForStories } from './story_reactions'
 import type { ReactionsData } from './reactions'
@@ -55,6 +56,9 @@ export async function createStory(story: NewStory, circleIds: string[]) {
     ? new Date(Date.now() + story.durationHours * 60 * 60 * 1000).toISOString()
     : null
 
+  const mediaPath = `stories/${story.id}/${story.mediaFilename}`
+  const thumbnailPath = story.thumbnailFilename ? `stories/${story.id}/thumbnails/${story.thumbnailFilename}` : null
+
   const { data, error } = await supabase
     .from('stories')
     .insert([{
@@ -63,8 +67,8 @@ export async function createStory(story: NewStory, circleIds: string[]) {
       caption: story.caption,
       expires_at: expiresAt,
       group_label: story.groupLabel,
-      media_path: `stories/${story.id}/${story.mediaFilename}`,
-      thumbnail_path: story.thumbnailFilename ? `stories/${story.id}/thumbnails/${story.thumbnailFilename}` : null,
+      media_path: mediaPath,
+      thumbnail_path: thumbnailPath,
       mime_type: story.mimeType,
     }])
     .select('id')
@@ -82,6 +86,16 @@ export async function createStory(story: NewStory, circleIds: string[]) {
 
   contextLogger.info({ storyId: data.id }, "Story created")
 
+  // Mirror onto the Photos page as an independent copy (see
+  // .claude/plans/post-story-photos-to-photo-page.md) so it survives the
+  // story expiring or being deleted — unlike posts, stories can't just
+  // share their storage object.
+  await copyStoryPhotoToLibrary(data.id, story.baby_id, {
+    storagePath: mediaPath,
+    thumbnailPath,
+    mimeType: story.mimeType,
+  })
+
   const { data: { user } } = await supabase.auth.getUser()
   const recipients = await getVisibleUserIds(story.baby_id, circleIds, user?.id)
   const t = await getTranslations('pushNotifications')
@@ -92,6 +106,7 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   }, recipients)
 
   revalidatePath(`/baby/${story.baby_id}/feed`)
+  revalidatePath(`/baby/${story.baby_id}/albums`)
 
   return data.id
 }
@@ -301,5 +316,8 @@ export async function deleteStory(storyId: string, babyId: string) {
 
   contextLogger.info("Story deleted")
 
+  // The story's Photos-page copy (source_story_id, ON DELETE SET NULL)
+  // deliberately survives this — see copyStoryPhotoToLibrary in albums.ts.
   revalidatePath(`/baby/${babyId}/feed`)
+  revalidatePath(`/baby/${babyId}/albums`)
 }
