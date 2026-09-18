@@ -909,7 +909,8 @@
     "invalidRequest": "Invalid request",
     "forbidden": "Not authorized",
     "heicTooLarge": "HEIC file too large",
-    "heicConversionFailed": "Couldn't convert the HEIC image"
+    "heicConversionFailed": "Couldn't convert the HEIC image",
+    "imageTooLarge": "Image file too large"
   },
   "dropzone": {
     "uploadedSuccess": "{count, plural, one {# file uploaded successfully} other {# files uploaded successfully}}",

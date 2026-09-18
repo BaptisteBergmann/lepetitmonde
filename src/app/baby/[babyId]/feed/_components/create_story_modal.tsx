@@ -69,8 +69,8 @@ export default function CreateStoryModal({
     setIsPending(true)
     try {
       const newlyUploaded = await upload.onUpload()
-      const finalNames = { ...upload.finalNames, ...newlyUploaded }
-      const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
+      const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
+      const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
       const file = upload.files.find((f) => successNames.has(f.name))
       if (!file) throw new Error(t('uploadError'))
 

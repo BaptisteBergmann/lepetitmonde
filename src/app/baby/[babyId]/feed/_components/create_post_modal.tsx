@@ -74,8 +74,8 @@ export default function CreatePostModal({
 
       if (upload.files.length > 0) {
         const newlyUploaded = await upload.onUpload()
-        const finalNames = { ...upload.finalNames, ...newlyUploaded }
-        const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
+        const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
+        const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
         const successFiles = upload.files.filter((f) => successNames.has(f.name))
 
         const uploadedFiles = await Promise.all(successFiles.map(async (f) => {

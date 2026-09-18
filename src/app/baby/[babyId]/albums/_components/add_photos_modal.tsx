@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
-import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
-import { generateImageThumbnail } from '@utils/image-thumbnail'
+import { useSupabaseUpload } from '@utils/actions/use-supabase-upload'
 import { attachAlbumPhotos, attachUnsortedPhotos } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { Loader2, Plus, X } from 'lucide-react'
@@ -40,28 +39,19 @@ export default function AddPhotosModal({
     setIsPending(true)
     try {
       const newlyUploaded = await upload.onUpload()
-      const finalNames = { ...upload.finalNames, ...newlyUploaded }
-      const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded)])
+      const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
+      const finalThumbnails = { ...upload.finalThumbnails, ...newlyUploaded.thumbnails }
+      const finalContentTypes = { ...upload.finalContentTypes, ...newlyUploaded.contentTypes }
+      const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
       const successFiles = upload.files.filter((f) => successNames.has(f.name))
 
-      const uploadedFiles = await Promise.all(successFiles.map(async (f) => {
-        const filename = finalNames[f.name] ?? f.name
-        const mimeType = f.type || 'application/octet-stream'
-
-        let thumbnailFilename: string | undefined
-        const thumbnailBlob = await generateImageThumbnail(f)
-        if (thumbnailBlob) {
-          const thumbName = `${filename}.jpg`
-          const { error } = await uploadFile(
-            babyId,
-            `${uploadPath}/thumbnails/${thumbName}`,
-            thumbnailBlob,
-            { cacheControl: '3600', upsert: false }
-          )
-          if (!error) thumbnailFilename = thumbName
-        }
-
-        return { filename, mimeType, thumbnailFilename }
+      // Thumbnails are generated server-side in /api/upload (from the actual
+      // stored bytes, post any HEIC→JPEG conversion), not here — see
+      // .claude/plans/albums-performance.md.
+      const uploadedFiles = successFiles.map((f) => ({
+        filename: finalNames[f.name] ?? f.name,
+        mimeType: finalContentTypes[f.name] ?? (f.type || 'application/octet-stream'),
+        thumbnailFilename: finalThumbnails[f.name],
       }))
 
       if (uploadedFiles.length > 0) {

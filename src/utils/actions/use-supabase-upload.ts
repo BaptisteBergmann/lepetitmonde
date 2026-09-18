@@ -24,10 +24,15 @@ export async function uploadFile(
 
   const fallbackFilename = path.split('/').pop()
   try {
-    const { error, filename } = await response.json()
-    return { error: error ?? undefined, filename: filename ?? fallbackFilename }
+    const { error, filename, thumbnailFilename, contentType } = await response.json()
+    return {
+      error: error ?? undefined,
+      filename: filename ?? fallbackFilename,
+      thumbnailFilename: thumbnailFilename as string | undefined,
+      contentType: contentType as string | undefined,
+    }
   } catch {
-    return { error: formatStatusError(response.status), filename: fallbackFilename }
+    return { error: formatStatusError(response.status), filename: fallbackFilename, thumbnailFilename: undefined, contentType: undefined }
   }
 }
 
@@ -96,6 +101,8 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
   const [errors, setErrors] = useState<{ name: string; message: string }[]>([])
   const [successes, setSuccesses] = useState<string[]>([])
   const [finalNames, setFinalNames] = useState<Record<string, string>>({})
+  const [finalThumbnails, setFinalThumbnails] = useState<Record<string, string>>({})
+  const [finalContentTypes, setFinalContentTypes] = useState<Record<string, string>>({})
 
   const isSuccess = useMemo(() => {
     if (errors.length === 0 && successes.length === 0) {
@@ -155,7 +162,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
-        const { error, filename } = await uploadFile(
+        const { error, filename, thumbnailFilename, contentType } = await uploadFile(
           bucketName,
           !!path ? `${path}/${file.name}` : file.name,
           file,
@@ -163,21 +170,21 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           (status) => t('uploadFailedWithStatus', { status })
         )
         if (error) {
-          return { name: file.name, message: error, filename: undefined }
+          return { name: file.name, message: error, filename: undefined, thumbnailFilename: undefined, contentType: undefined }
         } else {
-          return { name: file.name, message: undefined, filename }
+          return { name: file.name, message: undefined, filename, thumbnailFilename, contentType }
         }
       })
     )
 
     const responseErrors = responses.filter(
-      (x): x is { name: string; message: string; filename: undefined } => x.message !== undefined
+      (x): x is { name: string; message: string; filename: undefined; thumbnailFilename: undefined; contentType: undefined } => x.message !== undefined
     )
     // if there were errors previously, this function tried to upload the files again so we should clear/overwrite the existing errors.
     setErrors(responseErrors)
 
     const responseSuccesses = responses.filter(
-      (x): x is { name: string; message: undefined; filename: string } => x.message === undefined
+      (x): x is { name: string; message: undefined; filename: string; thumbnailFilename: string | undefined; contentType: string | undefined } => x.message === undefined
     )
     const newSuccesses = Array.from(
       new Set([...successes, ...responseSuccesses.map((x) => x.name)])
@@ -187,11 +194,22 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     const newFinalNames = Object.fromEntries(responseSuccesses.map((x) => [x.name, x.filename ?? x.name]))
     setFinalNames((prev) => ({ ...prev, ...newFinalNames }))
 
+    const newFinalThumbnails = Object.fromEntries(
+      responseSuccesses.filter((x) => x.thumbnailFilename).map((x) => [x.name, x.thumbnailFilename as string])
+    )
+    setFinalThumbnails((prev) => ({ ...prev, ...newFinalThumbnails }))
+
+    const newFinalContentTypes = Object.fromEntries(
+      responseSuccesses.filter((x) => x.contentType).map((x) => [x.name, x.contentType as string])
+    )
+    setFinalContentTypes((prev) => ({ ...prev, ...newFinalContentTypes }))
+
     setLoading(false)
 
-    // Returned directly (rather than relying on callers to read back `successes`/`finalNames`
-    // state after awaiting) since state updates above aren't visible in the caller's closure yet.
-    return newFinalNames
+    // Returned directly (rather than relying on callers to read back `successes`/`finalNames`/
+    // `finalThumbnails`/`finalContentTypes` state after awaiting) since state updates above
+    // aren't visible in the caller's closure yet.
+    return { names: newFinalNames, thumbnails: newFinalThumbnails, contentTypes: newFinalContentTypes }
   }, [files, path, bucketName, errors, successes])
 
   useEffect(() => {
@@ -224,6 +242,8 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     setFiles,
     successes,
     finalNames,
+    finalThumbnails,
+    finalContentTypes,
     isSuccess,
     loading,
     errors,
