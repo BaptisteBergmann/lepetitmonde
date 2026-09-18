@@ -2,7 +2,7 @@ import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
 type RealtimeEvent = {
-  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items'
+  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories'
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: unknown
   old: unknown
@@ -76,6 +76,21 @@ function openChannel(babyId: string): Entry {
       (payload) => {
         for (const listener of listeners) {
           listener({ table: 'inventory_items', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+        }
+      }
+    )
+    .on(
+      // `stories` visibility is circle-scoped (non-admins only see stories
+      // whose circles they belong to), but this subscription runs on the
+      // service-role client with no RLS — forwarding the raw row would leak
+      // a story's caption/media path to viewers outside its circle. Strip
+      // new/old to a bare signal; consumers refetch via `getActiveStories`,
+      // which re-applies the circle check server-side.
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'stories', filter: `baby_id=eq.${babyId}` },
+      (payload) => {
+        for (const listener of listeners) {
+          listener({ table: 'stories', eventType: payload.eventType as RealtimeEvent['eventType'], new: null, old: null })
         }
       }
     )

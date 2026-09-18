@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Plus, Film } from 'lucide-react'
 import { Tables } from '@utils/supabase/database.types'
 import { StoryGroup, StoryWithUrl, getActiveStories } from '@utils/actions/stories'
 import { HighlightWithStories, getHighlights } from '@utils/actions/story_highlights'
+import { useBabyRealtime } from '@/utils/hooks/use-baby-realtime'
 import { cn } from '@utils/utils'
 import CreateStoryModal from './create_story_modal'
 import StoryViewer from './story_viewer'
@@ -81,6 +82,21 @@ export default function StoryTray({
     setHighlights(nextHighlights)
     setGroups(nextStories)
   }
+
+  // Debounced so a burst of related row changes (a `stories` insert plus its
+  // `stories_circles` links, or several stories posted back to back) collapses
+  // into one refetch instead of one per event.
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useBabyRealtime(babyId, (event) => {
+    if (event.table !== 'stories') return
+    if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current)
+    refreshTimeoutRef.current = setTimeout(refresh, 500)
+  })
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current)
+    }
+  }, [])
 
   // Existing labeled group names, offered as autocomplete so continuing a
   // group (e.g. "Beach day") doesn't fragment into two by a typo.
