@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `abbf46e` Add loading, error and not-found boundaries
 - `fade172` Drop unused Geist Sans and Geist Mono
 - `e8f54af` Re-enable pinch-zoom by dropping maximumScale/userScalable
 - `9c84df3` Add z-index scale and reference it from README/CLAUDE.md
