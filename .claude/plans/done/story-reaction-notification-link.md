@@ -1,5 +1,17 @@
 # Story reaction notifications link to the story
 
+## Status: implemented
+
+Shipped as planned, no deviations: `?storyId=` query param on the feed URL,
+threaded from `page.tsx` → `feed_view.tsx` → `story_tray.tsx`, which computes
+the initial `viewerTarget` via a lazy `useState` initializer from the
+server-rendered `initialStories`/`initialHighlights` (an effect wasn't
+needed after all, since that data is already available synchronously at
+mount — simpler than the effect-based approach originally sketched here, and
+avoids a `react-hooks/set-state-in-effect` lint error). `story_viewer.tsx`'s
+index initializer now prefers an exact `target.storyId` match. See
+`feat(stories): point story reaction notifications at the reacted story`.
+
 When someone reacts to a story, the story's author gets a `new_story_reaction`
 push/in-app notification, but its `url` is just `/baby/${babyId}/feed` —
 tapping it lands on the feed with no way to know which story was reacted to,
