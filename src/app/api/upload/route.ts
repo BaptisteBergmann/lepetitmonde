@@ -31,10 +31,62 @@ const MAX_HEIC_UPLOAD_BYTES = 30 * 1024 * 1024
 // maxFileSize (add_photos_modal.tsx / create_album_modal.tsx: 50MB).
 const MAX_IMAGE_UPLOAD_BYTES = 50 * 1024 * 1024
 
+// Matches the client's own maxFileSize for video uploads (create_post_modal.tsx /
+// create_story_modal.tsx: 500MB) — streamed straight through to Storage rather
+// than buffered, but still needs a hard cap of its own (see limitStream below).
+const MAX_VIDEO_UPLOAD_BYTES = 500 * 1024 * 1024
+
 const THUMBNAIL_MAX_DIMENSION = 480
+
+// Explicit allowlist rather than an `image/*` / `video/*` prefix check: a prefix
+// check would also accept `image/svg+xml`, which the storage GET route serves
+// back with a matching Content-Type — an SVG can carry inline `<script>`.
+const ALLOWED_IMAGE_CONTENT_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/heic',
+  'image/heif',
+])
+
+const ALLOWED_VIDEO_CONTENT_TYPES = new Set([
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+])
 
 function isHeicUpload(contentType: string, path: string) {
   return contentType === 'image/heic' || contentType === 'image/heif' || HEIC_EXTENSION_RE.test(path)
+}
+
+class PayloadTooLargeError extends Error {}
+
+// Caps the number of bytes actually read off `stream`, rather than trusting the
+// client-supplied Content-Length header (which the video path used to skip
+// entirely, and which a client can misreport regardless).
+function limitStream(stream: ReadableStream<Uint8Array>, maxBytes: number): ReadableStream<Uint8Array> {
+  const reader = stream.getReader()
+  let bytesRead = 0
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      const { done, value } = await reader.read()
+      if (done) {
+        controller.close()
+        return
+      }
+      bytesRead += value.byteLength
+      if (bytesRead > maxBytes) {
+        await reader.cancel()
+        controller.error(new PayloadTooLargeError())
+        return
+      }
+      controller.enqueue(value)
+    },
+    cancel(reason) {
+      return reader.cancel(reason)
+    },
+  })
 }
 
 function withJpegExtension(path: string) {
@@ -117,24 +169,28 @@ export async function POST(request: Request) {
     return Response.json({ error: t('forbidden') }, { status: 403 })
   }
 
+  const isHeic = isHeicUpload(contentType, path)
+  const isImage = isHeic || ALLOWED_IMAGE_CONTENT_TYPES.has(contentType)
+  const isVideo = ALLOWED_VIDEO_CONTENT_TYPES.has(contentType)
+
+  if (!isImage && !isVideo) {
+    contextLoggerWithPath.warn({ contentType }, 'Rejected upload: unsupported content type')
+    return Response.json({ error: t('unsupportedType') }, { status: 415 })
+  }
+
   const supabaseAdmin = createAdminClient()
 
+  const maxUploadBytes = isHeic ? MAX_HEIC_UPLOAD_BYTES : isImage ? MAX_IMAGE_UPLOAD_BYTES : MAX_VIDEO_UPLOAD_BYTES
+  const limitedBody = limitStream(request.body, maxUploadBytes)
+
   let uploadPath = path
-  let uploadBody: ReadableStream<Uint8Array> | Buffer = request.body
+  let uploadBody: ReadableStream<Uint8Array> | Buffer = limitedBody
   let uploadContentType = contentType
-  const isHeic = isHeicUpload(contentType, path)
-  const isImage = isHeic || contentType.startsWith('image/')
 
   if (isHeic) {
-    const contentLength = Number(request.headers.get('content-length') ?? 0)
-    if (contentLength > MAX_HEIC_UPLOAD_BYTES) {
-      contextLoggerWithPath.warn({ contentLength }, 'Rejected oversized HEIC upload')
-      return Response.json({ error: t('heicTooLarge') }, { status: 413 })
-    }
-
     try {
       const { result, durationMs } = await withTiming(async () => {
-        const heicBuffer = Buffer.from(await request.arrayBuffer())
+        const heicBuffer = Buffer.from(await new Response(limitedBody).arrayBuffer())
         return convertHeic({ buffer: heicBuffer, format: 'JPEG', quality: 0.92 })
       })
       contextLoggerWithPath.info({ durationMs }, 'HEIC converted to JPEG')
@@ -142,6 +198,10 @@ export async function POST(request: Request) {
       uploadBody = Buffer.from(result)
       uploadContentType = 'image/jpeg'
     } catch (err) {
+      if (err instanceof PayloadTooLargeError) {
+        contextLoggerWithPath.warn('Rejected oversized HEIC upload')
+        return Response.json({ error: t('heicTooLarge') }, { status: 413 })
+      }
       contextLoggerWithPath.error(err, 'Error converting HEIC/HEIF file to JPEG')
       return Response.json({ error: t('heicConversionFailed') }, { status: 400 })
     }
@@ -149,19 +209,31 @@ export async function POST(request: Request) {
     // Buffered (rather than the video path's streaming passthrough) because
     // the thumbnail step below needs the full bytes in memory anyway —
     // bounded the same way the HEIC branch bounds its own decode.
-    const contentLength = Number(request.headers.get('content-length') ?? 0)
-    if (contentLength > MAX_IMAGE_UPLOAD_BYTES) {
-      contextLoggerWithPath.warn({ contentLength }, 'Rejected oversized image upload')
-      return Response.json({ error: t('imageTooLarge') }, { status: 413 })
+    try {
+      uploadBody = Buffer.from(await new Response(limitedBody).arrayBuffer())
+    } catch (err) {
+      if (err instanceof PayloadTooLargeError) {
+        contextLoggerWithPath.warn('Rejected oversized image upload')
+        return Response.json({ error: t('imageTooLarge') }, { status: 413 })
+      }
+      throw err
     }
-    uploadBody = Buffer.from(await request.arrayBuffer())
   }
 
-  const { result, durationMs } = await withTiming(() => supabaseAdmin.storage.from(bucketName).upload(uploadPath, uploadBody, {
-    contentType: uploadContentType,
-    cacheControl,
-    upsert,
-  }))
+  let result, durationMs
+  try {
+    ; ({ result, durationMs } = await withTiming(() => supabaseAdmin.storage.from(bucketName).upload(uploadPath, uploadBody, {
+      contentType: uploadContentType,
+      cacheControl,
+      upsert,
+    })))
+  } catch (err) {
+    if (err instanceof PayloadTooLargeError) {
+      contextLoggerWithPath.warn('Rejected oversized video upload')
+      return Response.json({ error: t('videoTooLarge') }, { status: 413 })
+    }
+    throw err
+  }
   contextLoggerWithPath.info({ durationMs, isHeic }, 'Upload to storage completed')
 
   if (result.error) {

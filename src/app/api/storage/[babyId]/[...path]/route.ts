@@ -69,6 +69,7 @@ export async function GET(
 
   const headers = new Headers({
     'Content-Type': upstreamResponse.headers.get('content-type') ?? 'application/octet-stream',
+    'X-Content-Type-Options': 'nosniff',
     'Accept-Ranges': 'bytes',
     // Post photos/videos are uploaded with upsert:false (create_post_modal.tsx),
     // so a given storage path never changes content once written — safe to let

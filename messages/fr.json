@@ -917,7 +917,9 @@
     "forbidden": "Non autorisé",
     "heicTooLarge": "Fichier HEIC trop volumineux",
     "heicConversionFailed": "Impossible de convertir l'image HEIC",
-    "imageTooLarge": "Fichier image trop volumineux"
+    "imageTooLarge": "Fichier image trop volumineux",
+    "videoTooLarge": "Fichier vidéo trop volumineux",
+    "unsupportedType": "Type de fichier non autorisé"
   },
   "dropzone": {
     "uploadedSuccess": "{count, plural, one {# fichier téléversé avec succès} other {# fichiers téléversés avec succès}}",

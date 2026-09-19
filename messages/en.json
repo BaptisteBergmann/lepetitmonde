@@ -917,7 +917,9 @@
     "forbidden": "Not authorized",
     "heicTooLarge": "HEIC file too large",
     "heicConversionFailed": "Couldn't convert the HEIC image",
-    "imageTooLarge": "Image file too large"
+    "imageTooLarge": "Image file too large",
+    "videoTooLarge": "Video file too large",
+    "unsupportedType": "Unsupported file type"
   },
   "dropzone": {
     "uploadedSuccess": "{count, plural, one {# file uploaded successfully} other {# files uploaded successfully}}",
