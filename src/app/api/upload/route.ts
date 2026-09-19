@@ -8,6 +8,7 @@ import { assertIsAdmin } from '@utils/actions/access'
 import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
 import { resolveLocale } from '@/i18n/config'
+import { hasUnsafePathSegment } from '@/utils/storage-path'
 
 async function getTranslator() {
   const locale = resolveLocale()
@@ -98,6 +99,11 @@ export async function POST(request: Request) {
   const contentType = request.headers.get('content-type') ?? 'application/octet-stream'
 
   if (!bucketName || !path || !request.body) {
+    return Response.json({ error: t('invalidRequest') }, { status: 400 })
+  }
+
+  if (hasUnsafePathSegment(path.split('/'))) {
+    contextLogger.warn({ bucketName, path }, 'Rejected upload: unsafe path segment')
     return Response.json({ error: t('invalidRequest') }, { status: 400 })
   }
 

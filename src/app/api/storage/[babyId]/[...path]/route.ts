@@ -2,6 +2,7 @@ import { getAuthUser } from '@utils/supabase/auth'
 import { getUserAccess } from '@utils/actions/users'
 import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
+import { hasUnsafePathSegment } from '@/utils/storage-path'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +38,11 @@ export async function GET(
   if (Array.isArray(access)) {
     contextLogger.warn('Rejected storage download: no access for baby')
     return Response.json({ error: 'Non autorisé' }, { status: 403 })
+  }
+
+  if (hasUnsafePathSegment([babyId, ...path])) {
+    contextLogger.warn('Rejected storage download: unsafe path segment')
+    return Response.json({ error: 'Chemin invalide' }, { status: 400 })
   }
 
   const upstreamPath = [babyId, ...path].map(encodeURIComponent).join('/')
