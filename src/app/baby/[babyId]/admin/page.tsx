@@ -85,7 +85,7 @@ export default async function InviteForm({
                           name="email"
                           type="email"
                           autoComplete="off"
-                          placeholder="email@famille.com"
+                          placeholder={t('invitePlaceholder')}
                           required
                           className="w-full bg-input/40"
                         />

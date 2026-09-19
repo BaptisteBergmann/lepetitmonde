@@ -31,7 +31,13 @@
     "react": "Réagir",
     "viewStats": "Voir les statistiques",
     "createHighlight": "Créer le highlight",
-    "photoN": "Photo {n}"
+    "photoN": "Photo {n}",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
+  },
+  "versionFooter": {
+    "title": "Historique des versions",
+    "unavailable": "Historique indisponible."
   },
   "auth": {
     "invalidCredentials": "Identifiants incorrects ou compte inexistant",
@@ -497,6 +503,7 @@
     "inviteByEmailTitle": "Inviter par e-mail",
     "inviteByEmailDescription": "Envoyez un e-mail d'invitation pour rejoindre ce journal.",
     "sendInvite": "Envoyer l'invitation",
+    "invitePlaceholder": "email@famille.com",
     "broadcastTitle": "Envoyer un e-mail",
     "broadcastDescription": "Envoyez un e-mail aux administrateurs, ou aux membres des cercles sélectionnés, avec une photo en pièce jointe si vous le souhaitez.",
     "broadcastSubjectPlaceholder": "Objet de l'e-mail",

@@ -31,7 +31,13 @@
     "react": "React",
     "viewStats": "View statistics",
     "createHighlight": "Create highlight",
-    "photoN": "Photo {n}"
+    "photoN": "Photo {n}",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "versionFooter": {
+    "title": "Version history",
+    "unavailable": "History unavailable."
   },
   "auth": {
     "invalidCredentials": "Incorrect credentials or no such account",
@@ -497,6 +503,7 @@
     "inviteByEmailTitle": "Invite by email",
     "inviteByEmailDescription": "Send an email invitation to join this journal.",
     "sendInvite": "Send invitation",
+    "invitePlaceholder": "email@family.com",
     "broadcastTitle": "Send an email",
     "broadcastDescription": "Send an email to admins, or to members of the selected circles, with an optional photo attached.",
     "broadcastSubjectPlaceholder": "Email subject",

@@ -5,15 +5,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { getTranslations } from 'next-intl/server';
 import type { ChangelogGroup } from '@utils/changelog';
 
-export default function VersionFooter({
+export default async function VersionFooter({
   commitSha,
   changelog,
 }: {
   commitSha: string;
   changelog: ChangelogGroup[];
 }) {
+  const t = await getTranslations('versionFooter');
   return (
     <Dialog>
       <DialogTrigger className="underline-offset-2 outline-hidden hover:underline">
@@ -21,11 +23,11 @@ export default function VersionFooter({
       </DialogTrigger>
       <DialogContent className="gap-3">
         <DialogHeader>
-          <DialogTitle>Historique des versions</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
         </DialogHeader>
         <div className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1 text-left">
           {changelog.length === 0 && (
-            <p className="text-sm text-muted-foreground">Historique indisponible.</p>
+            <p className="text-sm text-muted-foreground">{t('unavailable')}</p>
           )}
           {changelog.map((group) => (
             <div key={group.date}>
