@@ -87,7 +87,7 @@ export default async function RootLayout({
             <HeaderWrapper />
 
             {/* Le main permet de bien séparer le header du contenu */}
-            <main className="flex-grow pt-20"> {/* pt-20 = padding-top pour compenser le header fixed */}
+            <main className="flex-grow pt-[61px]"> {/* pt-[61px] = hauteur réelle du header fixed (py-3 + h-9 + border) */}
               <PullToRefresh>{children}</PullToRefresh>
             </main>
             <footer className="py-4 text-center text-xs text-muted-foreground">
