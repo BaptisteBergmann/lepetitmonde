@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -40,6 +41,7 @@ export default function PhotoLightbox({
   alt: string
   onClose: () => void
 }) {
+  const tA11y = useTranslations('a11y')
   const [index, setIndex] = useState(initialIndex)
   const [scale, setScale] = useState(1)
   const [translate, setTranslate] = useState({ x: 0, y: 0 })
@@ -203,6 +205,7 @@ export default function PhotoLightbox({
           <span className="text-sm text-white/70">{index + 1} / {photos.length}</span>
         ) : <span />}
         <button
+          aria-label={tA11y('close')}
           onClick={onClose}
           className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
         >
@@ -262,6 +265,7 @@ export default function PhotoLightbox({
         {photos.length > 1 && (
           <>
             <button
+              aria-label={tA11y('previous')}
               onClick={goPrev}
               disabled={index === 0}
               className={cn(
@@ -272,6 +276,7 @@ export default function PhotoLightbox({
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
+              aria-label={tA11y('next')}
               onClick={goNext}
               disabled={index === photos.length - 1}
               className={cn(
@@ -290,6 +295,8 @@ export default function PhotoLightbox({
           {photos.map((photo, i) => (
             <button
               key={photo.id}
+              aria-label={tA11y('photoN', { n: i + 1 })}
+              aria-current={i === index}
               onClick={() => { setIndex(i); resetZoom() }}
               className={cn(
                 "h-1.5 rounded-full transition-all cursor-pointer",

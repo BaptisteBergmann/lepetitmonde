@@ -35,6 +35,7 @@ export default function CreateAnecdoteModal({
 }) {
   const router = useRouter()
   const t = useTranslations('anecdotes.form')
+  const tA11y = useTranslations('a11y')
   const [anecdoteId] = useState(() => crypto.randomUUID())
 
   const [content, setContent] = useState("")
@@ -101,6 +102,7 @@ export default function CreateAnecdoteModal({
             {t('newTitle')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

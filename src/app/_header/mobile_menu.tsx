@@ -35,6 +35,7 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ initials, fullName, email, accesses }: MobileMenuProps) {
   const t = useTranslations('nav')
+  const tA11y = useTranslations('a11y')
   const params = useParams()
   const pathname = usePathname()
   const currentBabyId = params?.babyId as string
@@ -53,7 +54,7 @@ export default function MobileMenu({ initials, fullName, email, accesses }: Mobi
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary hover:bg-secondary-foreground/10 text-foreground transition-all cursor-pointer outline-none border border-border">
+      <DropdownMenuTrigger aria-label={tA11y('menu')} className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary hover:bg-secondary-foreground/10 text-foreground transition-all cursor-pointer outline-none border border-border">
         <Menu className="h-5 w-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 mt-2">

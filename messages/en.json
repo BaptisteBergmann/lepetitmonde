@@ -14,6 +14,25 @@
     "cancel": "Cancel",
     "confirm": "Confirm"
   },
+  "a11y": {
+    "menu": "Menu",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "remove": "Remove",
+    "copy": "Copy link",
+    "back": "Back",
+    "settings": "Settings",
+    "send": "Send",
+    "save": "Save",
+    "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next",
+    "react": "React",
+    "viewStats": "View statistics",
+    "createHighlight": "Create highlight",
+    "photoN": "Photo {n}"
+  },
   "auth": {
     "invalidCredentials": "Incorrect credentials or no such account",
     "invalidOrExpiredLink": "Invalid or expired link",

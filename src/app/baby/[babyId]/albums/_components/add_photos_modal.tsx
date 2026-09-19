@@ -24,6 +24,7 @@ export default function AddPhotosModal({
 }) {
   const router = useRouter()
   const t = useTranslations('albums.addPhotosForm')
+  const tA11y = useTranslations('a11y')
   const [isPending, setIsPending] = useState(false)
 
   const uploadPath = albumId ? `albums/${albumId}` : `photos/${babyId}`
@@ -91,6 +92,7 @@ export default function AddPhotosModal({
             {t('title')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

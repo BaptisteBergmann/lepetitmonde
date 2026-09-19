@@ -33,6 +33,7 @@ export default function AlbumDetailView({
 }) {
   const router = useRouter()
   const t = useTranslations('albums')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
@@ -90,10 +91,11 @@ export default function AlbumDetailView({
               <Share2 className="h-4 w-4" />
               <span>{t('share.title')}</span>
             </Button>
-            <Button variant="outline" size="icon" className="rounded-2xl cursor-pointer" onClick={() => setEditOpen(true)}>
+            <Button aria-label={tA11y('edit')} variant="outline" size="icon" className="rounded-2xl cursor-pointer" onClick={() => setEditOpen(true)}>
               <Pencil className="h-4 w-4" />
             </Button>
             <Button
+              aria-label={tA11y('delete')}
               variant="outline"
               size="icon"
               className="rounded-2xl cursor-pointer text-destructive hover:text-destructive"

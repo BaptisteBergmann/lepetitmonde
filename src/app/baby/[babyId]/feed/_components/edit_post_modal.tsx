@@ -36,6 +36,7 @@ export default function EditPostModal({
 }) {
   const router = useRouter()
   const t = useTranslations('feed.postForm')
+  const tA11y = useTranslations('a11y')
 
   const [caption, setCaption] = useState(post.caption ?? "")
   const [takenAt, setTakenAt] = useState(format(parseISO(post.taken_at), 'yyyy-MM-dd'))
@@ -120,6 +121,7 @@ export default function EditPostModal({
             {t('editTitle')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >
@@ -221,6 +223,7 @@ export default function EditPostModal({
                         className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
                       />
                       <button
+                        aria-label={tA11y('remove')}
                         type="button"
                         onClick={() => removePollOption(index)}
                         disabled={pollHasVotes || pollOptions.length <= 2}

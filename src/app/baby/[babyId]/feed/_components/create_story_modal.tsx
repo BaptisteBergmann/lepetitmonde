@@ -37,6 +37,7 @@ export default function CreateStoryModal({
   onCreated: () => void
 }) {
   const t = useTranslations('feed.storyForm')
+  const tA11y = useTranslations('a11y')
   const tShared = useTranslations('feed.postForm')
   const DURATION_LABELS: Record<string, string> = {
     '24': t('duration24h'),
@@ -137,6 +138,7 @@ export default function CreateStoryModal({
             {t('title')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

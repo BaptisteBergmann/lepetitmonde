@@ -22,6 +22,7 @@ export default function StoryReactionPicker({
   onChanged: () => void
 }) {
   const t = useTranslations('reactions')
+  const tA11y = useTranslations('a11y')
   const [pending, setPending] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -48,6 +49,7 @@ export default function StoryReactionPicker({
     <div className="flex items-center gap-1.5 flex-wrap">
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger
+          aria-label={tA11y('react')}
           disabled={pending}
           className={cn(
             "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50 bg-white/10 hover:bg-white/20",

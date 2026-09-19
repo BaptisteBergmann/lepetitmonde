@@ -52,6 +52,7 @@ export default function PhotoInfoModal({
 }) {
   const router = useRouter()
   const t = useTranslations('albums.photoInfoForm')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const tAlbums = useTranslations('albums')
   const dateFnsLocale = getDateFnsLocale(useLocale())
@@ -133,6 +134,7 @@ export default function PhotoInfoModal({
             {t('title')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

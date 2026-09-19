@@ -27,6 +27,7 @@ export default function PostStatsModal({
   onClose: () => void
 }) {
   const t = useTranslations('feed')
+  const tA11y = useTranslations('a11y')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [stats, setStats] = useState<PostStats | null>(null)
 
@@ -51,6 +52,7 @@ export default function PostStatsModal({
             {t('postStats.title')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

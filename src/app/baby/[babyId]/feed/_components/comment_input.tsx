@@ -18,6 +18,7 @@ export default function CommentInput({
   onAdded: () => void
 }) {
   const t = useTranslations('feed.comments')
+  const tA11y = useTranslations('a11y')
   const [body, setBody] = useState("")
   const [isPending, setIsPending] = useState(false)
 
@@ -48,6 +49,7 @@ export default function CommentInput({
         className="flex-1"
       />
       <Button
+        aria-label={tA11y('send')}
         size="icon"
         variant="outline"
         className="rounded-2xl cursor-pointer shrink-0"

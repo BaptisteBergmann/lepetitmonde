@@ -19,6 +19,7 @@ export default function ReactionPicker({
   initialReactions: ReactionsData
 }) {
   const t = useTranslations('reactions')
+  const tA11y = useTranslations('a11y')
   const [reactions, setReactions] = useState(initialReactions)
   const [pending, setPending] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -46,6 +47,7 @@ export default function ReactionPicker({
     <div className="flex items-center gap-1.5 flex-wrap">
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger
+          aria-label={tA11y('react')}
           disabled={pending}
           className={cn(
             "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50",

@@ -36,6 +36,7 @@ export default function CreateEventModal({
 }) {
   const router = useRouter()
   const t = useTranslations('calendar.eventForm')
+  const tA11y = useTranslations('a11y')
   const tKind = useTranslations('eventKinds')
   const tMilestone = useTranslations('milestones')
   const KIND_ITEMS: Record<Enums<'event_kind'>, string> = {
@@ -121,6 +122,7 @@ export default function CreateEventModal({
             {isEditing ? t('editTitle') : t('newTitle')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

@@ -22,6 +22,7 @@ export default function CommentReactionPicker({
   onChanged: () => void
 }) {
   const t = useTranslations('reactions')
+  const tA11y = useTranslations('a11y')
   const [pending, setPending] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -48,6 +49,7 @@ export default function CommentReactionPicker({
     <div className="flex items-center gap-1 flex-wrap mt-1">
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger
+          aria-label={tA11y('react')}
           disabled={pending}
           className={cn(
             "flex items-center justify-center h-5 w-5 rounded-full cursor-pointer transition-colors disabled:opacity-50",

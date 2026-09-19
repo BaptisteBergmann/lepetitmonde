@@ -10,6 +10,7 @@ import { submitBugReport } from '@utils/actions/bug_reports'
 
 export default function BugReportButton() {
   const t = useTranslations('bugReport')
+  const tA11y = useTranslations('a11y')
   const [isOpen, setIsOpen] = useState(false)
   const [isCapturing, setIsCapturing] = useState(false)
   const [isPending, setIsPending] = useState(false)
@@ -108,6 +109,7 @@ export default function BugReportButton() {
                 {t('title')}
               </h2>
               <button
+                aria-label={tA11y('close')}
                 onClick={handleClose}
                 className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
               >

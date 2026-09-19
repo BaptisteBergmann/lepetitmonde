@@ -38,6 +38,7 @@ export default function ShareAlbumModal({
   onClose: () => void
 }) {
   const t = useTranslations('albums.share')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const dateFnsLocale = getDateFnsLocale(useLocale())
 
@@ -117,6 +118,7 @@ export default function ShareAlbumModal({
             {t('title')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >
@@ -172,6 +174,7 @@ export default function ShareAlbumModal({
                     </p>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
+                        aria-label={tA11y('copy')}
                         onClick={() => handleCopy(share.id)}
                         className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
                       >

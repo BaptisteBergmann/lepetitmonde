@@ -34,6 +34,7 @@ export default function EditAlbumModal({
 }) {
   const router = useRouter()
   const t = useTranslations('albums.form')
+  const tA11y = useTranslations('a11y')
 
   const [name, setName] = useState(album.name)
   const [circleIds, setCircleIds] = useState<string[]>(album.circleIds)
@@ -73,6 +74,7 @@ export default function EditAlbumModal({
             {t('editTitle')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

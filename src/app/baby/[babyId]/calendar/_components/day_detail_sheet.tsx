@@ -47,6 +47,7 @@ export default function DayDetailSheet({
 }) {
   const router = useRouter()
   const t = useTranslations('calendar')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const tMilestone = useTranslations('milestones')
   const dateFnsLocale = getDateFnsLocale(useLocale())
@@ -81,6 +82,7 @@ export default function DayDetailSheet({
             {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: dateFnsLocale })}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >
@@ -133,12 +135,14 @@ export default function DayDetailSheet({
                 {isAdmin && (
                   <div className="flex items-center gap-1 shrink-0">
                     <button
+                      aria-label={tA11y('edit')}
                       onClick={() => onEdit(event)}
                       className="p-1.5 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
+                      aria-label={tA11y('delete')}
                       onClick={() => handleDelete(event.id)}
                       disabled={deletingId === event.id}
                       className="p-1.5 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"

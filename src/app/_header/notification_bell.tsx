@@ -36,6 +36,7 @@ type Device = { id: number; device_label: string | null; created_at: string; las
 
 export default function NotificationBell() {
   const t = useTranslations('notifications')
+  const tA11y = useTranslations('a11y')
   const tType = useTranslations('notificationTypes')
   const params = useParams<{ babyId?: string }>()
   const router = useRouter()
@@ -174,6 +175,7 @@ export default function NotificationBell() {
               </Button>
             )}
             <Button
+              aria-label={view === 'list' ? tA11y('settings') : tA11y('back')}
               variant="ghost"
               size="icon-sm"
               className="cursor-pointer"
@@ -237,6 +239,7 @@ export default function NotificationBell() {
                       {device.device_label ?? t('unknownDevice')}
                     </span>
                     <Button
+                      aria-label={tA11y('remove')}
                       variant="ghost"
                       size="icon-sm"
                       className="shrink-0 cursor-pointer"

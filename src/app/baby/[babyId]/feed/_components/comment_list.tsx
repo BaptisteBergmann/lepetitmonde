@@ -28,6 +28,7 @@ export default function CommentList({
   onChanged: () => void
 }) {
   const t = useTranslations('feed.comments')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const tCommon = useTranslations('common')
   const dateFnsLocale = getDateFnsLocale(useLocale())
@@ -104,6 +105,7 @@ export default function CommentList({
                   <div className="flex items-center gap-0.5">
                     {isOwner && (
                       <button
+                        aria-label={tA11y('edit')}
                         onClick={() => startEditing(comment)}
                         className="p-1 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
                       >
@@ -111,6 +113,7 @@ export default function CommentList({
                       </button>
                     )}
                     <button
+                      aria-label={tA11y('delete')}
                       onClick={() => handleDelete(comment)}
                       disabled={deletingId === comment.id}
                       className="p-1 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
@@ -135,6 +138,7 @@ export default function CommentList({
                   className="flex-1 h-8 text-sm"
                 />
                 <Button
+                  aria-label={tA11y('save')}
                   size="icon"
                   variant="outline"
                   className="h-8 w-8 rounded-xl cursor-pointer shrink-0"
@@ -144,6 +148,7 @@ export default function CommentList({
                   {savingId === comment.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                 </Button>
                 <Button
+                  aria-label={tA11y('cancel')}
                   size="icon"
                   variant="outline"
                   className="h-8 w-8 rounded-xl cursor-pointer shrink-0"

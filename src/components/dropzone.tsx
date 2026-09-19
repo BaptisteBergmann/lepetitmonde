@@ -64,6 +64,7 @@ const Dropzone = ({
 }
 const DropzoneContent = ({ className }: { className?: string }) => {
   const t = useTranslations('dropzone')
+  const tA11y = useTranslations('a11y')
   const {
     files,
     setFiles,
@@ -147,6 +148,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 
             {!loading && !isSuccessfullyUploaded && (
               <Button
+                aria-label={tA11y('remove')}
                 size="icon"
                 variant="link"
                 className="shrink-0 justify-self-end text-muted-foreground hover:text-foreground"

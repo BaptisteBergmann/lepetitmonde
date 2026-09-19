@@ -37,6 +37,7 @@ export default function StoryViewer({
   onChanged: () => void
 }) {
   const t = useTranslations('feed')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const isHighlight = target.kind === 'highlight'
   const stories: StoryWithUrl[] = isHighlight
@@ -217,6 +218,7 @@ export default function StoryViewer({
         <div className="flex items-center gap-1">
           {isAdmin && !isHighlight && (
             <button
+              aria-label={t('storyViewer.addToHighlights')}
               onClick={() => setHighlightPickerOpen((v) => !v)}
               className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
             >
@@ -225,6 +227,7 @@ export default function StoryViewer({
           )}
           {isAdmin && !isHighlight && (
             <button
+              aria-label={tA11y('delete')}
               onClick={handleDelete}
               className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
             >
@@ -232,6 +235,7 @@ export default function StoryViewer({
             </button>
           )}
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
           >
@@ -265,6 +269,7 @@ export default function StoryViewer({
               className="flex-1 bg-white/10 rounded-xl px-3 py-1.5 text-sm placeholder:text-white/40 focus:outline-none"
             />
             <button
+              aria-label={tA11y('createHighlight')}
               onClick={handleCreateHighlight}
               className="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 cursor-pointer transition-colors"
             >
@@ -305,6 +310,7 @@ export default function StoryViewer({
         )}
 
         <button
+          aria-label={tA11y('previous')}
           onClick={(e) => { e.stopPropagation(); goPrev() }}
           disabled={index === 0}
           className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none hidden sm:flex items-center justify-center"
@@ -312,6 +318,7 @@ export default function StoryViewer({
           <ChevronLeft className="h-6 w-6" />
         </button>
         <button
+          aria-label={tA11y('next')}
           onClick={(e) => { e.stopPropagation(); goNext() }}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer hidden sm:flex items-center justify-center"
         >

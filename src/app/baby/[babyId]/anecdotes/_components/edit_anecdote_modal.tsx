@@ -35,6 +35,7 @@ export default function EditAnecdoteModal({
 }) {
   const router = useRouter()
   const t = useTranslations('anecdotes.form')
+  const tA11y = useTranslations('a11y')
 
   const [content, setContent] = useState(anecdote.content)
   const [happenedAt, setHappenedAt] = useState(format(parseISO(anecdote.happened_at), 'yyyy-MM-dd'))
@@ -77,6 +78,7 @@ export default function EditAnecdoteModal({
             {t('editTitle')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

@@ -39,6 +39,7 @@ export default function Modal({
   lockStructure?: boolean;
 }) {
   const t = useTranslations('guess.form')
+  const tA11y = useTranslations('a11y')
   const tType = useTranslations('guess.answerTypes')
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -189,6 +190,7 @@ export default function Modal({
                 {isEditMode ? t('editTitle') : isAdmin ? t('newAdminTitle') : t('proposeTitle')}
               </h2>
               <button
+                aria-label={tA11y('close')}
                 onClick={() => setOpen(false)}
                 className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
               >
@@ -287,6 +289,7 @@ export default function Modal({
                           className="flex-1"
                         />
                         <button
+                          aria-label={tA11y('remove')}
                           onClick={() => handleRemoveChoice(index)}
                           disabled={choices.length <= 2}
                           className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"

@@ -46,6 +46,7 @@ export default function InventoryItemModal({
 }) {
   const router = useRouter()
   const t = useTranslations('inventory.form')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const isEditMode = !!item
   const [open, setOpen] = useState(false)
@@ -169,6 +170,7 @@ export default function InventoryItemModal({
                 {isEditMode ? t('editTitle') : t('addTitle')}
               </h2>
               <button
+                aria-label={tA11y('close')}
                 onClick={() => setOpen(false)}
                 className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
               >

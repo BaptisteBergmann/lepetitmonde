@@ -34,6 +34,7 @@ export default function CreateAlbumModal({
 }) {
   const router = useRouter()
   const t = useTranslations('albums.form')
+  const tA11y = useTranslations('a11y')
   const [albumId] = useState(() => crypto.randomUUID())
 
   const [name, setName] = useState("")
@@ -109,6 +110,7 @@ export default function CreateAlbumModal({
             {t('newTitle')}
           </h2>
           <button
+            aria-label={tA11y('close')}
             onClick={onClose}
             className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
           >

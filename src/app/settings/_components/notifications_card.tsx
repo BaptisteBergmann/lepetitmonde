@@ -11,6 +11,7 @@ import { Bell, BellOff, Send } from 'lucide-react'
 
 export default function NotificationsCard() {
   const t = useTranslations('settingsPage.notificationsCard')
+  const tA11y = useTranslations('a11y')
   const { isSupported, subscription, isPending, subscribe, unsubscribe } = usePushSubscription()
   const [message, setMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -68,6 +69,7 @@ export default function NotificationsCard() {
                   className="bg-input/40"
                 />
                 <Button
+                  aria-label={tA11y('send')}
                   type="button"
                   size="icon"
                   className="shrink-0 cursor-pointer"

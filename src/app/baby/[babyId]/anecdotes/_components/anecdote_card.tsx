@@ -28,6 +28,7 @@ export default function AnecdoteCard({
 }) {
   const router = useRouter()
   const t = useTranslations('anecdotes')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
@@ -95,12 +96,14 @@ export default function AnecdoteCard({
           {isAdmin && (
             <div className="flex items-center gap-1 shrink-0">
               <button
+                aria-label={tA11y('edit')}
                 onClick={() => setIsEditing(true)}
                 className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
               <button
+                aria-label={tA11y('delete')}
                 onClick={handleDelete}
                 disabled={deleting}
                 className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
