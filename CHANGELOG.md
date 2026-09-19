@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `6bbaf1b` Correct main padding-top to match actual fixed header height
 - `608ef8e` Enforce accessible names on buttons with jsx-a11y
 - `ffe60b3` Add accessible names to icon-only buttons
 - `c4c0e59` Replace native alert()/confirm() with toasts and a shared confirm dialog
