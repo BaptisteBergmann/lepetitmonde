@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `d559d74` Raise 9-11px text to the 12px type scale floor
 - `bfbd242` Give raw icon-only buttons a 44px touch target
 - `7bbd484` Enlarge Button touch targets on touch screens
 - `6bbaf1b` Correct main padding-top to match actual fixed header height
