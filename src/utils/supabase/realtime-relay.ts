@@ -42,14 +42,27 @@ function openChannel(babyId: string): Entry {
       }
     )
     .on(
-      // Can't filter by baby_id (no such column on `users`), so this fans out to every
-      // baby's channel; consumers ignore updates for users they don't already know about.
+      // Can't filter by baby_id at the subscription level (no such column on
+      // `users`), so this fans out to every baby's channel — but the payload
+      // (id, first/last name) still leaks across babies unless we check
+      // membership before relaying, hence the baby_access lookup below.
       'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'users' },
       (payload) => {
-        for (const listener of listeners) {
-          listener({ table: 'users', eventType: 'UPDATE', new: payload.new, old: payload.old })
-        }
+        const updatedUserId = (payload.new as { id?: string } | null)?.id
+        if (!updatedUserId) return
+        void supabase
+          .from('baby_access')
+          .select('user_id')
+          .eq('baby_id', babyId)
+          .eq('user_id', updatedUserId)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (!data) return
+            for (const listener of listeners) {
+              listener({ table: 'users', eventType: 'UPDATE', new: payload.new, old: payload.old })
+            }
+          })
       }
     )
     .on(
