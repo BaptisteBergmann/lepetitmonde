@@ -1,5 +1,20 @@
 # Pronostics: question resolution + leaderboard
 
+## Status: implemented
+
+Shipped as described, with one deliberate scope cut: the optional
+"notify members when a question is resolved" step (originally step 6) was
+left out — it was marked should-have/non-blocking in the plan, and the core
+resolve + leaderboard flow doesn't depend on it. Can be added later by
+mirroring the existing `new_pronostic` notify call in `reviewQuestion`.
+
+Everything else matches the plan as written: `correct_answer`/`resolved_at`
+columns, the `guess_scoring.ts` helper (exact match = 2pts, closest-wins for
+number/date/time = 1pt, ties all win), `resolveQuestion`/`unresolveQuestion`/
+`getLeaderboard` actions, the admin resolve/reopen modal, winner badges on
+both the admin page and member-facing question cards, and the leaderboard
+page linked from the main pronostics page.
+
 ## Goal
 
 Let an admin "validate" (resolve) an approved guess question by entering the
