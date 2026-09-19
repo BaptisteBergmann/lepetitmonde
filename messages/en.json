@@ -824,6 +824,13 @@
       "saveError": "Something went wrong while saving.",
       "notifyMeFor": "Notify me for"
     },
+    "themeCard": {
+      "title": "Appearance",
+      "description": "Choose the app theme.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "notificationsCard": {
       "title": "Notifications",
       "description": "Get alerted on this device for important events.",

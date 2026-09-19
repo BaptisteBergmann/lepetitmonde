@@ -53,11 +53,19 @@ export const viewport: Viewport = {
 const themeInitScript = `
   (function () {
     var m = window.matchMedia('(prefers-color-scheme: dark)');
+    var read = function () {
+      try { return localStorage.getItem('theme'); } catch (e) { return null; }
+    };
     var apply = function () {
-      document.documentElement.classList.toggle('dark', m.matches);
+      var pref = read();
+      var root = document.documentElement;
+      root.classList.toggle('dark', pref === 'dark' || (pref !== 'light' && m.matches));
+      root.classList.toggle('light', pref === 'light');
     };
     apply();
     m.addEventListener('change', apply);
+    window.addEventListener('themechange', apply);
+    window.addEventListener('storage', apply);
   })();
 `
 

@@ -824,6 +824,13 @@
       "saveError": "Erreur lors de l'enregistrement.",
       "notifyMeFor": "Me notifier pour"
     },
+    "themeCard": {
+      "title": "Apparence",
+      "description": "Choisissez le thème de l'application.",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
     "notificationsCard": {
       "title": "Notifications",
       "description": "Recevez une alerte sur cet appareil pour les évènements importants.",

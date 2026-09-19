@@ -1,15 +1,18 @@
 "use client"
 
+import { useSyncExternalStore } from "react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { readThemePreference, subscribeThemePreference, type ThemePreference } from "@utils/theme"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
-// No next-themes here: this app doesn't have a theme switcher, dark mode is
-// driven by a single prefers-color-scheme check in layout.tsx that toggles
-// a `.dark` class — "system" is the only theme that has ever existed here.
+// No next-themes here: the theme (system / light / dark) is applied as a `.dark`
+// class by the inline script in layout.tsx; we only mirror the stored preference
+// so sonner's own defaults (icons, close button) match the page.
 const Toaster = ({ ...props }: ToasterProps) => {
+  const theme = useSyncExternalStore(subscribeThemePreference, readThemePreference, () => "system" as ThemePreference)
   return (
     <Sonner
-      theme="system"
+      theme={theme}
       className="toaster group"
       icons={{
         success: (

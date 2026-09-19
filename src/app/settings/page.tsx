@@ -5,6 +5,7 @@ import { getBabiesList } from '@/utils/actions/baby'
 import AccountCard from './_components/account_card'
 import BabySettingsCard from './_components/baby_settings_card'
 import NotificationsCard from './_components/notifications_card'
+import ThemeCard from './_components/theme_card'
 import InstallCard from '@/components/install-card'
 
 export default async function SettingsPage() {
@@ -74,6 +75,7 @@ export default async function SettingsPage() {
             </div>
           )}
 
+          <ThemeCard />
           <NotificationsCard />
           <InstallCard />
         </div>

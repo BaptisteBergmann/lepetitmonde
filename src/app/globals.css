@@ -122,6 +122,10 @@ body {
   overscroll-behavior-y: none;
 }
 
+.light {
+  color-scheme: light;
+}
+
 .dark {
   color-scheme: dark;
   --background: oklch(0.249 0.02 254.9);
