@@ -191,6 +191,22 @@ body {
   }
 }
 
+/* Invisible 44px minimum hit area for small controls on touch screens (WCAG 2.5.5).
+   The element must be positioned (relative/absolute/fixed) for the pseudo-element to anchor to it. */
+@utility touch-target {
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
