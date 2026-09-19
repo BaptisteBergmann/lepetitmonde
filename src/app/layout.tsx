@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, DM_Sans, Fraunces } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import "./globals.css";
@@ -16,16 +16,6 @@ import VersionFooter from '@/components/version_footer';
 import { WebVitalsReporter } from './web-vitals-reporter';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 // Serif used only on the public landing page (headlines) — kept out of --font-sans
 // so the rest of the app keeps its existing DM Sans voice.
@@ -85,7 +75,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", dmSans.variable, fraunces.variable)}
+      className={cn("h-full", "antialiased", "font-sans", dmSans.variable, fraunces.variable)}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
