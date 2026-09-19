@@ -2,7 +2,7 @@ import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
 type RealtimeEvent = {
-  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories'
+  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories' | 'story_highlights'
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: unknown
   old: unknown
@@ -91,6 +91,36 @@ function openChannel(babyId: string): Entry {
       (payload) => {
         for (const listener of listeners) {
           listener({ table: 'stories', eventType: payload.eventType as RealtimeEvent['eventType'], new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // Same visibility reasoning as `stories` above: a highlight's own row
+      // has no circle column, but its name/cover can still hint at circle-
+      // restricted content, so strip it too and let consumers refetch via
+      // `getHighlights` (circle/RLS-aware).
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'story_highlights', filter: `baby_id=eq.${babyId}` },
+      (payload) => {
+        for (const listener of listeners) {
+          listener({ table: 'story_highlights', eventType: payload.eventType as RealtimeEvent['eventType'], new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // `story_highlight_items` has no baby_id column, so this can't be
+      // filtered per-baby and fans out to every baby's channel (same
+      // tradeoff as the `users` binding above). Only DELETE is bound:
+      // INSERT (adding a story to a highlight) already triggers a `stories`
+      // UPDATE via clearStoryExpiry, but removing a story from a highlight
+      // touches nothing else, so without this the tray would never learn
+      // about it. Forwarded as a `story_highlights` signal since that's
+      // what the tray refetches on.
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'story_highlight_items' },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'story_highlights', eventType: 'DELETE', new: null, old: null })
         }
       }
     )

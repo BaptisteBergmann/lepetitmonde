@@ -88,7 +88,7 @@ export default function StoryTray({
   // into one refetch instead of one per event.
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useBabyRealtime(babyId, (event) => {
-    if (event.table !== 'stories') return
+    if (event.table !== 'stories' && event.table !== 'story_highlights') return
     if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current)
     refreshTimeoutRef.current = setTimeout(refresh, 500)
   })

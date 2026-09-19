@@ -4,6 +4,8 @@
 
 Shipped in `37f174e` (feat(feed): live-update story tray via realtime relay). Matches the plan as written: `realtime-relay.ts` gained the `stories` binding with the row-stripped payload, `story_tray.tsx` wires `useBabyRealtime` with the 500ms debounce. No deviations.
 
+Follow-up: highlight rename/delete/remove-story-from-highlight weren't covered by the original plan (only new/expiring stories were), so those edits didn't propagate live to other viewers. Fixed with a `story_highlights` binding (filtered, row-stripped like `stories`) plus an unfiltered `story_highlight_items` DELETE binding (that table has no `baby_id` column, so it fans out per-baby-channel like the existing `users` binding). `story_tray.tsx`'s refresh trigger now also fires on `story_highlights` events.
+
 ## Context
 
 Right now the feed only updates on navigation/`router.refresh()`. If admin A posts a new story while admin B (or any family member) is sitting on `/baby/[babyId]/feed`, B doesn't see it in the tray until they manually reload. The ask: no manual refresh needed for new stories.
