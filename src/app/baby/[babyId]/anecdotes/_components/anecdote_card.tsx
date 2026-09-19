@@ -60,7 +60,7 @@ export default function AnecdoteCard({
           alt=""
           loading="lazy"
           decoding="async"
-          className="w-full aspect-square object-cover contain-paint"
+          className="w-full aspect-square object-cover bg-landing-background contain-paint"
         />
       )}
 

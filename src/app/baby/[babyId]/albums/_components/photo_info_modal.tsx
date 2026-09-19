@@ -148,7 +148,7 @@ export default function PhotoInfoModal({
             <img
               src={photo.thumbnailUrl ?? photo.url ?? undefined}
               alt=""
-              className="w-full max-h-56 object-cover rounded-2xl bg-landing-background"
+              className="w-full h-56 object-cover rounded-2xl bg-landing-background"
             />
           )}
 

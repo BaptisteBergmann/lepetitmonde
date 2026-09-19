@@ -43,7 +43,7 @@ function BubbleThumb({
     >
       {imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt={fallbackLabel} className="w-full h-full object-cover" />
+        <img src={imageUrl} alt={fallbackLabel} loading="lazy" decoding="async" className="w-full h-full object-cover" />
       ) : fallbackIsVideo ? (
         <Film className="h-5 w-5 text-landing-muted" />
       ) : (

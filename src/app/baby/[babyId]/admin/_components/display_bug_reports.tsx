@@ -93,7 +93,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                   className="shrink-0 h-16 w-16 rounded-xl overflow-hidden border border-landing-border cursor-pointer"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={screenshotUrl} alt={t('screenshotAlt')} className="h-full w-full object-cover" />
+                  <img src={screenshotUrl} alt={t('screenshotAlt')} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 </button>
               ) : (
                 <div className="shrink-0 h-16 w-16 rounded-xl border border-dashed border-landing-border flex items-center justify-center text-landing-muted">

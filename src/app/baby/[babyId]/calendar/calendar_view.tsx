@@ -196,6 +196,8 @@ export default function CalendarView({
                   <img
                     src={thumbnailUrl}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="h-6 w-6 rounded-md object-cover"
                   />
                   {dayPosts.length > 1 && (

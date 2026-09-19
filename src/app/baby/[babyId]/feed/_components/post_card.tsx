@@ -135,7 +135,7 @@ export default function PostCard({
                   onClick={() => setLightboxIndex(index)}
                   loading="lazy"
                   decoding="async"
-                  className="w-full aspect-square object-cover cursor-pointer contain-paint"
+                  className="w-full aspect-square object-cover bg-landing-background cursor-pointer contain-paint"
                 />
               )
             )
