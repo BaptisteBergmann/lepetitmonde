@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -54,7 +55,7 @@ export default function EditAnecdoteModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('editError'))
+      toast.error(t('editError'))
     } finally {
       setIsPending(false)
     }

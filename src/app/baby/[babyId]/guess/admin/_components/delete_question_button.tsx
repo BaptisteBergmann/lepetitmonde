@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -9,11 +11,12 @@ import { deleteQuestion } from "@/utils/actions/guesses_questions";
 
 export default function DeleteQuestionButton({ babyId, questionId }: { babyId: string; questionId: string }) {
   const t = useTranslations('guess');
+  const confirmAction = useConfirm()
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm(t('deleteConfirm'))) return;
+    if (!(await confirmAction(t('deleteConfirm')))) return;
 
     setIsDeleting(true);
     try {
@@ -21,7 +24,7 @@ export default function DeleteQuestionButton({ babyId, questionId }: { babyId: s
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert(t('deleteError'));
+      toast.error(t('deleteError'));
     } finally {
       setIsDeleting(false);
     }

@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -29,7 +30,7 @@ export default function ReorderQuestionButtons({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert(t('moveError'));
+      toast.error(t('moveError'));
     } finally {
       setPending(null);
     }

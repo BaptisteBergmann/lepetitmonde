@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { addComment } from '@utils/actions/comments'
@@ -31,7 +32,7 @@ export default function CommentInput({
       onAdded()
     } catch (err) {
       console.error(err)
-      alert(t('sendError'))
+      toast.error(t('sendError'))
     } finally {
       setIsPending(false)
     }

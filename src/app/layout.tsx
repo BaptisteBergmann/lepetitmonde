@@ -9,6 +9,7 @@ import { PwaHistoryTracker } from '@/components/pwa-history-tracker';
 import HeaderWrapper from './_header/header_wrapper';
 import PullToRefresh from '@/components/pull_to_refresh';
 import BugReportButton from '@/components/bug_report_button';
+import { ConfirmProvider } from '@/components/confirm_provider';
 import { Toaster } from '@/components/ui/sonner';
 import { getAuthUser } from '@utils/supabase/auth';
 import { getChangelog } from '@utils/changelog';
@@ -82,20 +83,22 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col overflow-x-hidden">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <HeaderWrapper />
+          <ConfirmProvider>
+            <HeaderWrapper />
 
-          {/* Le main permet de bien séparer le header du contenu */}
-          <main className="flex-grow pt-20"> {/* pt-20 = padding-top pour compenser le header fixed */}
-            <PullToRefresh>{children}</PullToRefresh>
-          </main>
-          <footer className="py-4 text-center text-xs text-muted-foreground">
-            <VersionFooter commitSha={commitSha} changelog={changelog} />
-          </footer>
-          <PwaRegistry />
-          <PwaHistoryTracker />
-          <WebVitalsReporter />
-          {user && <BugReportButton />}
-          <Toaster position="bottom-center" />
+            {/* Le main permet de bien séparer le header du contenu */}
+            <main className="flex-grow pt-20"> {/* pt-20 = padding-top pour compenser le header fixed */}
+              <PullToRefresh>{children}</PullToRefresh>
+            </main>
+            <footer className="py-4 text-center text-xs text-muted-foreground">
+              <VersionFooter commitSha={commitSha} changelog={changelog} />
+            </footer>
+            <PwaRegistry />
+            <PwaHistoryTracker />
+            <WebVitalsReporter />
+            {user && <BugReportButton />}
+            <Toaster position="bottom-center" />
+          </ConfirmProvider>
         </NextIntlClientProvider>
       </body>
       {/* <Header babies={babies}></Header> */}

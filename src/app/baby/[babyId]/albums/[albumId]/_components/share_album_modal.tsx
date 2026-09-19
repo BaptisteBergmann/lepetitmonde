@@ -1,5 +1,6 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocale, useTranslations } from 'next-intl'
@@ -37,6 +38,7 @@ export default function ShareAlbumModal({
   onClose: () => void
 }) {
   const t = useTranslations('albums.share')
+  const confirmAction = useConfirm()
   const dateFnsLocale = getDateFnsLocale(useLocale())
 
   const [duration, setDuration] = useState<string>('7d')
@@ -66,7 +68,7 @@ export default function ShareAlbumModal({
       await loadShares()
     } catch (err) {
       console.error(err)
-      alert(t('linkError'))
+      toast.error(t('linkError'))
     } finally {
       setGenerating(false)
     }
@@ -83,14 +85,14 @@ export default function ShareAlbumModal({
   }
 
   const handleRevoke = async (shareId: string) => {
-    if (!confirm(t('revokeConfirm'))) return
+    if (!(await confirmAction(t('revokeConfirm')))) return
     setRevokingId(shareId)
     try {
       await revokeAlbumShare(shareId, babyId)
       await loadShares()
     } catch (err) {
       console.error(err)
-      alert(t('revokeError'))
+      toast.error(t('revokeError'))
     } finally {
       setRevokingId(null)
     }

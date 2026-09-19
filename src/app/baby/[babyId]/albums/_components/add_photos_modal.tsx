@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -67,7 +68,7 @@ export default function AddPhotosModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('uploadError'))
+      toast.error(t('uploadError'))
     } finally {
       setIsPending(false)
     }

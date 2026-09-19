@@ -1,5 +1,6 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
@@ -42,6 +43,7 @@ export default function PostCard({
 }) {
   const router = useRouter()
   const t = useTranslations('feed')
+  const confirmAction = useConfirm()
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -54,7 +56,7 @@ export default function PostCard({
   }, [post.id, babyId])
 
   const handleDelete = async () => {
-    if (!confirm(t('postCard.deleteConfirm'))) return
+    if (!(await confirmAction(t('postCard.deleteConfirm')))) return
 
     setDeleting(true)
     try {
@@ -62,7 +64,7 @@ export default function PostCard({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('postCard.deleteError'))
+      toast.error(t('postCard.deleteError'))
     } finally {
       setDeleting(false)
     }

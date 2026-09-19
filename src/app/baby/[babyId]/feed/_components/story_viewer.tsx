@@ -1,5 +1,6 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createPortal } from 'react-dom'
@@ -36,6 +37,7 @@ export default function StoryViewer({
   onChanged: () => void
 }) {
   const t = useTranslations('feed')
+  const confirmAction = useConfirm()
   const isHighlight = target.kind === 'highlight'
   const stories: StoryWithUrl[] = isHighlight
     ? highlights[target.index]?.stories ?? []
@@ -61,7 +63,8 @@ export default function StoryViewer({
   // Sticky pause toggled by a tap in the middle zone; resets when the
   // story changes so autoplay resumes automatically on next/prev.
   const [manuallyPaused, setManuallyPaused] = useState(false)
-  const paused = holdPaused || manuallyPaused
+  const [confirming, setConfirming] = useState(false)
+  const paused = holdPaused || manuallyPaused || confirming
   const [videoProgress, setVideoProgress] = useState(0)
   const [views, setViews] = useState<StoryViewsData | null>(null)
   const [highlightPickerOpen, setHighlightPickerOpen] = useState(false)
@@ -90,6 +93,8 @@ export default function StoryViewer({
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     const handleKeyDown = (e: KeyboardEvent) => {
+      // The delete-confirm dialog owns the keyboard while it is open.
+      if (confirming) return
       if (e.key === 'Escape') onClose()
       if (e.key === 'ArrowLeft') goPrev()
       if (e.key === 'ArrowRight') goNext()
@@ -99,7 +104,7 @@ export default function StoryViewer({
       document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [onClose, goPrev, goNext])
+  }, [onClose, goPrev, goNext, confirming])
 
   // "Seen" tracking is an ephemeral-stories concept — highlight-sourced
   // items skip markStoryViewed entirely. The resets below are re-derived
@@ -174,7 +179,10 @@ export default function StoryViewer({
   }
 
   const handleDelete = async () => {
-    if (!confirm(t('storyViewer.deleteConfirm'))) return
+    setConfirming(true)
+    const confirmed = await confirmAction(t('storyViewer.deleteConfirm'))
+    setConfirming(false)
+    if (!confirmed) return
     await deleteStory(story.id, babyId)
     onChanged()
     goNext()

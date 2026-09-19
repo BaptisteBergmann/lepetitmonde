@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
@@ -112,7 +113,7 @@ export default function CreateStoryModal({
       onClose()
     } catch (err) {
       console.error(err)
-      alert(t('publishError'))
+      toast.error(t('publishError'))
     } finally {
       setIsPending(false)
     }

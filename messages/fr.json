@@ -10,7 +10,9 @@
     "retry": "Réessayer",
     "notFoundTitle": "Page introuvable",
     "notFoundDescription": "Cette page n'existe pas ou vous n'y avez pas accès.",
-    "backHome": "Retour à l'accueil"
+    "backHome": "Retour à l'accueil",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
   },
   "auth": {
     "invalidCredentials": "Identifiants incorrects ou compte inexistant",

@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
@@ -26,12 +28,13 @@ export default function AnecdoteCard({
 }) {
   const router = useRouter()
   const t = useTranslations('anecdotes')
+  const confirmAction = useConfirm()
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deleting, setDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
   const handleDelete = async () => {
-    if (!confirm(t('deleteConfirm'))) return
+    if (!(await confirmAction(t('deleteConfirm')))) return
 
     setDeleting(true)
     try {
@@ -39,7 +42,7 @@ export default function AnecdoteCard({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('deleteError'))
+      toast.error(t('deleteError'))
     } finally {
       setDeleting(false)
     }

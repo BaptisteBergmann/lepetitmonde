@@ -13,6 +13,11 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // Native alert()/confirm() block the thread and look out of place in the PWA:
+    // use toast.* from sonner and useConfirm() from components/confirm_provider.
+    rules: { "no-alert": "error" },
+  },
 ]);
 
 export default eslintConfig;

@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -51,7 +52,7 @@ export default function BuyList({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert(t('adjustError'));
+      toast.error(t('adjustError'));
     } finally {
       setPendingId(null);
     }

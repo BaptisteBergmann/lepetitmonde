@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from 'sonner'
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { generateShortLivedLink } from "@utils/actions/invite";
@@ -23,7 +24,7 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
       }
     } catch (err) {
       console.error(err);
-      alert(t('generateError'));
+      toast.error(t('generateError'));
     } finally {
       setIsLoading(false);
     }

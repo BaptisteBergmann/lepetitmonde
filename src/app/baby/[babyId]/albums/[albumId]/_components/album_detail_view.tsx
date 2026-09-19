@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -31,6 +33,7 @@ export default function AlbumDetailView({
 }) {
   const router = useRouter()
   const t = useTranslations('albums')
+  const confirmAction = useConfirm()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
@@ -43,7 +46,7 @@ export default function AlbumDetailView({
   const albumCircles = album.circleIds.map((id) => circles.find((c) => c.id === id))
 
   const handleDeleteAlbum = async () => {
-    if (!confirm(t('deleteAlbumConfirm'))) return
+    if (!(await confirmAction(t('deleteAlbumConfirm')))) return
     setDeletingAlbum(true)
     try {
       await deleteAlbum(album.id, babyId)
@@ -51,7 +54,7 @@ export default function AlbumDetailView({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('deleteAlbumError'))
+      toast.error(t('deleteAlbumError'))
       setDeletingAlbum(false)
     }
   }

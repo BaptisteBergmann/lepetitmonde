@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -50,6 +52,7 @@ export default function PhotoInfoModal({
 }) {
   const router = useRouter()
   const t = useTranslations('albums.photoInfoForm')
+  const confirmAction = useConfirm()
   const tAlbums = useTranslations('albums')
   const dateFnsLocale = getDateFnsLocale(useLocale())
 
@@ -77,7 +80,7 @@ export default function PhotoInfoModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('moveError'))
+      toast.error(t('moveError'))
     } finally {
       setIsMoving(false)
     }
@@ -94,14 +97,14 @@ export default function PhotoInfoModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('moveError'))
+      toast.error(t('moveError'))
     } finally {
       setIsMoving(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm(tAlbums('deletePhotoConfirm'))) return
+    if (!(await confirmAction(tAlbums('deletePhotoConfirm')))) return
     setIsDeleting(true)
     try {
       await deletePhoto(photo.id, babyId)
@@ -109,7 +112,7 @@ export default function PhotoInfoModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(tAlbums('deletePhotoError'))
+      toast.error(tAlbums('deletePhotoError'))
     } finally {
       setIsDeleting(false)
     }

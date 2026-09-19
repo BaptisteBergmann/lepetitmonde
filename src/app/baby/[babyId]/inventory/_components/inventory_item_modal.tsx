@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -44,6 +46,7 @@ export default function InventoryItemModal({
 }) {
   const router = useRouter()
   const t = useTranslations('inventory.form')
+  const confirmAction = useConfirm()
   const isEditMode = !!item
   const [open, setOpen] = useState(false)
 
@@ -114,7 +117,7 @@ export default function InventoryItemModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : t('saveError'))
+      toast.error(err instanceof Error ? err.message : t('saveError'))
     } finally {
       setIsPending(false)
     }
@@ -122,7 +125,7 @@ export default function InventoryItemModal({
 
   const handleDelete = async () => {
     if (!item) return
-    if (!confirm(t('deleteConfirm'))) return
+    if (!(await confirmAction(t('deleteConfirm')))) return
 
     setIsDeleting(true)
     try {
@@ -131,7 +134,7 @@ export default function InventoryItemModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : t('deleteError'))
+      toast.error(err instanceof Error ? err.message : t('deleteError'))
     } finally {
       setIsDeleting(false)
     }

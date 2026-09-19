@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
@@ -26,6 +28,7 @@ export default function CommentList({
   onChanged: () => void
 }) {
   const t = useTranslations('feed.comments')
+  const confirmAction = useConfirm()
   const tCommon = useTranslations('common')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -58,14 +61,14 @@ export default function CommentList({
       onChanged()
     } catch (err) {
       console.error(err)
-      alert(t('editError'))
+      toast.error(t('editError'))
     } finally {
       setSavingId(null)
     }
   }
 
   const handleDelete = async (comment: Comment) => {
-    if (!confirm(t('deleteConfirm'))) return
+    if (!(await confirmAction(t('deleteConfirm')))) return
 
     setDeletingId(comment.id)
     try {
@@ -73,7 +76,7 @@ export default function CommentList({
       onChanged()
     } catch (err) {
       console.error(err)
-      alert(t('deleteError'))
+      toast.error(t('deleteError'))
     } finally {
       setDeletingId(null)
     }

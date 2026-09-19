@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from 'sonner'
 import { Button } from "@/components/ui/button";
 import { submitGuess } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
@@ -69,7 +70,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert(t('submitError'));
+      toast.error(t('submitError'));
     } finally {
       setIsSubmitting(false);
     }

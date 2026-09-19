@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
@@ -72,10 +73,10 @@ export default function BugReportButton() {
 
       await submitBugReport(formData)
       handleClose()
-      alert(t('submittedConfirmation'))
+      toast.success(t('submittedConfirmation'))
     } catch (err) {
       console.error(err)
-      alert(t('submitError'))
+      toast.error(t('submitError'))
     } finally {
       setIsPending(false)
     }

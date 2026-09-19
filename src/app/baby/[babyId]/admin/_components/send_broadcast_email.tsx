@@ -1,5 +1,6 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -31,6 +32,7 @@ interface SendBroadcastEmailProps {
 
 export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adminUserIds }: SendBroadcastEmailProps) {
   const t = useTranslations('admin')
+  const confirmAction = useConfirm()
   const [isSending, startTransition] = useTransition()
   const [circleIds, setCircleIds] = useState<string[]>([])
 
@@ -53,10 +55,10 @@ export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adm
     return ids.size
   }, [adminUserIds, circlesAccess, circleIds])
 
-  function handleSubmit(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     for (const circleId of circleIds) formData.append('circleIds', circleId)
 
-    if (!window.confirm(t('broadcastConfirm', { count: recipientCount }))) return
+    if (!(await confirmAction(t('broadcastConfirm', { count: recipientCount })))) return
 
     startTransition(async () => {
       try {

@@ -1,5 +1,7 @@
 'use client'
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -45,6 +47,7 @@ export default function DayDetailSheet({
 }) {
   const router = useRouter()
   const t = useTranslations('calendar')
+  const confirmAction = useConfirm()
   const tMilestone = useTranslations('milestones')
   const dateFnsLocale = getDateFnsLocale(useLocale())
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -55,7 +58,7 @@ export default function DayDetailSheet({
       : t('hiddenAdminOnly')
 
   const handleDelete = async (eventId: string) => {
-    if (!confirm(t('deleteEventConfirm'))) return
+    if (!(await confirmAction(t('deleteEventConfirm')))) return
 
     setDeletingId(eventId)
     try {
@@ -63,7 +66,7 @@ export default function DayDetailSheet({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('deleteError'))
+      toast.error(t('deleteError'))
     } finally {
       setDeletingId(null)
     }

@@ -1,6 +1,8 @@
 
 "use client";
 
+import { useConfirm } from '@/components/confirm_provider'
+import { toast } from 'sonner'
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
@@ -42,6 +44,7 @@ export default function RealtimeCirclesList({
   isAdmin,
 }: RealtimeCirclesListProps) {
   const t = useTranslations('admin.circles');
+  const confirmAction = useConfirm()
   const [circles, setCircles] = useState<Circle[]>(initialCircles);
   const [circlesAccess, setCirclesAccess] = useState<CircleAccess[]>(initialCirclesAccess);
   const [selectedUserByCircle, setSelectedUserByCircle] = useState<Record<string, string>>({});
@@ -96,7 +99,7 @@ export default function RealtimeCirclesList({
       setSelectedUserByCircle((prev) => ({ ...prev, [circleId]: "" }));
     } catch (err) {
       console.error(err);
-      alert(t('addMemberError'));
+      toast.error(t('addMemberError'));
     } finally {
       setPendingCircleId(null);
     }
@@ -108,20 +111,20 @@ export default function RealtimeCirclesList({
       await removeUserFromCircle(circleId, userId, babyId);
     } catch (err) {
       console.error(err);
-      alert(t('removeMemberError'));
+      toast.error(t('removeMemberError'));
     } finally {
       setPendingCircleId(null);
     }
   };
 
   const handleDeleteCircle = async (circle: Circle) => {
-    if (!confirm(t('deleteConfirm', { name: circle.name ?? '' }))) return;
+    if (!(await confirmAction(t('deleteConfirm', { name: circle.name ?? '' })))) return;
     setPendingCircleId(circle.id);
     try {
       await deleteCircle(circle.id, babyId);
     } catch (err) {
       console.error(err);
-      alert(t('deleteError'));
+      toast.error(t('deleteError'));
     } finally {
       setPendingCircleId(null);
     }

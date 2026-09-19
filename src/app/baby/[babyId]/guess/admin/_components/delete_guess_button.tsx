@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
@@ -26,7 +27,7 @@ export default function DeleteGuessButton({
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert(t('deleteError'));
+      toast.error(t('deleteError'));
       throw err;
     }
   };

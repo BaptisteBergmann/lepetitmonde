@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
@@ -98,7 +99,7 @@ export default function CreateEventModal({
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert(t('saveError'))
+      toast.error(t('saveError'))
     } finally {
       setIsPending(false)
     }

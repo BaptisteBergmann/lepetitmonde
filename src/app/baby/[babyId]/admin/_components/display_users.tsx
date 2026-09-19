@@ -95,7 +95,7 @@ export default function RealtimeUsersList({
           prev.map((u) => (u.id === userId ? { ...u, access_level: previousAccessLevel } : u))
         );
       }
-      alert(err instanceof Error ? err.message : t('updateAccessError'));
+      toast.error(err instanceof Error ? err.message : t('updateAccessError'));
     } finally {
       setPendingUserId(null);
     }
