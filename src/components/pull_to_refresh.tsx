@@ -158,7 +158,10 @@ export default function PullToRefresh({ children }: { children: React.ReactNode 
       >
         <RefreshCw ref={iconRef} className={cn('h-5 w-5 text-primary', refreshing && 'animate-spin')} />
       </div>
-      <div ref={contentRef} className="relative z-10" onTransitionEnd={handleTransitionEnd}>
+      {/* No z-index here: it would create a stacking context that traps the
+          `fixed z-50` story viewer/modals below the app header and nav. DOM
+          order alone keeps this above the indicator. */}
+      <div ref={contentRef} className="relative" onTransitionEnd={handleTransitionEnd}>
         {children}
       </div>
     </div>
