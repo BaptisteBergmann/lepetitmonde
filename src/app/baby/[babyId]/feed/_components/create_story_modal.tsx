@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
 import {
   Select,
@@ -119,9 +120,9 @@ export default function CreateStoryModal({
 
   const hasFileErrors = upload.files.some((file) => file.errors.length !== 0)
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200"
+      className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-[60] p-4 animate-in fade-in-0 duration-200"
       onClick={onClose}
     >
       <div
@@ -261,6 +262,7 @@ export default function CreateStoryModal({
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

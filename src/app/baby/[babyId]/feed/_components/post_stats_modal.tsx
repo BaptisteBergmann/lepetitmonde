@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
@@ -35,9 +36,9 @@ export default function PostStatsModal({
 
   const postCircles = post.circle_ids.map((id) => circles.find((c) => c.id === id))
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200"
+      className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-[60] p-4 animate-in fade-in-0 duration-200"
       onClick={onClose}
     >
       <div
@@ -117,7 +118,8 @@ export default function PostStatsModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { getDateFnsLocale } from "@utils/formatting";
@@ -158,9 +159,9 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
         })}
       </div>
 
-      {openScreenshot && (
+      {openScreenshot && createPortal(
         <div
-          className="fixed inset-0 w-full h-full bg-black/70 backdrop-blur-xs flex justify-center items-center z-50 p-4"
+          className="fixed inset-0 w-full h-full bg-black/70 backdrop-blur-xs flex justify-center items-center z-[60] p-4"
           onClick={() => setOpenScreenshot(null)}
         >
           <button
@@ -177,7 +178,8 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
             className="max-h-[90vh] max-w-full rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

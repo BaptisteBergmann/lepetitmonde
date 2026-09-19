@@ -152,7 +152,7 @@ export default function InventoryItemModal({
 
       {open && createPortal(
         <div
-          className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-in fade-in-0 duration-200"
+          className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-[60] p-4 animate-in fade-in-0 duration-200"
           onClick={() => setOpen(false)}
         >
           <div
