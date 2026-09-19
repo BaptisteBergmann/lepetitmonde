@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `fade172` Drop unused Geist Sans and Geist Mono
+- `e8f54af` Re-enable pinch-zoom by dropping maximumScale/userScalable
 - `9c84df3` Add z-index scale and reference it from README/CLAUDE.md
 - `7b240d7` Raise select/dropdown-menu/dialog z-index onto the shared scale
 - `f10b508` Raise popover z-index above full-screen overlays
