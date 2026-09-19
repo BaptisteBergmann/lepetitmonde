@@ -2,13 +2,14 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
-import { TablesInsert } from '@utils/supabase/database.types'
+import { TablesInsert, Json } from '@utils/supabase/database.types'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
-import { getUserAccess } from './users'
+import { getUserAccess, getUsers } from './users'
 import { assertIsAdmin, getAllBabyMemberIds } from './access'
 import { notifyUsers } from './notify'
 import { actionError } from './errors'
+import { computeWinners } from '../guess_scoring'
 
 export async function getQuestions(babyId: string) {
   const supabase = await createClient()
@@ -174,6 +175,116 @@ export async function moveQuestion(babyId: string, questionId: string, direction
 
   revalidatePath(`/baby/${babyId}/guess`)
   revalidatePath(`/baby/${babyId}/guess/admin`)
+}
+
+export async function resolveQuestion(babyId: string, questionId: string, correctAnswer: Json) {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: resolveQuestion.name, babyId, questionId })
+
+  const { data: question, error: fetchError } = await supabase
+    .from('guess_questions')
+    .select('status')
+    .eq('baby_id', babyId)
+    .eq('id', questionId)
+    .single()
+
+  if (fetchError) { contextLogger.error(fetchError, "Error fetching question before resolving"); throw fetchError }
+  if (question.status !== 'approved') throw await actionError('pronosticNotApproved')
+
+  const { error } = await supabase
+    .from('guess_questions')
+    .update({ correct_answer: correctAnswer, resolved_at: new Date().toISOString() })
+    .eq('baby_id', babyId)
+    .eq('id', questionId)
+
+  if (error) { contextLogger.error(error, "Error resolving question"); throw error }
+  contextLogger.info("Question resolved")
+
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
+  revalidatePath(`/baby/${babyId}/guess/leaderboard`)
+}
+
+export async function unresolveQuestion(babyId: string, questionId: string) {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: unresolveQuestion.name, babyId, questionId })
+
+  const { error } = await supabase
+    .from('guess_questions')
+    .update({ correct_answer: null, resolved_at: null })
+    .eq('baby_id', babyId)
+    .eq('id', questionId)
+
+  if (error) { contextLogger.error(error, "Error unresolving question"); throw error }
+  contextLogger.info("Question unresolved")
+
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
+  revalidatePath(`/baby/${babyId}/guess/leaderboard`)
+}
+
+// Visible to any baby member, matching the existing baby-wide visibility of
+// guesses themselves (see getAllGuesses / .claude/plans/rls.md).
+export async function getLeaderboard(babyId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw await actionError('unauthorized')
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw await actionError('unauthorized')
+
+  const contextLogger = logger.child({ function: getLeaderboard.name, babyId })
+
+  const { data: questions, error: questionsError } = await supabase
+    .from('guess_questions')
+    .select('id, type, correct_answer')
+    .eq('baby_id', babyId)
+    .eq('status', 'approved')
+    .not('resolved_at', 'is', null)
+
+  if (questionsError) { contextLogger.error(questionsError, "Error fetching resolved questions"); return [] }
+  if (questions.length === 0) return []
+
+  const { data: guesses, error: guessesError } = await supabase
+    .from('guesses')
+    .select('user_id, question_id, answer')
+    .eq('baby_id', babyId)
+    .in('question_id', questions.map((question) => question.id))
+
+  if (guessesError) { contextLogger.error(guessesError, "Error fetching guesses for leaderboard"); return [] }
+
+  const users = await getUsers(babyId)
+  const nameById = new Map(
+    users
+      .filter((u): u is NonNullable<typeof u> => !!u)
+      .map((u) => [u.id, [u.first_name, u.last_name].filter(Boolean).join(' ') || null])
+  )
+
+  const scoreByUser = new Map<string, { points: number; questionsWon: number }>()
+
+  for (const question of questions) {
+    const questionGuesses = guesses.filter((guess) => guess.question_id === question.id)
+    for (const winner of computeWinners(question, questionGuesses)) {
+      const entry = scoreByUser.get(winner.userId) ?? { points: 0, questionsWon: 0 }
+      entry.points += winner.points
+      entry.questionsWon += 1
+      scoreByUser.set(winner.userId, entry)
+    }
+  }
+
+  return Array.from(scoreByUser.entries())
+    .map(([userId, { points, questionsWon }]) => ({
+      userId,
+      name: nameById.get(userId) ?? null,
+      points,
+      questionsWon,
+    }))
+    .sort((a, b) => b.points - a.points)
 }
 
 type NewGuess = TablesInsert<'guess_questions'>;

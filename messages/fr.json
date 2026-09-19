@@ -899,6 +899,7 @@
     "alreadyAnswered": "Vous avez déjà répondu à cette question",
     "pollOptionsCount": "Un sondage doit avoir entre 2 et 6 options",
     "pronosticNotFound": "Pronostic introuvable",
+    "pronosticNotApproved": "Seul un pronostic validé peut être clôturé",
     "describeIssue": "Merci de décrire le problème.",
     "cannotDeleteAnsweredPronostic": "Impossible de supprimer un pronostic ayant déjà des réponses",
     "cannotRemoveLastAdmin": "Impossible de retirer le dernier administrateur de ce journal.",
