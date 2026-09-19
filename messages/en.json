@@ -368,6 +368,7 @@
     "subtitle": "Who'll guess right? Join the pronostics or create new ones to make the wait fun!",
     "loading": "Loading pronostics...",
     "manage": "Manage",
+    "leaderboardLink": "Leaderboard",
     "empty": "No pronostics created yet.",
     "emptyHint": "Click \"Suggest a pronostic\" to add one.",
     "unknownUser": "User",

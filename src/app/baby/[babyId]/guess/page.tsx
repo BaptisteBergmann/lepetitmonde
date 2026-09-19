@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import QuestionsListWrapper from "./questions_list_wrapper";
-import { Loader2, Settings, Dices } from "lucide-react";
+import { Loader2, Settings, Dices, Trophy } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { logger } from "@/utils/logger";
@@ -34,6 +34,12 @@ export default async function GuessesPage({
 
         {!Array.isArray(access) && (
           <div className="relative flex justify-end gap-2">
+            <Link href={`/baby/${babyId}/guess/leaderboard`}>
+              <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
+                <Trophy className="h-4 w-4" />
+                <span>{t('leaderboardLink')}</span>
+              </Button>
+            </Link>
             <Modal babyId={babyId} isAdmin={access.access_level === "admin"} />
             {access.access_level === "admin" && (
               <Link href={`/baby/${babyId}/guess/admin`}>

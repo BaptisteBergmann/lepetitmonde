@@ -368,6 +368,7 @@
     "subtitle": "Qui verra juste ? Participez aux pronostics ou créez-en de nouveaux pour animer l'attente !",
     "loading": "Chargement des pronostics...",
     "manage": "Administrer",
+    "leaderboardLink": "Classement",
     "empty": "Aucun pronostic créé pour le moment.",
     "emptyHint": "Cliquez sur \"Proposer un pronostic\" pour en ajouter un.",
     "unknownUser": "Utilisateur",
