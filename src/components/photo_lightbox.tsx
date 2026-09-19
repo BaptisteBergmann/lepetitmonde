@@ -221,7 +221,12 @@ export default function PhotoLightbox({
         >
           {photos.map((photo, i) => (
             <div key={photo.id} className="w-full h-full shrink-0 flex items-center justify-center">
-              {photo.url && (
+              {/* Only the current slide plus its immediate neighbors actually mount
+                  media — this row is fully rendered (all slides exist for the
+                  swipe/translateX layout), but without this guard every photo's
+                  full-res `url` would load immediately on open, not just the one
+                  being viewed. */}
+              {photo.url && Math.abs(i - index) <= 1 && (
                 photo.mime_type?.startsWith('video/') ? (
                   <video
                     src={photo.url}
