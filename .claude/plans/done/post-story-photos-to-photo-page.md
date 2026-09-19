@@ -1,5 +1,9 @@
 # Mirror post/story media onto the Photos page
 
+## Status: implemented
+
+Shipped across `af68e94` (source_post_id/source_story_id migration + link/copy actions), `ef4649b` (mirroring wired into createPost/createStory), and `3b8fab1` (server-generated thumbnails for post/story images). No deviations found.
+
 ## Context
 
 Photos and videos currently live in three disconnected places:

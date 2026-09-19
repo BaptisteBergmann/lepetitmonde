@@ -1,5 +1,9 @@
 # Photo info modal for Albums
 
+## Status: implemented
+
+Shipped in `415c97f` (feat(albums): add photo info popup to reassign albums and view details). `unassignPhotoFromAlbum` added, `photo_info_modal.tsx` created, `assign_to_album_modal.tsx` deleted per plan. No deviations found.
+
 ## Context
 
 On the Photos page (`/baby/[babyId]/albums`), photos can currently only be deleted — there's no way to move a photo to a different album, pull it back out of an album ("unsorted"), or see basic info about it (when it was added, whether it came from a post/story). The "All Photos" tab has a partial version of this (an "add to album" button) but only for photos with no album yet; once a photo is filed into an album, and on the single-album detail page in general, there's no reassignment path at all — only delete. The user wants an "info" popup on each photo that closes this gap: view info, and change which album (group) a photo belongs to. Per the user, album membership drives visibility ("album takes precedent on the circles") — circles are shown read-only in the popup, reflecting whichever album is selected, not edited per-photo.
