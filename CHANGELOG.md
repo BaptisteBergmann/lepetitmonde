@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `bfbd242` Give raw icon-only buttons a 44px touch target
+- `7bbd484` Enlarge Button touch targets on touch screens
 - `6bbaf1b` Correct main padding-top to match actual fixed header height
 - `608ef8e` Enforce accessible names on buttons with jsx-a11y
 - `ffe60b3` Add accessible names to icon-only buttons
