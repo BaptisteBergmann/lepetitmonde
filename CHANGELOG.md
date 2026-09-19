@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `608ef8e` Enforce accessible names on buttons with jsx-a11y
+- `ffe60b3` Add accessible names to icon-only buttons
 - `c4c0e59` Replace native alert()/confirm() with toasts and a shared confirm dialog
 - `abbf46e` Add loading, error and not-found boundaries
 - `fade172` Drop unused Geist Sans and Geist Mono
