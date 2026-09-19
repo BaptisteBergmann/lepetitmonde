@@ -16,7 +16,16 @@ const eslintConfig = defineConfig([
   {
     // Native alert()/confirm() block the thread and look out of place in the PWA:
     // use toast.* from sonner and useConfirm() from components/confirm_provider.
-    rules: { "no-alert": "error" },
+    rules: {
+      "no-alert": "error",
+      // Icon-only buttons need an aria-label (see the `a11y` namespace in messages/*.json).
+      "jsx-a11y/control-has-associated-label": ["error", {
+        depth: 3,
+        controlComponents: ["Button", "PopoverTrigger", "DropdownMenuTrigger"],
+        ignoreElements: ["audio", "canvas", "embed", "input", "option", "textarea", "tr", "video"],
+        ignoreRoles: ["grid", "listbox", "menu", "menubar", "radiogroup", "row", "tablist", "toolbar", "tree", "treegrid"],
+      }],
+    },
   },
 ]);
 
