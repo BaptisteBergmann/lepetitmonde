@@ -207,7 +207,7 @@ export default function PhotoLightbox({
         <button
           aria-label={tA11y('close')}
           onClick={onClose}
-          className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
+          className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
         >
           <X className="h-5 w-5" />
         </button>
@@ -269,7 +269,7 @@ export default function PhotoLightbox({
               onClick={goPrev}
               disabled={index === 0}
               className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none",
+                "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none touch-target pointer-coarse:p-2",
                 "hidden sm:flex items-center justify-center"
               )}
             >
@@ -280,7 +280,7 @@ export default function PhotoLightbox({
               onClick={goNext}
               disabled={index === photos.length - 1}
               className={cn(
-                "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none",
+                "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none touch-target pointer-coarse:p-2",
                 "hidden sm:flex items-center justify-center"
               )}
             >

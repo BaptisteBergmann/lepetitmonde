@@ -107,7 +107,7 @@ export default function CommentList({
                       <button
                         aria-label={tA11y('edit')}
                         onClick={() => startEditing(comment)}
-                        className="p-1 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                        className="p-1 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
                       >
                         <Pencil className="h-3 w-3" />
                       </button>
@@ -116,7 +116,7 @@ export default function CommentList({
                       aria-label={tA11y('delete')}
                       onClick={() => handleDelete(comment)}
                       disabled={deletingId === comment.id}
-                      className="p-1 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
+                      className="p-1 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 touch-target relative pointer-coarse:p-2"
                     >
                       {deletingId === comment.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                     </button>

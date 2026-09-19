@@ -52,7 +52,7 @@ export default function CommentReactionPicker({
           aria-label={tA11y('react')}
           disabled={pending}
           className={cn(
-            "flex items-center justify-center h-5 w-5 rounded-full cursor-pointer transition-colors disabled:opacity-50",
+            "flex items-center justify-center h-5 w-5 rounded-full cursor-pointer transition-colors disabled:opacity-50 touch-target relative",
             initialReactions.myEmoji ? "text-rose-500" : "text-landing-muted hover:text-landing-foreground hover:bg-landing-surface"
           )}
         >

@@ -197,7 +197,7 @@ export default function RealtimeCirclesList({
                       <button
                         onClick={() => handleRemoveMember(circle.id, member.id)}
                         disabled={isPending}
-                        className="rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                        className="rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive cursor-pointer touch-target relative"
                         title={t('removeTitle')}
                       >
                         <X className="h-3 w-3" />

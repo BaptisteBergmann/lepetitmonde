@@ -54,7 +54,7 @@ export default function PostStatsModal({
           <button
             aria-label={tA11y('close')}
             onClick={onClose}
-            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
           >
             <X className="h-4 w-4" />
           </button>

@@ -50,7 +50,7 @@ export default function ReactionPicker({
           aria-label={tA11y('react')}
           disabled={pending}
           className={cn(
-            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50",
+            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50 touch-target relative",
             reactions.myEmoji ? "text-rose-500" : "text-landing-muted hover:text-landing-foreground hover:bg-landing-background"
           )}
         >

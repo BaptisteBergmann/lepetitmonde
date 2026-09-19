@@ -192,7 +192,7 @@ export default function Modal({
               <button
                 aria-label={tA11y('close')}
                 onClick={() => setOpen(false)}
-                className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -292,7 +292,7 @@ export default function Modal({
                           aria-label={tA11y('remove')}
                           onClick={() => handleRemoveChoice(index)}
                           disabled={choices.length <= 2}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed touch-target relative pointer-coarse:p-2"
                         >
                           <X className="h-4 w-4" />
                         </button>

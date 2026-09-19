@@ -102,7 +102,7 @@ export default function AlbumsView({
                   <button
                     onClick={() => setInfoPhotoId(photo.id)}
                     title={t('photoInfo')}
-                    className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer touch-target pointer-coarse:p-2"
                   >
                     <Info className="h-3.5 w-3.5" />
                   </button>

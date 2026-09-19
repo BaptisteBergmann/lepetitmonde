@@ -84,7 +84,7 @@ export default function DayDetailSheet({
           <button
             aria-label={tA11y('close')}
             onClick={onClose}
-            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
           >
             <X className="h-4 w-4" />
           </button>
@@ -137,7 +137,7 @@ export default function DayDetailSheet({
                     <button
                       aria-label={tA11y('edit')}
                       onClick={() => onEdit(event)}
-                      className="p-1.5 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                      className="p-1.5 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -145,7 +145,7 @@ export default function DayDetailSheet({
                       aria-label={tA11y('delete')}
                       onClick={() => handleDelete(event.id)}
                       disabled={deletingId === event.id}
-                      className="p-1.5 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
+                      className="p-1.5 hover:bg-landing-surface rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 touch-target relative pointer-coarse:p-2"
                     >
                       {deletingId === event.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                     </button>

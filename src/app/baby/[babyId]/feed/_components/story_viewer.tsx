@@ -220,7 +220,7 @@ export default function StoryViewer({
             <button
               aria-label={t('storyViewer.addToHighlights')}
               onClick={() => setHighlightPickerOpen((v) => !v)}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
             >
               <Sparkles className="h-4.5 w-4.5" />
             </button>
@@ -229,7 +229,7 @@ export default function StoryViewer({
             <button
               aria-label={tA11y('delete')}
               onClick={handleDelete}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
             >
               <Trash2 className="h-4.5 w-4.5" />
             </button>
@@ -237,7 +237,7 @@ export default function StoryViewer({
           <button
             aria-label={tA11y('close')}
             onClick={onClose}
-            className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
           >
             <X className="h-5 w-5" />
           </button>
@@ -271,7 +271,7 @@ export default function StoryViewer({
             <button
               aria-label={tA11y('createHighlight')}
               onClick={handleCreateHighlight}
-              className="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 cursor-pointer transition-colors"
+              className="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 cursor-pointer transition-colors touch-target relative pointer-coarse:p-2"
             >
               <PlusIcon className="h-4 w-4" />
             </button>
@@ -313,14 +313,14 @@ export default function StoryViewer({
           aria-label={tA11y('previous')}
           onClick={(e) => { e.stopPropagation(); goPrev() }}
           disabled={index === 0}
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none hidden sm:flex items-center justify-center"
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none hidden sm:flex items-center justify-center touch-target pointer-coarse:p-2"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
         <button
           aria-label={tA11y('next')}
           onClick={(e) => { e.stopPropagation(); goNext() }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer hidden sm:flex items-center justify-center"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer hidden sm:flex items-center justify-center touch-target pointer-coarse:p-2"
         >
           <ChevronRight className="h-6 w-6" />
         </button>

@@ -123,7 +123,7 @@ export default function EditPostModal({
           <button
             aria-label={tA11y('close')}
             onClick={onClose}
-            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+            className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
           >
             <X className="h-4 w-4" />
           </button>
@@ -227,7 +227,7 @@ export default function EditPostModal({
                         type="button"
                         onClick={() => removePollOption(index)}
                         disabled={pollHasVotes || pollOptions.length <= 2}
-                        className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                        className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shrink-0 touch-target relative pointer-coarse:p-2"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>

@@ -167,7 +167,7 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
           <button
             onClick={() => setOpenScreenshot(null)}
             aria-label={t('close')}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer touch-target"
           >
             <X className="h-4 w-4" />
           </button>

@@ -52,7 +52,7 @@ export default function StoryReactionPicker({
           aria-label={tA11y('react')}
           disabled={pending}
           className={cn(
-            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50 bg-white/10 hover:bg-white/20",
+            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50 bg-white/10 hover:bg-white/20 touch-target relative",
             initialReactions.myEmoji ? "text-rose-400" : "text-white/80 hover:text-white"
           )}
         >

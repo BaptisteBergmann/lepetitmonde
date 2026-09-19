@@ -75,7 +75,7 @@ export default function GuessesTabs({
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="p-2 text-landing-muted hover:text-landing-foreground hover:bg-landing-surface rounded-xl transition-colors duration-200 disabled:opacity-50 cursor-pointer"
+          className="p-2 text-landing-muted hover:text-landing-foreground hover:bg-landing-surface rounded-xl transition-colors duration-200 disabled:opacity-50 cursor-pointer touch-target relative"
           title={t('refresh')}
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />

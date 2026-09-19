@@ -200,21 +200,21 @@ export default function PostCard({
               <button
                 onClick={handleShare}
                 title={t('postCard.shareTitle')}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
               >
                 <Share2 className="h-3.5 w-3.5" />
               </button>
               <button
                 aria-label={tA11y('viewStats')}
                 onClick={() => setStatsOpen(true)}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
               >
                 <BarChart3 className="h-3.5 w-3.5" />
               </button>
               <button
                 aria-label={tA11y('edit')}
                 onClick={() => setIsEditing(true)}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
@@ -222,7 +222,7 @@ export default function PostCard({
                 aria-label={tA11y('delete')}
                 onClick={handleDelete}
                 disabled={deleting}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
+                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 touch-target relative pointer-coarse:p-2"
               >
                 {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
               </button>

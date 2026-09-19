@@ -89,7 +89,7 @@ export default function BugReportButton() {
         onClick={handleOpen}
         disabled={isCapturing}
         aria-label={t('openButton')}
-        className="fixed bottom-4 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground border border-border shadow-lg hover:bg-muted transition-colors cursor-pointer disabled:opacity-60"
+        className="fixed bottom-4 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground border border-border shadow-lg hover:bg-muted transition-colors cursor-pointer disabled:opacity-60 touch-target"
       >
         {isCapturing ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Bug className="h-4.5 w-4.5" />}
       </button>
@@ -111,7 +111,7 @@ export default function BugReportButton() {
               <button
                 aria-label={tA11y('close')}
                 onClick={handleClose}
-                className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer"
+                className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -129,7 +129,7 @@ export default function BugReportButton() {
                   <button
                     onClick={handleRemoveScreenshot}
                     aria-label={t('removeScreenshot')}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer"
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer touch-target pointer-coarse:p-2"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
