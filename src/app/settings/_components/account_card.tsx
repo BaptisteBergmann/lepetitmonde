@@ -78,11 +78,11 @@ export default function AccountCard({ initials, fullName, email, firstName, last
             <div className="grid grid-cols-2 gap-3">
               <Field>
                 <FieldLabel htmlFor="firstName">{t('firstNameLabel')}</FieldLabel>
-                <Input name="firstName" id="firstName" defaultValue={firstName} />
+                <Input name="firstName" id="firstName" autoComplete="given-name" defaultValue={firstName} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="lastName">{t('lastNameLabel')}</FieldLabel>
-                <Input name="lastName" id="lastName" defaultValue={lastName} />
+                <Input name="lastName" id="lastName" autoComplete="family-name" defaultValue={lastName} />
               </Field>
             </div>
             <Field>
@@ -98,7 +98,7 @@ export default function AccountCard({ initials, fullName, email, firstName, last
             <p className="text-xs font-semibold text-landing-muted -mt-1">{t('emailSection')}</p>
             <Field>
               <FieldLabel htmlFor="email">{t('emailLabel')}</FieldLabel>
-              <Input name="email" id="email" type="email" defaultValue={email} required />
+              <Input name="email" id="email" type="email" autoComplete="email" defaultValue={email} required />
             </Field>
             <Field>
               <Button type="submit" size="sm" variant="outline" disabled={isSavingEmail} className="cursor-pointer">
@@ -113,11 +113,11 @@ export default function AccountCard({ initials, fullName, email, firstName, last
             <p className="text-xs font-semibold text-landing-muted -mt-1">{t('passwordSection')}</p>
             <Field>
               <FieldLabel htmlFor="password">{t('newPasswordLabel')}</FieldLabel>
-              <PasswordInput name="password" id="password" required minLength={6} />
+              <PasswordInput name="password" id="password" autoComplete="new-password" required minLength={6} />
             </Field>
             <Field>
               <FieldLabel htmlFor="confirmPassword">{t('confirmPasswordLabel')}</FieldLabel>
-              <PasswordInput name="confirmPassword" id="confirmPassword" required minLength={6} />
+              <PasswordInput name="confirmPassword" id="confirmPassword" autoComplete="new-password" required minLength={6} />
             </Field>
             <Field>
               <Button type="submit" size="sm" variant="outline" className="cursor-pointer">

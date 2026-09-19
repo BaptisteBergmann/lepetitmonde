@@ -33,15 +33,15 @@ export async function ResetPasswordForm({
                 </p>
               </div>
               {message && (
-                <p className="text-sm text-center text-muted-foreground">{message}</p>
+                <p role="alert" className="text-sm text-center text-muted-foreground">{message}</p>
               )}
               <Field>
                 <FieldLabel htmlFor="password">{t("newPasswordLabel")}</FieldLabel>
-                <PasswordInput name="password" id="password" required minLength={6} />
+                <PasswordInput name="password" id="password" autoComplete="new-password" required minLength={6} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="confirmPassword">{t("confirmPasswordLabel")}</FieldLabel>
-                <PasswordInput name="confirmPassword" id="confirmPassword" required minLength={6} />
+                <PasswordInput name="confirmPassword" id="confirmPassword" autoComplete="new-password" required minLength={6} />
               </Field>
               <Field>
                 <Button type="submit">{t("submit")}</Button>

@@ -84,6 +84,7 @@ export default async function InviteForm({
                         <Input
                           name="email"
                           type="email"
+                          autoComplete="off"
                           placeholder="email@famille.com"
                           required
                           className="w-full bg-input/40"

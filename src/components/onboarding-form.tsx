@@ -75,6 +75,7 @@ export function OnboardingForm({
                     name="nickname"
                     id="nickname"
                     type="text"
+                    autoComplete="nickname"
                     placeholder={t('nicknamePlaceholder')}
                     defaultValue={nickname}
                     required

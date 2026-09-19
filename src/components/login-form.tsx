@@ -42,7 +42,7 @@ export async function LoginForm({
                 </p>
               </div>
               {message && (
-                <p className="text-sm text-center text-muted-foreground">{message}</p>
+                <p role="alert" className="text-sm text-center text-muted-foreground">{message}</p>
               )}
               <Field>
                 <FieldLabel htmlFor="email">{t("login.emailLabel")}</FieldLabel>
@@ -50,6 +50,7 @@ export async function LoginForm({
                   name="email"
                   id="email"
                   type="email"
+                  autoComplete="username"
                   placeholder="m@example.com"
                   required
                 />
@@ -64,7 +65,7 @@ export async function LoginForm({
                     {t("login.forgotPassword")}
                   </a>
                 </div>
-                <PasswordInput name="password" id="password" required />
+                <PasswordInput name="password" id="password" autoComplete="current-password" required />
               </Field>
               <Field>
                 <Button type="submit">{t("login.submit")}</Button>

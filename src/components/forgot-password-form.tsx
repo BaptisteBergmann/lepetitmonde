@@ -34,7 +34,7 @@ export async function ForgotPasswordForm({
                 </p>
               </div>
               {message && (
-                <p className="text-sm text-center text-muted-foreground">{message}</p>
+                <p role="alert" className="text-sm text-center text-muted-foreground">{message}</p>
               )}
               <Field>
                 <FieldLabel htmlFor="email">{t("emailLabel")}</FieldLabel>
@@ -42,6 +42,7 @@ export async function ForgotPasswordForm({
                   name="email"
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="m@example.com"
                   required
                 />

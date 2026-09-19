@@ -41,7 +41,7 @@ export async function SignupForm({
               </div>
 
               {message && (
-                <p className="text-sm text-center text-muted-foreground">{message}</p>
+                <p role="alert" className="text-sm text-center text-muted-foreground">{message}</p>
               )}
 
               {/* Ajout d'un champ Nom pour l'inscription */}
@@ -55,6 +55,7 @@ export async function SignupForm({
                   name="name"
                   id="name"
                   type="text"
+                  autoComplete="name"
                   placeholder={t("signup.namePlaceholder")}
                   required
                 />
@@ -66,6 +67,7 @@ export async function SignupForm({
                   name="email"
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="m@example.com"
                   required
                 />
@@ -77,6 +79,7 @@ export async function SignupForm({
                 <PasswordInput
                   name="password"
                   id="password"
+                  autoComplete="new-password"
                   placeholder={t("signup.passwordPlaceholder")}
                   required
                 />
