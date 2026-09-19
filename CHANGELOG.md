@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `7b240d7` Raise select/dropdown-menu/dialog z-index onto the shared scale
 - `f10b508` Raise popover z-index above full-screen overlays
 - `e5daf55` Portal all full-screen modals above the fixed header
 - `c8bee1b` Portal lightbox and story viewer above the fixed header
