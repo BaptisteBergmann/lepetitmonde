@@ -46,7 +46,7 @@ export async function addStoryReaction(storyId: string, babyId: string, emoji: s
     await notifyUsers(babyId, 'new_story_reaction', {
       title: t('newStoryReaction.title'),
       body: t('newStoryReaction.body', { name, emoji }),
-      url: `/baby/${babyId}/feed`,
+      url: `/baby/${babyId}/feed?storyId=${storyId}`,
     }, [story.created_by])
   }
 }

@@ -26,6 +26,7 @@ export default function FeedView({
   initialHighlights,
   initialStories,
   highlightPostId,
+  highlightStoryId,
 }: {
   babyId: string
   isAdmin: boolean
@@ -38,6 +39,7 @@ export default function FeedView({
   initialHighlights: HighlightWithStories[]
   initialStories: StoryGroup[]
   highlightPostId?: string
+  highlightStoryId?: string
 }) {
   const t = useTranslations('feed')
   const [posts, setPosts] = useState<PostWithDetails[]>(initialPosts)
@@ -82,6 +84,7 @@ export default function FeedView({
         circles={circles}
         initialHighlights={initialHighlights}
         initialStories={initialStories}
+        highlightStoryId={highlightStoryId}
       />
 
       {isAdmin && (

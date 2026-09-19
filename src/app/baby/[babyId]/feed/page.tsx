@@ -20,10 +20,10 @@ export default async function FeedPage({
   searchParams,
 }: {
   params: Promise<{ babyId: string }>
-  searchParams: Promise<{ postId?: string }>
+  searchParams: Promise<{ postId?: string; storyId?: string }>
 }) {
   const { babyId } = await params;
-  const { postId } = await searchParams;
+  const { postId, storyId } = await searchParams;
   const contextLogger = logger.child({ function: FeedPage.name, babyId })
   const t = await getTranslations('feed')
 
@@ -67,14 +67,14 @@ export default async function FeedPage({
             </div>
           }
         >
-          <FeedContent babyId={babyId} isAdmin={isAdmin} highlightPostId={postId} />
+          <FeedContent babyId={babyId} isAdmin={isAdmin} highlightPostId={postId} highlightStoryId={storyId} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-async function FeedContent({ babyId, isAdmin, highlightPostId }: { babyId: string; isAdmin: boolean; highlightPostId?: string }) {
+async function FeedContent({ babyId, isAdmin, highlightPostId, highlightStoryId }: { babyId: string; isAdmin: boolean; highlightPostId?: string; highlightStoryId?: string }) {
   const contextLogger = logger.child({ function: FeedContent.name, babyId })
   const { data: { user } } = await getAuthUser()
   if (!user) return null
@@ -118,6 +118,7 @@ async function FeedContent({ babyId, isAdmin, highlightPostId }: { babyId: strin
       initialHighlights={highlights}
       initialStories={stories}
       highlightPostId={targetPost ? targetPost.id : undefined}
+      highlightStoryId={highlightStoryId}
     />
   )
 }

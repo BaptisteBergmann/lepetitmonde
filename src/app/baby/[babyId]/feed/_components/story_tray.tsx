@@ -14,8 +14,8 @@ import StoryViewer from './story_viewer'
 type Circle = Tables<'circles'>
 
 export type ViewerTarget =
-  | { kind: 'group'; index: number }
-  | { kind: 'highlight'; index: number }
+  | { kind: 'group'; index: number; storyId?: string }
+  | { kind: 'highlight'; index: number; storyId?: string }
 
 function bubbleImageFor(story: StoryWithUrl | undefined) {
   if (!story) return null
@@ -61,18 +61,31 @@ export default function StoryTray({
   circles,
   initialHighlights,
   initialStories,
+  highlightStoryId,
 }: {
   babyId: string
   isAdmin: boolean
   circles: Circle[]
   initialHighlights: HighlightWithStories[]
   initialStories: StoryGroup[]
+  highlightStoryId?: string
 }) {
   const t = useTranslations('feed.storyTray')
   const [highlights, setHighlights] = useState(initialHighlights)
   const [groups, setGroups] = useState(initialStories)
   const [createOpen, setCreateOpen] = useState(false)
-  const [viewerTarget, setViewerTarget] = useState<ViewerTarget | null>(null)
+  // Auto-open the story a notification deep-linked to. Derived once from the
+  // initial (server-rendered) data, same lazy-initializer approach as
+  // story_viewer.tsx's own index — StoryTray is never remounted with a new
+  // `highlightStoryId`, so this never needs to react to later prop changes.
+  const [viewerTarget, setViewerTarget] = useState<ViewerTarget | null>(() => {
+    if (!highlightStoryId) return null
+    const groupIndex = initialStories.findIndex((g) => g.stories.some((s) => s.id === highlightStoryId))
+    if (groupIndex !== -1) return { kind: 'group', index: groupIndex, storyId: highlightStoryId }
+    const highlightIndex = initialHighlights.findIndex((h) => h.stories.some((s) => s.id === highlightStoryId))
+    if (highlightIndex !== -1) return { kind: 'highlight', index: highlightIndex, storyId: highlightStoryId }
+    return null
+  })
 
   const refresh = async () => {
     const [nextHighlights, nextStories] = await Promise.all([
