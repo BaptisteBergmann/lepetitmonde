@@ -3,7 +3,14 @@
     "appName": "Le petit monde",
     "appDescription": "A private space for the family",
     "dateAtTime": "{date} at {time}",
-    "userFallback": "User"
+    "userFallback": "User",
+    "loading": "Loading...",
+    "errorTitle": "Oops, something went wrong",
+    "errorDescription": "An unexpected error occurred. You can try again or go back home.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "This page doesn't exist or you don't have access to it.",
+    "backHome": "Back to home"
   },
   "auth": {
     "invalidCredentials": "Incorrect credentials or no such account",

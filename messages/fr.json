@@ -3,7 +3,14 @@
     "appName": "Le petit monde",
     "appDescription": "Un espace privé pour la famille",
     "dateAtTime": "{date} à {time}",
-    "userFallback": "Utilisateur"
+    "userFallback": "Utilisateur",
+    "loading": "Chargement...",
+    "errorTitle": "Oups, quelque chose s'est mal passé",
+    "errorDescription": "Une erreur inattendue est survenue. Vous pouvez réessayer ou revenir à l'accueil.",
+    "retry": "Réessayer",
+    "notFoundTitle": "Page introuvable",
+    "notFoundDescription": "Cette page n'existe pas ou vous n'y avez pas accès.",
+    "backHome": "Retour à l'accueil"
   },
   "auth": {
     "invalidCredentials": "Identifiants incorrects ou compte inexistant",
