@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `d1125a3` Add autocomplete hints and announce auth messages
 - `ed57c0f` Reserve space and placeholders for remaining images
 - `d559d74` Raise 9-11px text to the 12px type scale floor
 - `bfbd242` Give raw icon-only buttons a 44px touch target
