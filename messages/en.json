@@ -393,7 +393,9 @@
       "yourAnswer": "Your answer",
       "sending": "Sending...",
       "submit": "Submit my pronostic",
-      "submitError": "Something went wrong while sending your pronostic."
+      "submitError": "Something went wrong while sending your pronostic.",
+      "correctAnswer": "Correct answer",
+      "exactMatch": "Spot on!"
     },
     "answerTypes": {
       "text": "Text",
@@ -442,7 +444,9 @@
       "subtitle": "Create and review the pronostics offered to the family.",
       "empty": "No pronostics created yet.",
       "emptyHint": "Click \"New pronostic\" to add one.",
-      "noAnswersYet": "No answers yet."
+      "noAnswersYet": "No answers yet.",
+      "correctAnswer": "Correct answer",
+      "notResolvedYet": "Not resolved yet"
     },
     "pendingQuestions": {
       "titleWithCount": "Suggestions awaiting approval ({count})",
@@ -460,6 +464,30 @@
       "moveUp": "Move pronostic up",
       "moveDown": "Move pronostic down",
       "moveError": "Something went wrong while moving."
+    },
+    "resolve": {
+      "resolve": "Resolve",
+      "resolveTitle": "Resolve the pronostic",
+      "editAnswer": "Edit answer",
+      "editAnswerTitle": "Edit the correct answer",
+      "notice": "Once the correct answer is saved, the family's pronostics are automatically compared to build the leaderboard.",
+      "correctAnswerLabel": "Correct answer",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "confirm": "Confirm",
+      "saveError": "Something went wrong while saving.",
+      "reopen": "Reopen",
+      "reopenConfirmTitle": "Reopen this pronostic?",
+      "reopenConfirmDescription": "The correct answer will be cleared and this pronostic won't count in the leaderboard until it's resolved again."
+    },
+    "leaderboard": {
+      "back": "Back to pronostics",
+      "title": "Leaderboard",
+      "subtitle": "Everyone's score on the pronostics resolved so far.",
+      "empty": "No pronostic resolved yet.",
+      "emptyHint": "The leaderboard will appear once an admin resolves a pronostic.",
+      "questionsWon": "{count, plural, one {# pronostic won} other {# pronostics won}}",
+      "points": "{count, plural, one {# point} other {# points}}"
     }
   },
   "admin": {

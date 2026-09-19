@@ -62,3 +62,16 @@ export function computeWinners(question: ScorableQuestion, guesses: ScorableGues
     .filter((candidate) => candidate.distance === minDistance)
     .map((candidate) => ({ userId: candidate.userId, points: 1 }))
 }
+
+// Whether a single guess exactly matches the correct answer. Unlike
+// computeWinners, this doesn't need the full guess pool — used to highlight
+// a member's own answer as exact without knowing how close everyone else was.
+export function isExactMatch(
+  type: string,
+  correctAnswer: Json | null | undefined,
+  guessAnswer: Json | null | undefined
+): boolean {
+  const correct = toComparable(type, correctAnswer)
+  const guess = toComparable(type, guessAnswer)
+  return correct !== null && guess !== null && correct === guess
+}

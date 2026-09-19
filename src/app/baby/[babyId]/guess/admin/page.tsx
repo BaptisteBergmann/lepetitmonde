@@ -2,17 +2,20 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getLocaleTag } from "@/utils/formatting";
-import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil } from "lucide-react";
+import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil, Trophy } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getPendingQuestions, getQuestions } from "@/utils/actions/guesses_questions";
 import { getAllGuesses } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
+import { computeWinners } from "@/utils/guess_scoring";
 import Modal from "../_components/modal";
 import PendingQuestions from "./_components/pending_questions";
 import DeleteQuestionButton from "./_components/delete_question_button";
 import DeleteGuessButton from "./_components/delete_guess_button";
 import ReorderQuestionButtons from "./_components/reorder_question_buttons";
+import ResolveQuestionModal from "./_components/resolve_question_modal";
+import UnresolveQuestionButton from "./_components/unresolve_question_button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@components/reveal";
@@ -128,6 +131,12 @@ export default async function GuessAdminPage({
             {questions.map((question, index) => {
               const { icon, label } = getTypeMeta(question.type, tType);
               const questionGuesses = guesses.filter((g) => g.question_id === question.id);
+              const isResolved = !!question.resolved_at;
+              const pointsByUserId = new Map(
+                isResolved
+                  ? computeWinners(question, questionGuesses).map((winner) => [winner.userId, winner.points])
+                  : []
+              );
               return (
                 <Card key={question.id} className="relative overflow-hidden border-landing-border bg-landing-surface">
                   <div className="absolute top-0 right-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl border-l border-b border-landing-border bg-landing-background">
@@ -156,73 +165,78 @@ export default async function GuessAdminPage({
                   </CardHeader>
                   <CardContent className="pt-0 pb-4">
                     {questionGuesses.length === 0 ? (
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs text-landing-muted italic">{tAdmin('noAnswersYet')}</p>
-                        <div className="flex items-center gap-2">
-                          <Modal
-                            babyId={babyId}
-                            isAdmin
-                            question={question}
-                            trigger={
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 rounded-2xl cursor-pointer"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                                {t('edit')}
-                              </Button>
-                            }
-                          />
-                          <DeleteQuestionButton babyId={babyId} questionId={question.id} />
-                        </div>
-                      </div>
+                      <p className="text-xs text-landing-muted italic mb-3">{tAdmin('noAnswersYet')}</p>
                     ) : (
-                      <div className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-1.5">
-                          {questionGuesses.map((guess) => {
-                            const guessUserName = userNameById.get(guess.user_id) ?? t('unknownUser');
-                            return (
-                              <div
-                                key={guess.id}
-                                className="flex items-center justify-between gap-3 rounded-xl bg-landing-background px-3 py-2 text-sm"
-                              >
-                                <span className="flex items-center gap-1.5 text-landing-muted">
-                                  <User className="h-3.5 w-3.5" />
-                                  {guessUserName}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-landing-foreground">
-                                    {formatAnswer(guess.answer, question.type, question.options, localeTag)}
+                      <div className="flex flex-col gap-1.5 mb-3">
+                        {questionGuesses.map((guess) => {
+                          const guessUserName = userNameById.get(guess.user_id) ?? t('unknownUser');
+                          const points = pointsByUserId.get(guess.user_id);
+                          return (
+                            <div
+                              key={guess.id}
+                              className="flex items-center justify-between gap-3 rounded-xl bg-landing-background px-3 py-2 text-sm"
+                            >
+                              <span className="flex items-center gap-1.5 text-landing-muted">
+                                <User className="h-3.5 w-3.5" />
+                                {guessUserName}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                {points && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                                    <Trophy className="h-3.5 w-3.5" />
+                                    +{points}
                                   </span>
-                                  <DeleteGuessButton babyId={babyId} guessId={guess.id} userName={guessUserName} />
-                                </div>
+                                )}
+                                <span className="font-semibold text-landing-foreground">
+                                  {formatAnswer(guess.answer, question.type, question.options, localeTag)}
+                                </span>
+                                <DeleteGuessButton babyId={babyId} guessId={guess.id} userName={guessUserName} />
                               </div>
-                            );
-                          })}
-                        </div>
-                        <div className="flex justify-end">
-                          <Modal
-                            babyId={babyId}
-                            isAdmin
-                            question={question}
-                            lockStructure
-                            trigger={
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 rounded-2xl cursor-pointer"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                                {t('edit')}
-                              </Button>
-                            }
-                          />
-                        </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
+
+                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-landing-border">
+                      <div className="text-xs min-w-0">
+                        {isResolved ? (
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                            <Trophy className="h-3.5 w-3.5" />
+                            {tAdmin('correctAnswer')}:{" "}
+                            <span className="text-landing-foreground">
+                              {formatAnswer(question.correct_answer, question.type, question.options, localeTag)}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-landing-muted italic">{tAdmin('notResolvedYet')}</span>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <Modal
+                          babyId={babyId}
+                          isAdmin
+                          question={question}
+                          lockStructure={questionGuesses.length > 0}
+                          trigger={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 rounded-2xl cursor-pointer"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              {t('edit')}
+                            </Button>
+                          }
+                        />
+                        {questionGuesses.length === 0 && !isResolved && (
+                          <DeleteQuestionButton babyId={babyId} questionId={question.id} />
+                        )}
+                        <ResolveQuestionModal babyId={babyId} question={question} />
+                        {isResolved && <UnresolveQuestionButton babyId={babyId} questionId={question.id} />}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               );

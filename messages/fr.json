@@ -393,7 +393,9 @@
       "yourAnswer": "Votre réponse",
       "sending": "Envoi en cours...",
       "submit": "Valider mon pronostic",
-      "submitError": "Une erreur est survenue lors de l'envoi de votre pronostic."
+      "submitError": "Une erreur est survenue lors de l'envoi de votre pronostic.",
+      "correctAnswer": "Bonne réponse",
+      "exactMatch": "Pile poil !"
     },
     "answerTypes": {
       "text": "Texte",
@@ -442,7 +444,9 @@
       "subtitle": "Créez et consultez les pronostics proposés à la famille.",
       "empty": "Aucun pronostic créé pour le moment.",
       "emptyHint": "Cliquez sur \"Nouveau pronostic\" pour en ajouter un.",
-      "noAnswersYet": "Aucune réponse pour le moment."
+      "noAnswersYet": "Aucune réponse pour le moment.",
+      "correctAnswer": "Bonne réponse",
+      "notResolvedYet": "Pas encore clôturé"
     },
     "pendingQuestions": {
       "titleWithCount": "Propositions en attente de validation ({count})",
@@ -460,6 +464,30 @@
       "moveUp": "Monter le pronostic",
       "moveDown": "Descendre le pronostic",
       "moveError": "Une erreur est survenue lors du déplacement."
+    },
+    "resolve": {
+      "resolve": "Clôturer",
+      "resolveTitle": "Clôturer le pronostic",
+      "editAnswer": "Modifier la réponse",
+      "editAnswerTitle": "Modifier la bonne réponse",
+      "notice": "Une fois la bonne réponse enregistrée, les pronostics de la famille seront comparés automatiquement pour établir le classement.",
+      "correctAnswerLabel": "Bonne réponse",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "confirm": "Confirmer",
+      "saveError": "Une erreur est survenue lors de l'enregistrement.",
+      "reopen": "Réouvrir",
+      "reopenConfirmTitle": "Réouvrir ce pronostic ?",
+      "reopenConfirmDescription": "La bonne réponse sera effacée et ce pronostic ne comptera plus dans le classement jusqu'à ce qu'il soit à nouveau clôturé."
+    },
+    "leaderboard": {
+      "back": "Retour aux pronostics",
+      "title": "Classement",
+      "subtitle": "Le score de chacun sur les pronostics déjà clôturés.",
+      "empty": "Aucun pronostic clôturé pour le moment.",
+      "emptyHint": "Le classement apparaîtra dès qu'un administrateur aura clôturé un pronostic.",
+      "questionsWon": "{count, plural, one {# pronostic gagné} other {# pronostics gagnés}}",
+      "points": "{count, plural, one {# point} other {# points}}"
     }
   },
   "admin": {
