@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `f10b508` Raise popover z-index above full-screen overlays
 - `e5daf55` Portal all full-screen modals above the fixed header
 - `c8bee1b` Portal lightbox and story viewer above the fixed header
 - `1461518` Drive the pull-to-refresh gesture with a transform instead of animated height
