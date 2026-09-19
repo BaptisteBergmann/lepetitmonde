@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `a80b9c2` Add admin resolve-question UI
 - `fa4766c` Add resolveQuestion/unresolveQuestion/getLeaderboard actions and scoring helper
 - `b4e5c42` Add correct_answer and resolved_at to guess_questions
 - `2e095e2` Lazy-mount lightbox media to the current slide ± 1
