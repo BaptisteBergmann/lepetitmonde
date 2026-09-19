@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `b4e5c42` Add correct_answer and resolved_at to guess_questions
 - `2e095e2` Lazy-mount lightbox media to the current slide ± 1
 - `2bfdd16` Live-update story tray on highlight rename/delete
 - `b38c1a4` Mark live-updates, photo-info-modal, and post-story-photos plans as implemented
