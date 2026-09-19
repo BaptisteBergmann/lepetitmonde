@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `086bbd8` Add leaderboard page
 - `5777096` Show correct answer and exact-match badge on question cards
 - `a80b9c2` Add admin resolve-question UI
 - `fa4766c` Add resolveQuestion/unresolveQuestion/getLeaderboard actions and scoring helper
