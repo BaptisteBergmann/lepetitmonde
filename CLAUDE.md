@@ -47,6 +47,10 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
   contextLogger.info("Action performed");
   ```
 
+### 6. Z-Index / Stacking
+
+- Every `z-index` must come from the shared scale documented in `docs/z-index.md` (`z-0`/`z-10` local, `z-40` floating chrome, `z-50` header only, `z-[60]` full-screen overlays, `z-[70]` anchored floating content like Popover/Select/DropdownMenu). Never pick a bespoke value to "get above" one specific neighbor — read that doc before adding or changing a `z-index`, especially on any component that portals to `document.body`.
+
 ## 🧰 Tooling & Environment
 
 - Tool versions (Node, etc.) and environment variables are managed with **mise**. Do not suggest nvm, direnv, or manually exporting env vars — use `mise.toml` / `mise` commands instead.

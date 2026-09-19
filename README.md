@@ -32,7 +32,7 @@ This is a real, running personal project (built for one family's use), shared pu
 - **Emails**: React Email templates, sent via [Resend](https://resend.com/) (or any SMTP-compatible relay).
 - **Logging**: [Pino](https://getpino.io/) for lightweight, structured JSON logs, perfect for production debugging.
 
-See `CLAUDE.md` for the architectural rules this codebase follows (server/client split, Server Actions, auth checks, etc.) and `docs/PROJECT_OVERVIEW.md` for a full tour of the feature set and code structure.
+See `CLAUDE.md` for the architectural rules this codebase follows (server/client split, Server Actions, auth checks, etc.), `docs/PROJECT_OVERVIEW.md` for a full tour of the feature set and code structure, and `docs/z-index.md` for the app's z-index scale (which tier to use for modals, popovers, dropdowns, etc.).
 
 ## 🖥️ Infrastructure & Hosting
 
