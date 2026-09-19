@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `1461518` Drive the pull-to-refresh gesture with a transform instead of animated height
 - `a863a54` Drop unnecessary 'use client' on version_footer
 - `98c2eb2` Enforce MIME allowlist and size cap server-side for uploads
 - `9dd1c30` Don't relay unfiltered users updates across babies
