@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight, Eye, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
 import { cn } from '@utils/utils'
 import { StoryGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
@@ -179,9 +180,10 @@ export default function StoryViewer({
     goNext()
   }
 
-  return (
-    <div className="fixed inset-0 w-full h-full bg-black z-50 flex flex-col animate-in fade-in-0 duration-200">
-      <div className="flex gap-1 px-3 pt-3 shrink-0">
+  // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
+  return createPortal(
+    <div className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200">
+      <div className="flex gap-1 px-3 pt-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         {stories.map((s, i) => (
           <div key={s.id} className="h-0.5 flex-1 rounded-full bg-white/25 overflow-hidden">
             <div
@@ -332,6 +334,7 @@ export default function StoryViewer({
           )}
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   )
 }

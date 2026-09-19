@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@utils/utils'
 
@@ -194,9 +195,10 @@ export default function PhotoLightbox({
     touchStartX.current = null
   }
 
-  return (
-    <div className="fixed inset-0 w-full h-full bg-black/95 z-50 flex flex-col animate-in fade-in-0 duration-200">
-      <div className="flex justify-between items-center px-4 py-3 shrink-0">
+  // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
+  return createPortal(
+    <div className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200">
+      <div className="flex justify-between items-center px-4 py-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         {photos.length > 1 ? (
           <span className="text-sm text-white/70">{index + 1} / {photos.length}</span>
         ) : <span />}
@@ -297,6 +299,7 @@ export default function PhotoLightbox({
           ))}
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   )
 }
