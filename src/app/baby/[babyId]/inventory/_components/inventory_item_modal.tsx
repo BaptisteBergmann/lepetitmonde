@@ -227,7 +227,7 @@ export default function InventoryItemModal({
                   />
                   {nameMatches.length > 0 && (
                     <div className="flex flex-col gap-1 rounded-lg border border-landing-border bg-landing-background p-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-landing-muted">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-landing-muted">
                         {t('existingStockLabel')}
                       </p>
                       {nameMatches.map((match) => (

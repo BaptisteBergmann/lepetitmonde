@@ -57,7 +57,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
                     ID: {invitation.id.substring(0, 8)}...
                   </p>
                   <span
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
                       isExpired
                         ? "bg-landing-background text-landing-muted"
                         : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
@@ -66,7 +66,7 @@ export default function InvitationsList({ invitations }: InvitationsListProps) {
                     {isExpired ? t('expired') : t('active')}
                   </span>
                 </div>
-                <p className="text-[10px] text-landing-muted truncate">
+                <p className="text-xs text-landing-muted truncate">
                   {t('expiresOn', { date: new Date(invitation.expires_at).toLocaleString(localeTag) })}
                 </p>
               </div>

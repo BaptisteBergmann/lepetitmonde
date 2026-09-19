@@ -167,7 +167,7 @@ export default function RealtimeCirclesList({
                 </div>
                 <div>
                   <p className="font-semibold text-sm text-landing-foreground">{circle.name}</p>
-                  <p className="text-[10px] text-landing-muted font-mono">ID: {circle.id.substring(0, 8)}...</p>
+                  <p className="text-xs text-landing-muted font-mono">ID: {circle.id.substring(0, 8)}...</p>
                 </div>
               </div>
 
@@ -259,7 +259,7 @@ function UsersWithoutCircle({ users }: { users: User[] }) {
         </div>
         <div>
           <p className="font-semibold text-sm text-landing-foreground">{t('withoutCircle')}</p>
-          <p className="text-[10px] text-landing-muted">{t('withoutCircleDescription')}</p>
+          <p className="text-xs text-landing-muted">{t('withoutCircleDescription')}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5 pl-1">

@@ -94,7 +94,7 @@ function CommentReactionPill({ emoji, count, names }: { emoji: string; count: nu
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="flex items-center gap-0.5 h-5 px-1.5 rounded-full bg-landing-surface text-landing-foreground cursor-pointer hover:bg-landing-border transition-colors">
         <span className="text-sm leading-none">{emoji}</span>
-        <span className="text-[10px]">{count}</span>
+        <span className="text-xs">{count}</span>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-2">
         <p className="text-xs text-landing-foreground whitespace-nowrap">{formatNamesPreview(names)}</p>

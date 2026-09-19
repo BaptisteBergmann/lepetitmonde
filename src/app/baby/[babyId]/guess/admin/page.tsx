@@ -130,7 +130,7 @@ export default async function GuessAdminPage({
               const questionGuesses = guesses.filter((g) => g.question_id === question.id);
               return (
                 <Card key={question.id} className="relative overflow-hidden border-landing-border bg-landing-surface">
-                  <div className="absolute top-0 right-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl border-l border-b border-landing-border bg-landing-background">
+                  <div className="absolute top-0 right-0 flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-bl-xl border-l border-b border-landing-border bg-landing-background">
                     {icon}
                     <span className="text-landing-muted">{label}</span>
                   </div>

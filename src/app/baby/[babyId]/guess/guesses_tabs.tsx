@@ -46,7 +46,7 @@ export default function GuessesTabs({
           >
             <HelpCircle className="h-4 w-4" />
             <span>{t('toGuess')}</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "pending"
+            <span className={`text-xs px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "pending"
               ? "bg-primary text-primary-foreground"
               : "bg-landing-background text-landing-muted"
               }`}>
@@ -63,7 +63,7 @@ export default function GuessesTabs({
           >
             <CheckCircle2 className="h-4 w-4" />
             <span>{t('myPronostics')}</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "completed"
+            <span className={`text-xs px-2 py-0.5 rounded-full font-bold transition-all ${activeTab === "completed"
               ? "bg-emerald-500 text-white"
               : "bg-landing-background text-landing-muted"
               }`}>

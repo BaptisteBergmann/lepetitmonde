@@ -162,7 +162,7 @@ export default function RealtimeUsersList({
                     </span>
                   )}
                 </p>
-                <p className="text-[10px] text-landing-muted truncate">
+                <p className="text-xs text-landing-muted truncate">
                   {joinedDate ? t('memberSince', { date: joinedDate }) : `ID: ${user.id}`}
                 </p>
               </div>
@@ -206,7 +206,7 @@ export default function RealtimeUsersList({
                   >
                     <Bell className="h-3.5 w-3.5 text-primary" />
                     <span className="hidden sm:inline">{t('notify')}</span>
-                    <span className="text-[10px] text-landing-muted">({devices.length})</span>
+                    <span className="text-xs text-landing-muted">({devices.length})</span>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-64">
                     <div className="flex flex-col gap-2">

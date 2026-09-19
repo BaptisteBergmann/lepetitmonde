@@ -93,7 +93,7 @@ export default function CreateInvite({ babyId }: { babyId: string }) {
           </div>
         )}
         {copied && (
-          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
             {t('copied')}
           </p>
         )}

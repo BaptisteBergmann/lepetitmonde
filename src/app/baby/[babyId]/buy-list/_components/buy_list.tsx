@@ -96,7 +96,7 @@ export default function BuyList({
                       </Badge>
                     </div>
                     {item.updatedByName && (
-                      <p className="mt-1 text-[10px] text-landing-muted">
+                      <p className="mt-1 text-xs text-landing-muted">
                         {t('checkedBy', {
                           name: item.updatedByName,
                           date: tCommon('dateAtTime', {

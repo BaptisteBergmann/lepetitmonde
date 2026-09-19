@@ -107,12 +107,12 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                     {report.description}
                   </p>
                   <span
-                    className={`shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[report.status]}`}
+                    className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[report.status]}`}
                   >
                     {STATUS_LABELS[report.status]}
                   </span>
                 </div>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-landing-muted">
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-landing-muted">
                   <span className="font-semibold">{reporterName}</span>
                   <span>
                     {tCommon('dateAtTime', {

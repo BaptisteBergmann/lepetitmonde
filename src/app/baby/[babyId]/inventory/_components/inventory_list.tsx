@@ -206,7 +206,7 @@ export default function InventoryList({
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-wider text-landing-muted">{t('typeLabel')}</span>
+        <span className="mr-0.5 text-xs font-semibold uppercase tracking-wider text-landing-muted">{t('typeLabel')}</span>
         <button
           type="button"
           onClick={() => setSelectedKinds(new Set())}
@@ -278,7 +278,7 @@ export default function InventoryList({
                     <div className="space-y-2.5">
                       {subgroupBySubtype(visibleItems).map(([subtype, subItems]) => (
                         <div key={subtype}>
-                          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-landing-muted">
+                          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-landing-muted">
                             {subtype}
                           </p>
                           <div className="flex flex-wrap gap-1.5">

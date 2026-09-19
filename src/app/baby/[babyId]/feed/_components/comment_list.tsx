@@ -95,7 +95,7 @@ export default function CommentList({
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-xs font-semibold text-landing-foreground">{author || t('unknownUser')}</span>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[10px] text-landing-muted">
+                <span className="text-xs text-landing-muted">
                   {tCommon('dateAtTime', {
                     date: format(parseISO(comment.created_at), 'd MMM', { locale: dateFnsLocale }),
                     time: format(parseISO(comment.created_at), 'HH:mm', { locale: dateFnsLocale }),

@@ -122,7 +122,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
         {hasAnswered ? (
           <div className="bg-emerald-500/10 dark:bg-emerald-500/[0.05] border border-emerald-500/20 dark:border-emerald-500/10 rounded-2xl p-4 flex items-center justify-between">
             <div className="space-y-0.5">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
+              <span className="text-xs uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
                 {t('yourAnswer')}
               </span>
               <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
