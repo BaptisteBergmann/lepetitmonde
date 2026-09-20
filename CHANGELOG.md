@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-19
 
+- `b5e2e82` Dialog semantics and focus handling for viewers
+- `be404d1` Move the 16 hand-rolled modals onto a shared Dialog-based Modal
 - `95969e9` Add a Light/Dark/System theme selector in settings
 - `7627a98` Translate version footer, password toggle, invite placeholder and SW fallback
 - `d1125a3` Add autocomplete hints and announce auth messages
