@@ -1,8 +1,8 @@
 'use client'
 
+import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
 import { Bug, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,6 @@ import { submitBugReport } from '@utils/actions/bug_reports'
 
 export default function BugReportButton() {
   const t = useTranslations('bugReport')
-  const tA11y = useTranslations('a11y')
   const [isOpen, setIsOpen] = useState(false)
   const [isCapturing, setIsCapturing] = useState(false)
   const [isPending, setIsPending] = useState(false)
@@ -94,91 +93,68 @@ export default function BugReportButton() {
         {isCapturing ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Bug className="h-4.5 w-4.5" />}
       </button>
 
-      {isOpen && createPortal(
-        <div
-          className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-[60] p-4 animate-in fade-in-0 duration-200"
-          onClick={handleClose}
-        >
-          <div
-            className="w-full max-w-[460px] max-h-[90vh] bg-landing-surface text-landing-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-landing-border animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
-              <h2 className="font-display text-base font-semibold flex items-center gap-2">
-                <Bug className="h-4.5 w-4.5 text-primary" />
-                {t('title')}
-              </h2>
-              <button
-                aria-label={tA11y('close')}
-                onClick={handleClose}
-                className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4 flex-1 overflow-y-auto">
-              {previewUrl && (
-                <div className="relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewUrl}
-                    alt={t('screenshotAlt')}
-                    className="w-full rounded-2xl border border-landing-border"
-                  />
-                  <button
-                    onClick={handleRemoveScreenshot}
-                    aria-label={t('removeScreenshot')}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer touch-target pointer-coarse:p-2"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="bug_description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t('descriptionLabel')}
-                </label>
-                <textarea
-                  id="bug_description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  autoFocus
-                  placeholder={t('descriptionPlaceholder')}
-                  className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
+      {isOpen && (
+        <Modal onClose={handleClose} title={<><Bug className="h-4.5 w-4.5 text-primary" />{t('title')}</>}>
+          <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+            {previewUrl && (
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={previewUrl}
+                  alt={t('screenshotAlt')}
+                  className="w-full rounded-2xl border border-landing-border"
                 />
+                <button
+                  onClick={handleRemoveScreenshot}
+                  aria-label={t('removeScreenshot')}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer touch-target pointer-coarse:p-2"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
-            </div>
+            )}
 
-            <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
-              <Button
-                variant="outline"
-                className="rounded-2xl cursor-pointer"
-                onClick={handleClose}
-                disabled={isPending}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                disabled={!description.trim() || isPending}
-                className="rounded-2xl cursor-pointer"
-                onClick={handleSubmit}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{t('sending')}</span>
-                  </>
-                ) : (
-                  <span>{t('send')}</span>
-                )}
-              </Button>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="bug_description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('descriptionLabel')}
+              </label>
+              <textarea
+                id="bug_description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                autoFocus
+                placeholder={t('descriptionPlaceholder')}
+                className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
+              />
             </div>
           </div>
-        </div>,
-        document.body,
+
+          <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
+            <Button
+              variant="outline"
+              className="rounded-2xl cursor-pointer"
+              onClick={handleClose}
+              disabled={isPending}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              disabled={!description.trim() || isPending}
+              className="rounded-2xl cursor-pointer"
+              onClick={handleSubmit}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{t('sending')}</span>
+                </>
+              ) : (
+                <span>{t('send')}</span>
+              )}
+            </Button>
+          </div>
+        </Modal>
       )}
     </>
   )

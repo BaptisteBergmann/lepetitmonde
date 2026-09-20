@@ -1,8 +1,8 @@
 'use client'
 
+import { Modal as ModalShell } from '@/components/modal'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -173,258 +173,232 @@ export default function Modal({
         </Button>
       )}
 
-      {open && createPortal(
-        <div
-          className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-xs flex justify-center items-center z-[60] p-4 animate-in fade-in-0 duration-200"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="w-full max-w-[460px] max-h-[90vh] bg-landing-surface text-landing-foreground shadow-2xl rounded-3xl overflow-hidden flex flex-col border border-landing-border animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
+      {open && (
+        <ModalShell onClose={() => setOpen(false)} title={<><HelpCircle className="h-4.5 w-4.5 text-primary" />{isEditMode ? t('editTitle') : isAdmin ? t('newAdminTitle') : t('proposeTitle')}</>}>
+          {/* Modal Content */}
+          <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
-            {/* Modal Header */}
-            <div className="flex justify-between items-center border-b border-landing-border py-4 px-5">
-              <h2 className="font-display text-base font-semibold flex items-center gap-2">
-                <HelpCircle className="h-4.5 w-4.5 text-primary" />
-                {isEditMode ? t('editTitle') : isAdmin ? t('newAdminTitle') : t('proposeTitle')}
-              </h2>
-              <button
-                aria-label={tA11y('close')}
-                onClick={() => setOpen(false)}
-                className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            {!isAdmin && (
+              <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
+                {t('nonAdminNotice')}
+              </p>
+            )}
+
+            {/* Champ Titre */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('titleLabel')}
+              </Label>
+              <Input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={t('titlePlaceholder')}
+                required
+              />
             </div>
 
-            {/* Modal Content */}
-            <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+            {/* Champ Description */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('descriptionLabel')}
+              </Label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('descriptionPlaceholder')}
+                rows={3}
+                className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
+              />
+            </div>
 
-              {!isAdmin && (
-                <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
-                  {t('nonAdminNotice')}
-                </p>
-              )}
+            {lockStructure && (
+              <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
+                {t('lockStructureNotice')}
+              </p>
+            )}
 
-              {/* Champ Titre */}
+            {/* Sélecteur du Type de Réponse attendu (réservé à l'admin : les propositions sont typées lors de la validation) */}
+            {isAdmin && !lockStructure && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t('titleLabel')}
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t('answerTypeLabel')}
                 </Label>
-                <Input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder={t('titlePlaceholder')}
-                  required
-                />
+                <Select value={selectValue} onValueChange={handleTypeChange}>
+                  <SelectTrigger className="w-full text-foreground bg-input/50">
+                    <SelectValue placeholder={t('answerTypePlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {items.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          <div className="flex items-center gap-2">
+                            {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
+                            {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
+                            {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
+                            {item.value === "option" && <CircleDot className="h-3.5 w-3.5 text-violet-500" />}
+                            <span>{item.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
+            )}
 
-              {/* Champ Description */}
+            {/* Options prédéfinies (uniquement pour le type "Choix unique") */}
+            {isAdmin && !lockStructure && isOptionType && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t('descriptionLabel')}
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t('choicesLabel')}
                 </Label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={t('descriptionPlaceholder')}
-                  rows={3}
-                  className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
-                />
+                <div className="flex flex-col gap-2">
+                  {choices.map((choice, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={choice}
+                        onChange={(e) => handleChoiceChange(index, e.target.value)}
+                        placeholder={t('choicePlaceholder', { number: index + 1 })}
+                        className="flex-1"
+                      />
+                      <button
+                        aria-label={tA11y('remove')}
+                        onClick={() => handleRemoveChoice(index)}
+                        disabled={choices.length <= 2}
+                        className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed touch-target relative pointer-coarse:p-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="self-start gap-1.5 rounded-2xl cursor-pointer mt-1"
+                  onClick={handleAddChoice}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>{t('addChoice')}</span>
+                </Button>
               </div>
+            )}
 
-              {lockStructure && (
-                <p className="text-xs text-landing-muted bg-landing-background rounded-2xl px-3 py-2">
-                  {t('lockStructureNotice')}
-                </p>
-              )}
-
-              {/* Sélecteur du Type de Réponse attendu (réservé à l'admin : les propositions sont typées lors de la validation) */}
-              {isAdmin && !lockStructure && (
+            {/* Étalonnage (uniquement pour le type "Nombre") */}
+            {isAdmin && !lockStructure && isNumberType && (
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="min" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {t('minLabel')}
+                    </Label>
+                    <Input
+                      type="number"
+                      id="min"
+                      value={minValue}
+                      onChange={(e) => setMinValue(e.target.value)}
+                      placeholder={t('minPlaceholder')}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="max" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {t('maxLabel')}
+                    </Label>
+                    <Input
+                      type="number"
+                      id="max"
+                      value={maxValue}
+                      onChange={(e) => setMaxValue(e.target.value)}
+                      placeholder={t('maxPlaceholder')}
+                    />
+                  </div>
+                </div>
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {t('answerTypeLabel')}
+                    {t('precisionLabel')}
                   </Label>
-                  <Select value={selectValue} onValueChange={handleTypeChange}>
+                  <Select value={precision} onValueChange={(v) => v && setPrecision(v)}>
                     <SelectTrigger className="w-full text-foreground bg-input/50">
-                      <SelectValue placeholder={t('answerTypePlaceholder')} />
+                      <SelectValue placeholder={t('precisionPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {items.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            <div className="flex items-center gap-2">
-                              {item.value === "date" && <Calendar className="h-3.5 w-3.5 text-primary" />}
-                              {item.value === "number" && <Hash className="h-3.5 w-3.5 text-rose" />}
-                              {item.value === "text" && <Type className="h-3.5 w-3.5 text-emerald-500" />}
-                              {item.value === "option" && <CircleDot className="h-3.5 w-3.5 text-violet-500" />}
-                              <span>{item.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="0">{t('precision0')}</SelectItem>
+                        <SelectItem value="1">{t('precision1')}</SelectItem>
+                        <SelectItem value="2">{t('precision2')}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Options prédéfinies (uniquement pour le type "Choix unique") */}
-              {isAdmin && !lockStructure && isOptionType && (
+            {/* Réglages du calendrier (uniquement pour le type "Date") */}
+            {isAdmin && !lockStructure && isDateType && (
+              <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {t('choicesLabel')}
+                  <Label htmlFor="defaultMonth" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {t('defaultMonthLabel')}
                   </Label>
-                  <div className="flex flex-col gap-2">
-                    {choices.map((choice, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Input
-                          type="text"
-                          value={choice}
-                          onChange={(e) => handleChoiceChange(index, e.target.value)}
-                          placeholder={t('choicePlaceholder', { number: index + 1 })}
-                          className="flex-1"
-                        />
-                        <button
-                          aria-label={tA11y('remove')}
-                          onClick={() => handleRemoveChoice(index)}
-                          disabled={choices.length <= 2}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed touch-target relative pointer-coarse:p-2"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="self-start gap-1.5 rounded-2xl cursor-pointer mt-1"
-                    onClick={handleAddChoice}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span>{t('addChoice')}</span>
-                  </Button>
+                  <Input
+                    type="month"
+                    id="defaultMonth"
+                    value={defaultMonth}
+                    onChange={(e) => setDefaultMonth(e.target.value)}
+                  />
                 </div>
-              )}
-
-              {/* Étalonnage (uniquement pour le type "Nombre") */}
-              {isAdmin && !lockStructure && isNumberType && (
-                <div className="flex flex-col gap-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="min" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {t('minLabel')}
-                      </Label>
-                      <Input
-                        type="number"
-                        id="min"
-                        value={minValue}
-                        onChange={(e) => setMinValue(e.target.value)}
-                        placeholder={t('minPlaceholder')}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="max" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {t('maxLabel')}
-                      </Label>
-                      <Input
-                        type="number"
-                        id="max"
-                        value={maxValue}
-                        onChange={(e) => setMaxValue(e.target.value)}
-                        placeholder={t('maxPlaceholder')}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t('precisionLabel')}
-                    </Label>
-                    <Select value={precision} onValueChange={(v) => v && setPrecision(v)}>
-                      <SelectTrigger className="w-full text-foreground bg-input/50">
-                        <SelectValue placeholder={t('precisionPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="0">{t('precision0')}</SelectItem>
-                          <SelectItem value="1">{t('precision1')}</SelectItem>
-                          <SelectItem value="2">{t('precision2')}</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="highlightedDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {t('highlightedDateLabel')}
+                  </Label>
+                  <Input
+                    type="date"
+                    id="highlightedDate"
+                    value={highlightedDate}
+                    onChange={(e) => setHighlightedDate(e.target.value)}
+                  />
                 </div>
-              )}
-
-              {/* Réglages du calendrier (uniquement pour le type "Date") */}
-              {isAdmin && !lockStructure && isDateType && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="defaultMonth" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t('defaultMonthLabel')}
-                    </Label>
-                    <Input
-                      type="month"
-                      id="defaultMonth"
-                      value={defaultMonth}
-                      onChange={(e) => setDefaultMonth(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="highlightedDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      {t('highlightedDateLabel')}
-                    </Label>
-                    <Input
-                      type="date"
-                      id="highlightedDate"
-                      value={highlightedDate}
-                      onChange={(e) => setHighlightedDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            {/* Modal Footer */}
-            <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
-              <Button
-                variant="outline"
-                className="rounded-2xl cursor-pointer"
-                onClick={() => setOpen(false)}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                disabled={
-                  !title.trim() ||
-                  (isAdmin && !selectValue) ||
-                  (isAdmin && isOptionType && validChoices.length < 2) ||
-                  (isAdmin && isNumberType && (minValue === "" || maxValue === "" || Number(minValue) >= Number(maxValue))) ||
-                  isPending
-                }
-                className="rounded-2xl cursor-pointer"
-                onClick={handleConfirm}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{isEditMode ? t('saving') : t('creating')}</span>
-                  </>
-                ) : (
-                  <span>{isEditMode ? t('save') : t('confirm')}</span>
-                )}
-              </Button>
-            </div>
+              </div>
+            )}
 
           </div>
-        </div>,
-        document.body
+
+          {/* Modal Footer */}
+          <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
+            <Button
+              variant="outline"
+              className="rounded-2xl cursor-pointer"
+              onClick={() => setOpen(false)}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              disabled={
+                !title.trim() ||
+                (isAdmin && !selectValue) ||
+                (isAdmin && isOptionType && validChoices.length < 2) ||
+                (isAdmin && isNumberType && (minValue === "" || maxValue === "" || Number(minValue) >= Number(maxValue))) ||
+                isPending
+              }
+              className="rounded-2xl cursor-pointer"
+              onClick={handleConfirm}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{isEditMode ? t('saving') : t('creating')}</span>
+                </>
+              ) : (
+                <span>{isEditMode ? t('save') : t('confirm')}</span>
+              )}
+            </Button>
+          </div>
+        </ModalShell>
       )}
     </div>
   )

@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { XIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@utils/utils"
 
@@ -23,7 +24,7 @@ function DialogBackdrop({ className, ...props }: DialogPrimitive.Backdrop.Props)
     <DialogPrimitive.Backdrop
       data-slot="dialog-backdrop"
       className={cn(
-        "fixed inset-0 z-[60] bg-black/50 duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -37,6 +38,7 @@ function DialogContent({
   showCloseButton = true,
   ...props
 }: DialogPrimitive.Popup.Props & { showCloseButton?: boolean }) {
+  const tA11y = useTranslations("a11y")
   return (
     <DialogPrimitive.Portal>
       <DialogBackdrop />
@@ -55,7 +57,7 @@ function DialogContent({
             className="absolute top-4 right-4 rounded-full p-1 opacity-60 outline-hidden transition-opacity hover:opacity-100 focus-visible:opacity-100"
           >
             <XIcon className="size-4" />
-            <span className="sr-only">Fermer</span>
+            <span className="sr-only">{tA11y("close")}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
