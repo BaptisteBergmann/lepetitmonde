@@ -64,6 +64,10 @@ export default function StoryViewer({
   // under an already-mounted instance.
   const [index, setIndex] = useState(() => {
     if (isHighlight) return 0
+    if (target.storyId) {
+      const targetIndex = stories.findIndex((s) => s.id === target.storyId)
+      if (targetIndex !== -1) return targetIndex
+    }
     const firstUnseen = stories.findIndex((s) => !s.viewed)
     return firstUnseen === -1 ? 0 : firstUnseen
   })

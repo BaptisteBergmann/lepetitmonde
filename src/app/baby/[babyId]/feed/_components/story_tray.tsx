@@ -14,7 +14,7 @@ import StoryViewer from './story_viewer'
 type Circle = Tables<'circles'>
 
 export type ViewerTarget =
-  | { kind: 'group'; index: number }
+  | { kind: 'group'; index: number; storyId?: string }
   | { kind: 'highlight'; index: number }
 
 function bubbleImageFor(story: StoryWithUrl | undefined) {
@@ -61,18 +61,29 @@ export default function StoryTray({
   circles,
   initialHighlights,
   initialStories,
+  highlightStoryId,
 }: {
   babyId: string
   isAdmin: boolean
   circles: Circle[]
   initialHighlights: HighlightWithStories[]
   initialStories: StoryGroup[]
+  highlightStoryId?: string
 }) {
   const t = useTranslations('feed.storyTray')
   const [highlights, setHighlights] = useState(initialHighlights)
   const [groups, setGroups] = useState(initialStories)
   const [createOpen, setCreateOpen] = useState(false)
-  const [viewerTarget, setViewerTarget] = useState<ViewerTarget | null>(null)
+  // Auto-open the story a notification deep-linked to. Lazy-initialized
+  // (rather than set from an effect) since `initialStories` is already
+  // fully loaded on mount — stories aren't paginated like posts. If the
+  // story has since expired or isn't visible to this user, it's simply not
+  // found and the tray renders normally with no viewer opened.
+  const [viewerTarget, setViewerTarget] = useState<ViewerTarget | null>(() => {
+    if (!highlightStoryId) return null
+    const groupIndex = initialStories.findIndex((g) => g.stories.some((s) => s.id === highlightStoryId))
+    return groupIndex === -1 ? null : { kind: 'group', index: groupIndex, storyId: highlightStoryId }
+  })
 
   const refresh = async () => {
     const [nextHighlights, nextStories] = await Promise.all([

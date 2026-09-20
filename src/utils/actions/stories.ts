@@ -102,7 +102,7 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   await notifyUsers(story.baby_id, 'new_story', {
     title: t('newStory.title'),
     body: t('newStory.body'),
-    url: `/baby/${story.baby_id}/feed`,
+    url: `/baby/${story.baby_id}/feed?storyId=${data.id}`,
   }, recipients)
 
   revalidatePath(`/baby/${story.baby_id}/feed`)
