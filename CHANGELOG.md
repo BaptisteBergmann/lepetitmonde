@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-20
+
+- `d678830` Deep-link story notifications to the specific story
+
 ## 2026-09-19
 
 - `b5e2e82` Dialog semantics and focus handling for viewers
