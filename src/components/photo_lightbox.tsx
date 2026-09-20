@@ -205,6 +205,13 @@ export default function PhotoLightbox({
     touchStartX.current = null
   }
 
+  // Clicking the dark area around the media closes the lightbox; the photo/video itself and the
+  // controls keep their own behaviour. Swipes, pans and pinches never produce a click.
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('img, video, button')) return
+    onClose()
+  }
+
   // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
   return createPortal(
     <div
@@ -214,6 +221,7 @@ export default function PhotoLightbox({
       aria-modal="true"
       aria-label={tA11y('photoViewer')}
       tabIndex={-1}
+      onClick={handleBackdropClick}
     >
       <div className="flex justify-between items-center px-4 py-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         {photos.length > 1 ? (
