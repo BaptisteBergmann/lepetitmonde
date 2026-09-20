@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-20
 
+- `d458891` Close the photo lightbox when clicking outside the photo
 - `d678830` Deep-link story notifications to the specific story
 
 ## 2026-09-19
