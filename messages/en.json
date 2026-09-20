@@ -32,6 +32,8 @@
     "viewStats": "View statistics",
     "createHighlight": "Create highlight",
     "photoN": "Photo {n}",
+    "photoViewer": "Photo viewer",
+    "storyViewer": "Story",
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },

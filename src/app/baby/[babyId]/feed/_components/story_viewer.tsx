@@ -38,6 +38,14 @@ export default function StoryViewer({
 }) {
   const t = useTranslations('feed')
   const tA11y = useTranslations('a11y')
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Move focus into the overlay on open and give it back on close (keyboard / screen reader users).
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null
+    containerRef.current?.focus()
+    return () => previous?.focus?.()
+  }, [])
   const confirmAction = useConfirm()
   const isHighlight = target.kind === 'highlight'
   const stories: StoryWithUrl[] = isHighlight
@@ -191,7 +199,14 @@ export default function StoryViewer({
 
   // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
   return createPortal(
-    <div className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200">
+    <div
+      className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={tA11y('storyViewer')}
+      tabIndex={-1}
+    >
       <div className="flex gap-1 px-3 pt-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         {stories.map((s, i) => (
           <div key={s.id} className="h-0.5 flex-1 rounded-full bg-white/25 overflow-hidden">

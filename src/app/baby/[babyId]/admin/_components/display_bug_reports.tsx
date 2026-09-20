@@ -1,7 +1,7 @@
 "use client";
 
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { getDateFnsLocale } from "@utils/formatting";
@@ -159,27 +159,27 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
         })}
       </div>
 
-      {openScreenshot && createPortal(
-        <div
-          className="fixed inset-0 w-full h-full bg-black/70 backdrop-blur-xs flex justify-center items-center z-[60] p-4"
-          onClick={() => setOpenScreenshot(null)}
-        >
-          <button
-            onClick={() => setOpenScreenshot(null)}
-            aria-label={t('close')}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer touch-target"
+      {openScreenshot && (
+        <Dialog open onOpenChange={(open) => { if (!open) setOpenScreenshot(null) }}>
+          <DialogContent
+            showCloseButton={false}
+            className="w-auto max-h-[95vh] max-w-[calc(100%-2rem)] border-0 bg-transparent p-0 shadow-none ring-0"
           >
-            <X className="h-4 w-4" />
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={openScreenshot}
-            alt={t('screenshotAltLarge')}
-            className="max-h-[90vh] max-w-full rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>,
-        document.body,
+            <DialogTitle className="sr-only">{t('screenshotAltLarge')}</DialogTitle>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={openScreenshot}
+              alt={t('screenshotAltLarge')}
+              className="max-h-[90vh] max-w-full rounded-2xl"
+            />
+            <DialogClose
+              aria-label={t('close')}
+              className="absolute top-2 right-2 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors cursor-pointer touch-target"
+            >
+              <X className="h-4 w-4" />
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );

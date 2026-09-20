@@ -42,6 +42,14 @@ export default function PhotoLightbox({
   onClose: () => void
 }) {
   const tA11y = useTranslations('a11y')
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Move focus into the overlay on open and give it back on close (keyboard / screen reader users).
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null
+    containerRef.current?.focus()
+    return () => previous?.focus?.()
+  }, [])
   const [index, setIndex] = useState(initialIndex)
   const [scale, setScale] = useState(1)
   const [translate, setTranslate] = useState({ x: 0, y: 0 })
@@ -199,7 +207,14 @@ export default function PhotoLightbox({
 
   // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
   return createPortal(
-    <div className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200">
+    <div
+      className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={tA11y('photoViewer')}
+      tabIndex={-1}
+    >
       <div className="flex justify-between items-center px-4 py-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         {photos.length > 1 ? (
           <span className="text-sm text-white/70">{index + 1} / {photos.length}</span>
