@@ -350,8 +350,15 @@ export default function StoryViewer({
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
       >
+        {/* `key={story.id}` on both branches: without it React reuses the
+            same DOM node across a story change and just swaps `src`, and the
+            browser keeps painting the *previous* frame until the new one
+            decodes — a stale-image flash even when the new media is already
+            cached. Keying by story forces a real mount, so the gap shows the
+            viewer's own black background instead. */}
         {isVideo ? (
           <video
+            key={story.id}
             ref={videoRef}
             src={story.url}
             poster={story.thumbnailUrl ?? undefined}
@@ -367,6 +374,7 @@ export default function StoryViewer({
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
+            key={story.id}
             src={story.url}
             alt={story.caption ?? ""}
             className="w-full h-full object-contain"
