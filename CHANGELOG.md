@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-21
+
+- `225286b` Stop awaiting the expired-story sweep on feed load
+
 ## 2026-09-19
 
 - `c26b584` Drive the pull-to-refresh gesture with a transform instead of animated height
