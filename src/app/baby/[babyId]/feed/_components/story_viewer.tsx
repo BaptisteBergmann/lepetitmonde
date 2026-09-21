@@ -89,6 +89,24 @@ export default function StoryViewer({
 
   const story = stories[index]
 
+  // Wraps onClose: a tap on the advance/pause zones is handled on
+  // `pointerup`, one event before the browser's own synthesized "click" for
+  // that same tap. When that tap is what closes the viewer (goNext on the
+  // last story), the overlay can already be unmounted by the time the click
+  // fires, so it falls through to whatever feed post is underneath and opens
+  // its lightbox. Swallowing exactly one click right after any close — no
+  // matter what triggered it — stops that stray click regardless of the
+  // precise browser timing that produces it.
+  const closeViewer = useCallback(() => {
+    const swallowNextClick = (e: MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    window.addEventListener('click', swallowNextClick, { capture: true, once: true })
+    setTimeout(() => window.removeEventListener('click', swallowNextClick, { capture: true }), 500)
+    onClose()
+  }, [onClose])
+
   const goPrev = useCallback(() => {
     setIndex((i) => Math.max(0, i - 1))
   }, [])
@@ -96,19 +114,19 @@ export default function StoryViewer({
   const goNext = useCallback(() => {
     setIndex((i) => {
       if (i >= stories.length - 1) {
-        onClose()
+        closeViewer()
         return i
       }
       return i + 1
     })
-  }, [stories.length, onClose])
+  }, [stories.length, closeViewer])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     const handleKeyDown = (e: KeyboardEvent) => {
       // The delete-confirm dialog owns the keyboard while it is open.
       if (confirming) return
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeViewer()
       if (e.key === 'ArrowLeft') goPrev()
       if (e.key === 'ArrowRight') goNext()
     }
@@ -117,7 +135,7 @@ export default function StoryViewer({
       document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [onClose, goPrev, goNext, confirming])
+  }, [closeViewer, goPrev, goNext, confirming])
 
   // "Seen" tracking is an ephemeral-stories concept — highlight-sourced
   // items skip markStoryViewed entirely. The resets below are re-derived
@@ -156,7 +174,14 @@ export default function StoryViewer({
 
   const isVideo = story.mime_type.startsWith('video/')
 
-  const handlePointerDown = () => {
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Tap navigation acts on pointerup, one event before the browser's own
+    // synthesized "click" for a touch tap. If that tap just closed the
+    // viewer (goNext on the last story), the overlay is already unmounted
+    // by the time the click fires, so it falls through to the feed post
+    // underneath. preventDefault on a touch pointerdown tells the browser to
+    // skip that compatibility click entirely for this gesture.
+    if (e.pointerType === 'touch') e.preventDefault()
     wasHeld.current = false
     holdTimer.current = setTimeout(() => {
       wasHeld.current = true
@@ -255,7 +280,7 @@ export default function StoryViewer({
           )}
           <button
             aria-label={tA11y('close')}
-            onClick={onClose}
+            onClick={closeViewer}
             className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
           >
             <X className="h-5 w-5" />
