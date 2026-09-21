@@ -2,6 +2,11 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-21
+
+- `85f0514` Lazy-load and size story tray thumbnails
+- `279de02` Stop awaiting the expired-story sweep on feed load
+
 ## 2026-09-20
 
 - `d458891` Close the photo lightbox when clicking outside the photo
