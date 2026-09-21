@@ -92,6 +92,14 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col overflow-x-hidden">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ConfirmProvider>
+            {/* One shared ambient glow behind the whole app (not per-page) —
+                fixed to the viewport, no z-index needed: it's the first
+                element in body so every later sibling paints over it. */}
+            <div
+              aria-hidden
+              className="pointer-events-none fixed -top-10 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
+            />
+
             <HeaderWrapper />
 
             {/* Le main permet de bien séparer le header du contenu */}
