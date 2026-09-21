@@ -1,7 +1,7 @@
 'use client'
 
 import { useConfirm } from '@/components/confirm_provider'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight, Eye, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
@@ -48,9 +48,13 @@ export default function StoryViewer({
   }, [])
   const confirmAction = useConfirm()
   const isHighlight = target.kind === 'highlight'
-  const stories: StoryWithUrl[] = isHighlight
-    ? highlights[target.index]?.stories ?? []
-    : groups[target.index]?.stories ?? []
+  // Stable reference across renders (not just across navigation) — the `?? []`
+  // fallback would otherwise hand back a fresh empty array every render,
+  // which defeats the neighbor-preload effect's dependency check below.
+  const stories: StoryWithUrl[] = useMemo(
+    () => (isHighlight ? highlights[target.index]?.stories : groups[target.index]?.stories) ?? [],
+    [isHighlight, highlights, groups, target.index]
+  )
   const title = isHighlight
     ? highlights[target.index]?.name ?? ''
     : groups[target.index]?.title ?? ''
@@ -155,6 +159,23 @@ export default function StoryViewer({
       getStoryViews(story.id, babyId, story.created_by).then(setViews)
     }
   }, [story, babyId, isAdmin, isHighlight])
+
+  // Every story's media goes through this app's own storage proxy (auth
+  // check + DB access check + an upstream fetch to Supabase Storage on every
+  // request — see api/storage/[babyId]/[...path]/route.ts), so navigating
+  // starts that whole round trip from zero. Warm the browser's HTTP cache for
+  // the adjacent stories while the current one is showing, so by the time
+  // the user actually taps next/prev the response the proxy set an immutable
+  // Cache-Control on is already sitting in cache.
+  useEffect(() => {
+    const controller = new AbortController()
+    const neighborUrls = [stories[index + 1]?.url, stories[index - 1]?.url]
+      .filter((url): url is string => !!url)
+    for (const url of neighborUrls) {
+      fetch(url, { cache: 'force-cache', signal: controller.signal }).catch(() => {})
+    }
+    return () => controller.abort()
+  }, [index, stories])
 
   useEffect(() => {
     if (!story || story.mime_type.startsWith('video/')) return
