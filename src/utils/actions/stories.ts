@@ -170,7 +170,9 @@ async function getViewedStoryIds(storyIds: string[], userId: string | undefined)
 
 export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
   const contextLogger = logger.child({ function: getActiveStories.name, babyId })
-  await pruneExpiredStories(babyId)
+  // Fire-and-forget: the query below already filters out expired rows, so
+  // the sweep is pure housekeeping and shouldn't delay the feed render.
+  pruneExpiredStories(babyId).catch((err) => contextLogger.error(err, "Error pruning expired stories"))
 
   const supabase = await createClient()
   const { data: { user } } = await getAuthUser()
