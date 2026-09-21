@@ -44,6 +44,10 @@
             </tr>
             <tr>
               <td style="padding:8px 32px 32px 32px; color:#6e6459; font-size:13px; line-height:1.6;">
+                <p style="margin:16px 0; word-break:break-all;">
+                  Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br />
+                  {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=recovery&amp;next=/reset-password
+                </p>
                 <p style="margin:16px 0;">
                   Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email
                   sans risque : votre mot de passe ne sera pas modifié.
