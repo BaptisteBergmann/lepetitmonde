@@ -11,7 +11,10 @@ const PUBLIC_PAGES = ['/login', '/signup', '/forgot-password', '/invite']
 const AUTH_ONLY_PAGES = ['/login', '/forgot-password']
 // Routes reachable regardless of session state (e.g. the recovery-link callback,
 // which must run even for an already-authenticated user re-clicking an old link).
-const ALWAYS_PUBLIC_PATHS = ['/auth']
+// '/emails' holds the Supabase Auth email templates, which Supabase fetches over
+// HTTP without a session; redirecting them to /login made it send the login page
+// as the email body.
+const ALWAYS_PUBLIC_PATHS = ['/auth', '/emails']
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
