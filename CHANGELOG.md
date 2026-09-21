@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-21
 
+- `0926e85` Preload the next/previous story's media
 - `e09f5dc` Stop closing a story from opening a feed photo underneath
 - `df7dd5f` Add per-page loading skeletons
 - `06cd153` Drop per-page headers duplicated on the baby landing page
