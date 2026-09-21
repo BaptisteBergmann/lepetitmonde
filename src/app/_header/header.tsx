@@ -1,12 +1,12 @@
 import SiteTitle from './site_title';
-import { getAllUserAccess } from '@/utils/actions/users';
-import { getPageSettings } from '@/utils/actions/page_settings';
+import { getNavAccesses } from './get_nav_accesses';
 import { logger } from '@/utils/logger';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import PageSelector from './page_selector';
 import UserMenu from './user_menu';
 import MobileMenu from './mobile_menu';
+import BottomNav from './bottom_nav';
 import NotificationBell from './notification_bell';
 import { createClient } from '@/utils/supabase/server';
 import { Tables } from '@/utils/supabase/database.types';
@@ -22,20 +22,7 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
   // Désactivé en prod pour des logs plus propres, utile en debug
   // contextLogger.debug(babies);
 
-  const allUserAccess = await getAllUserAccess();
-
-  const accesses = await Promise.all(allUserAccess.map(async (acc) => {
-    const pages = await getPageSettings(acc.baby_id);
-    return {
-      ...acc,
-      // Plain objects only — this is passed into MobileMenu, a Client
-      // Component, and ResolvedPage's `icon` (a function reference) can't
-      // cross that boundary. See the note on NavPage in ./types.
-      allowedPages: pages
-        .filter((page) => page.enabled && (acc.access_level === "admin" || acc.access_level === page.role))
-        .map((page) => ({ id: page.id, name: page.name, role: page.role, enabled: page.enabled }))
-    };
-  }));
+  const accesses = await getNavAccesses();
 
   contextLogger.debug(accesses, "User accesses");
 
@@ -48,6 +35,7 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
     .join('') || 'U';
 
   return (
+    <>
     <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between gap-2 px-3 sm:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
 
       {/* 1. ZONE GAUCHE : Logo et Sélecteur */}
@@ -70,9 +58,9 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
         {user ? (
           <>
             <NotificationBell />
-            {/* Sur mobile : menu hamburger regroupant navigation + compte */}
+            {/* Sur mobile : menu hamburger pour le compte (la navigation vit dans BottomNav) */}
             <div className="md:hidden">
-              <MobileMenu initials={initials} fullName={fullName} email={user.email} accesses={accesses} />
+              <MobileMenu initials={initials} fullName={fullName} email={user.email} />
             </div>
             {/* Sur grand écran : bulle de profil avec menu déroulant */}
             <div className="hidden md:block">
@@ -91,5 +79,7 @@ export default async function Header({ babies }: { babies: Tables<'babies'>[] })
       </div>
 
     </header>
+    {user && <BottomNav accesses={accesses} />}
+    </>
   );
 }

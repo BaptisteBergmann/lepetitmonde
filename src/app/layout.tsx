@@ -105,6 +105,12 @@ export default async function RootLayout({
             {/* Le main permet de bien séparer le header du contenu */}
             <main className="flex-grow pt-[61px]"> {/* pt-[61px] = hauteur réelle du header fixed (py-3 + h-9 + border) */}
               <PullToRefresh>{children}</PullToRefresh>
+              {/* Réserve la place du BottomNav (mobile only) sous le contenu scrollable,
+                  pour qu'il ne masque pas le bas de la page. Hauteur = env(safe-area-inset-bottom)
+                  + la hauteur visuelle de la barre (icône + paddings, pas de label). */}
+              {user && (
+                <div aria-hidden className="md:hidden" style={{ height: 'calc(3.25rem + env(safe-area-inset-bottom))' }} />
+              )}
             </main>
             <footer className="py-4 text-center text-xs text-muted-foreground">
               <VersionFooter commitSha={commitSha} changelog={changelog} />

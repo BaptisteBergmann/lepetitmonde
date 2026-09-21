@@ -88,7 +88,7 @@ export default function BugReportButton() {
         onClick={handleOpen}
         disabled={isCapturing}
         aria-label={t('openButton')}
-        className="fixed bottom-4 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground border border-border shadow-lg hover:bg-muted transition-colors cursor-pointer disabled:opacity-60 touch-target"
+        className="fixed z-40 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground border border-border shadow-lg hover:bg-muted transition-colors cursor-pointer disabled:opacity-60 touch-target left-4 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] md:bottom-4"
       >
         {isCapturing ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Bug className="h-4.5 w-4.5" />}
       </button>
