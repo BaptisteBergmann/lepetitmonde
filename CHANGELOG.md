@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-21
 
+- `e9e13ab` Add fallback link to the recovery email
+- `89ed980` Serve email templates without a session
 - `85f0514` Lazy-load and size story tray thumbnails
 - `279de02` Stop awaiting the expired-story sweep on feed load
 
