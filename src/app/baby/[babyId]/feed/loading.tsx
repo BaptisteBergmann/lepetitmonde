@@ -8,7 +8,7 @@ export default async function Loading() {
   return (
     <div role="status" aria-live="polite" className="overflow-hidden text-landing-foreground">
       <span className="sr-only">{t('loading')}</span>
-      <div aria-hidden className="mx-auto max-w-2xl space-y-8 px-4 py-10 sm:px-6 sm:py-16 animate-pulse">
+      <div aria-hidden className="mx-auto max-w-2xl space-y-8 px-4 pt-5 pb-10 sm:px-6 sm:pt-8 sm:pb-16 animate-pulse">
         <div className="flex gap-3 overflow-hidden">
           {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className="size-16 shrink-0 rounded-full bg-muted" />

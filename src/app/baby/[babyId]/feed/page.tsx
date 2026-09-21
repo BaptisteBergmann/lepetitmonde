@@ -37,7 +37,7 @@ export default async function FeedPage({
 
   return (
     <div className="overflow-hidden text-landing-foreground">
-      <div className="relative mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
+      <div className="relative mx-auto max-w-2xl px-4 pt-5 pb-10 sm:px-6 sm:pt-8 sm:pb-16 space-y-8">
         <Suspense
           fallback={
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
