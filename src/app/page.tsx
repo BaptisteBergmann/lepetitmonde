@@ -24,13 +24,8 @@ export default async function Home() {
   const babies = await getBabiesList();
 
   return (
-    <div className="bg-landing-background text-landing-foreground">
+    <div className="text-landing-foreground">
       <div className="relative mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-10 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
-        />
-
         <Reveal className="relative text-center">
           <Image
             src="/logo_mark.svg"

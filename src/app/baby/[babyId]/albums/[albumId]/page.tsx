@@ -36,7 +36,7 @@ export default async function AlbumPage({
   if (!album) notFound()
 
   return (
-    <div className="bg-landing-background text-landing-foreground">
+    <div className="text-landing-foreground">
       <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-6">
         <Link
           href={`/baby/${babyId}/albums`}

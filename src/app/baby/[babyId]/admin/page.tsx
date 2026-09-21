@@ -19,7 +19,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, UserPlus, Mail, ShieldCheck, Bug, LayoutGrid, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Reveal } from "@components/reveal";
 
 export default async function InviteForm({
   params,
@@ -46,21 +45,8 @@ export default async function InviteForm({
     : [];
 
   return (
-    <div className="bg-landing-background text-landing-foreground">
+    <div className="text-landing-foreground">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
-        {/* Header Section */}
-        <Reveal className="border-b border-landing-border pb-6">
-          <p className="text-xs font-semibold tracking-[0.16em] text-landing-camel uppercase">
-            {t('eyebrow')}
-          </p>
-          <h1 className="mt-1 font-display text-3xl font-semibold">
-            {t('title')}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
-            {t('subtitle')}
-          </p>
-        </Reveal>
-
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           {/* Left Column: Forms and Invites (5 cols) */}
           <div className="space-y-6 lg:col-span-5">
