@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-21
 
+- `1cb97a9` Add bottom navigation bar for mobile
 - `3e5f1aa` Move the ambient background glow to a single global instance
 - `e9e13ab` Add fallback link to the recovery email
 - `89ed980` Serve email templates without a session
