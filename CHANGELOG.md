@@ -4,7 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-22
 
-- `9ab502b` Stop set-state-in-effect errors and lint config leak from stale worktree
+- `f22edd3` Stop set-state-in-effect errors and lint config leak from stale worktree
 - `2abe3a9` Prevent iOS Safari auto-zoom on all text inputs
 - `54f02ba` Add story edit modal for caption, group, and circles
 - `a965226` Add updateStory action for caption, group, and circles
