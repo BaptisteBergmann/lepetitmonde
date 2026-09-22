@@ -62,6 +62,15 @@ export default function FeedView({
     return () => clearTimeout(timeout)
   }, [highlightPostId, posts])
 
+  // Re-sync when the server hands us new props, e.g. after a pull-to-refresh
+  // triggers `router.refresh()`. Since this component stays mounted across
+  // that refresh, `useState(initialPosts)`'s initial value alone would never
+  // pick up the new data.
+  useEffect(() => {
+    setPosts(initialPosts)
+    setHasMore(initialHasMore)
+  }, [initialPosts, initialHasMore])
+
   const loadMore = async () => {
     if (posts.length === 0) return
     setLoadingMore(true)

@@ -94,6 +94,17 @@ export default function StoryTray({
     setGroups(nextStories)
   }
 
+  // Re-sync when the server hands us new props, e.g. after a pull-to-refresh
+  // triggers `router.refresh()`. Since this component stays mounted across
+  // that refresh, `useState(initialX)`'s initial value alone would never
+  // pick up the new data.
+  useEffect(() => {
+    setHighlights(initialHighlights)
+  }, [initialHighlights])
+  useEffect(() => {
+    setGroups(initialStories)
+  }, [initialStories])
+
   // Debounced so a burst of related row changes (a `stories` insert plus its
   // `stories_circles` links, or several stories posted back to back) collapses
   // into one refetch instead of one per event.
