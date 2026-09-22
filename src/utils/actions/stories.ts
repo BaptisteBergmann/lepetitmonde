@@ -111,6 +111,75 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   return data.id
 }
 
+type StoryUpdate = { caption: string | null; groupLabel: string | null }
+
+// Caption/group/visibility only — the media itself and the duration/expiry
+// are immutable once posted (no UI exposes editing them). Highlighted
+// stories aren't editable here either; the caller (story_viewer.tsx) only
+// offers this for active, non-highlighted stories, same restriction as delete.
+export async function updateStory(storyId: string, babyId: string, update: StoryUpdate, circleIds: string[]) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: updateStory.name, storyId, babyId })
+
+  await assertIsAdmin(supabase, babyId)
+
+  // Snapshot who could see this story *before* the circle change, so that
+  // after re-linking we can notify only the people newly able to see it —
+  // never re-notifying admins or members of a circle that was already
+  // assigned (see getVisibleUserIds' "newly visible" doc comment).
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: oldLinks, error: oldLinksError } = await supabase
+    .from('stories_circles')
+    .select('circle_id')
+    .eq('story_id', storyId)
+
+  if (oldLinksError) { contextLogger.error(oldLinksError, "Error fetching current story circles"); throw oldLinksError }
+
+  const oldCircleIds = oldLinks.map((row) => row.circle_id)
+  const previouslyVisible = new Set(await getVisibleUserIds(babyId, oldCircleIds, user?.id))
+
+  const { error } = await supabase
+    .from('stories')
+    .update({
+      caption: update.caption,
+      group_label: update.groupLabel,
+    })
+    .eq('id', storyId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error updating story"); throw error }
+
+  const { error: deleteCirclesError } = await supabase
+    .from('stories_circles')
+    .delete()
+    .eq('story_id', storyId)
+
+  if (deleteCirclesError) { contextLogger.error(deleteCirclesError, "Error clearing story circles"); throw deleteCirclesError }
+
+  if (circleIds.length > 0) {
+    const { error: circlesError } = await supabase
+      .from('stories_circles')
+      .insert(circleIds.map((circleId) => ({ story_id: storyId, circle_id: circleId })))
+
+    if (circlesError) { contextLogger.error(circlesError, "Error linking story circles"); throw circlesError }
+  }
+
+  contextLogger.info("Story updated")
+
+  const nowVisible = await getVisibleUserIds(babyId, circleIds, user?.id)
+  const newlyVisible = nowVisible.filter((id) => !previouslyVisible.has(id))
+  if (newlyVisible.length > 0) {
+    const t = await getTranslations('pushNotifications')
+    await notifyUsers(babyId, 'new_story', {
+      title: t('newStory.title'),
+      body: t('newStory.body'),
+      url: `/baby/${babyId}/feed?storyId=${storyId}`,
+    }, newlyVisible)
+  }
+
+  revalidatePath(`/baby/${babyId}/feed`)
+}
+
 // Not exported: a "use server" file may only export async functions (Server
 // Actions), so this small pure helper stays private here and is duplicated
 // in story_highlights.ts rather than shared.
