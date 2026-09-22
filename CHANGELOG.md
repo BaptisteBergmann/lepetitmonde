@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-22
+
+- `7fc3ed9` Resync story tray and post list state after pull-to-refresh
+
 ## 2026-09-21
 
 - `7ae59e0` Tighten the gap above the story tray
