@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-22
 
+- `9264fb8` Add laughing emoji to reaction picker
 - `7fc3ed9` Resync story tray and post list state after pull-to-refresh
 
 ## 2026-09-21
