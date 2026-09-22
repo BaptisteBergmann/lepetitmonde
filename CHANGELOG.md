@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-22
 
+- `2abe3a9` Prevent iOS Safari auto-zoom on all text inputs
 - `54f02ba` Add story edit modal for caption, group, and circles
 - `a965226` Add updateStory action for caption, group, and circles
 - `f30a4f3` Notify newly-visible users when an edit adds a circle to a post
