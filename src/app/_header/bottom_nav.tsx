@@ -24,6 +24,11 @@ export default function BottomNav({ accesses }: { accesses: AccessWithPages[] })
 
   if (!allowedPages.length) return null
 
+  // Hub page ("choose a page to view") already lists every section as a
+  // card — showing the same links again in the bottom bar is redundant.
+  const isHubPage = pathname === `/baby/${currentBabyId}`
+  if (isHubPage) return null
+
   const orderedPages = getOrderedPages(allowedPages)
 
   return (
