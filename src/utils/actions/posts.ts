@@ -96,6 +96,21 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
 
   await assertIsAdmin(supabase, babyId)
 
+  // Snapshot who could see this post *before* the circle change, so that
+  // after re-linking we can notify only the people newly able to see it —
+  // never re-notifying admins or members of a circle that was already
+  // assigned (see getVisibleUserIds' "newly visible" doc comment).
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: oldLinks, error: oldLinksError } = await supabase
+    .from('posts_circles')
+    .select('circle_id')
+    .eq('post_id', postId)
+
+  if (oldLinksError) { contextLogger.error(oldLinksError, "Error fetching current post circles"); throw oldLinksError }
+
+  const oldCircleIds = oldLinks.map((row) => row.circle_id)
+  const previouslyVisible = new Set(await getVisibleUserIds(babyId, oldCircleIds, user?.id))
+
   const { error } = await supabase
     .from('posts')
     .update({
@@ -123,6 +138,17 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
   }
 
   contextLogger.info("Post updated")
+
+  const nowVisible = await getVisibleUserIds(babyId, circleIds, user?.id)
+  const newlyVisible = nowVisible.filter((id) => !previouslyVisible.has(id))
+  if (newlyVisible.length > 0) {
+    const t = await getTranslations('pushNotifications')
+    await notifyUsers(babyId, 'new_post', {
+      title: t('newPost.title'),
+      body: update.caption || t('newPost.bodyFallback'),
+      url: `/baby/${babyId}/feed?postId=${postId}`,
+    }, newlyVisible)
+  }
 
   revalidatePath(`/baby/${babyId}/feed`)
 }
