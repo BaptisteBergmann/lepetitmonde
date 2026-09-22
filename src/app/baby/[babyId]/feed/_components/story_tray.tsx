@@ -204,6 +204,8 @@ export default function StoryTray({
         <StoryViewer
           babyId={babyId}
           isAdmin={isAdmin}
+          circles={circles}
+          existingGroupLabels={existingGroupLabels}
           highlights={highlights}
           groups={groups}
           target={viewerTarget}

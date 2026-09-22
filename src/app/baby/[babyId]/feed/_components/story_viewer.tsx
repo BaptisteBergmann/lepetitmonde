@@ -4,12 +4,16 @@ import { useConfirm } from '@/components/confirm_provider'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createPortal } from 'react-dom'
-import { X, ChevronLeft, ChevronRight, Eye, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Eye, Pencil, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
 import { cn } from '@utils/utils'
 import { StoryGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
 import { HighlightWithStories, createHighlight, addStoryToHighlight } from '@utils/actions/story_highlights'
+import { Tables } from '@utils/supabase/database.types'
 import StoryReactionPicker from './story_reaction_picker'
+import EditStoryModal from './edit_story_modal'
 import type { ViewerTarget } from './story_tray'
+
+type Circle = Tables<'circles'>
 
 const PHOTO_DURATION_MS = 5000
 // Press-and-hold pauses without navigating; anything shorter is a tap.
@@ -22,6 +26,8 @@ const RIGHT_ZONE = 0.7
 export default function StoryViewer({
   babyId,
   isAdmin,
+  circles,
+  existingGroupLabels,
   highlights,
   groups,
   target,
@@ -30,6 +36,8 @@ export default function StoryViewer({
 }: {
   babyId: string
   isAdmin: boolean
+  circles: Circle[]
+  existingGroupLabels: string[]
   highlights: HighlightWithStories[]
   groups: StoryGroup[]
   target: ViewerTarget
@@ -81,7 +89,8 @@ export default function StoryViewer({
   // story changes so autoplay resumes automatically on next/prev.
   const [manuallyPaused, setManuallyPaused] = useState(false)
   const [confirming, setConfirming] = useState(false)
-  const paused = holdPaused || manuallyPaused || confirming
+  const [editing, setEditing] = useState(false)
+  const paused = holdPaused || manuallyPaused || confirming || editing
   const [videoProgress, setVideoProgress] = useState(0)
   const [views, setViews] = useState<StoryViewsData | null>(null)
   const [highlightPickerOpen, setHighlightPickerOpen] = useState(false)
@@ -128,8 +137,8 @@ export default function StoryViewer({
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     const handleKeyDown = (e: KeyboardEvent) => {
-      // The delete-confirm dialog owns the keyboard while it is open.
-      if (confirming) return
+      // The delete-confirm dialog / edit modal own the keyboard while open.
+      if (confirming || editing) return
       if (e.key === 'Escape') closeViewer()
       if (e.key === 'ArrowLeft') goPrev()
       if (e.key === 'ArrowRight') goNext()
@@ -139,7 +148,7 @@ export default function StoryViewer({
       document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [closeViewer, goPrev, goNext, confirming])
+  }, [closeViewer, goPrev, goNext, confirming, editing])
 
   // "Seen" tracking is an ephemeral-stories concept — highlight-sourced
   // items skip markStoryViewed entirely. The resets below are re-derived
@@ -151,6 +160,7 @@ export default function StoryViewer({
     setViews(null)
     setHighlightPickerOpen(false)
     setManuallyPaused(false)
+    setEditing(false)
     if (!story) return
     if (!isHighlight) {
       markStoryViewed(story.id, babyId)
@@ -292,6 +302,15 @@ export default function StoryViewer({
           )}
           {isAdmin && !isHighlight && (
             <button
+              aria-label={tA11y('edit')}
+              onClick={() => setEditing(true)}
+              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+            >
+              <Pencil className="h-4.5 w-4.5" />
+            </button>
+          )}
+          {isAdmin && !isHighlight && (
+            <button
               aria-label={tA11y('delete')}
               onClick={handleDelete}
               className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
@@ -308,6 +327,23 @@ export default function StoryViewer({
           </button>
         </div>
       </div>
+
+      {editing && !isHighlight && (
+        <EditStoryModal
+          babyId={babyId}
+          story={story}
+          circles={circles}
+          existingGroupLabels={existingGroupLabels}
+          onClose={() => setEditing(false)}
+          // A saved edit can change the group label, which moves the story
+          // to a different tray bubble (see the `byKey` grouping in
+          // getActiveStories) — this viewer's `target.index` would then
+          // point at the wrong bubble once `onChanged` refetches. Simplest
+          // safe move: close the viewer and let the refreshed tray render;
+          // the user can re-open whichever bubble the story landed in.
+          onSaved={() => { onChanged(); onClose() }}
+        />
+      )}
 
       {highlightPickerOpen && (
         <div className="mx-4 mb-2 p-3 rounded-2xl bg-white/10 text-white space-y-2 shrink-0">
