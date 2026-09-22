@@ -7,11 +7,15 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
+    // Default ignores of eslint-config-next. Use "**/" prefixes so these also
+    // match nested checkouts (e.g. .claude/worktrees/*/.next) — a bare ".next/**"
+    // is gitignore-anchored to the repo root and won't catch those.
+    "**/.next/**",
+    "**/out/**",
+    "**/build/**",
+    "**/next-env.d.ts",
+    // Nested git worktrees are separate checkouts with their own lint runs.
+    ".claude/worktrees/**",
   ]),
   {
     // Native alert()/confirm() block the thread and look out of place in the PWA:

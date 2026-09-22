@@ -74,6 +74,21 @@ export default function StoryTray({
   const [highlights, setHighlights] = useState(initialHighlights)
   const [groups, setGroups] = useState(initialStories)
   const [createOpen, setCreateOpen] = useState(false)
+  // Re-sync when the server hands us new props, e.g. after a pull-to-refresh
+  // triggers `router.refresh()`. Since this component stays mounted across
+  // that refresh, `useState(initialX)`'s initial value alone would never pick
+  // up the new data. Adjusted during render (not an effect) to avoid an extra
+  // render pass — see https://react.dev/learn/you-might-not-need-an-effect.
+  const [prevInitialHighlights, setPrevInitialHighlights] = useState(initialHighlights)
+  if (initialHighlights !== prevInitialHighlights) {
+    setPrevInitialHighlights(initialHighlights)
+    setHighlights(initialHighlights)
+  }
+  const [prevInitialStories, setPrevInitialStories] = useState(initialStories)
+  if (initialStories !== prevInitialStories) {
+    setPrevInitialStories(initialStories)
+    setGroups(initialStories)
+  }
   // Auto-open the story a notification deep-linked to. Lazy-initialized
   // (rather than set from an effect) since `initialStories` is already
   // fully loaded on mount — stories aren't paginated like posts. If the
@@ -93,17 +108,6 @@ export default function StoryTray({
     setHighlights(nextHighlights)
     setGroups(nextStories)
   }
-
-  // Re-sync when the server hands us new props, e.g. after a pull-to-refresh
-  // triggers `router.refresh()`. Since this component stays mounted across
-  // that refresh, `useState(initialX)`'s initial value alone would never
-  // pick up the new data.
-  useEffect(() => {
-    setHighlights(initialHighlights)
-  }, [initialHighlights])
-  useEffect(() => {
-    setGroups(initialStories)
-  }, [initialStories])
 
   // Debounced so a burst of related row changes (a `stories` insert plus its
   // `stories_circles` links, or several stories posted back to back) collapses
