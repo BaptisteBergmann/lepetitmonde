@@ -325,6 +325,7 @@
     },
     "storyForm": {
       "title": "Nouvelle story",
+      "editTitle": "Modifier la story",
       "photoVideoLabel": "Photo / vidéo",
       "groupLabel": "Groupe (facultatif)",
       "groupPlaceholder": "ex: Journée à la plage",
@@ -337,7 +338,8 @@
       "visibleByPlaceholder": "Masqué (aucun cercle)",
       "visibleByHint": "Aucun cercle sélectionné = story masquée, visible uniquement par les administrateurs.",
       "uploadError": "Échec de l'envoi du fichier",
-      "publishError": "Une erreur est survenue lors de la publication de la story."
+      "publishError": "Une erreur est survenue lors de la publication de la story.",
+      "editError": "Une erreur est survenue lors de la modification de la story."
     },
     "storyTray": {
       "add": "Ajouter"
@@ -985,7 +987,8 @@
     "baby": "Bébé",
     "sleep": "Dodo",
     "celebration": "Célébration",
-    "heart": "Cœur"
+    "heart": "Cœur",
+    "laughing": "Rire"
   },
   "notifications": {
     "title": "Notifications",

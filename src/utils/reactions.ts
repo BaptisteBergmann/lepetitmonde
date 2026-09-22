@@ -7,4 +7,5 @@ export const REACTIONS = [
   { emoji: '😴', key: 'sleep' },
   { emoji: '🎉', key: 'celebration' },
   { emoji: '❤️', key: 'heart' },
+  { emoji: '😂', key: 'laughing' },
 ] as const

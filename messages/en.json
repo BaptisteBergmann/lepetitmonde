@@ -325,6 +325,7 @@
     },
     "storyForm": {
       "title": "New story",
+      "editTitle": "Edit story",
       "photoVideoLabel": "Photo / video",
       "groupLabel": "Group (optional)",
       "groupPlaceholder": "e.g. Day at the beach",
@@ -337,7 +338,8 @@
       "visibleByPlaceholder": "Hidden (no circle)",
       "visibleByHint": "No circle selected = hidden story, visible to admins only.",
       "uploadError": "File upload failed",
-      "publishError": "Something went wrong while publishing the story."
+      "publishError": "Something went wrong while publishing the story.",
+      "editError": "Something went wrong while saving the changes."
     },
     "storyTray": {
       "add": "Add"
@@ -985,7 +987,8 @@
     "baby": "Baby",
     "sleep": "Sleep",
     "celebration": "Celebration",
-    "heart": "Heart"
+    "heart": "Heart",
+    "laughing": "Laughing"
   },
   "notifications": {
     "title": "Notifications",
