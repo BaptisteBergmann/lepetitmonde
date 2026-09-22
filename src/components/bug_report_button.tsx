@@ -125,7 +125,7 @@ export default function BugReportButton() {
                 rows={4}
                 autoFocus
                 placeholder={t('descriptionPlaceholder')}
-                className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
+                className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
               />
             </div>
           </div>

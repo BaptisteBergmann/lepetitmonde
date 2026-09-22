@@ -106,7 +106,7 @@ export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adm
               placeholder={t('broadcastMessagePlaceholder')}
               required
               rows={4}
-              className="w-full rounded-md border border-input bg-input/40 px-3 py-2 text-sm resize-none"
+              className="w-full rounded-md border border-input bg-input/40 px-3 py-2 text-base md:text-sm resize-none"
             />
           </Field>
           <Field>

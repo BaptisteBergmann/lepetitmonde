@@ -367,7 +367,7 @@ export default function StoryViewer({
               value={newHighlightName}
               onChange={(e) => setNewHighlightName(e.target.value)}
               placeholder={t('storyViewer.newHighlightPlaceholder')}
-              className="flex-1 bg-white/10 rounded-xl px-3 py-1.5 text-sm placeholder:text-white/40 focus:outline-none"
+              className="flex-1 bg-white/10 rounded-xl px-3 py-1.5 text-base md:text-sm placeholder:text-white/40 focus:outline-none"
             />
             <button
               aria-label={tA11y('createHighlight')}

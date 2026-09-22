@@ -159,7 +159,7 @@ export default function CreatePostModal({
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             rows={3}
-            className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
+            className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
           />
         </div>
 
@@ -173,7 +173,7 @@ export default function CreatePostModal({
             value={takenAt}
             onChange={(e) => setTakenAt(e.target.value)}
             required
-            className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring transition-[color,box-shadow] duration-200"
+            className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring transition-[color,box-shadow] duration-200"
           />
         </div>
 
@@ -233,7 +233,7 @@ export default function CreatePostModal({
                 value={pollQuestion}
                 onChange={(e) => setPollQuestion(e.target.value)}
                 placeholder={t('pollQuestionPlaceholder')}
-                className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
+                className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
               />
               <div className="flex flex-col gap-1.5">
                 {pollOptions.map((option, index) => (
@@ -243,7 +243,7 @@ export default function CreatePostModal({
                       value={option}
                       onChange={(e) => updatePollOption(index, e.target.value)}
                       placeholder={t('pollOptionPlaceholder', { number: index + 1 })}
-                      className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
+                      className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
                     />
                     <button
                       aria-label={tA11y('remove')}
