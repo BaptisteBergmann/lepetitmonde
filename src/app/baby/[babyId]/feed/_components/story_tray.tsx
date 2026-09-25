@@ -42,8 +42,12 @@ function BubbleThumb({
       )}
     >
       {imageUrl ? (
+        // No loading="lazy"/decoding="async": the tray is always above the
+        // fold, and async decoding let the browser paint an empty bubble
+        // while re-decoding a thumbnail it had discarded after the tray
+        // scrolled far off-screen — visible as a flicker on scroll back up.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt={fallbackLabel} width={56} height={56} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+        <img src={imageUrl} alt={fallbackLabel} width={56} height={56} className="w-full h-full object-cover" />
       ) : fallbackIsVideo ? (
         <Film className="h-5 w-5 text-landing-muted" />
       ) : (
