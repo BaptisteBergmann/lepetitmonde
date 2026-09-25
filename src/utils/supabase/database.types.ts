@@ -1542,6 +1542,51 @@ export type Database = {
           },
         ]
       }
+      todo_items: {
+        Row: {
+          baby_id: string
+          created_at: string
+          created_by: string | null
+          done: boolean
+          id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          created_by?: string | null
+          done?: boolean
+          id?: string
+          position: number
+          title: string
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          created_by?: string | null
+          done?: boolean
+          id?: string
+          position?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todo_items_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todo_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
