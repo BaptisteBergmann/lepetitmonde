@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-25
+
+- `9e78204` Add todo_items table
+
 ## 2026-09-22
 
 - `c01cef7` Hide bottom bar on the baby hub page
