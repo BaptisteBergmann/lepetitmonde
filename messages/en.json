@@ -228,6 +228,11 @@
       "eyebrow": "Page — Let's do this together",
       "description": "What's left to buy. Check items off as you go, everyone sees the update live."
     },
+    "todo": {
+      "name": "To-do",
+      "eyebrow": "Page — The parents' list",
+      "description": "A task list for admins: what's left to prepare, to book, to not forget."
+    },
     "admin": {
       "name": "Admin",
       "eyebrow": "Page — The circle",
@@ -664,6 +669,34 @@
       "saveError": "Something went wrong while saving.",
       "deleteConfirm": "Delete this item? This action can't be undone.",
       "deleteError": "Something went wrong while deleting."
+    }
+  },
+  "todo": {
+    "title": "To-do",
+    "subtitle": "What's left to prepare, to book, to not forget.",
+    "empty": "Nothing to do for now",
+    "emptyHint": "Add a first task to start the list.",
+    "progress": "{done} of {total} done",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this task?",
+    "deleteError": "Something went wrong while deleting.",
+    "toggleError": "Something went wrong while updating.",
+    "moveUp": "Move task up",
+    "moveDown": "Move task down",
+    "moveError": "Something went wrong while moving.",
+    "form": {
+      "addTitle": "New task",
+      "editTitle": "Edit task",
+      "titleLabel": "Task",
+      "titlePlaceholder": "e.g. Book the pediatrician",
+      "cancel": "Cancel",
+      "add": "Add",
+      "adding": "Adding…",
+      "save": "Save",
+      "saving": "Saving…",
+      "saveError": "Something went wrong while saving."
     }
   },
   "anecdotes": {

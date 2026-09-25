@@ -228,6 +228,11 @@
       "eyebrow": "Page — On y va ensemble",
       "description": "Ce qu'il reste à acheter. Cochez au fur et à mesure, tout le monde voit la mise à jour en direct."
     },
+    "todo": {
+      "name": "À faire",
+      "eyebrow": "Page — La liste des parents",
+      "description": "Une liste de tâches pour les administrateurs : ce qu'il reste à préparer, à réserver, à ne pas oublier."
+    },
     "admin": {
       "name": "Administration",
       "eyebrow": "Page — Le cercle",
@@ -664,6 +669,34 @@
       "saveError": "Une erreur est survenue lors de la sauvegarde.",
       "deleteConfirm": "Supprimer cet article ? Cette action est irréversible.",
       "deleteError": "Une erreur est survenue lors de la suppression."
+    }
+  },
+  "todo": {
+    "title": "À faire",
+    "subtitle": "Ce qu'il reste à préparer, à réserver, à ne pas oublier.",
+    "empty": "Rien à faire pour le moment",
+    "emptyHint": "Ajoutez une première tâche pour commencer la liste.",
+    "progress": "{done} sur {total} terminées",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer cette tâche ?",
+    "deleteError": "Une erreur est survenue lors de la suppression.",
+    "toggleError": "Une erreur est survenue lors de la mise à jour.",
+    "moveUp": "Monter la tâche",
+    "moveDown": "Descendre la tâche",
+    "moveError": "Une erreur est survenue lors du déplacement.",
+    "form": {
+      "addTitle": "Nouvelle tâche",
+      "editTitle": "Modifier la tâche",
+      "titleLabel": "Tâche",
+      "titlePlaceholder": "ex. Prendre rendez-vous chez le pédiatre",
+      "cancel": "Annuler",
+      "add": "Ajouter",
+      "adding": "Ajout…",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saveError": "Une erreur est survenue lors de l'enregistrement."
     }
   },
   "anecdotes": {
