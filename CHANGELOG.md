@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-25
 
+- `ec963ec` Add todo page plan, marked implemented
 - `4c368ef` Add admin-only todo page
 - `7cc02b7` Add todo list, checkbox, modal and row actions
 - `8cd555a` Register admin-only todo page and translations
