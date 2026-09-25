@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-25
 
+- `d491e88` fix(stories): stop story tray thumbnails flickering on scroll back up
 - `ec963ec` Add todo page plan, marked implemented
 - `4c368ef` Add admin-only todo page
 - `7cc02b7` Add todo list, checkbox, modal and row actions
