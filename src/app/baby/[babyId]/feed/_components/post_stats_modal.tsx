@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
-import { BarChart3, Eye, SmilePlus, MessageCircle } from 'lucide-react'
+import { BarChart3, Eye, SmilePlus, MessageCircle, ListChecks } from 'lucide-react'
 import { getPostStats, PostStats } from '@utils/actions/post_stats'
 import { PostWithDetails } from '@utils/actions/posts'
 import { Tables } from '@utils/supabase/database.types'
@@ -90,6 +90,23 @@ export default function PostStatsModal({
                 <p className="text-sm text-landing-muted">{t('postStats.noReactions')}</p>
               )}
             </StatSection>
+
+            {stats.poll && (
+              <StatSection title={t('postStats.poll')} icon={ListChecks}>
+                <p className="text-sm font-medium text-landing-foreground">{stats.poll.question}</p>
+                <div className="space-y-1">
+                  {stats.poll.options.map(({ id, label, count, voterNames }) => (
+                    <p key={id} className="text-sm text-landing-foreground">
+                      <span className="mr-1">{label}</span>
+                      <span className="font-medium">{count}</span>
+                      {voterNames.length > 0 && (
+                        <span className="text-landing-muted"> — {voterNames.join(", ")}</span>
+                      )}
+                    </p>
+                  ))}
+                </div>
+              </StatSection>
+            )}
 
             <StatSection title={t('postStats.comments')} icon={MessageCircle}>
               <p className="text-sm text-landing-foreground">{stats.commentCount}</p>

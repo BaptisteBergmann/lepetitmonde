@@ -301,7 +301,8 @@
       "seenBy": "Seen by",
       "reactions": "Reactions",
       "noReactions": "No reactions yet.",
-      "comments": "Comments"
+      "comments": "Comments",
+      "poll": "Poll"
     },
     "postForm": {
       "newTitle": "New post",

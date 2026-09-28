@@ -301,7 +301,8 @@
       "seenBy": "Vu par",
       "reactions": "Réactions",
       "noReactions": "Aucune réaction pour l'instant.",
-      "comments": "Commentaires"
+      "comments": "Commentaires",
+      "poll": "Sondage"
     },
     "postForm": {
       "newTitle": "Nouvelle publication",
