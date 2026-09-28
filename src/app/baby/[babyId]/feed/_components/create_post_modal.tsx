@@ -66,22 +66,32 @@ export default function CreatePostModal({
     [circles]
   )
 
+  // Set once createPost succeeds, so a retry after partial upload failures only
+  // re-uploads the failed files instead of re-creating the post (same postId).
+  const [postCreated, setPostCreated] = useState(false)
+  const [attachedNames, setAttachedNames] = useState<Set<string>>(() => new Set())
+
   const handleConfirm = async () => {
     setIsPending(true)
     try {
-      await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds, sendEmail)
+      if (!postCreated) {
+        await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds, sendEmail)
 
-      if (pollEnabled && pollValid) {
-        await createPoll(postId, babyId, pollQuestion, pollOptions)
+        if (pollEnabled && pollValid) {
+          await createPoll(postId, babyId, pollQuestion, pollOptions)
+        }
+        setPostCreated(true)
       }
 
+      let failedCount = 0
       if (upload.files.length > 0) {
         const newlyUploaded = await upload.onUpload()
         const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
         const finalThumbnails = { ...upload.finalThumbnails, ...newlyUploaded.thumbnails }
         const finalContentTypes = { ...upload.finalContentTypes, ...newlyUploaded.contentTypes }
         const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
-        const successFiles = upload.files.filter((f) => successNames.has(f.name))
+        const successFiles = upload.files.filter((f) => successNames.has(f.name) && !attachedNames.has(f.name))
+        failedCount = upload.files.filter((f) => !successNames.has(f.name)).length
 
         const uploadedFiles = await Promise.all(successFiles.map(async (f) => {
           const filename = finalNames[f.name] ?? f.name
@@ -109,11 +119,18 @@ export default function CreatePostModal({
 
         if (uploadedFiles.length > 0) {
           await attachPostPhotos(postId, babyId, uploadedFiles)
+          setAttachedNames((prev) => new Set([...prev, ...successFiles.map((f) => f.name)]))
         }
       }
 
-      onClose()
       router.refresh()
+      if (failedCount > 0) {
+        // Keep the modal open so the Dropzone's per-file errors stay visible and
+        // the user can retry — the post itself is already published.
+        toast.error(t('uploadsFailed', { count: failedCount }))
+        return
+      }
+      onClose()
     } catch (err) {
       console.error(err)
       toast.error(t('publishError'))
@@ -278,7 +295,7 @@ export default function CreatePostModal({
           className="rounded-2xl cursor-pointer"
           onClick={onClose}
         >
-          {t('cancel')}
+          {postCreated ? t('close') : t('cancel')}
         </Button>
         <Button
           disabled={!takenAt || hasFileErrors || !pollValid || isPending}
@@ -291,7 +308,7 @@ export default function CreatePostModal({
               <span>{t('publishing')}</span>
             </>
           ) : (
-            <span>{t('publish')}</span>
+            <span>{postCreated ? t('retryUploads') : t('publish')}</span>
           )}
         </Button>
       </div>

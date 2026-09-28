@@ -326,7 +326,10 @@
       "saving": "Enregistrement...",
       "save": "Enregistrer",
       "publishError": "Une erreur est survenue lors de la publication.",
-      "editError": "Une erreur est survenue lors de la modification."
+      "editError": "Une erreur est survenue lors de la modification.",
+      "uploadsFailed": "{count, plural, one {# fichier n'a} other {# fichiers n'ont}} pas pu être envoyé{count, plural, one {} other {s}}. Le post est publié sans — réessayez ci-dessous ou fermez.",
+      "retryUploads": "Réessayer les envois",
+      "close": "Fermer"
     },
     "storyForm": {
       "title": "Nouvelle story",
