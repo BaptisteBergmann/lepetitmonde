@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-09-28
+
+- `f053484` fix(upload): generate thumbnails with sharp so 48-50MP photos get one
+
 ## 2026-09-25
 
 - `d491e88` fix(stories): stop story tray thumbnails flickering on scroll back up
