@@ -1,5 +1,5 @@
 import convertHeic from 'heic-convert'
-import { Jimp } from 'jimp'
+import sharp from 'sharp'
 import { createTranslator } from 'next-intl'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
@@ -115,13 +115,19 @@ function toThumbnailPath(uploadPath: string) {
 // falling back to the full-size original on every grid render. Returns
 // null (not a thrown error) on failure so a thumbnail glitch never blocks
 // the actual upload — same fallback-to-full-size behavior as before.
-async function generateThumbnail(buffer: Buffer): Promise<Buffer | null> {
+//
+// sharp (libvips) rather than Jimp: jpeg-js decodes the full bitmap in JS
+// and refuses anything over its 512MB budget, which every 48-50MP phone
+// photo exceeds — sharp shrinks JPEGs during decode, so memory stays small.
+async function generateThumbnail(buffer: Buffer, contextLogger: typeof logger): Promise<Buffer | null> {
   try {
-    const image = await Jimp.read(buffer)
-    const scale = Math.min(1, THUMBNAIL_MAX_DIMENSION / Math.max(image.bitmap.width, image.bitmap.height))
-    if (scale < 1) image.scale(scale)
-    return await image.getBuffer('image/jpeg', { quality: 80 })
-  } catch {
+    return await sharp(buffer)
+      .rotate()
+      .resize(THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer()
+  } catch (err) {
+    contextLogger.warn(err, 'Thumbnail decode/resize failed')
     return null
   }
 }
@@ -243,7 +249,7 @@ export async function POST(request: Request) {
 
   let thumbnailFilename: string | undefined
   if (isImage && uploadBody instanceof Buffer) {
-    const { result: thumbnailBuffer, durationMs: thumbnailDurationMs } = await withTiming(() => generateThumbnail(uploadBody as Buffer))
+    const { result: thumbnailBuffer, durationMs: thumbnailDurationMs } = await withTiming(() => generateThumbnail(uploadBody as Buffer, contextLoggerWithPath))
     if (thumbnailBuffer) {
       const thumbnailPath = toThumbnailPath(uploadPath)
       const { error: thumbnailError } = await supabaseAdmin.storage.from(bucketName).upload(thumbnailPath, thumbnailBuffer, {
