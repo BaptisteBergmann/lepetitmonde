@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-09-28
 
+- `b5224c8` feat(feed): show poll votes per option in the post stats modal
 - `76a3149` fix(feed): surface failed post uploads instead of silently dropping them
 - `f053484` fix(upload): generate thumbnails with sharp so 48-50MP photos get one
 
