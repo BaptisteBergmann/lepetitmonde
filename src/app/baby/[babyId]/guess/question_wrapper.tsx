@@ -43,7 +43,7 @@ export interface PickerProps {
 }
 
 export type QuestionWithGuess = Tables<"guess_questions"> & {
-  guesses?: Tables<"guesses">[];
+  guesses?: Omit<Tables<"guesses">, "is_correct" | "is_funny">[];
 };
 
 export default function QuestionWrapper({
@@ -54,8 +54,7 @@ export default function QuestionWrapper({
   // Own score on a resolved question, computed server-side.
   result?: MyResult;
 }) {
-  const contextLogger = logger.child({ function: QuestionWrapper.name });
-  contextLogger.info(questionWithGuess, "Display question");
+  const contextLogger = logger.child({ function: QuestionWrapper.name, questionId: questionWithGuess.id });
 
   const router = useRouter();
   const t = useTranslations('guess.question');

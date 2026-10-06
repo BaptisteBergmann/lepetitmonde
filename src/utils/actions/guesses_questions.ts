@@ -305,7 +305,9 @@ export async function getQuestionsWithGuess(babyId: string) {
 
   const { data, error } = await supabase
     .from('guess_questions')
-    .select("*, guesses!inner (*)")
+    // Explicit guess columns: is_correct / is_funny are admin-side verdicts
+    // and must not reach the member's browser.
+    .select("*, guesses!inner (id, user_id, question_id, baby_id, answer, created_at)")
     .eq('baby_id', babyId)
     .eq('status', 'approved')
     .eq('guesses.user_id', user.id)
