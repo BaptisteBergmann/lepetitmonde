@@ -1,5 +1,8 @@
-'use server'
-
+// Deliberately NOT a 'use server' module: every helper here runs on the
+// service role with no auth check of its own, so exporting them from an
+// action file would let any client create buckets or copy/delete objects in
+// any baby's bucket. Only import from server code that has already verified
+// the caller (every current importer is an action that does).
 import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@/utils/logger'
 
@@ -21,7 +24,7 @@ export async function ensureBabyBucket(babyId: string) {
 const BUG_REPORTS_BUCKET = 'bug-reports'
 
 // Returns the bucket name after making sure it exists, so callers never
-// need a separate non-async export (illegal in a "use server" file).
+// need a separate constant export.
 export async function ensureBugReportsBucket() {
   const contextLogger = logger.child({ function: ensureBugReportsBucket.name })
   const supabaseAdmin = createAdminClient()
