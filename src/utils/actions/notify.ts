@@ -1,5 +1,8 @@
-'use server'
-
+// Deliberately NOT a 'use server' module: notifyUsers runs on the service
+// role and takes babyId, recipients and content with no auth check of its
+// own, so exporting it from an action file would let any client write inbox
+// entries and send pushes to anyone. Only import from server code that has
+// already verified the caller and computed the recipients itself.
 import webpush, { ensureVapidConfigured } from '@utils/webpush'
 import { createAdminClient } from '@utils/supabase/admin'
 import { Enums } from '@utils/supabase/database.types'
