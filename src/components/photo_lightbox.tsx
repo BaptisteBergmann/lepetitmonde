@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@utils/utils'
 
@@ -43,13 +43,6 @@ export default function PhotoLightbox({
 }) {
   const tA11y = useTranslations('a11y')
   const containerRef = useRef<HTMLDivElement>(null)
-
-  // Move focus into the overlay on open and give it back on close (keyboard / screen reader users).
-  useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null
-    containerRef.current?.focus()
-    return () => previous?.focus?.()
-  }, [])
   const [index, setIndex] = useState(initialIndex)
   const [scale, setScale] = useState(1)
   const [translate, setTranslate] = useState({ x: 0, y: 0 })
@@ -78,18 +71,14 @@ export default function PhotoLightbox({
     resetZoom()
   }
 
+  // Escape, focus trap/restore and scroll lock come from the Dialog below.
   useEffect(() => {
-    document.body.style.overflow = 'hidden'
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
       if (e.key === 'ArrowLeft') goPrev()
       if (e.key === 'ArrowRight') goNext()
     }
     window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
-    }
+    return () => window.removeEventListener('keydown', handleKeyDown)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -212,124 +201,130 @@ export default function PhotoLightbox({
     onClose()
   }
 
-  // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
-  return createPortal(
-    <div
-      className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={tA11y('photoViewer')}
-      tabIndex={-1}
-      onClick={handleBackdropClick}
-    >
-      <div className="flex justify-between items-center px-4 py-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
-        {photos.length > 1 ? (
-          <span className="text-sm text-white/70">{index + 1} / {photos.length}</span>
-        ) : <span />}
-        <button
-          aria-label={tA11y('close')}
-          onClick={onClose}
-          className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+  // Base UI Dialog gives focus trap + restore, Escape (topmost layer first) and
+  // scroll lock; the portal keeps any ancestor stacking context from trapping
+  // the overlay under the fixed header. The popup is full-screen, so there is
+  // no "outside" to press: dark-area clicks go through handleBackdropClick,
+  // and pointer dismissal is off so e.g. swiping a toast can't close it.
+  return (
+    <DialogPrimitive.Root open onOpenChange={(open) => { if (!open) onClose() }} disablePointerDismissal>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Popup
+          className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
+          ref={containerRef}
+          initialFocus={containerRef}
+          aria-label={tA11y('photoViewer')}
+          tabIndex={-1}
+          onClick={handleBackdropClick}
         >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
+          <div className="flex justify-between items-center px-4 py-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+            {photos.length > 1 ? (
+              <span className="text-sm text-white/70">{index + 1} / {photos.length}</span>
+            ) : <span />}
+            <button
+              aria-label={tA11y('close')}
+              onClick={onClose}
+              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-      <div
-        ref={imageAreaRef}
-        className="relative flex-1 overflow-hidden"
-        style={{ touchAction: 'none' }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div
-          className="flex h-full transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
-        >
-          {photos.map((photo, i) => (
-            <div key={photo.id} className="w-full h-full shrink-0 flex items-center justify-center">
-              {/* Only the current slide plus its immediate neighbors actually mount
-                  media — this row is fully rendered (all slides exist for the
-                  swipe/translateX layout), but without this guard every photo's
-                  full-res `url` would load immediately on open, not just the one
-                  being viewed. */}
-              {photo.url && Math.abs(i - index) <= 1 && (
-                photo.mime_type?.startsWith('video/') ? (
-                  <video
-                    src={photo.url}
-                    poster={photo.thumbnailUrl ?? undefined}
-                    controls
-                    playsInline
-                    className="max-w-full max-h-full object-contain select-none"
-                  />
-                ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photo.url}
-                    alt={alt}
-                    className={cn(
-                      "max-w-full max-h-full object-contain select-none",
-                      i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out"
-                    )}
-                    style={
-                      i === index
-                        ? { transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)` }
-                        : undefined
-                    }
-                    draggable={false}
-                  />
-                )
-              )}
+          <div
+            ref={imageAreaRef}
+            className="relative flex-1 overflow-hidden"
+            style={{ touchAction: 'none' }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="flex h-full transition-transform duration-300 ease-out"
+              style={{ transform: `translateX(-${index * 100}%)` }}
+            >
+              {photos.map((photo, i) => (
+                <div key={photo.id} className="w-full h-full shrink-0 flex items-center justify-center">
+                  {/* Only the current slide plus its immediate neighbors actually mount
+                      media — this row is fully rendered (all slides exist for the
+                      swipe/translateX layout), but without this guard every photo's
+                      full-res `url` would load immediately on open, not just the one
+                      being viewed. */}
+                  {photo.url && Math.abs(i - index) <= 1 && (
+                    photo.mime_type?.startsWith('video/') ? (
+                      <video
+                        src={photo.url}
+                        poster={photo.thumbnailUrl ?? undefined}
+                        controls
+                        playsInline
+                        className="max-w-full max-h-full object-contain select-none"
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photo.url}
+                        alt={alt}
+                        className={cn(
+                          "max-w-full max-h-full object-contain select-none",
+                          i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out"
+                        )}
+                        style={
+                          i === index
+                            ? { transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)` }
+                            : undefined
+                        }
+                        draggable={false}
+                      />
+                    )
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {photos.length > 1 && (
-          <>
-            <button
-              aria-label={tA11y('previous')}
-              onClick={goPrev}
-              disabled={index === 0}
-              className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none touch-target pointer-coarse:p-2",
-                "hidden sm:flex items-center justify-center"
-              )}
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              aria-label={tA11y('next')}
-              onClick={goNext}
-              disabled={index === photos.length - 1}
-              className={cn(
-                "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none touch-target pointer-coarse:p-2",
-                "hidden sm:flex items-center justify-center"
-              )}
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </>
-        )}
-      </div>
+            {photos.length > 1 && (
+              <>
+                <button
+                  aria-label={tA11y('previous')}
+                  onClick={goPrev}
+                  disabled={index === 0}
+                  className={cn(
+                    "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none touch-target pointer-coarse:p-2",
+                    "hidden sm:flex items-center justify-center"
+                  )}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  aria-label={tA11y('next')}
+                  onClick={goNext}
+                  disabled={index === photos.length - 1}
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none touch-target pointer-coarse:p-2",
+                    "hidden sm:flex items-center justify-center"
+                  )}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </>
+            )}
+          </div>
 
-      {photos.length > 1 && (
-        <div className="flex justify-center gap-1.5 py-3 shrink-0">
-          {photos.map((photo, i) => (
-            <button
-              key={photo.id}
-              aria-label={tA11y('photoN', { n: i + 1 })}
-              aria-current={i === index}
-              onClick={() => { setIndex(i); resetZoom() }}
-              className={cn(
-                "h-1.5 rounded-full transition-all cursor-pointer",
-                i === index ? "w-4 bg-white" : "w-1.5 bg-white/30"
-              )}
-            />
-          ))}
-        </div>
-      )}
-    </div>,
-    document.body,
+          {photos.length > 1 && (
+            <div className="flex justify-center gap-1.5 py-3 shrink-0">
+              {photos.map((photo, i) => (
+                <button
+                  key={photo.id}
+                  aria-label={tA11y('photoN', { n: i + 1 })}
+                  aria-current={i === index}
+                  onClick={() => { setIndex(i); resetZoom() }}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all cursor-pointer",
+                    i === index ? "w-4 bg-white" : "w-1.5 bg-white/30"
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }

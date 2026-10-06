@@ -1,9 +1,9 @@
 'use client'
 
-import { useConfirm } from '@/components/confirm_provider'
+import { ConfirmProvider, useConfirm } from '@/components/confirm_provider'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { createPortal } from 'react-dom'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { X, ChevronLeft, ChevronRight, Eye, Loader2, Pause, Pencil, Play, Plus as PlusIcon, Sparkles, Trash2, Volume2, VolumeX } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@utils/utils'
@@ -29,17 +29,7 @@ const RIGHT_ZONE = 0.7
 
 const viewerIconButton = "p-1.5 pointer-coarse:p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70"
 
-export default function StoryViewer({
-  babyId,
-  isAdmin,
-  circles,
-  existingGroupLabels,
-  highlights,
-  groups,
-  target,
-  onClose,
-  onChanged,
-}: {
+type StoryViewerProps = {
   babyId: string
   isAdmin: boolean
   circles: Circle[]
@@ -49,17 +39,71 @@ export default function StoryViewer({
   target: ViewerTarget
   onClose: () => void
   onChanged: () => void
-}) {
-  const t = useTranslations('feed')
+}
+
+// Dialog shell: Base UI gives the focus trap + restore, scroll lock and a
+// layered Escape (an open reaction Popover, Select, EditStoryModal or
+// confirm closes first, and only then the viewer).
+export default function StoryViewer(props: StoryViewerProps) {
+  const { onClose } = props
   const tA11y = useTranslations('a11y')
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Move focus into the overlay on open and give it back on close (keyboard / screen reader users).
-  useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null
-    containerRef.current?.focus()
-    return () => previous?.focus?.()
-  }, [])
+  // Wraps onClose: a tap on the advance/pause zones is handled on
+  // `pointerup`, one event before the browser's own synthesized "click" for
+  // that same tap. When that tap is what closes the viewer (goNext on the
+  // last story), the overlay can already be unmounted by the time the click
+  // fires, so it falls through to whatever feed post is underneath and opens
+  // its lightbox. Swallowing exactly one click right after any close — no
+  // matter what triggered it — stops that stray click regardless of the
+  // precise browser timing that produces it.
+  const closeViewer = useCallback(() => {
+    const swallowNextClick = (e: MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    window.addEventListener('click', swallowNextClick, { capture: true, once: true })
+    setTimeout(() => window.removeEventListener('click', swallowNextClick, { capture: true }), 500)
+    onClose()
+  }, [onClose])
+
+  // The popup is full-screen, so the only possible "outside" presses are on
+  // things like toasts: never let those dismiss the viewer.
+  return (
+    <DialogPrimitive.Root open onOpenChange={(open) => { if (!open) closeViewer() }} disablePointerDismissal>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Popup
+          ref={containerRef}
+          initialFocus={containerRef}
+          aria-label={tA11y('storyViewer')}
+          tabIndex={-1}
+          className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
+        >
+          {/* Own provider so the delete confirm renders inside this dialog's
+              tree; the page-level one would count as an outside interaction. */}
+          <ConfirmProvider>
+            <StoryViewerBody {...props} closeViewer={closeViewer} />
+          </ConfirmProvider>
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  )
+}
+
+function StoryViewerBody({
+  babyId,
+  isAdmin,
+  circles,
+  existingGroupLabels,
+  highlights,
+  groups,
+  target,
+  onClose,
+  onChanged,
+  closeViewer,
+}: StoryViewerProps & { closeViewer: () => void }) {
+  const t = useTranslations('feed')
+  const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const isHighlight = target.kind === 'highlight'
   const targetId = target.kind === 'highlight' ? target.id : target.key
@@ -124,24 +168,6 @@ export default function StoryViewer({
   const storyCreatedBy = story?.created_by ?? null
   const storyIsVideo = story?.mime_type.startsWith('video/') ?? false
 
-  // Wraps onClose: a tap on the advance/pause zones is handled on
-  // `pointerup`, one event before the browser's own synthesized "click" for
-  // that same tap. When that tap is what closes the viewer (goNext on the
-  // last story), the overlay can already be unmounted by the time the click
-  // fires, so it falls through to whatever feed post is underneath and opens
-  // its lightbox. Swallowing exactly one click right after any close — no
-  // matter what triggered it — stops that stray click regardless of the
-  // precise browser timing that produces it.
-  const closeViewer = useCallback(() => {
-    const swallowNextClick = (e: MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    window.addEventListener('click', swallowNextClick, { capture: true, once: true })
-    setTimeout(() => window.removeEventListener('click', swallowNextClick, { capture: true }), 500)
-    onClose()
-  }, [onClose])
-
   const goPrev = useCallback(() => {
     setIndex((i) => Math.max(0, i - 1))
   }, [])
@@ -156,25 +182,22 @@ export default function StoryViewer({
     })
   }, [stories.length, closeViewer])
 
+  // Escape is left to the Dialog so the topmost layer closes first.
   useEffect(() => {
-    document.body.style.overflow = 'hidden'
     const handleKeyDown = (e: KeyboardEvent) => {
       // The delete-confirm dialog / edit modal own the keyboard while open.
       if (confirming || editing) return
-      // Typing in the highlight name field: arrows move the caret and
-      // Escape stays in the field instead of navigating/closing.
+      // Typing in the highlight name field: arrows move the caret instead of
+      // navigating. Arrows inside the reaction popover belong to it too.
       const el = e.target
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || (el instanceof HTMLElement && el.isContentEditable)) return
-      if (e.key === 'Escape') closeViewer()
+      if (el instanceof Element && el.closest('[data-slot="popover-content"]')) return
       if (e.key === 'ArrowLeft') goPrev()
       if (e.key === 'ArrowRight') goNext()
     }
     window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [closeViewer, goPrev, goNext, confirming, editing])
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [goPrev, goNext, confirming, editing])
 
   // "Seen" tracking is an ephemeral-stories concept — highlight-sourced
   // items skip markStoryViewed entirely. The resets below are re-derived
@@ -329,16 +352,8 @@ export default function StoryViewer({
     videoRef.current?.play().catch(() => setNeedsTapToPlay(true))
   }
 
-  // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
-  return createPortal(
-    <div
-      className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={tA11y('storyViewer')}
-      tabIndex={-1}
-    >
+  return (
+    <>
       <div className="flex gap-1 px-3 pt-3 shrink-0" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         {stories.map((s, i) => (
           <div key={s.id} className="h-0.5 flex-1 rounded-full bg-white/25 overflow-hidden">
@@ -599,7 +614,6 @@ export default function StoryViewer({
           </div>
         )}
       </div>
-    </div>,
-    document.body,
+    </>
   )
 }
