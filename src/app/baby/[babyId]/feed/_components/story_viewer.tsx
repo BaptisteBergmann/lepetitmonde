@@ -70,7 +70,18 @@ export default function StoryViewer(props: StoryViewerProps) {
   // The popup is full-screen, so the only possible "outside" presses are on
   // things like toasts: never let those dismiss the viewer.
   return (
-    <DialogPrimitive.Root open onOpenChange={(open) => { if (!open) closeViewer() }} disablePointerDismissal>
+    <DialogPrimitive.Root
+      open
+      onOpenChange={(open, details) => {
+        if (open) return
+        // Escape while typing a highlight name would lose the text: keep the
+        // viewer open (it's controlled) until the field is empty.
+        const target = details.reason === 'escape-key' ? details.event.target : null
+        if (target instanceof HTMLInputElement && target.value.trim()) return
+        closeViewer()
+      }}
+      disablePointerDismissal
+    >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Popup
           ref={containerRef}
