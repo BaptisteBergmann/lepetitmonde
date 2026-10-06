@@ -37,16 +37,25 @@ export default function ReactionPicker({
     setReactions(applyMyReaction(snapshot, wasMine ? null : emoji))
     setPickerOpen(false)
     try {
-      if (wasMine) {
-        await removeReaction(postId, babyId)
-      } else {
-        await addReaction(postId, babyId, emoji)
+      try {
+        if (wasMine) {
+          await removeReaction(postId, babyId)
+        } else {
+          await addReaction(postId, babyId, emoji)
+        }
+      } catch (err) {
+        contextLogger.error(err, 'Error saving reaction')
+        setReactions(snapshot)
+        toast.error(t('error'))
+        return
       }
-      setReactions(await getReactions(postId, babyId))
-    } catch (err) {
-      contextLogger.error(err, 'Error saving reaction')
-      setReactions(snapshot)
-      toast.error(t('error'))
+      // The reaction is saved: a failed refetch only means stale names, so
+      // keep the optimistic state rather than rolling back.
+      try {
+        setReactions(await getReactions(postId, babyId))
+      } catch (err) {
+        contextLogger.warn({ err }, 'Error refetching reactions after save')
+      }
     } finally {
       inFlight.current = false
     }

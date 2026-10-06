@@ -54,14 +54,17 @@ export default function CommentReactionPicker({
       } else {
         await addCommentReaction(commentId, babyId, emoji)
       }
-      onChanged()
     } catch (err) {
       contextLogger.error(err, 'Error saving comment reaction')
       setReactions(snapshot)
       toast.error(t('error'))
+      return
     } finally {
       inFlight.current = false
     }
+    // Only a failed mutation rolls back; the parent's refetch is outside the
+    // try so its problems can't undo a reaction that was saved.
+    onChanged()
   }
 
   return (
