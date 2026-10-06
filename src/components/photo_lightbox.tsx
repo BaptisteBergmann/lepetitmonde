@@ -48,7 +48,10 @@ export default function PhotoLightbox({
   const [translate, setTranslate] = useState({ x: 0, y: 0 })
   const touchStartX = useRef<number | null>(null)
 
-  const imageAreaRef = useRef<HTMLDivElement>(null)
+  // State, not a ref: the Dialog portal mounts this node a couple of commits
+  // after PhotoLightbox itself, so a mount-time effect reading a ref would see
+  // null and never attach the gesture listener.
+  const [imageArea, setImageArea] = useState<HTMLDivElement | null>(null)
   const scaleRef = useRef(1)
   const pinchStartDistance = useRef<number | null>(null)
   const pinchStartScale = useRef(1)
@@ -87,7 +90,7 @@ export default function PhotoLightbox({
   }, [scale])
 
   const clampTranslate = (s: number, t: { x: number; y: number }) => {
-    const el = imageAreaRef.current
+    const el = imageArea
     if (!el || s <= 1) return { x: 0, y: 0 }
     const maxX = (el.clientWidth * (s - 1)) / 2
     const maxY = (el.clientHeight * (s - 1)) / 2
@@ -103,7 +106,7 @@ export default function PhotoLightbox({
   // preventDefault() on touchmove only works via a non-passive native listener,
   // React's synthetic onTouchMove is registered passive and can't stop native scroll/zoom.
   useEffect(() => {
-    const el = imageAreaRef.current
+    const el = imageArea
     if (!el) return
 
     const onTouchMove = (e: TouchEvent) => {
@@ -132,7 +135,10 @@ export default function PhotoLightbox({
 
     el.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => el.removeEventListener('touchmove', onTouchMove)
-  }, [])
+    // clampTranslate only reads imageArea (a dep) and refs, so re-attaching the
+    // listener on every render for its new identity would buy nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageArea])
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
@@ -231,7 +237,7 @@ export default function PhotoLightbox({
           </div>
 
           <div
-            ref={imageAreaRef}
+            ref={setImageArea}
             className="relative flex-1 overflow-hidden"
             style={{ touchAction: 'none' }}
             onTouchStart={handleTouchStart}
