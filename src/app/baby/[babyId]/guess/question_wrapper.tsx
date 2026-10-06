@@ -4,10 +4,11 @@ import { toast } from 'sonner'
 import { Button } from "@/components/ui/button";
 import { submitGuess } from "@/utils/actions/guesses";
 import { logger } from "@/utils/logger";
-import { Tables, Json } from "@/utils/supabase/database.types";
+import { Tables } from "@/utils/supabase/database.types";
 import { useState, Dispatch, SetStateAction } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getLocaleTag } from "@/utils/formatting";
+import { formatAnswer } from "@/utils/guess_format";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { CheckCircle2, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -76,32 +77,6 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
     }
   };
 
-  const formatDisplayValue = (val: Json | undefined, type: string, options: QuestionOptions | null) => {
-    if (val === undefined || val === null || val === "") return "-";
-    if (type === "date") {
-      try {
-        const d = new Date(val as string | number);
-        if (!isNaN(d.getTime())) {
-          return d.toLocaleDateString(localeTag, {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          });
-        }
-      } catch (_) { }
-    }
-    if (type === "number") {
-      const num = Number(val);
-      if (!isNaN(num) && typeof options?.precision === "number") {
-        return num.toLocaleString(localeTag, {
-          minimumFractionDigits: options.precision,
-          maximumFractionDigits: options.precision,
-        });
-      }
-    }
-    return String(val);
-  };
-
   return (
     <Card className={`relative overflow-hidden transition-all duration-200 border ${hasAnswered
       ? "border-emerald-100 dark:border-emerald-950 bg-emerald-500/5 dark:bg-emerald-500/[0.02]"
@@ -126,7 +101,7 @@ export default function QuestionWrapper({ questionWithGuess }: { questionWithGue
                 {t('yourAnswer')}
               </span>
               <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
-                {formatDisplayValue(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type, questionOptions)}
+                {formatAnswer(questionWithGuess.guesses?.at(0)?.answer, questionWithGuess.type, questionWithGuess.options, localeTag)}
               </p>
             </div>
             <div className="bg-emerald-500 text-white rounded-full p-1.5 shadow-xs">

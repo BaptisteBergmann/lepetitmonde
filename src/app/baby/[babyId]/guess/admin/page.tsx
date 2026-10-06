@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getLocaleTag } from "@/utils/formatting";
+import { formatAnswer } from "@/utils/guess_format";
 import { ArrowLeft, Calendar, Hash, Type, User, CircleDot, Pencil } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
@@ -28,26 +29,6 @@ function getTypeMeta(type: string, tType: (key: string) => string) {
     default:
       return { icon: <Type className="h-3.5 w-3.5 text-emerald-500" />, label: tType('text') };
   }
-}
-
-function formatAnswer(value: unknown, type: string, options: unknown, localeTag: string) {
-  if (value === undefined || value === null || value === "") return "-";
-  if (type === "date") {
-    const d = new Date(value as string);
-    if (!isNaN(d.getTime())) {
-      return d.toLocaleDateString(localeTag, { day: "numeric", month: "long", year: "numeric" });
-    }
-  }
-  if (type === "number") {
-    const num = Number(value);
-    if (!isNaN(num)) {
-      const precision = (options as { precision?: number } | null)?.precision;
-      if (typeof precision === "number") {
-        return num.toLocaleString(localeTag, { minimumFractionDigits: precision, maximumFractionDigits: precision });
-      }
-    }
-  }
-  return String(value);
 }
 
 export default async function GuessAdminPage({
