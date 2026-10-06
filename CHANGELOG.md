@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `e4d0e76` docs(plans): add journal UI polish plan
 - `85b3c3d` docs(plans): mark feed follow-ups implemented
 - `a44f515` fix(feed): make the whole 0-vote poll row vote
 - `ed38b5e` fix(feed): disable the dropzone while a post or story is publishing
