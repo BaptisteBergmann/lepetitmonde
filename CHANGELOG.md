@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `ed38b5e` fix(feed): disable the dropzone while a post or story is publishing
 - `f7f1e5a` fix(feed): keep publishPost from failing after the push when email fails
 - `bf215f5` fix(feed): roll back partial post and poll creates so retries work
 - `41cf3f5` fix(security): stop exposing notifyUsers as a server action
