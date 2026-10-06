@@ -53,7 +53,7 @@ export async function removeStorageObjects(babyId: string, paths: string[]) {
 
 // Storage-to-storage duplication (no download/re-upload round trip) — used
 // to give a story's media a permanent, independent copy on the Photos page
-// (see copyStoryPhotoToLibrary in albums.ts) so it survives the story
+// (see copyStoryPhotoToLibrary in albums-internal.ts) so it survives the story
 // itself expiring or being deleted.
 export async function copyStorageObject(babyId: string, fromPath: string, toPath: string) {
   const contextLogger = logger.child({ function: copyStorageObject.name, babyId, fromPath, toPath })

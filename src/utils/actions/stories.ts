@@ -10,7 +10,7 @@ import { assertIsAdmin, getVisibleUserIds } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
-import { copyStoryPhotoToLibrary } from './albums'
+import { copyStoryPhotoToLibrary } from '@utils/albums-internal'
 import { notifyUsers } from './notify'
 import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-loaders'
 import type { ReactionsData } from './reactions'
@@ -381,7 +381,7 @@ export async function deleteStory(storyId: string, babyId: string) {
   contextLogger.info("Story deleted")
 
   // The story's Photos-page copy (source_story_id, ON DELETE SET NULL)
-  // deliberately survives this — see copyStoryPhotoToLibrary in albums.ts.
+  // deliberately survives this — see copyStoryPhotoToLibrary in albums-internal.ts.
   revalidatePath(`/baby/${babyId}/feed`)
   revalidatePath(`/baby/${babyId}/albums`)
 }
