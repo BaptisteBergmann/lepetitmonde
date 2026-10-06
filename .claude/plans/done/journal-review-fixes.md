@@ -1,6 +1,11 @@
 # Journal (feed) review fixes
 
-Status: approved
+Status: implemented
+
+## Status: implemented
+Shipped 2026-10-06 (steps 0–14, reviewer approved round 1). Migration `20261006205655_poll_votes_option_matches_poll` applied (pre-check: 0 mismatched votes); types regenerated.
+Deviations: notifications wait until every upload succeeds (user decision, not "after first pass"); new `serverErrors.textRequired` key; `uploadsFailed` toast reworded; upload hook dedupes retries and turns network errors into per-file errors; "Finish publishing" skips already-uploaded files; viewer closes when its group disappears; `maxLength` on feed inputs.
+Follow-ups (reviewer, low): make `createPoll`/`createPost` atomic or retry-safe; wrap the email step in `publishPost` so a failure can't resend the push; disable the Dropzone while pending; make the 0-vote poll row fully tappable; tapping a reaction pill adds that reaction (user decision). Separate security fix needed: `storage.ts`, `albums.ts` (`linkPostPhotos`, `copyStoryPhotoToLibrary`) and `notify.ts` expose unauthenticated service-role actions.
 Approved by: Baptiste (2026-10-06)
 
 ## Goal
