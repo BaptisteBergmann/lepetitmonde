@@ -357,6 +357,13 @@
       "deleteConfirm": "Supprimer cette story ? Cette action est irréversible.",
       "addToHighlights": "Ajouter aux highlights",
       "newHighlightPlaceholder": "Nouveau highlight"
+    },
+    "poll": {
+      "voteCount": "{percent} % · {count}",
+      "zeroPercent": "0 %",
+      "resultSr": "{percent} %, {count, plural, =0 {aucun vote} one {# vote} other {# votes}}",
+      "votersLabel": "Voir qui a voté pour « {option} »",
+      "voteError": "Votre vote n'a pas pu être enregistré. Réessayez."
     }
   },
   "calendar": {
