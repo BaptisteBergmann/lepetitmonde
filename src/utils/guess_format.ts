@@ -1,13 +1,33 @@
 import type { Json } from '@utils/supabase/database.types'
 
+const DAY_MS = 86_400_000
+
+// Date answers are stored as the UTC instant of the picker's local midnight,
+// so the same calendar day comes in as e.g. 22:00Z the day before (Paris) or
+// 04:00Z (Montreal). Rounding to the nearest UTC midnight recovers the day
+// the person actually picked, for any timezone within ±12h. Scoring and
+// display both go through this so they can never disagree.
+export function toCalendarDay(value: Json | undefined): number | null {
+  if (typeof value !== 'string' && typeof value !== 'number') return null
+  if (typeof value === 'string' && value.trim() === '') return null
+  const ms = new Date(value).getTime()
+  return Number.isFinite(ms) ? Math.round(ms / DAY_MS) : null
+}
+
 // One formatter for guesses and correct answers so the admin page, member
 // cards and leaderboard always show the same value the same way.
 export function formatAnswer(value: Json | undefined, type: string, options: Json | null | undefined, localeTag: string): string {
   if (value === undefined || value === null || value === '') return '-'
   if (type === 'date') {
-    const d = new Date(value as string | number)
-    if (!isNaN(d.getTime())) {
-      return d.toLocaleDateString(localeTag, { day: 'numeric', month: 'long', year: 'numeric' })
+    const day = toCalendarDay(value)
+    if (day !== null) {
+      // UTC so the server (UTC) and every viewer's browser show the same day.
+      return new Date(day * DAY_MS).toLocaleDateString(localeTag, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
     }
   }
   if (type === 'number') {

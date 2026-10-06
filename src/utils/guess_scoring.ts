@@ -1,3 +1,4 @@
+import { toCalendarDay } from '@utils/guess_format'
 import type { Json, Tables } from '@utils/supabase/database.types'
 
 // Pronostic scoring, computed at read time (nothing stored) so deleting a
@@ -11,7 +12,6 @@ export const MAX_TEXT_ANSWER_LENGTH = 500
 
 const CLOSEST_WINS_TYPES = new Set(['number', 'date', 'time'])
 
-const DAY_MS = 86_400_000
 const MINUTES_PER_DAY = 1440
 // Enough to absorb float error (|3.1 - 3.2| vs |3.3 - 3.2|) without merging
 // genuinely different guesses.
@@ -62,12 +62,10 @@ export function toComparable(type: string, value: Json | undefined): number | nu
       const n = Number(value)
       return Number.isFinite(n) ? n : null
     }
-    case 'date': {
-      // Whole days: dates are stored as the UTC instant of a local midnight,
-      // so raw ms would differ by an hour across DST or between timezones.
-      const ms = new Date(value).getTime()
-      return Number.isFinite(ms) ? Math.round(ms / DAY_MS) : null
-    }
+    case 'date':
+      // Whole calendar days, shared with formatAnswer so the date shown is
+      // always the date scored.
+      return toCalendarDay(value)
     case 'time': {
       const match = /^(\d{1,2}):(\d{2})$/.exec(String(value).trim())
       if (!match) return null
