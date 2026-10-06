@@ -527,7 +527,8 @@
         "unflag": "Retirer la mention drôle de la réponse de {userName}",
         "hiddenUntilResolved": "Visible par la famille une fois dévoilé",
         "error": "Impossible de modifier la mention drôle."
-      }
+      },
+      "leaderboardLink": "Classement"
     },
     "pendingQuestions": {
       "titleWithCount": "Propositions en attente de validation ({count})",
@@ -545,6 +546,27 @@
       "moveUp": "Monter le pronostic",
       "moveDown": "Descendre le pronostic",
       "moveError": "Une erreur est survenue lors du déplacement."
+    },
+    "leaderboardLink": "Classement",
+    "leaderboard": {
+      "title": "Classement",
+      "subtitle": "Qui connaissait le mieux bébé ? Les points viennent des pronostics déjà dévoilés.",
+      "back": "Retour aux pronostics",
+      "resolvedProgress": "{resolved} pronostic(s) dévoilé(s) sur {total}",
+      "empty": "Pas encore de résultats",
+      "emptyHint": "Le classement se remplira dès que les premières réponses seront dévoilées. En attendant, faites vos pronostics !",
+      "emptyCta": "Faire mes pronostics",
+      "noPlayers": "Personne n'avait répondu aux pronostics dévoilés.",
+      "pointsUnit": "{count, plural, one {pt} other {pts}}",
+      "pointsLong": "{count, plural, one {# point} other {# points}}",
+      "rank": "Rang {rank}",
+      "rankTied": "Ex æquo au rang {rank}",
+      "you": "Vous",
+      "funnyTitle": "Les réponses les plus drôles",
+      "funnySubtitle": "Choisies par les admins pour le plaisir.",
+      "funnyEmpty": "Aucune réponse drôle choisie pour l'instant.",
+      "funnyBadge": "{count, plural, one {# réponse drôle} other {# réponses drôles}}",
+      "by": "par {name}"
     }
   },
   "admin": {

@@ -527,7 +527,8 @@
         "unflag": "Remove funny mark from {userName}'s answer",
         "hiddenUntilResolved": "Shown to the family once resolved",
         "error": "Couldn't update the funny mark."
-      }
+      },
+      "leaderboardLink": "Leaderboard"
     },
     "pendingQuestions": {
       "titleWithCount": "Suggestions awaiting approval ({count})",
@@ -545,6 +546,27 @@
       "moveUp": "Move pronostic up",
       "moveDown": "Move pronostic down",
       "moveError": "Something went wrong while moving."
+    },
+    "leaderboardLink": "Leaderboard",
+    "leaderboard": {
+      "title": "Leaderboard",
+      "subtitle": "Who knew baby best? Points come from the pronostics already resolved.",
+      "back": "Back to pronostics",
+      "resolvedProgress": "{resolved} of {total} pronostics resolved",
+      "empty": "No results yet",
+      "emptyHint": "The leaderboard fills up as soon as the first answers are revealed. In the meantime, make your guesses!",
+      "emptyCta": "Make my pronostics",
+      "noPlayers": "Nobody had guessed the revealed pronostics.",
+      "pointsUnit": "{count, plural, one {pt} other {pts}}",
+      "pointsLong": "{count, plural, one {# point} other {# points}}",
+      "rank": "Rank {rank}",
+      "rankTied": "Tied for rank {rank}",
+      "you": "You",
+      "funnyTitle": "Funniest answers",
+      "funnySubtitle": "Picked by the admins for a good laugh.",
+      "funnyEmpty": "No funny answers picked yet.",
+      "funnyBadge": "{count, plural, one {# funny answer} other {# funny answers}}",
+      "by": "by {name}"
     }
   },
   "admin": {

@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getLocaleTag } from "@/utils/formatting";
 import { formatAnswer } from "@/utils/guess_format";
 import { isClosestWinsType, scoreQuestion } from "@/utils/guess_scoring";
-import { ArrowLeft, Calendar, Clock, Hash, Type, User, CircleDot, Pencil, Laugh, Lock } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Hash, Type, User, CircleDot, Pencil, Laugh, Lock, Trophy } from "lucide-react";
 import { getUserAccess, getUsers } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getPendingQuestions, getQuestions } from "@/utils/actions/guesses_questions";
@@ -80,13 +80,22 @@ export default async function GuessAdminPage({
     <div className="text-landing-foreground">
       <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-16">
         <Reveal className="border-b border-landing-border pb-6 mb-8">
-          <Link
-            href={`/baby/${babyId}/guess`}
-            className="inline-flex items-center gap-1.5 text-sm text-landing-muted hover:text-landing-foreground transition-colors mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {tAdmin('back')}
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-4">
+            <Link
+              href={`/baby/${babyId}/guess`}
+              className="inline-flex items-center gap-1.5 text-sm text-landing-muted hover:text-landing-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {tAdmin('back')}
+            </Link>
+            <Link
+              href={`/baby/${babyId}/guess/leaderboard`}
+              className="inline-flex items-center gap-1.5 text-sm text-landing-muted hover:text-landing-foreground transition-colors"
+            >
+              <Trophy className="h-4 w-4" />
+              {tAdmin('leaderboardLink')}
+            </Link>
+          </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="font-display text-3xl font-semibold">

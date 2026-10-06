@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import QuestionsListWrapper from "./questions_list_wrapper";
-import { Loader2, Settings } from "lucide-react";
+import { Loader2, Settings, Trophy } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { logger } from "@/utils/logger";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import Modal from "./_components/modal";
 
 export default async function GuessesPage({
@@ -27,16 +27,27 @@ export default async function GuessesPage({
     <div className="overflow-hidden text-landing-foreground">
       <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
         {!Array.isArray(access) && (
-          <div className="relative flex justify-end gap-2">
-            <Modal babyId={babyId} isAdmin={access.access_level === "admin"} />
-            {access.access_level === "admin" && (
-              <Link href={`/baby/${babyId}/guess/admin`}>
-                <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer">
+          <div className="relative flex flex-wrap items-center justify-between gap-2">
+            {/* Styled Link rather than <Link><Button>, so there's no button nested in an anchor. */}
+            <Link
+              href={`/baby/${babyId}/guess/leaderboard`}
+              className={buttonVariants({ variant: "outline", className: "gap-2 rounded-2xl cursor-pointer" })}
+            >
+              <Trophy className="h-4 w-4" />
+              <span>{t('leaderboardLink')}</span>
+            </Link>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Modal babyId={babyId} isAdmin={access.access_level === "admin"} />
+              {access.access_level === "admin" && (
+                <Link
+                  href={`/baby/${babyId}/guess/admin`}
+                  className={buttonVariants({ variant: "outline", className: "gap-2 rounded-2xl cursor-pointer" })}
+                >
                   <Settings className="h-4 w-4" />
                   <span>{t('manage')}</span>
-                </Button>
-              </Link>
-            )}
+                </Link>
+              )}
+            </div>
           </div>
         )}
 
