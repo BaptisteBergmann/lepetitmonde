@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `06eab44` fix(feed): require admin and post ownership for post views and stats
 - `969191b` refactor(feed): move batch interaction loaders out of server-action files
 - `089c9e5` feat(feed): add feed access helpers
 - `61b1018` fix(feed): split poll option row into vote button and voters trigger
