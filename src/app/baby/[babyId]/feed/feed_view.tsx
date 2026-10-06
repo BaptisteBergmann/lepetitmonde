@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+import { logger } from '@/utils/logger'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, getPosts } from '@utils/actions/posts'
 import { StoryGroup } from '@utils/actions/stories'
@@ -83,6 +85,10 @@ export default function FeedView({
       const next = await getPosts(babyId, { limit: pageSize, before })
       setPosts((prev) => [...prev, ...next])
       setHasMore(next.length === pageSize)
+    } catch (err) {
+      // hasMore stays as-is so the button itself is the retry.
+      logger.child({ function: 'FeedView.loadMore', babyId }).error(err, 'Error loading older posts')
+      toast.error(t('loadMoreError'))
     } finally {
       setLoadingMore(false)
     }
@@ -140,6 +146,14 @@ export default function FeedView({
             {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             <span>{t('loadMore')}</span>
           </Button>
+        </div>
+      )}
+
+      {!hasMore && posts.length > 0 && (
+        <div className="flex items-center gap-3 pt-2 text-xs text-landing-muted">
+          <span className="h-px flex-1 bg-landing-border" aria-hidden />
+          <p>{t('endOfFeed')}</p>
+          <span className="h-px flex-1 bg-landing-border" aria-hidden />
         </div>
       )}
 

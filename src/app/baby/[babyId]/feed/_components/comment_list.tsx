@@ -14,6 +14,7 @@ import { Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
 import CommentReactionPicker from './comment_reaction_picker'
 import type { Comment } from '@utils/actions/comments'
 import { FEED_LIMITS } from '@utils/feed-limits'
+import { logger } from '@/utils/logger'
 
 export default function CommentList({
   comments,
@@ -73,7 +74,7 @@ export default function CommentList({
       cancelEditing()
       onChanged()
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'CommentList.saveEdit', babyId, commentId: comment.id }).error(err, 'Error updating comment')
       toast.error(t('editError'))
     } finally {
       setSavingId(null)
@@ -88,7 +89,7 @@ export default function CommentList({
       await deleteComment(comment.id, comment.post_id, babyId)
       onChanged()
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'CommentList.handleDelete', babyId, commentId: comment.id }).error(err, 'Error deleting comment')
       toast.error(t('deleteError'))
     } finally {
       setDeletingId(null)

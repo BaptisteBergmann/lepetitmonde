@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Pencil, X, BarChart3, Plus } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { FEED_LIMITS } from '@utils/feed-limits'
+import { logger } from '@/utils/logger'
 
 type Circle = Tables<'circles'>
 
@@ -81,7 +82,7 @@ export default function EditPostModal({
       onClose()
       router.refresh()
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'EditPostModal.handleConfirm', babyId, postId: post.id }).error(err, 'Error updating post')
       toast.error(t('editError'))
     } finally {
       setIsPending(false)

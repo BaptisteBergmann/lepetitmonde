@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2, Send } from 'lucide-react'
 import { FEED_LIMITS } from '@utils/feed-limits'
+import { logger } from '@/utils/logger'
 
 export default function CommentInput({
   postId,
@@ -33,7 +34,7 @@ export default function CommentInput({
       setBody("")
       onAdded()
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'CommentInput.handleSubmit', babyId, postId }).error(err, 'Error adding comment')
       toast.error(t('sendError'))
     } finally {
       setIsPending(false)

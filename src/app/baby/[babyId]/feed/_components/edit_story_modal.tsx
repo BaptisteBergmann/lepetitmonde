@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Loader2, Pencil } from 'lucide-react'
 import { FEED_LIMITS } from '@utils/feed-limits'
+import { logger } from '@/utils/logger'
 
 type Circle = Tables<'circles'>
 
@@ -61,7 +62,7 @@ export default function EditStoryModal({
       onSaved()
       onClose()
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'EditStoryModal.handleConfirm', babyId, storyId: story.id }).error(err, 'Error updating story')
       toast.error(t('editError'))
     } finally {
       setIsPending(false)

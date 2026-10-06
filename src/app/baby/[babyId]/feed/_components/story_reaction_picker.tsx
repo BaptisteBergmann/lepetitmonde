@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { addStoryReaction, removeStoryReaction } from '@utils/actions/story_reactions'
 import { ReactionsData } from '@utils/actions/reactions'
-import { REACTIONS } from '@utils/reactions'
+import { REACTIONS, applyMyReaction } from '@utils/reactions'
 import { formatNamesPreview } from '@utils/users'
 import { cn } from '@utils/utils'
+import { logger } from '@/utils/logger'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import { SmilePlus } from 'lucide-react'
 
@@ -23,14 +25,29 @@ export default function StoryReactionPicker({
 }) {
   const t = useTranslations('reactions')
   const tA11y = useTranslations('a11y')
-  const [pending, setPending] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  // Ignore taps while a request runs instead of disabling the trigger, so it
+  // doesn't flash dimmed on every reaction.
+  const inFlight = useRef(false)
+
+  // Local copy for optimistic updates, re-synced whenever the parent's
+  // refetch (onChanged) hands back new data. Adjusted during render, same
+  // pattern as feed_view.tsx.
+  const [reactions, setReactions] = useState(initialReactions)
+  const [prevInitialReactions, setPrevInitialReactions] = useState(initialReactions)
+  if (initialReactions !== prevInitialReactions) {
+    setPrevInitialReactions(initialReactions)
+    setReactions(initialReactions)
+  }
 
   const pick = async (emoji: string) => {
-    if (pending) return
+    if (inFlight.current) return
+    inFlight.current = true
+    const contextLogger = logger.child({ function: 'StoryReactionPicker.pick', babyId, storyId, emoji })
+    const snapshot = reactions
+    const wasMine = snapshot.myEmoji === emoji
+    setReactions(applyMyReaction(snapshot, wasMine ? null : emoji))
     setPickerOpen(false)
-    setPending(true)
-    const wasMine = initialReactions.myEmoji === emoji
     try {
       if (wasMine) {
         await removeStoryReaction(storyId, babyId)
@@ -39,9 +56,11 @@ export default function StoryReactionPicker({
       }
       onChanged()
     } catch (err) {
-      console.error(err)
+      contextLogger.error(err, 'Error saving story reaction')
+      setReactions(snapshot)
+      toast.error(t('error'))
     } finally {
-      setPending(false)
+      inFlight.current = false
     }
   }
 
@@ -50,14 +69,13 @@ export default function StoryReactionPicker({
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger
           aria-label={tA11y('react')}
-          disabled={pending}
           className={cn(
-            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors disabled:opacity-50 bg-white/10 hover:bg-white/20 touch-target relative",
-            initialReactions.myEmoji ? "text-rose-400" : "text-white/80 hover:text-white"
+            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors bg-white/10 hover:bg-white/20 touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+            reactions.myEmoji ? "text-rose-400" : "text-white/80 hover:text-white"
           )}
         >
-          {initialReactions.myEmoji ? (
-            <span className="text-base leading-none">{initialReactions.myEmoji}</span>
+          {reactions.myEmoji ? (
+            <span className="text-base leading-none">{reactions.myEmoji}</span>
           ) : (
             <SmilePlus className="h-4 w-4" />
           )}
@@ -68,10 +86,11 @@ export default function StoryReactionPicker({
               key={emoji}
               type="button"
               onClick={() => pick(emoji)}
-              title={t(key)}
+              aria-label={t(key)}
+              aria-pressed={reactions.myEmoji === emoji}
               className={cn(
-                "rounded-full p-1.5 text-xl leading-none transition-transform cursor-pointer hover:scale-110 hover:bg-landing-background",
-                initialReactions.myEmoji === emoji && "scale-110 bg-landing-background"
+                "inline-flex min-h-9 min-w-9 items-center justify-center rounded-full text-xl leading-none cursor-pointer transition-transform hover:scale-110 hover:bg-landing-background outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none motion-reduce:hover:scale-100",
+                reactions.myEmoji === emoji && "bg-landing-background ring-1 ring-primary/40 scale-110 motion-reduce:scale-100"
               )}
             >
               {emoji}
@@ -80,7 +99,7 @@ export default function StoryReactionPicker({
         </PopoverContent>
       </Popover>
 
-      {initialReactions.breakdown.map(({ emoji, count, names }) => (
+      {reactions.breakdown.map(({ emoji, count, names }) => (
         <StoryReactionPill key={emoji} emoji={emoji} count={count} names={names} />
       ))}
     </div>
@@ -88,11 +107,15 @@ export default function StoryReactionPicker({
 }
 
 function StoryReactionPill({ emoji, count, names }: { emoji: string; count: number; names: string[] }) {
+  const t = useTranslations('reactions')
   const [open, setOpen] = useState(false)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="flex items-center gap-1 h-7 px-2 rounded-full bg-white/10 text-white cursor-pointer hover:bg-white/20 transition-colors">
+      <PopoverTrigger
+        aria-label={t('pillLabel', { emoji, count })}
+        className="flex items-center gap-1 h-7 px-2 rounded-full bg-white/10 text-white cursor-pointer hover:bg-white/20 transition-colors touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+      >
         <span className="text-base leading-none">{emoji}</span>
         <span className="text-xs">{count}</span>
       </PopoverTrigger>

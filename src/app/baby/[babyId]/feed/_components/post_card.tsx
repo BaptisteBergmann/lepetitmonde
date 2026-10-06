@@ -29,6 +29,7 @@ import PostStatsModal from './post_stats_modal'
 import ReactionPicker from './reaction_picker'
 import PollVoter from './poll_voter'
 import PostViews from './post_views'
+import { logger } from '@/utils/logger'
 
 type Circle = Tables<'circles'>
 
@@ -72,7 +73,7 @@ export default function PostCard({
       await deletePost(post.id, babyId)
       router.refresh()
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'PostCard.handleDelete', babyId, postId: post.id }).error(err, 'Error deleting post')
       toast.error(t('postCard.deleteError'))
     } finally {
       setDeleting(false)
@@ -101,7 +102,7 @@ export default function PostCard({
       await navigator.clipboard.writeText(shareUrl)
       toast.success(t('postCard.linkCopied'))
     } catch (err) {
-      console.error(err)
+      logger.child({ function: 'PostCard.handleShare', babyId, postId: post.id }).error(err, 'Error copying share link')
     }
   }
 

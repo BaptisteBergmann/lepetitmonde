@@ -1,15 +1,17 @@
 'use client'
 
 import { Modal } from '@/components/modal'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { format, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
-import { BarChart3, Eye, SmilePlus, MessageCircle, ListChecks } from 'lucide-react'
+import { AlertCircle, BarChart3, Eye, SmilePlus, MessageCircle, ListChecks, RotateCw } from 'lucide-react'
 import { getPostStats, PostStats } from '@utils/actions/post_stats'
 import { PostWithDetails } from '@utils/actions/posts'
 import { Tables } from '@utils/supabase/database.types'
 import { Badge } from '@components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { logger } from '@/utils/logger'
 
 type Circle = Tables<'circles'>
 
@@ -27,12 +29,32 @@ export default function PostStatsModal({
   onClose: () => void
 }) {
   const t = useTranslations('feed')
-  const dateFnsLocale = getDateFnsLocale(useLocale())
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const [stats, setStats] = useState<PostStats | null>(null)
+  const [error, setError] = useState(false)
+  // Full list (this is the detail view), joined the locale's way: "A, B and C".
+  const listFormat = useMemo(() => new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }), [locale])
+
+  // Bumped by Retry to re-run the fetch effect.
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
-    getPostStats(post.id, babyId, post.created_by).then(setStats)
-  }, [post.id, babyId, post.created_by])
+    let cancelled = false
+    getPostStats(post.id, babyId, post.created_by)
+      .then((result) => { if (!cancelled) setStats(result) })
+      .catch((err) => {
+        logger.child({ function: 'PostStatsModal.loadStats', babyId, postId: post.id, attempt }).error(err, 'Error loading post stats')
+        if (!cancelled) setError(true)
+      })
+    return () => { cancelled = true }
+  }, [post.id, babyId, post.created_by, attempt])
+
+  const retry = () => {
+    setError(false)
+    setAttempt((n) => n + 1)
+  }
 
   const postCircles = post.circle_ids.map((id) => circles.find((c) => c.id === id))
 
@@ -63,13 +85,24 @@ export default function PostStatsModal({
           </div>
         </div>
 
-        {!stats ? (
-          <p className="text-sm text-landing-muted">{t('postStats.loading')}</p>
+        {error ? (
+          <div role="alert" className="flex flex-col items-start gap-3 rounded-2xl border border-landing-border bg-landing-background p-4">
+            <p className="flex items-start gap-2 text-sm text-landing-foreground">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-destructive" />
+              {t('postStats.loadError')}
+            </p>
+            <Button variant="outline" size="sm" className="gap-1.5 rounded-2xl" onClick={retry}>
+              <RotateCw className="h-3.5 w-3.5" />
+              {tCommon('retry')}
+            </Button>
+          </div>
+        ) : !stats ? (
+          <p role="status" className="text-sm text-landing-muted">{t('postStats.loading')}</p>
         ) : (
           <>
             <StatSection title={t('postStats.seenBy')} icon={Eye}>
               {stats.views.count > 0 ? (
-                <p className="text-sm text-landing-foreground">{stats.views.names.join(", ")}</p>
+                <p className="text-sm text-landing-foreground">{listFormat.format(stats.views.names)}</p>
               ) : (
                 <p className="text-sm text-landing-muted">{t('nobodyYet')}</p>
               )}
@@ -82,7 +115,7 @@ export default function PostStatsModal({
                     <p key={emoji} className="text-sm text-landing-foreground">
                       <span className="mr-1">{emoji}</span>
                       <span className="font-medium">{count}</span>
-                      <span className="text-landing-muted"> — {names.join(", ")}</span>
+                      <span className="text-landing-muted"> — {listFormat.format(names)}</span>
                     </p>
                   ))}
                 </div>
@@ -100,7 +133,7 @@ export default function PostStatsModal({
                       <span className="mr-1">{label}</span>
                       <span className="font-medium">{count}</span>
                       {voterNames.length > 0 && (
-                        <span className="text-landing-muted"> — {voterNames.join(", ")}</span>
+                        <span className="text-landing-muted"> — {listFormat.format(voterNames)}</span>
                       )}
                     </p>
                   ))}

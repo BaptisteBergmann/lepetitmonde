@@ -314,7 +314,8 @@
       "reactions": "Reactions",
       "noReactions": "No reactions yet.",
       "comments": "Comments",
-      "poll": "Poll"
+      "poll": "Poll",
+      "loadError": "Couldn't load the statistics."
     },
     "postForm": {
       "newTitle": "New post",
@@ -387,7 +388,9 @@
       "resultSr": "{percent}%, {count, plural, =0 {no votes} one {# vote} other {# votes}}",
       "votersLabel": "See who voted for “{option}”",
       "voteError": "Your vote couldn't be saved. Please try again."
-    }
+    },
+    "loadMoreError": "Couldn't load older posts. Try again.",
+    "endOfFeed": "This is where it all began"
   },
   "calendar": {
     "eyebrow": "Page — The big milestones",
@@ -1127,7 +1130,9 @@
     "sleep": "Sleep",
     "celebration": "Celebration",
     "heart": "Heart",
-    "laughing": "Laughing"
+    "laughing": "Laughing",
+    "error": "Couldn't save your reaction.",
+    "pillLabel": "{emoji} {count}, see who reacted"
   },
   "notifications": {
     "title": "Notifications",
