@@ -62,7 +62,18 @@ export async function createPost(post: NewPost, circleIds: string[]) {
       .from('posts_circles')
       .insert(circleIds.map((circleId) => ({ post_id: data.id, circle_id: circleId })))
 
-    if (circlesError) { contextLogger.error(circlesError, "Error linking post circles"); throw circlesError }
+    if (circlesError) {
+      contextLogger.error(circlesError, "Error linking post circles")
+      // The modal retries with the same postId; leaving the row behind would
+      // make that retry fail on the duplicate id, so undo it before failing.
+      const { error: rollbackError } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', data.id)
+        .eq('baby_id', post.baby_id)
+      if (rollbackError) contextLogger.error(rollbackError, "Error rolling back post without circles")
+      throw circlesError
+    }
   }
 
   contextLogger.info({ postId: data.id }, "Post created")

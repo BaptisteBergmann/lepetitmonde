@@ -41,7 +41,18 @@ export async function createPoll(postId: string, babyId: string, question: strin
     .from('poll_options')
     .insert(trimmedOptions.map((label, position) => ({ poll_id: poll.id, label, position })))
 
-  if (optionsError) { contextLogger.error(optionsError, "Error creating poll options"); throw optionsError }
+  if (optionsError) {
+    contextLogger.error(optionsError, "Error creating poll options")
+    // An option-less poll would block the modal's retry (a second insert
+    // would leave two polls on the post), so undo it before failing.
+    const { error: rollbackError } = await supabase
+      .from('polls')
+      .delete()
+      .eq('id', poll.id)
+      .eq('post_id', postId)
+    if (rollbackError) contextLogger.error(rollbackError, "Error rolling back option-less poll")
+    throw optionsError
+  }
 
   contextLogger.info({ pollId: poll.id }, "Poll created")
 
