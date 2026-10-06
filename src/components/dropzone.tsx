@@ -1,5 +1,5 @@
 import { CheckCircle, File, Upload, Video, X } from 'lucide-react'
-import { createContext, useCallback, useContext, type PropsWithChildren } from 'react'
+import { createContext, useCallback, useContext, type DragEvent, type PropsWithChildren } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { cn } from "@utils/utils"
@@ -21,12 +21,22 @@ export const formatBytes = (
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
 }
 
-type DropzoneContextType = Omit<UseSupabaseUploadReturn, 'getRootProps' | 'getInputProps'>
+type DropzoneContextType = Omit<UseSupabaseUploadReturn, 'getRootProps' | 'getInputProps'> & {
+  disabled: boolean
+}
+
+const blockDrag = (event: DragEvent<HTMLElement>) => {
+  event.preventDefault()
+  event.stopPropagation()
+}
 
 const DropzoneContext = createContext<DropzoneContextType | undefined>(undefined)
 
 type DropzoneProps = UseSupabaseUploadReturn & {
   className?: string
+  // Set while the parent form is publishing: files added or removed mid-upload
+  // would not match what is being uploaded and attached.
+  disabled?: boolean
 }
 
 const Dropzone = ({
@@ -34,6 +44,7 @@ const Dropzone = ({
   children,
   getRootProps,
   getInputProps,
+  disabled = false,
   ...restProps
 }: PropsWithChildren<DropzoneProps>) => {
   const isSuccess = restProps.isSuccess
@@ -44,19 +55,33 @@ const Dropzone = ({
     restProps.files.some((file) => file.errors.length !== 0)
 
   return (
-    <DropzoneContext.Provider value={{ ...restProps }}>
+    <DropzoneContext.Provider value={{ ...restProps, disabled }}>
       <div
         {...getRootProps({
+          // A disabled input only blocks the file picker; drops still reach
+          // the root's handlers. Stopping propagation makes react-dropzone
+          // skip its own handlers, and preventDefault keeps the browser from
+          // opening the dropped file in place of the app.
+          ...(disabled && {
+            onDragEnter: blockDrag,
+            onDragOver: (event: DragEvent<HTMLElement>) => {
+              blockDrag(event)
+              event.dataTransfer.dropEffect = 'none'
+            },
+            onDrop: blockDrag,
+          }),
+          'aria-disabled': disabled || undefined,
           className: cn(
             'border-2 border-border rounded-lg p-6 text-center bg-card transition-colors duration-300 text-foreground',
             className,
             isSuccess ? 'border-solid' : 'border-dashed',
             isActive && 'border-primary bg-primary/10',
-            isInvalid && 'border-destructive bg-destructive/10'
+            isInvalid && 'border-destructive bg-destructive/10',
+            disabled && 'opacity-60 cursor-not-allowed'
           ),
         })}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps({ disabled })} />
         {children}
       </div>
     </DropzoneContext.Provider>
@@ -74,6 +99,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
     maxFileSize,
     maxFiles,
     isSuccess,
+    disabled,
   } = useDropzoneContext()
 
   const exceedMaxFiles = files.length > maxFiles
@@ -146,7 +172,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
               )}
             </div>
 
-            {!loading && !isSuccessfullyUploaded && (
+            {!loading && !disabled && !isSuccessfullyUploaded && (
               <Button
                 aria-label={tA11y('remove')}
                 size="icon"
@@ -171,7 +197,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 
 const DropzoneEmptyState = ({ className }: { className?: string }) => {
   const t = useTranslations('dropzone')
-  const { maxFiles, maxFileSize, inputRef, isSuccess } = useDropzoneContext()
+  const { maxFiles, maxFileSize, inputRef, isSuccess, disabled } = useDropzoneContext()
 
   if (isSuccess) {
     return null
@@ -194,8 +220,9 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
           {t.rich(maxFiles === 1 ? 'dragDropOne' : 'dragDropMany', {
             select: (chunks) => (
               <a
-                onClick={() => inputRef.current?.click()}
-                className="underline cursor-pointer transition hover:text-foreground"
+                onClick={() => { if (!disabled) inputRef.current?.click() }}
+                aria-disabled={disabled || undefined}
+                className={cn("underline transition", disabled ? "cursor-not-allowed" : "cursor-pointer hover:text-foreground")}
               >
                 {chunks}
               </a>

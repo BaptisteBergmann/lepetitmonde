@@ -213,7 +213,7 @@ export default function CreatePostModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photosVideosLabel')}
           </Label>
-          <Dropzone {...upload}>
+          <Dropzone {...upload} disabled={isPending}>
             <DropzoneEmptyState />
             <DropzoneContent />
           </Dropzone>

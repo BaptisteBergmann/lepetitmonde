@@ -132,7 +132,7 @@ export default function CreateStoryModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photoVideoLabel')}
           </Label>
-          <Dropzone {...upload}>
+          <Dropzone {...upload} disabled={isPending}>
             <DropzoneEmptyState />
             <DropzoneContent />
           </Dropzone>
