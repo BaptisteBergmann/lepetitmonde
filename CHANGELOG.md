@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `47dbb69` fix(security): stop exposing storage helpers as server actions
 - `d663620` docs(plans): add feed follow-ups plan
 - `6597267` docs(plans): mark journal review fixes implemented
 - `bf15e0b` chore(types): regenerate database types for poll vote composite FK
