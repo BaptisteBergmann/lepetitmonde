@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `b7f0b57` feat(feed): replace post admin icons with an actions menu
 - `cdbffb9` feat(feed): accessible media tiles, 4-tile grid and post articles
 - `b14ae88` refactor(ui): build the story viewer and photo lightbox on Base UI Dialog
 - `2d30b4f` feat(feed): story viewer pause, mute and tap-to-play controls
