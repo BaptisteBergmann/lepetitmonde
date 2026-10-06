@@ -577,6 +577,7 @@ export type Database = {
       guess_questions: {
         Row: {
           baby_id: string
+          correct_answer: Json | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -584,12 +585,14 @@ export type Database = {
           is_active: boolean
           options: Json | null
           position: number
+          resolved_at: string | null
           status: string
           title: string | null
           type: string
         }
         Insert: {
           baby_id: string
+          correct_answer?: Json | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -597,12 +600,14 @@ export type Database = {
           is_active: boolean
           options?: Json | null
           position?: number
+          resolved_at?: string | null
           status?: string
           title?: string | null
           type: string
         }
         Update: {
           baby_id?: string
+          correct_answer?: Json | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -610,6 +615,7 @@ export type Database = {
           is_active?: boolean
           options?: Json | null
           position?: number
+          resolved_at?: string | null
           status?: string
           title?: string | null
           type?: string
@@ -637,6 +643,8 @@ export type Database = {
           baby_id: string
           created_at: string
           id: string
+          is_correct: boolean | null
+          is_funny: boolean
           question_id: string
           user_id: string
         }
@@ -645,6 +653,8 @@ export type Database = {
           baby_id: string
           created_at?: string
           id?: string
+          is_correct?: boolean | null
+          is_funny?: boolean
           question_id?: string
           user_id?: string
         }
@@ -653,6 +663,8 @@ export type Database = {
           baby_id?: string
           created_at?: string
           id?: string
+          is_correct?: boolean | null
+          is_funny?: boolean
           question_id?: string
           user_id?: string
         }
