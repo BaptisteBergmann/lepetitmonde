@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/select"
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
 import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
-import { createPost, attachPostPhotos } from '@utils/actions/posts'
+import { createPost, attachPostPhotos, publishPost } from '@utils/actions/posts'
 import { createPoll } from '@utils/actions/polls'
 import { captureVideoThumbnail } from '@utils/video-thumbnail'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Loader2, ImagePlus, X, BarChart3, Plus } from 'lucide-react'
+import { Loader2, ImagePlus, X, BarChart3, Plus, Info } from 'lucide-react'
 import { format } from 'date-fns'
 import { FEED_LIMITS } from '@utils/feed-limits'
 
@@ -67,26 +67,42 @@ export default function CreatePostModal({
     [circles]
   )
 
-  // Set once createPost succeeds, so a retry after partial upload failures only
-  // re-uploads the failed files instead of re-creating the post (same postId).
+  // Each step is tracked separately so a retry resumes where the last attempt
+  // stopped (same postId) instead of re-creating the post or the poll.
+  // Notifications go out last, only once the poll and every file are attached.
   const [postCreated, setPostCreated] = useState(false)
+  const [pollCreated, setPollCreated] = useState(false)
+  const [published, setPublished] = useState(false)
   const [attachedNames, setAttachedNames] = useState<Set<string>>(() => new Set())
 
   const handleConfirm = async () => {
+    if (isPending) return
     setIsPending(true)
     try {
       if (!postCreated) {
-        await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds, sendEmail)
-
-        if (pollEnabled && pollValid) {
-          await createPoll(postId, babyId, pollQuestion, pollOptions)
-        }
+        await createPost({ id: postId, baby_id: babyId, taken_at: takenAt, caption: caption || null }, circleIds)
         setPostCreated(true)
+      }
+
+      if (pollEnabled && !pollCreated) {
+        try {
+          await createPoll(postId, babyId, pollQuestion, pollOptions)
+          setPollCreated(true)
+        } catch {
+          router.refresh()
+          toast.error(t('pollCreateError'))
+          return
+        }
       }
 
       let failedCount = 0
       if (upload.files.length > 0) {
-        const newlyUploaded = await upload.onUpload()
+        // On a "Finish publishing" retry every file may already be uploaded;
+        // calling onUpload then would re-send them all and hit "already exists".
+        const needsUpload = upload.files.some((f) => !upload.successes.includes(f.name))
+        const newlyUploaded = needsUpload
+          ? await upload.onUpload()
+          : { names: {}, thumbnails: {}, contentTypes: {} }
         const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
         const finalThumbnails = { ...upload.finalThumbnails, ...newlyUploaded.thumbnails }
         const finalContentTypes = { ...upload.finalContentTypes, ...newlyUploaded.contentTypes }
@@ -124,16 +140,24 @@ export default function CreatePostModal({
         }
       }
 
-      router.refresh()
       if (failedCount > 0) {
-        // Keep the modal open so the Dropzone's per-file errors stay visible and
-        // the user can retry — the post itself is already published.
+        // Keep the modal open so the Dropzone's per-file errors stay visible
+        // and the user can retry. Nobody is notified until every file is in.
+        router.refresh()
         toast.error(t('uploadsFailed', { count: failedCount }))
         return
       }
+
+      if (!published) {
+        await publishPost(postId, babyId, sendEmail)
+        setPublished(true)
+      }
+
+      router.refresh()
       onClose()
-    } catch (err) {
-      console.error(err)
+    } catch {
+      // Server actions log their own failures; the inline notice and the
+      // "Finish publishing" label carry the resumable state.
       toast.error(t('publishError'))
     } finally {
       setIsPending(false)
@@ -141,6 +165,17 @@ export default function CreatePostModal({
   }
 
   const hasFileErrors = upload.files.some((file) => file.errors.length !== 0)
+  // Derived from the hook's per-file upload errors (not a snapshot) so it
+  // stays right if a failing file is removed from the Dropzone.
+  const uploadFailedCount = upload.files.filter((file) => upload.errors.some((e) => e.name === file.name)).length
+
+  const notice = isPending || !postCreated
+    ? null
+    : pollEnabled && !pollCreated
+      ? t('pollCreateError')
+      : !published && uploadFailedCount > 0
+        ? t('uploadsFailedNotice', { count: uploadFailedCount })
+        : t('lockedNotice')
 
   const updatePollOption = (index: number, value: string) => {
     setPollOptions((options) => options.map((option, i) => (i === index ? value : option)))
@@ -158,6 +193,13 @@ export default function CreatePostModal({
     <Modal onClose={onClose} title={<><ImagePlus className="h-4.5 w-4.5 text-primary" />{t('newTitle')}</>}>
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
+        {notice && (
+          <div role="status" className="flex gap-2 rounded-2xl border border-landing-border bg-landing-background p-3 text-sm text-landing-foreground">
+            <Info className="h-4 w-4 shrink-0 mt-0.5 text-primary" aria-hidden />
+            <p>{notice}</p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-1.5">
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photosVideosLabel')}
@@ -168,6 +210,9 @@ export default function CreatePostModal({
           </Dropzone>
         </div>
 
+        {/* Already sent with createPost: edits here would be silently ignored
+            on retry, so they lock once the post exists. */}
+        <fieldset disabled={isPending || postCreated} className="min-w-0 space-y-4 disabled:opacity-60">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('captionLabel')}
@@ -203,6 +248,7 @@ export default function CreatePostModal({
           <Select
             items={circleItems}
             multiple
+            disabled={isPending || postCreated}
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
@@ -234,6 +280,9 @@ export default function CreatePostModal({
             <span className="text-xs text-muted-foreground">{t('sendEmailHint')}</span>
           </span>
         </label>
+        </fieldset>
+
+        <fieldset disabled={isPending || pollCreated} className="min-w-0 space-y-4 disabled:opacity-60">
 
         <div className="flex flex-col gap-2">
           <button
@@ -290,6 +339,7 @@ export default function CreatePostModal({
             </div>
           )}
         </div>
+        </fieldset>
 
       </div>
 
@@ -312,7 +362,11 @@ export default function CreatePostModal({
               <span>{t('publishing')}</span>
             </>
           ) : (
-            <span>{postCreated ? t('retryUploads') : t('publish')}</span>
+            <span>
+              {uploadFailedCount > 0 && postCreated
+                ? t('retryUploads')
+                : postCreated && !published ? t('finishPublishing') : t('publish')}
+            </span>
           )}
         </Button>
       </div>

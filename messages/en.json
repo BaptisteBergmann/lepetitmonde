@@ -328,9 +328,13 @@
       "save": "Save",
       "publishError": "Something went wrong while publishing.",
       "editError": "Something went wrong while saving the changes.",
-      "uploadsFailed": "{count, plural, one {# file} other {# files}} failed to upload. The post is published without {count, plural, one {it} other {them}} — retry below or close.",
+      "uploadsFailed": "{count, plural, one {# file} other {# files}} failed to upload. The post isn't shared yet — retry below.",
       "retryUploads": "Retry failed uploads",
-      "close": "Close"
+      "close": "Close",
+      "finishPublishing": "Finish publishing",
+      "lockedNotice": "This post has already been created. To change its text, date or visibility, close this window and use Edit on the post.",
+      "pollCreateError": "The post was created but the poll couldn't be added. Try again, or remove the poll to publish without it.",
+      "uploadsFailedNotice": "{count, plural, one {# file wasn't} other {# files weren't}} uploaded. The post isn't shared yet: nobody is notified until every file is uploaded. Retry below."
     },
     "storyForm": {
       "title": "New story",

@@ -328,9 +328,13 @@
       "save": "Enregistrer",
       "publishError": "Une erreur est survenue lors de la publication.",
       "editError": "Une erreur est survenue lors de la modification.",
-      "uploadsFailed": "{count, plural, one {# fichier n'a} other {# fichiers n'ont}} pas pu être envoyé{count, plural, one {} other {s}}. Le post est publié sans — réessayez ci-dessous ou fermez.",
+      "uploadsFailed": "{count, plural, one {# fichier n'a} other {# fichiers n'ont}} pas pu être envoyé{count, plural, one {} other {s}}. Le post n'est pas encore partagé — réessayez ci-dessous.",
       "retryUploads": "Réessayer les envois",
-      "close": "Fermer"
+      "close": "Fermer",
+      "finishPublishing": "Terminer la publication",
+      "lockedNotice": "Ce post a déjà été créé. Pour modifier le texte, la date ou la visibilité, fermez cette fenêtre puis utilisez « Modifier » sur le post.",
+      "pollCreateError": "Le post est créé mais le sondage n'a pas pu être ajouté. Réessayez, ou retirez le sondage pour publier sans.",
+      "uploadsFailedNotice": "{count, plural, one {# fichier n'a pas pu être envoyé} other {# fichiers n'ont pas pu être envoyés}}. Le post n'est pas encore partagé : personne n'est prévenu tant que tous les fichiers ne sont pas envoyés. Réessayez ci-dessous."
     },
     "storyForm": {
       "title": "Nouvelle story",

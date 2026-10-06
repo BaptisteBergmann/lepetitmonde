@@ -32,7 +32,10 @@ export type PostWithDetails = Tables<'posts'> & {
   views: PostViewsData
 }
 
-export async function createPost(post: NewPost, circleIds: string[], sendEmail: boolean) {
+// Creates the row only. Nobody is notified here: the modal attaches the
+// poll and every photo first, then calls publishPost, so a notification
+// never opens a post that is still missing its media.
+export async function createPost(post: NewPost, circleIds: string[]) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: createPost.name, babyId: post.baby_id })
 
@@ -64,33 +67,56 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
 
   contextLogger.info({ postId: data.id }, "Post created")
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const recipients = await getVisibleUserIds(post.baby_id, circleIds, user?.id)
+  return data.id
+}
+
+// Sends the new-post push (and optional email) once the post is complete.
+// Recipients come from the circles stored on the post, never from client
+// input. Not idempotent on the server: the modal's `published` state and
+// pending lock are what prevent a double send (admin-only action).
+export async function publishPost(postId: string, babyId: string, sendEmail: boolean) {
+  const supabase = await createClient()
+  const contextLogger = logger.child({ function: publishPost.name, postId, babyId })
+
+  const { viewer, post } = await assertPostVisible(postId, babyId, await assertAdmin(babyId))
+
+  const { data: postRow, error: postError } = await supabase
+    .from('posts')
+    .select('caption')
+    .eq('id', postId)
+    .eq('baby_id', babyId)
+    .single()
+
+  if (postError) { contextLogger.error(postError, "Error fetching post to publish"); throw postError }
+
+  const recipients = await getVisibleUserIds(babyId, post.circleIds, viewer.userId)
   const t = await getTranslations('pushNotifications')
-  const body = caption || t('newPost.bodyFallback')
-  await notifyUsers(post.baby_id, 'new_post', {
+  const body = postRow.caption || t('newPost.bodyFallback')
+  await notifyUsers(babyId, 'new_post', {
     title: t('newPost.title'),
     body,
-    url: `/baby/${post.baby_id}/feed?postId=${data.id}`,
+    url: `/baby/${babyId}/feed?postId=${postId}`,
   }, recipients)
 
-  if (sendEmail) {
+  if (sendEmail === true) {
     const { data: baby, error: babyError } = await supabase
       .from('babies')
       .select('baby_surname')
-      .eq('id', post.baby_id)
+      .eq('id', babyId)
       .single()
 
     if (babyError) {
       contextLogger.error(babyError, "Error fetching baby for new-post email")
     } else {
       const emails = await getEmailsForUserIds(recipients)
-      const postUrl = `${process.env.SITE_URL}/baby/${post.baby_id}/feed?postId=${data.id}`
+      const postUrl = `${process.env.SITE_URL}/baby/${babyId}/feed?postId=${postId}`
       await sendNewPostEmails(emails, baby.baby_surname, body, postUrl)
     }
   }
 
-  return data.id
+  contextLogger.info({ recipientCount: recipients.length, sendEmail }, "Post published")
+
+  revalidatePath(`/baby/${babyId}/feed`)
 }
 
 type PostUpdate = { caption: string | null; taken_at: string }
