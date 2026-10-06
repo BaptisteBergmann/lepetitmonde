@@ -8,6 +8,12 @@ export const PODIUM_POINTS = [3, 2, 1]
 
 const CLOSEST_WINS_TYPES = new Set(['number', 'date', 'time'])
 
+const DAY_MS = 86_400_000
+const MINUTES_PER_DAY = 1440
+// Enough to absorb float error (|3.1 - 3.2| vs |3.3 - 3.2|) without merging
+// genuinely different guesses.
+const DISTANCE_PRECISION = 1e6
+
 export type ScorableQuestion = Pick<Tables<'guess_questions'>, 'id' | 'type' | 'correct_answer' | 'resolved_at'>
 export type ScorableGuess = Pick<Tables<'guesses'>, 'id' | 'user_id' | 'question_id' | 'answer' | 'is_correct' | 'is_funny'>
 
@@ -52,8 +58,10 @@ export function toComparable(type: string, value: Json | undefined): number | nu
       return Number.isFinite(n) ? n : null
     }
     case 'date': {
+      // Whole days: dates are stored as the UTC instant of a local midnight,
+      // so raw ms would differ by an hour across DST or between timezones.
       const ms = new Date(value).getTime()
-      return Number.isFinite(ms) ? ms : null
+      return Number.isFinite(ms) ? Math.round(ms / DAY_MS) : null
     }
     case 'time': {
       const match = /^(\d{1,2}):(\d{2})$/.exec(String(value).trim())
@@ -72,6 +80,13 @@ function textOf(value: Json | undefined) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : ''
 }
 
+function distanceBetween(type: string, value: number, target: number) {
+  let distance = Math.abs(value - target)
+  // 23:50 vs 00:10 is 20 minutes apart, not 23h40.
+  if (type === 'time') distance = Math.min(distance, MINUTES_PER_DAY - distance)
+  return Math.round(distance * DISTANCE_PRECISION) / DISTANCE_PRECISION
+}
+
 export function scoreQuestion(question: ScorableQuestion, guesses: ScorableGuess[]): Map<string, GuessScore> {
   const scores = new Map<string, GuessScore>()
   if (!question.resolved_at || question.correct_answer === null) return scores
@@ -87,7 +102,7 @@ export function scoreQuestion(question: ScorableQuestion, guesses: ScorableGuess
       if (target === null || value === null) {
         scores.set(guess.id, { points: 0, isCorrect: false })
       } else {
-        ranked.push({ id: guess.id, distance: Math.abs(value - target) })
+        ranked.push({ id: guess.id, distance: distanceBetween(question.type, value, target) })
       }
     }
 
