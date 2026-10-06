@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `f7f1e5a` fix(feed): keep publishPost from failing after the push when email fails
 - `bf215f5` fix(feed): roll back partial post and poll creates so retries work
 - `41cf3f5` fix(security): stop exposing notifyUsers as a server action
 - `06ed1b6` fix(security): move post and story photo library helpers out of server actions
