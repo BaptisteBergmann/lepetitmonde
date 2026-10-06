@@ -298,13 +298,14 @@
       "delete": "Delete"
     },
     "comments": {
-      "empty": "No comments yet.",
       "unknownUser": "User",
       "inputPlaceholder": "Add a comment...",
       "sendError": "Something went wrong while sending the comment.",
       "editError": "Something went wrong while editing the comment.",
       "deleteConfirm": "Delete this comment?",
-      "deleteError": "Something went wrong while deleting the comment."
+      "deleteError": "Something went wrong while deleting the comment.",
+      "viewAll": "{count, plural, one {View # comment} other {View all # comments}}",
+      "inputLabel": "Write a comment"
     },
     "postStats": {
       "title": "Stats",

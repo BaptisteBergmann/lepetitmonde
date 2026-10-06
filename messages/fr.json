@@ -298,13 +298,14 @@
       "delete": "Supprimer"
     },
     "comments": {
-      "empty": "Aucun commentaire pour l'instant.",
       "unknownUser": "Utilisateur",
       "inputPlaceholder": "Ajouter un commentaire...",
       "sendError": "Une erreur est survenue lors de l'envoi du commentaire.",
       "editError": "Une erreur est survenue lors de la modification du commentaire.",
       "deleteConfirm": "Supprimer ce commentaire ?",
-      "deleteError": "Une erreur est survenue lors de la suppression du commentaire."
+      "deleteError": "Une erreur est survenue lors de la suppression du commentaire.",
+      "viewAll": "{count, plural, one {Voir le commentaire} other {Voir les # commentaires}}",
+      "inputLabel": "Écrire un commentaire"
     },
     "postStats": {
       "title": "Statistiques",

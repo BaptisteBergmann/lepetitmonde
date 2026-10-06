@@ -46,8 +46,10 @@ export default function CommentInput({
         value={body}
         maxLength={FEED_LIMITS.comment}
         onChange={(e) => setBody(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
+        // Enter that confirms an IME composition (CJK input) must not send.
+        onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSubmit() }}
         placeholder={t('inputPlaceholder')}
+        aria-label={t('inputLabel')}
         className="flex-1"
       />
       <Button

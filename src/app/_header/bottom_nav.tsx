@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { AccessWithPages } from './types'
@@ -10,6 +11,16 @@ import { getOrderedPages } from './page_order'
 // Icons resolved from PAGE_REGISTRY rather than through the `accesses` prop —
 // see the note on NavPage in ./types for why icons can't cross the Server →
 // Client boundary.
+const NON_TEXT_INPUT_TYPES = new Set(['button', 'checkbox', 'radio', 'file', 'submit', 'range', 'color', 'date'])
+
+// True when the focused element brings up the on-screen keyboard.
+function isTextEntry(el: Element | null): boolean {
+  if (!el) return false
+  if (el instanceof HTMLTextAreaElement) return true
+  if (el instanceof HTMLElement && el.isContentEditable) return true
+  return el instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.has(el.type)
+}
+
 const ICONS_BY_PAGE_ID = new Map<string, typeof PAGE_REGISTRY[number]['icon']>(
   PAGE_REGISTRY.map((page) => [page.id, page.icon])
 )
@@ -18,11 +29,32 @@ export default function BottomNav({ accesses }: { accesses: AccessWithPages[] })
   const params = useParams()
   const pathname = usePathname()
   const currentBabyId = params?.babyId as string
+  // While the mobile keyboard is up the fixed bar would cover the focused
+  // field (e.g. the comment input), so it steps aside app-wide.
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+
+  useEffect(() => {
+    let frame = 0
+    const handleFocusIn = () => setKeyboardOpen(isTextEntry(document.activeElement))
+    // Re-check on the next frame: when focus moves between two fields,
+    // activeElement is still <body> during focusout and the bar would flicker.
+    const handleFocusOut = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => setKeyboardOpen(isTextEntry(document.activeElement)))
+    }
+    document.addEventListener('focusin', handleFocusIn)
+    document.addEventListener('focusout', handleFocusOut)
+    return () => {
+      cancelAnimationFrame(frame)
+      document.removeEventListener('focusin', handleFocusIn)
+      document.removeEventListener('focusout', handleFocusOut)
+    }
+  }, [])
 
   const babyAccess = accesses.find((acc) => acc.baby_id === currentBabyId)
   const allowedPages = babyAccess?.allowedPages ?? []
 
-  if (!allowedPages.length) return null
+  if (!allowedPages.length || keyboardOpen) return null
 
   // Hub page ("choose a page to view") already lists every section as a
   // card — showing the same links again in the bottom bar is redundant.

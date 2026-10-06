@@ -2,9 +2,9 @@
 
 import { useConfirm } from '@/components/confirm_provider'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { format, parseISO } from 'date-fns'
+import { format, isThisYear, parseISO } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { updateComment, deleteComment } from '@utils/actions/comments'
 import { getDisplayName } from '@utils/users'
@@ -37,9 +37,20 @@ export default function CommentList({
   const [editBody, setEditBody] = useState("")
   const [savingId, setSavingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState(false)
+  const listRef = useRef<HTMLDivElement>(null)
 
-  if (comments.length === 0) {
-    return <p className="text-xs text-landing-muted">{t('empty')}</p>
+  if (comments.length === 0) return null
+
+  // Comments are sorted oldest first, so the collapsed view shows the latest 2.
+  const COLLAPSED_COUNT = 2
+  const collapsed = !expanded && comments.length > COLLAPSED_COUNT
+  const visibleComments = collapsed ? comments.slice(-COLLAPSED_COUNT) : comments
+
+  const expand = () => {
+    setExpanded(true)
+    // The "View all" button unmounts; land keyboard/screen reader users on the list.
+    listRef.current?.focus()
   }
 
   const startEditing = (comment: Comment) => {
@@ -85,8 +96,18 @@ export default function CommentList({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      {comments.map((comment) => {
+    <div ref={listRef} tabIndex={-1} className="flex flex-col gap-2 outline-none">
+      {collapsed && (
+        <button
+          type="button"
+          onClick={expand}
+          className="self-start text-xs font-semibold text-landing-muted hover:text-landing-foreground hover:underline underline-offset-4 py-1 rounded-md cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring touch-target relative"
+        >
+          {t('viewAll', { count: comments.length })}
+        </button>
+      )}
+      {visibleComments.map((comment) => {
+        const createdAt = parseISO(comment.created_at)
         const author = getDisplayName(comment.users, comment.nickname) || t('unknownUser')
         const isOwner = currentUserId !== null && comment.user_id === currentUserId
         const isEditing = editingId === comment.id
@@ -98,8 +119,8 @@ export default function CommentList({
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-xs text-landing-muted">
                   {tCommon('dateAtTime', {
-                    date: format(parseISO(comment.created_at), 'd MMM', { locale: dateFnsLocale }),
-                    time: format(parseISO(comment.created_at), 'HH:mm', { locale: dateFnsLocale }),
+                    date: format(createdAt, isThisYear(createdAt) ? 'd MMM' : 'd MMM yyyy', { locale: dateFnsLocale }),
+                    time: format(createdAt, 'HH:mm', { locale: dateFnsLocale }),
                   })}
                 </span>
                 {!isEditing && (isOwner || isAdmin) && (
@@ -133,7 +154,8 @@ export default function CommentList({
                   maxLength={FEED_LIMITS.comment}
                   onChange={(e) => setEditBody(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveEdit(comment)
+                    // Enter that confirms an IME composition (CJK input) must not save.
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) saveEdit(comment)
                     if (e.key === 'Escape') cancelEditing()
                   }}
                   autoFocus
