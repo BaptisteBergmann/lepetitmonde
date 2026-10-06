@@ -62,7 +62,13 @@ None of this is required by the app itself, though — see below for a fully loc
 Schema changes are tracked as SQL files in `supabase/migrations/` using the Supabase CLI (already a devDependency). The remote Postgres (reached via the Supavisor pooler at `${SUPABASE_DB_HOST}:${POSTGRES_PORT}`) tracks which migrations it has applied in a `supabase_migrations.schema_migrations` table, so `db_push` is idempotent: on a fresh database it runs every migration (acting as init), on an existing one it only runs what's new.
 
 - **Create a migration**: `mise run db_migration_new <name>` — scaffolds an empty, timestamped file in `supabase/migrations/`. Write the `ALTER TABLE` / `CREATE TABLE` / etc. SQL by hand.
-- **Apply pending migrations**: `mise run db_push` — connects with `sslmode=disable` (the pooler doesn't negotiate TLS on this connection type; occasionally flaky on the first attempt over a LAN — just retry).
+- **Apply pending migrations**: `mise run db_push` — connects with `sslmode=disable` (the pooler doesn't negotiate TLS on this connection type). It can fail repeatedly with `tls error (server refused TLS connection)` even though `mise run db_migration_status` connects fine with the same URL — retrying the task doesn't help. Running the same command through `mise exec` with `--debug` does connect, and also prints the real error if something else is wrong (e.g. a migration applied on the database but missing locally):
+
+  ```sh
+  mise exec -- bash -c 'pnpm supabase db push --debug --db-url "postgres://postgres.${POOLER_TENANT_ID}:${POSTGRES_PASSWORD}@${SUPABASE_DB_HOST}:${POSTGRES_PORT}/postgres?sslmode=disable"'
+  ```
+
+  The debug output includes every SQL message, so filter out the `PG Send`/`PG Recv` lines (and check it for connection details before pasting it anywhere).
 - **Check status**: `mise run db_migration_status` — shows which migrations are applied locally vs. on the remote database.
 
 Not using mise? Run the equivalent `supabase` CLI commands directly with your own `--db-url`; see `mise.toml.example` for the exact connection string shape.
