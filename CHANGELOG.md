@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-06
+
+- `25ac22d` chore(agents): add planner, designer, builder and reviewer subagents
+
 ## 2026-09-28
 
 - `b5224c8` feat(feed): show poll votes per option in the post stats modal
