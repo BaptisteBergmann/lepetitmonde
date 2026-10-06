@@ -77,7 +77,7 @@ export default function StoryViewer(props: StoryViewerProps) {
           initialFocus={containerRef}
           aria-label={tA11y('storyViewer')}
           tabIndex={-1}
-          className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
+          className="fixed inset-0 w-full h-full bg-black z-[60] flex flex-col animate-in fade-in-0 duration-200 motion-reduce:animate-none outline-none"
         >
           {/* Own provider so the delete confirm renders inside this dialog's
               tree; the page-level one would count as an outside interaction. */}

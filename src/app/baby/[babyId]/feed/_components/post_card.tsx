@@ -111,7 +111,7 @@ export default function PostCard({
       id={`post-${post.id}`}
       aria-labelledby={`post-${post.id}-date`}
       className={cn(
-        "rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden transition-shadow duration-700",
+        "rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden transition-shadow duration-700 motion-reduce:transition-none",
         highlighted && "ring-2 ring-primary ring-offset-2 ring-offset-landing-background"
       )}
     >

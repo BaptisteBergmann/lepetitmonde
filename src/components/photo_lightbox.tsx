@@ -210,7 +210,7 @@ export default function PhotoLightbox({
     <DialogPrimitive.Root open onOpenChange={(open) => { if (!open) onClose() }} disablePointerDismissal>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Popup
-          className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200 outline-none"
+          className="fixed inset-0 w-full h-full bg-black/95 z-[60] flex flex-col animate-in fade-in-0 duration-200 motion-reduce:animate-none outline-none"
           ref={containerRef}
           initialFocus={containerRef}
           aria-label={tA11y('photoViewer')}
@@ -238,7 +238,7 @@ export default function PhotoLightbox({
             onTouchEnd={handleTouchEnd}
           >
             <div
-              className="flex h-full transition-transform duration-300 ease-out"
+              className="flex h-full transition-transform duration-300 ease-out motion-reduce:transition-none"
               style={{ transform: `translateX(-${index * 100}%)` }}
             >
               {photos.map((photo, i) => (
@@ -264,7 +264,7 @@ export default function PhotoLightbox({
                         alt={alt}
                         className={cn(
                           "max-w-full max-h-full object-contain select-none",
-                          i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out"
+                          i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out motion-reduce:transition-none"
                         )}
                         style={
                           i === index

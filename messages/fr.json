@@ -280,7 +280,7 @@
     "loading": "Chargement du journal...",
     "pendingAccess": "Vous n'êtes pas encore rattaché à un groupe de ce journal. L'administrateur a été notifié et vous aurez accès au contenu dès qu'il vous aura ajouté à un groupe.",
     "newPost": "Nouvelle publication",
-    "empty": "Aucune publication pour l'instant.",
+    "empty": "Pas encore de souvenirs",
     "loadMore": "Charger plus",
     "adminOnly": "Administrateurs uniquement",
     "circleFallback": "Cercle",
@@ -371,7 +371,8 @@
       "editError": "Une erreur est survenue lors de la modification de la story."
     },
     "storyTray": {
-      "add": "Ajouter"
+      "add": "Nouvelle story",
+      "unseenLabel": "{title}, à voir"
     },
     "storyViewer": {
       "deleteConfirm": "Supprimer cette story ? Cette action est irréversible.",
@@ -390,7 +391,9 @@
       "voteError": "Votre vote n'a pas pu être enregistré. Réessayez."
     },
     "loadMoreError": "Impossible de charger les publications plus anciennes. Réessayez.",
-    "endOfFeed": "C'est ici que tout commence"
+    "endOfFeed": "C'est ici que tout commence",
+    "emptyAdminCta": "Partager le premier souvenir",
+    "emptyMemberHint": "Les nouvelles photos et stories apparaîtront ici."
   },
   "calendar": {
     "eyebrow": "Page — Les grandes étapes",

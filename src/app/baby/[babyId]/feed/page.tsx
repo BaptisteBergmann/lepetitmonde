@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
-import { Loader2, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles, getCircleMemberCounts, getUserCircleIds } from "@/utils/actions/circles";
@@ -11,6 +11,7 @@ import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
 import { withTiming } from "@/utils/timing";
 import FeedView from "./feed_view";
+import FeedSkeleton from "./_components/feed_skeleton";
 
 const PAGE_SIZE = 10;
 
@@ -25,6 +26,7 @@ export default async function FeedPage({
   const { postId, storyId } = await searchParams;
   const contextLogger = logger.child({ function: FeedPage.name, babyId })
   const t = await getTranslations('feed')
+  const tCommon = await getTranslations('common')
 
   await assertPageAccess(babyId, 'feed')
 
@@ -41,12 +43,7 @@ export default async function FeedPage({
         {/* sr-only: the story tray is this page's visual header. */}
         <h1 className="sr-only">{t('title')}</h1>
         <Suspense
-          fallback={
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm">{t('loading')}</p>
-            </div>
-          }
+          fallback={<FeedSkeleton label={tCommon('loading')} />}
         >
           <FeedContent babyId={babyId} isAdmin={isAdmin} highlightPostId={postId} highlightStoryId={storyId} />
         </Suspense>

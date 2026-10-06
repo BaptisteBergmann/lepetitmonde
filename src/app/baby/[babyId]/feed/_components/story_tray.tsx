@@ -50,11 +50,11 @@ function BubbleThumb({
         // while re-decoding a thumbnail it had discarded after the tray
         // scrolled far off-screen — visible as a flicker on scroll back up.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt={fallbackLabel} width={56} height={56} className="w-full h-full object-cover" />
+        <img src={imageUrl} alt="" width={56} height={56} className="w-full h-full object-cover" />
       ) : fallbackIsVideo ? (
         <Film className="h-5 w-5 text-landing-muted" />
       ) : (
-        <span className="text-sm font-semibold text-landing-muted">
+        <span className="text-sm font-semibold text-landing-muted" aria-hidden>
           {fallbackLabel.charAt(0).toUpperCase()}
         </span>
       )}
@@ -144,8 +144,9 @@ export default function StoryTray({
           {highlights.map((highlight) => (
             <button
               key={highlight.id}
+              type="button"
               onClick={() => setViewerTarget({ kind: 'highlight', id: highlight.id })}
-              className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer"
+              className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex size-14 rounded-2xl border border-landing-border p-0.5">
                 <BubbleThumb
@@ -165,21 +166,25 @@ export default function StoryTray({
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
           {isAdmin && (
             <button
+              type="button"
               onClick={() => setCreateOpen(true)}
-              className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer"
+              className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex size-14 items-center justify-center rounded-full border-2 border-dashed border-landing-border text-landing-muted hover:text-primary hover:border-primary transition-colors">
                 <Plus className="h-5 w-5" />
               </span>
-              <span className="text-xs text-landing-muted">{t('add')}</span>
+              {/* Wraps to 2 lines rather than truncating ("Nouvelle story" doesn't fit w-16). */}
+              <span className="w-full text-center text-xs leading-tight text-landing-muted line-clamp-2 break-words">{t('add')}</span>
             </button>
           )}
 
           {groups.map((group) => (
             <button
               key={group.key}
+              type="button"
               onClick={() => setViewerTarget({ kind: 'group', key: group.key })}
-              className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer"
+              aria-label={group.allViewed ? undefined : t('unseenLabel', { title: group.title })}
+              className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span
                 className={cn(
@@ -195,7 +200,14 @@ export default function StoryTray({
                   rounded={group.isLabeled ? '2xl' : 'full'}
                 />
               </span>
-              <span className="text-xs text-landing-muted truncate w-full text-center">{group.title}</span>
+              <span
+                className={cn(
+                  "text-xs truncate w-full text-center",
+                  group.allViewed ? "text-landing-muted" : "font-medium text-landing-foreground"
+                )}
+              >
+                {group.title}
+              </span>
             </button>
           ))}
         </div>

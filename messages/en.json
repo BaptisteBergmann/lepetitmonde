@@ -280,7 +280,7 @@
     "loading": "Loading the journal...",
     "pendingAccess": "You're not attached to a group in this journal yet. The admin has been notified and you'll get access to the content once they add you to a group.",
     "newPost": "New post",
-    "empty": "No posts yet.",
+    "empty": "No memories yet",
     "loadMore": "Load more",
     "adminOnly": "Admins only",
     "circleFallback": "Circle",
@@ -371,7 +371,8 @@
       "editError": "Something went wrong while saving the changes."
     },
     "storyTray": {
-      "add": "Add"
+      "add": "New story",
+      "unseenLabel": "{title}, new"
     },
     "storyViewer": {
       "deleteConfirm": "Delete this story? This action can't be undone.",
@@ -390,7 +391,9 @@
       "voteError": "Your vote couldn't be saved. Please try again."
     },
     "loadMoreError": "Couldn't load older posts. Try again.",
-    "endOfFeed": "This is where it all began"
+    "endOfFeed": "This is where it all began",
+    "emptyAdminCta": "Share the first memory",
+    "emptyMemberHint": "New photos and stories will appear here."
   },
   "calendar": {
     "eyebrow": "Page — The big milestones",
