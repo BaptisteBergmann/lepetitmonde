@@ -7,6 +7,8 @@ import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { StoryWithUrl } from './stories'
+import { getStoryReactionsForStories } from './story_reactions'
+import type { Tables } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 
 export type HighlightWithStories = {
@@ -21,6 +23,20 @@ export type HighlightWithStories = {
 
 function toStoryUrl(babyId: string, path: string) {
   return `/api/storage/${babyId}/${path.split('/').map(encodeURIComponent).join('/')}`
+}
+
+async function getViewedStoryIds(storyIds: string[], userId: string | undefined): Promise<Set<string>> {
+  if (!userId || storyIds.length === 0) return new Set()
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('story_views')
+    .select('story_id')
+    .eq('user_id', userId)
+    .in('story_id', storyIds)
+
+  if (error) return new Set()
+  return new Set(data.map((row) => row.story_id))
 }
 
 // Highlights have no circle scoping of their own — visibility flows entirely
@@ -45,29 +61,46 @@ export async function getHighlights(babyId: string): Promise<HighlightWithStorie
 
   if (error) { contextLogger.error(error, "Error fetching highlights"); return [] }
 
-  const highlights: HighlightWithStories[] = []
-
-  for (const row of data) {
+  // First pass: resolve which stories this viewer can see, so reactions and
+  // viewed state are fetched once for the whole tray instead of per highlight.
+  type StoryRow = (Tables<'stories'> & { stories_circles: { circle_id: string }[] }) | null
+  const visibleByHighlight = data.map((row) => {
     const items = [...row.story_highlight_items].sort((a, b) => a.position - b.position)
-    const visibleStories: StoryWithUrl[] = []
+    const rows: Exclude<StoryRow, null>[] = []
 
     for (const item of items) {
-      const storyRow = Array.isArray(item.stories) ? item.stories[0] : item.stories
+      const storyRow: StoryRow = Array.isArray(item.stories) ? item.stories[0] : item.stories
       if (!storyRow) continue
+      // Defense in depth: a highlight item should never point at another
+      // baby's story, but nothing in the schema enforces that.
+      if (storyRow.baby_id !== babyId) continue
 
-      const { stories_circles, ...story } = storyRow
-      const visible = isAdmin || stories_circles.some((sc: { circle_id: string }) => userCircleIds.has(sc.circle_id))
-      if (!visible) continue
-
-      visibleStories.push({
-        ...story,
-        circleIds: stories_circles.map((sc: { circle_id: string }) => sc.circle_id),
-        url: toStoryUrl(babyId, story.media_path),
-        thumbnailUrl: story.thumbnail_path ? toStoryUrl(babyId, story.thumbnail_path) : null,
-      })
+      const visible = isAdmin || storyRow.stories_circles.some((sc) => userCircleIds.has(sc.circle_id))
+      if (visible) rows.push(storyRow)
     }
 
-    if (visibleStories.length === 0) continue
+    return { row, rows }
+  })
+
+  const storyIds = Array.from(new Set(visibleByHighlight.flatMap(({ rows }) => rows.map((r) => r.id))))
+  const [reactionsByStory, viewedIds] = await Promise.all([
+    getStoryReactionsForStories(storyIds, babyId),
+    getViewedStoryIds(storyIds, user?.id),
+  ])
+
+  const highlights: HighlightWithStories[] = []
+
+  for (const { row, rows } of visibleByHighlight) {
+    if (rows.length === 0) continue
+
+    const visibleStories: StoryWithUrl[] = rows.map(({ stories_circles, ...story }) => ({
+      ...story,
+      circleIds: stories_circles.map((sc) => sc.circle_id),
+      url: toStoryUrl(babyId, story.media_path),
+      thumbnailUrl: story.thumbnail_path ? toStoryUrl(babyId, story.thumbnail_path) : null,
+      reactions: reactionsByStory[story.id] ?? { breakdown: [], myEmoji: null },
+      viewed: viewedIds.has(story.id),
+    }))
 
     const cover = visibleStories.find((s) => s.id === row.cover_story_id) ?? visibleStories[0]
     highlights.push({
