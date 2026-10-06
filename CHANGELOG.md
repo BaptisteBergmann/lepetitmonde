@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `414e3da` feat(guess): add pronostics leaderboard page
 - `a8c78eb` feat(guess): let admins resolve pronostics and flag funny answers
 - `0ab8a38` refactor(guess): share pronostic answer formatting
 - `7b12b4e` feat(guess): add leaderboard data action
