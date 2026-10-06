@@ -20,6 +20,7 @@ import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Loader2, Sparkles } from 'lucide-react'
+import { FEED_LIMITS } from '@utils/feed-limits'
 
 type Circle = Tables<'circles'>
 
@@ -142,6 +143,7 @@ export default function CreateStoryModal({
           <textarea
             id="story-caption"
             value={caption}
+            maxLength={FEED_LIMITS.storyCaption}
             onChange={(e) => setCaption(e.target.value)}
             rows={2}
             className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
@@ -157,6 +159,7 @@ export default function CreateStoryModal({
             id="story-group"
             list="story-group-labels"
             value={groupLabel}
+            maxLength={FEED_LIMITS.groupLabel}
             onChange={(e) => setGroupLabel(e.target.value)}
             placeholder={t('groupPlaceholder')}
             className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"

@@ -19,6 +19,7 @@ import type { PostViewsData } from './views'
 import { getCommentsForPosts, getReactionsForPosts, getPollsForPosts, getPostViewsForPosts } from '@utils/feed-loaders'
 import { logger } from '../logger'
 import { assertAdmin, assertCirclesInBaby, assertPostVisible } from '@utils/feed-access'
+import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
 
 type NewPost = TablesInsert<'posts'>
 export type PostPhotoWithUrl = Tables<'post_photos'> & { url: string | null; thumbnailUrl: string | null }
@@ -37,6 +38,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
 
   await assertIsAdmin(supabase, post.baby_id)
   await assertCirclesInBaby(circleIds, post.baby_id)
+  const caption = await normalizeText(post.caption, FEED_LIMITS.postCaption)
   await ensureBabyBucket(post.baby_id)
 
   const { data, error } = await supabase
@@ -45,7 +47,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
       id: post.id,
       baby_id: post.baby_id,
       taken_at: post.taken_at,
-      caption: post.caption || null,
+      caption,
     }])
     .select('id')
     .single()
@@ -65,7 +67,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
   const { data: { user } } = await supabase.auth.getUser()
   const recipients = await getVisibleUserIds(post.baby_id, circleIds, user?.id)
   const t = await getTranslations('pushNotifications')
-  const body = post.caption || t('newPost.bodyFallback')
+  const body = caption || t('newPost.bodyFallback')
   await notifyUsers(post.baby_id, 'new_post', {
     title: t('newPost.title'),
     body,
@@ -101,6 +103,7 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
   // post must be proven to belong to this baby first.
   await assertPostVisible(postId, babyId, await assertAdmin(babyId))
   await assertCirclesInBaby(circleIds, babyId)
+  const caption = await normalizeText(update.caption, FEED_LIMITS.postCaption)
 
   // Snapshot who could see this post *before* the circle change, so that
   // after re-linking we can notify only the people newly able to see it —
@@ -121,7 +124,7 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
     .from('posts')
     .update({
       taken_at: update.taken_at,
-      caption: update.caption || null,
+      caption,
     })
     .eq('id', postId)
     .eq('baby_id', babyId)
@@ -151,7 +154,7 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
     const t = await getTranslations('pushNotifications')
     await notifyUsers(babyId, 'new_post', {
       title: t('newPost.title'),
-      body: update.caption || t('newPost.bodyFallback'),
+      body: caption || t('newPost.bodyFallback'),
       url: `/baby/${babyId}/feed?postId=${postId}`,
     }, newlyVisible)
   }

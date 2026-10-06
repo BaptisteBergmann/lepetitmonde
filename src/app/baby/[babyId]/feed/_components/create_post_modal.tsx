@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Loader2, ImagePlus, X, BarChart3, Plus } from 'lucide-react'
 import { format } from 'date-fns'
+import { FEED_LIMITS } from '@utils/feed-limits'
 
 type Circle = Tables<'circles'>
 
@@ -174,6 +175,7 @@ export default function CreatePostModal({
           <textarea
             id="caption"
             value={caption}
+            maxLength={FEED_LIMITS.postCaption}
             onChange={(e) => setCaption(e.target.value)}
             rows={3}
             className="w-full border border-transparent bg-input/50 rounded-2xl p-3 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground resize-none transition-[color,box-shadow] duration-200"
@@ -248,6 +250,7 @@ export default function CreatePostModal({
               <input
                 type="text"
                 value={pollQuestion}
+                maxLength={FEED_LIMITS.pollQuestion}
                 onChange={(e) => setPollQuestion(e.target.value)}
                 placeholder={t('pollQuestionPlaceholder')}
                 className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
@@ -258,6 +261,7 @@ export default function CreatePostModal({
                     <input
                       type="text"
                       value={option}
+                      maxLength={FEED_LIMITS.pollOption}
                       onChange={(e) => updatePollOption(index, e.target.value)}
                       placeholder={t('pollOptionPlaceholder', { number: index + 1 })}
                       className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"

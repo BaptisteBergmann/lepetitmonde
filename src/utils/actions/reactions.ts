@@ -10,14 +10,16 @@ import { notifyUsers } from './notify'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertReactionEmoji } from '@utils/feed-validation'
 import { assertMember, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
-export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
+export async function addReaction(postId: string, babyId: string, rawEmoji: string = '❤️') {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addReaction.name, postId, babyId })
 
   const { viewer, post } = await assertPostVisible(postId, babyId, await assertMember(babyId))
   const user = { id: viewer.userId }
+  const emoji = await assertReactionEmoji(rawEmoji)
 
   const { error } = await supabase
     .from('post_reactions')

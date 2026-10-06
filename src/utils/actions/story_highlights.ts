@@ -11,6 +11,7 @@ import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-load
 import type { Tables } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { assertAdmin, assertHighlightInBaby, assertStoryVisible } from '@utils/feed-access'
+import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
 
 export type HighlightWithStories = {
   id: string
@@ -115,11 +116,12 @@ async function clearStoryExpiry(supabase: Awaited<ReturnType<typeof createClient
   return error
 }
 
-export async function createHighlight(babyId: string, name: string, storyId: string) {
+export async function createHighlight(babyId: string, rawName: string, storyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: createHighlight.name, babyId, storyId })
 
   await assertStoryVisible(storyId, babyId, await assertAdmin(babyId))
+  const name = await normalizeText(rawName, FEED_LIMITS.highlightName, { requiredKey: 'textRequired' })
 
   const { data, error } = await supabase
     .from('story_highlights')
@@ -199,11 +201,12 @@ export async function removeStoryFromHighlight(highlightId: string, storyId: str
   revalidatePath(`/baby/${babyId}/feed`)
 }
 
-export async function renameHighlight(highlightId: string, babyId: string, name: string) {
+export async function renameHighlight(highlightId: string, babyId: string, rawName: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: renameHighlight.name, highlightId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  const name = await normalizeText(rawName, FEED_LIMITS.highlightName, { requiredKey: 'textRequired' })
 
   const { error } = await supabase
     .from('story_highlights')

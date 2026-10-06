@@ -1067,7 +1067,11 @@
     "broadcastError": "Something went wrong while sending the email.",
     "pronosticClosed": "This pronostic is closed: the answer has been revealed.",
     "invalidCorrectAnswer": "This answer isn't valid for this pronostic.",
-    "verdictTextOnly": "Only free-text answers can be marked correct or wrong by hand."
+    "verdictTextOnly": "Only free-text answers can be marked correct or wrong by hand.",
+    "textTooLong": "This text is too long.",
+    "textRequired": "This field can't be empty.",
+    "commentRequired": "The comment can't be empty.",
+    "invalidReaction": "Unknown reaction."
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",

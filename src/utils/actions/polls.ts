@@ -7,10 +7,13 @@ import { getNicknamesByBaby } from './users'
 import { getDisplayName } from '../users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
 import { assertAdmin, assertMember, assertOptionInPoll, assertPollVisible, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
 async function assertValidOptions(options: string[]) {
-  const trimmed = options.map((option) => option.trim()).filter(Boolean)
+  if (!Array.isArray(options)) throw await actionError('pollOptionsCount')
+  const normalized = await Promise.all(options.map((option) => normalizeText(option, FEED_LIMITS.pollOption)))
+  const trimmed = normalized.filter((option): option is string => option !== null)
   if (trimmed.length < 2 || trimmed.length > 6) {
     throw await actionError('pollOptionsCount')
   }
@@ -23,8 +26,7 @@ export async function createPoll(postId: string, babyId: string, question: strin
 
   await assertPostVisible(postId, babyId, await assertAdmin(babyId))
 
-  const trimmedQuestion = question.trim()
-  if (!trimmedQuestion) throw await actionError('pollQuestionRequired')
+  const trimmedQuestion = await normalizeText(question, FEED_LIMITS.pollQuestion, { requiredKey: 'pollQuestionRequired' })
   const trimmedOptions = await assertValidOptions(options)
 
   const { data: poll, error } = await supabase
@@ -63,8 +65,7 @@ export async function updatePoll(pollId: string, postId: string, babyId: string,
   if (voteCountError) { contextLogger.error(voteCountError, "Error checking poll votes"); throw voteCountError }
   if (voteCount && voteCount > 0) throw await actionError('cannotEditVotedPoll')
 
-  const trimmedQuestion = question.trim()
-  if (!trimmedQuestion) throw await actionError('pollQuestionRequired')
+  const trimmedQuestion = await normalizeText(question, FEED_LIMITS.pollQuestion, { requiredKey: 'pollQuestionRequired' })
   const trimmedOptions = await assertValidOptions(options)
 
   const { error } = await supabase

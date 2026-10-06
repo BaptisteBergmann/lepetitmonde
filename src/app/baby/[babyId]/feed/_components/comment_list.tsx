@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
 import CommentReactionPicker from './comment_reaction_picker'
 import type { Comment } from '@utils/actions/comments'
+import { FEED_LIMITS } from '@utils/feed-limits'
 
 export default function CommentList({
   comments,
@@ -129,6 +130,7 @@ export default function CommentList({
               <div className="flex items-center gap-1.5 mt-1">
                 <Input
                   value={editBody}
+                  maxLength={FEED_LIMITS.comment}
                   onChange={(e) => setEditBody(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') saveEdit(comment)

@@ -1067,7 +1067,11 @@
     "broadcastError": "Erreur lors de l'envoi de l'e-mail.",
     "pronosticClosed": "Ce pronostic est clôturé : la réponse a été dévoilée.",
     "invalidCorrectAnswer": "Cette réponse n'est pas valide pour ce pronostic.",
-    "verdictTextOnly": "Seules les réponses libres peuvent être jugées justes ou fausses à la main."
+    "verdictTextOnly": "Seules les réponses libres peuvent être jugées justes ou fausses à la main.",
+    "textTooLong": "Ce texte est trop long.",
+    "textRequired": "Ce champ ne peut pas être vide.",
+    "commentRequired": "Le commentaire ne peut pas être vide.",
+    "invalidReaction": "Réaction inconnue."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",

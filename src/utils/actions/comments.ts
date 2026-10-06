@@ -10,15 +10,17 @@ import { notifyUsers } from './notify'
 import { getDisplayName } from '@utils/users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { FEED_LIMITS, normalizeText, truncateForPush } from '@utils/feed-validation'
 import { assertCommentVisible, assertMember, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
-export async function addComment(postId: string, babyId: string, body: string) {
+export async function addComment(postId: string, babyId: string, rawBody: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addComment.name, postId, babyId })
 
   const { viewer } = await assertPostVisible(postId, babyId, await assertMember(babyId))
   const user = { id: viewer.userId }
   const circleIds = Array.from(viewer.circleIds)
+  const body = await normalizeText(rawBody, FEED_LIMITS.comment, { requiredKey: 'commentRequired' })
 
   const { error } = await supabase
     .from('post_comments')
@@ -42,18 +44,19 @@ export async function addComment(postId: string, babyId: string, body: string) {
   const name = getDisplayName(commenterProfile, commenter?.nickname) || t('someoneFallback')
   await notifyUsers(babyId, 'new_comment', {
     title: t('newComment.title'),
-    body: t('newComment.body', { name, body }),
+    body: t('newComment.body', { name, body: truncateForPush(body) }),
     url: `/baby/${babyId}/feed?postId=${postId}`,
   }, recipients)
 }
 
-export async function updateComment(commentId: string, postId: string, babyId: string, body: string) {
+export async function updateComment(commentId: string, postId: string, babyId: string, rawBody: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updateComment.name, commentId, postId, babyId })
 
   const { viewer, comment } = await assertCommentVisible(commentId, babyId, await assertMember(babyId))
   if (comment.post_id !== postId) throw await actionError('unauthorized')
   const user = { id: viewer.userId }
+  const body = await normalizeText(rawBody, FEED_LIMITS.comment, { requiredKey: 'commentRequired' })
 
   const { data, error } = await supabase
     .from('post_comments')

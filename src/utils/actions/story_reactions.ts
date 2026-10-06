@@ -9,14 +9,16 @@ import { notifyUsers } from './notify'
 import { getUserAccess } from './users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertReactionEmoji } from '@utils/feed-validation'
 import { assertMember, assertStoryVisible } from '@utils/feed-access'
 
-export async function addStoryReaction(storyId: string, babyId: string, emoji: string = '❤️') {
+export async function addStoryReaction(storyId: string, babyId: string, rawEmoji: string = '❤️') {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addStoryReaction.name, storyId, babyId })
 
   const { viewer, story } = await assertStoryVisible(storyId, babyId, await assertMember(babyId))
   const user = { id: viewer.userId }
+  const emoji = await assertReactionEmoji(rawEmoji)
 
   const { error } = await supabase
     .from('story_reactions')

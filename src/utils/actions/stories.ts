@@ -16,6 +16,7 @@ import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-load
 import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
 import { assertAdmin, assertCirclesInBaby, assertStoryVisible, findVisibleStory, getFeedViewer } from '@utils/feed-access'
+import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
 
 export type StoryWithUrl = Tables<'stories'> & {
   url: string
@@ -52,6 +53,8 @@ export async function createStory(story: NewStory, circleIds: string[]) {
 
   await assertIsAdmin(supabase, story.baby_id)
   await assertCirclesInBaby(circleIds, story.baby_id)
+  const caption = await normalizeText(story.caption, FEED_LIMITS.storyCaption)
+  const groupLabel = await normalizeText(story.groupLabel, FEED_LIMITS.groupLabel)
   await ensureBabyBucket(story.baby_id)
 
   const expiresAt = story.durationHours
@@ -66,9 +69,9 @@ export async function createStory(story: NewStory, circleIds: string[]) {
     .insert([{
       id: story.id,
       baby_id: story.baby_id,
-      caption: story.caption,
+      caption,
       expires_at: expiresAt,
-      group_label: story.groupLabel,
+      group_label: groupLabel,
       media_path: mediaPath,
       thumbnail_path: thumbnailPath,
       mime_type: story.mimeType,
@@ -127,6 +130,8 @@ export async function updateStory(storyId: string, babyId: string, update: Story
   // the story must be proven to belong to this baby first.
   await assertStoryVisible(storyId, babyId, await assertAdmin(babyId))
   await assertCirclesInBaby(circleIds, babyId)
+  const caption = await normalizeText(update.caption, FEED_LIMITS.storyCaption)
+  const groupLabel = await normalizeText(update.groupLabel, FEED_LIMITS.groupLabel)
 
   // Snapshot who could see this story *before* the circle change, so that
   // after re-linking we can notify only the people newly able to see it —
@@ -146,8 +151,8 @@ export async function updateStory(storyId: string, babyId: string, update: Story
   const { error } = await supabase
     .from('stories')
     .update({
-      caption: update.caption,
-      group_label: update.groupLabel,
+      caption,
+      group_label: groupLabel,
     })
     .eq('id', storyId)
     .eq('baby_id', babyId)

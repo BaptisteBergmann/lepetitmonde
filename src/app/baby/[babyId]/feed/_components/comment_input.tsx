@@ -7,6 +7,7 @@ import { addComment } from '@utils/actions/comments'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2, Send } from 'lucide-react'
+import { FEED_LIMITS } from '@utils/feed-limits'
 
 export default function CommentInput({
   postId,
@@ -43,6 +44,7 @@ export default function CommentInput({
     <div className="flex items-center gap-2">
       <Input
         value={body}
+        maxLength={FEED_LIMITS.comment}
         onChange={(e) => setBody(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
         placeholder={t('inputPlaceholder')}
