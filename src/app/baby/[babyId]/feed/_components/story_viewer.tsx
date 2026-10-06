@@ -607,7 +607,9 @@ function StoryViewerBody({
           <p className="max-h-[30dvh] overflow-y-auto overscroll-contain text-sm text-white whitespace-pre-wrap">{story.caption}</p>
         )}
 
+        {/* Keyed by story so optimistic state or a late rollback can't leak onto the next story. */}
         <StoryReactionPicker
+          key={story.id}
           storyId={story.id}
           babyId={babyId}
           initialReactions={story.reactions}
