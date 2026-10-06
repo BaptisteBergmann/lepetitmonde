@@ -440,7 +440,12 @@
       "yourAnswer": "Your answer",
       "sending": "Sending...",
       "submit": "Submit my pronostic",
-      "submitError": "Something went wrong while sending your pronostic."
+      "submitError": "Something went wrong while sending your pronostic.",
+      "correctAnswer": "Correct answer",
+      "youEarned": "{count, plural, =0 {No points this time} one {You earned # point} other {You earned # points}}",
+      "podium": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} closest",
+      "closed": "Closed",
+      "seeLeaderboard": "See the leaderboard"
     },
     "answerTypes": {
       "text": "Text",

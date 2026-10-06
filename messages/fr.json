@@ -440,7 +440,12 @@
       "yourAnswer": "Votre réponse",
       "sending": "Envoi en cours...",
       "submit": "Valider mon pronostic",
-      "submitError": "Une erreur est survenue lors de l'envoi de votre pronostic."
+      "submitError": "Une erreur est survenue lors de l'envoi de votre pronostic.",
+      "correctAnswer": "Bonne réponse",
+      "youEarned": "{count, plural, =0 {Pas de point cette fois} one {Vous gagnez # point} other {Vous gagnez # points}}",
+      "podium": "{rank, selectordinal, one {#er} other {#e}} plus proche",
+      "closed": "Clôturé",
+      "seeLeaderboard": "Voir le classement"
     },
     "answerTypes": {
       "text": "Texte",

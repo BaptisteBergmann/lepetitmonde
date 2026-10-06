@@ -7,15 +7,18 @@ import { HelpCircle, CheckCircle2, ClipboardList, RefreshCw } from "lucide-react
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import Modal from "./_components/modal";
+import type { MyResult } from "@/utils/actions/guesses";
 
 export default function GuessesTabs({
   unanswered,
   answered,
+  results = {},
   babyId,
   isAdmin = false,
 }: {
   unanswered: QuestionWithGuess[];
   answered: QuestionWithGuess[];
+  results?: Record<string, MyResult>;
   babyId: string;
   isAdmin?: boolean;
 }) {
@@ -110,7 +113,7 @@ export default function GuessesTabs({
         <div className="columns-1 md:columns-2 gap-4">
           {currentQuestions.map((question) => (
             <div key={question.id} className="mb-4 break-inside-avoid transition-all duration-200">
-              <QuestionWrapper questionWithGuess={question} />
+              <QuestionWrapper questionWithGuess={question} result={results[question.id]} />
             </div>
           ))}
         </div>

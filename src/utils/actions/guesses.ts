@@ -5,7 +5,7 @@ import { createClient } from '@utils/supabase/server'
 import { logger } from '../logger'
 import { getTranslations } from 'next-intl/server'
 import { Json, TablesInsert } from '../supabase/database.types'
-import { buildStandings, ScorableGuess } from '@utils/guess_scoring'
+import { buildStandings, ScorableGuess, scoreQuestion } from '@utils/guess_scoring'
 import { getUserAccess, getUsers } from './users'
 import { assertIsAdmin } from './access'
 import { actionError } from './errors'
@@ -261,4 +261,46 @@ export async function getLeaderboard(babyId: string) {
     totalCount: totalResult.count ?? 0,
     currentUserId: user.id,
   }
+}
+
+export type MyResult = { points: number; rank?: number }
+
+// Member-facing: scores every guess of resolved questions (closest-wins needs
+// them all) but only returns the current user's own result per question.
+export async function getMyResolvedResults(babyId: string): Promise<Record<string, MyResult>> {
+  const contextLogger = logger.child({ function: getMyResolvedResults.name, babyId })
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw await actionError('unauthorized')
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw await actionError('unauthorized')
+
+  const { data: questions, error: questionsError } = await supabase
+    .from('guess_questions')
+    .select('id, type, correct_answer, resolved_at')
+    .eq('baby_id', babyId)
+    .eq('status', 'approved')
+    .not('resolved_at', 'is', null)
+
+  if (questionsError) { contextLogger.error(questionsError, "Error fetching resolved questions"); throw questionsError }
+  if (questions.length === 0) return {}
+
+  const { data: guesses, error: guessesError } = await supabase
+    .from('guesses')
+    .select('id, user_id, question_id, answer, is_correct, is_funny')
+    .eq('baby_id', babyId)
+    .in('question_id', questions.map((q) => q.id))
+
+  if (guessesError) { contextLogger.error(guessesError, "Error fetching guesses of resolved questions"); throw guessesError }
+
+  const results: Record<string, MyResult> = {}
+  for (const question of questions) {
+    const mine = guesses.find((g) => g.question_id === question.id && g.user_id === user.id)
+    if (!mine) continue
+    const score = scoreQuestion(question, guesses).get(mine.id)
+    results[question.id] = { points: score?.points ?? 0, rank: score?.rank }
+  }
+  return results
 }
