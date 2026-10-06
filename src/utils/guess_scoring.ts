@@ -40,10 +40,12 @@ export function isClosestWinsType(type: string) {
 
 export function normalizeText(s: string) {
   return s
-    .trim()
     .toLowerCase()
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
+    // "Marie-Lou", "marie lou" and "Marie  Lou" are the same answer.
+    .replace(/[\s\-'’]+/g, ' ')
+    .trim()
 }
 
 export function toComparable(type: string, value: Json | undefined): number | null {
