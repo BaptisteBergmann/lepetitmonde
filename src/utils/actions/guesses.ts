@@ -3,8 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
 import { logger } from '../logger'
-import { TablesInsert } from '../supabase/database.types'
-import { getUserAccess } from './users'
+import { getTranslations } from 'next-intl/server'
+import { Json, TablesInsert } from '../supabase/database.types'
+import { buildStandings, ScorableGuess } from '@utils/guess_scoring'
+import { getUserAccess, getUsers } from './users'
 import { assertIsAdmin } from './access'
 import { actionError } from './errors'
 
@@ -169,4 +171,94 @@ export async function setGuessFunny(babyId: string, guessId: string, isFunny: bo
   contextLogger.info({ isFunny }, "Guess funny flag set")
 
   revalidateGuessPages(babyId)
+}
+
+export type FunnyAnswer = {
+  guessId: string
+  questionTitle: string | null
+  questionType: string
+  questionOptions: Json | null
+  answer: Json | null
+  authorId: string
+  authorName: string
+}
+
+// Member-facing. Only resolved questions are read here, so the answers,
+// correct answers and funny flags of open questions never leave the server.
+export async function getLeaderboard(babyId: string) {
+  const contextLogger = logger.child({ function: getLeaderboard.name, babyId })
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw await actionError('unauthorized')
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw await actionError('unauthorized')
+
+  const t = await getTranslations('guess')
+
+  const [resolvedResult, totalResult, users] = await Promise.all([
+    supabase
+      .from('guess_questions')
+      .select('id, type, options, title, position, correct_answer, resolved_at')
+      .eq('baby_id', babyId)
+      .eq('status', 'approved')
+      .not('resolved_at', 'is', null)
+      .order('position', { ascending: true }),
+    supabase
+      .from('guess_questions')
+      .select('id', { count: 'exact', head: true })
+      .eq('baby_id', babyId)
+      .eq('status', 'approved'),
+    getUsers(babyId),
+  ])
+
+  if (resolvedResult.error) { contextLogger.error(resolvedResult.error, "Error fetching resolved questions"); throw resolvedResult.error }
+  if (totalResult.error) { contextLogger.error(totalResult.error, "Error counting questions"); throw totalResult.error }
+
+  const questions = resolvedResult.data
+  const members = users.map((u) => ({
+    id: u.id,
+    name: u.nickname || [u.first_name, u.last_name].filter(Boolean).join(' ') || t('unknownUser'),
+  }))
+
+  let guesses: (ScorableGuess & { created_at: string })[] = []
+  if (questions.length > 0) {
+    const { data, error } = await supabase
+      .from('guesses')
+      .select('id, user_id, question_id, answer, is_correct, is_funny, created_at')
+      .eq('baby_id', babyId)
+      .in('question_id', questions.map((q) => q.id))
+
+    if (error) { contextLogger.error(error, "Error fetching guesses of resolved questions"); throw error }
+    guesses = data
+  }
+
+  const standings = buildStandings(questions, guesses, members, t('unknownUser'))
+
+  const nameById = new Map(members.map((m) => [m.id, m.name]))
+  const funnyAnswers: FunnyAnswer[] = questions.flatMap((question) =>
+    guesses
+      .filter((g) => g.question_id === question.id && g.is_funny)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((g) => ({
+        guessId: g.id,
+        questionTitle: question.title,
+        questionType: question.type,
+        questionOptions: question.options,
+        answer: g.answer,
+        authorId: g.user_id,
+        authorName: nameById.get(g.user_id) ?? t('unknownUser'),
+      }))
+  )
+
+  contextLogger.debug({ standings: standings.length, funny: funnyAnswers.length }, "Leaderboard computed")
+
+  return {
+    standings,
+    funnyAnswers,
+    resolvedCount: questions.length,
+    totalCount: totalResult.count ?? 0,
+    currentUserId: user.id,
+  }
 }
