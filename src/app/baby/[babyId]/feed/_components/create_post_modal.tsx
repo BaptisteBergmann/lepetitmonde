@@ -169,6 +169,15 @@ export default function CreatePostModal({
   // stays right if a failing file is removed from the Dropzone.
   const uploadFailedCount = upload.files.filter((file) => upload.errors.some((e) => e.name === file.name)).length
 
+  // First match wins: multi-file counter, single-file "Uploading…", then
+  // the server-side steps.
+  const progress = upload.uploadProgress
+  const pendingLabel = progress && progress.total > 1
+    ? t('uploadProgress', { current: Math.min(progress.done + 1, progress.total), total: progress.total })
+    : progress
+      ? t('uploadingOne')
+      : t('publishing')
+
   const notice = isPending || !postCreated
     ? null
     : pollEnabled && !pollCreated
@@ -190,7 +199,7 @@ export default function CreatePostModal({
   }
 
   return (
-    <Modal onClose={onClose} title={<><ImagePlus className="h-4.5 w-4.5 text-primary" />{t('newTitle')}</>}>
+    <Modal dismissible={!isPending} onClose={onClose} title={<><ImagePlus className="h-4.5 w-4.5 text-primary" />{t('newTitle')}</>}>
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
         {notice && (
@@ -343,23 +352,37 @@ export default function CreatePostModal({
 
       </div>
 
-      <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
+      <div className="relative border-t border-landing-border bg-landing-background flex flex-wrap justify-end gap-2 items-center px-5 py-3.5">
+        {progress && progress.total > 1 && (
+          <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-landing-border">
+            <div
+              className="h-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
+              style={{ width: `${(progress.done / progress.total) * 100}%` }}
+            />
+          </div>
+        )}
+        {/* Button label changes aren't reliably announced; mirror the phase here. */}
+        <span role="status" aria-live="polite" className="sr-only">{isPending ? pendingLabel : ''}</span>
         <Button
           variant="outline"
           className="rounded-2xl cursor-pointer"
+          disabled={isPending}
           onClick={onClose}
         >
           {postCreated ? t('close') : t('cancel')}
         </Button>
+        {/* aria-disabled rather than disabled while pending: a natively disabled
+            button drops focus to <body> mid-publish. handleConfirm returns early. */}
         <Button
-          disabled={!takenAt || hasFileErrors || !pollValid || isPending}
-          className="rounded-2xl cursor-pointer"
+          disabled={!takenAt || hasFileErrors || !pollValid}
+          aria-disabled={isPending || undefined}
+          className="rounded-2xl cursor-pointer aria-disabled:cursor-wait"
           onClick={handleConfirm}
         >
           {isPending ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{t('publishing')}</span>
+              <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+              <span>{pendingLabel}</span>
             </>
           ) : (
             <span>

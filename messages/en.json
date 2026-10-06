@@ -334,7 +334,9 @@
       "finishPublishing": "Finish publishing",
       "lockedNotice": "This post has already been created. To change its text, date or visibility, close this window and use Edit on the post.",
       "pollCreateError": "The post was created but the poll couldn't be added. Try again, or remove the poll to publish without it.",
-      "uploadsFailedNotice": "{count, plural, one {# file wasn't} other {# files weren't}} uploaded. The post isn't shared yet: nobody is notified until every file is uploaded. Retry below."
+      "uploadsFailedNotice": "{count, plural, one {# file wasn't} other {# files weren't}} uploaded. The post isn't shared yet: nobody is notified until every file is uploaded. Retry below.",
+      "uploadProgress": "Uploading {current} of {total}…",
+      "uploadingOne": "Uploading…"
     },
     "storyForm": {
       "title": "New story",

@@ -103,6 +103,9 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
   const [finalNames, setFinalNames] = useState<Record<string, string>>({})
   const [finalThumbnails, setFinalThumbnails] = useState<Record<string, string>>({})
   const [finalContentTypes, setFinalContentTypes] = useState<Record<string, string>>({})
+  // Non-null only while onUpload runs; `done` counts settled files (success or
+  // failure), so modals can show "Uploading 2 of 5…".
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null)
 
   const isSuccess = useMemo(() => {
     if (errors.length === 0 && successes.length === 0) {
@@ -152,13 +155,19 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     // [Joshen] This is to support handling partial successes
     // If any files didn't upload for any reason, hitting "Upload" again will only upload the files that had errors
     const filesWithErrors = errors.map((x) => x.name)
+    // A failed file is also "not a success", so the two lists overlap: dedupe,
+    // or the retry uploads it twice in parallel and one copy fails with
+    // "already exists" (and the progress total would be wrong).
     const filesToUpload =
       filesWithErrors.length > 0
-        ? [
+        ? Array.from(new Set([
           ...files.filter((f) => filesWithErrors.includes(f.name)),
           ...files.filter((f) => !successes.includes(f.name)),
-        ]
+        ]))
         : files
+
+    setUploadProgress({ done: 0, total: filesToUpload.length })
+    const markSettled = () => setUploadProgress((prev) => prev && { ...prev, done: prev.done + 1 })
 
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
@@ -169,6 +178,16 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           { cacheControl: cacheControl.toString(), upsert },
           (status) => t('uploadFailedWithStatus', { status })
         )
+          // A network failure (fetch rejecting) becomes a per-file error like
+          // any other, so the caller's retry flow handles it instead of the
+          // whole batch rejecting and leaving `loading` stuck on.
+          .catch((err: unknown) => ({
+            error: t('uploadFailed', { error: err instanceof Error ? err.message : String(err) }) as string | undefined,
+            filename: undefined,
+            thumbnailFilename: undefined,
+            contentType: undefined,
+          }))
+          .finally(markSettled)
         if (error) {
           return { name: file.name, message: error, filename: undefined, thumbnailFilename: undefined, contentType: undefined }
         } else {
@@ -204,6 +223,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     )
     setFinalContentTypes((prev) => ({ ...prev, ...newFinalContentTypes }))
 
+    setUploadProgress(null)
     setLoading(false)
 
     // Returned directly (rather than relying on callers to read back `successes`/`finalNames`/
@@ -246,6 +266,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     finalContentTypes,
     isSuccess,
     loading,
+    uploadProgress,
     errors,
     setErrors,
     onUpload,

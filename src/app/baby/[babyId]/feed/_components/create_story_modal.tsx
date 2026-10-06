@@ -67,7 +67,7 @@ export default function CreateStoryModal({
   )
 
   const handleConfirm = async () => {
-    if (upload.files.length !== 1) return
+    if (isPending || upload.files.length !== 1) return
 
     setIsPending(true)
     try {
@@ -112,8 +112,9 @@ export default function CreateStoryModal({
 
       onCreated()
       onClose()
-    } catch (err) {
-      console.error(err)
+    } catch {
+      // The story row is only created after the upload succeeds, so a
+      // failure leaves nothing on the server: the form simply unlocks.
       toast.error(t('publishError'))
     } finally {
       setIsPending(false)
@@ -121,9 +122,10 @@ export default function CreateStoryModal({
   }
 
   const hasFileErrors = upload.files.some((file) => file.errors.length !== 0)
+  const pendingLabel = upload.uploadProgress ? tShared('uploadingOne') : tShared('publishing')
 
   return (
-    <Modal onClose={onClose} title={<><Sparkles className="h-4.5 w-4.5 text-primary" />{t('title')}</>}>
+    <Modal dismissible={!isPending} onClose={onClose} title={<><Sparkles className="h-4.5 w-4.5 text-primary" />{t('title')}</>}>
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
         <div className="flex flex-col gap-1.5">
@@ -136,6 +138,7 @@ export default function CreateStoryModal({
           </Dropzone>
         </div>
 
+        <fieldset disabled={isPending} className="min-w-0 space-y-4 disabled:opacity-60">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="story-caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {tShared('captionLabel')}
@@ -178,7 +181,7 @@ export default function CreateStoryModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('durationLabel')}
           </Label>
-          <Select items={DURATION_LABELS} value={duration} onValueChange={(value) => value && setDuration(value as string)}>
+          <Select items={DURATION_LABELS} disabled={isPending} value={duration} onValueChange={(value) => value && setDuration(value as string)}>
             <SelectTrigger className="w-full text-foreground bg-input/50">
               <SelectValue />
             </SelectTrigger>
@@ -199,6 +202,7 @@ export default function CreateStoryModal({
           <Select
             items={circleItems}
             multiple
+            disabled={isPending}
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
@@ -217,26 +221,30 @@ export default function CreateStoryModal({
             {t('visibleByHint')}
           </p>
         </div>
+        </fieldset>
 
       </div>
 
-      <div className="border-t border-landing-border bg-landing-background flex justify-end gap-2 items-center px-5 py-3.5">
+      <div className="relative border-t border-landing-border bg-landing-background flex flex-wrap justify-end gap-2 items-center px-5 py-3.5">
+        <span role="status" aria-live="polite" className="sr-only">{isPending ? pendingLabel : ''}</span>
         <Button
           variant="outline"
           className="rounded-2xl cursor-pointer"
+          disabled={isPending}
           onClick={onClose}
         >
           {tShared('cancel')}
         </Button>
         <Button
-          disabled={upload.files.length !== 1 || hasFileErrors || isPending}
-          className="rounded-2xl cursor-pointer"
+          disabled={upload.files.length !== 1 || hasFileErrors}
+          aria-disabled={isPending || undefined}
+          className="rounded-2xl cursor-pointer aria-disabled:cursor-wait"
           onClick={handleConfirm}
         >
           {isPending ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{tShared('publishing')}</span>
+              <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+              <span>{pendingLabel}</span>
             </>
           ) : (
             <span>{tShared('publish')}</span>

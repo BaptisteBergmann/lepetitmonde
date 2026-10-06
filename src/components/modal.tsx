@@ -13,23 +13,28 @@ import { cn } from '@utils/utils'
 // Callers keep rendering it only while it should be open (`{open && <Modal ...>}`), so it is
 // always `open` here; `onClose` fires for Escape, backdrop click and the close button.
 //
+// `dismissible={false}` (e.g. while uploads are in flight) ignores all three, so the form
+// can't unmount mid-upload; the close button stays in place but is disabled.
+//
 // Children are laid out below the header inside a flex column: use a `flex-1 overflow-y-auto`
 // body followed by an optional footer, as the modals did before.
 export function Modal({
   onClose,
   title,
   titleClassName,
+  dismissible = true,
   children,
 }: {
   onClose: () => void
   title: React.ReactNode
   titleClassName?: string
+  dismissible?: boolean
   children: React.ReactNode
 }) {
   const tA11y = useTranslations('a11y')
 
   return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+    <Dialog open onOpenChange={(open) => { if (!open && dismissible) onClose() }}>
       <DialogContent
         showCloseButton={false}
         className="max-h-[90vh] max-w-[460px] gap-0 overflow-hidden border border-landing-border bg-landing-surface p-0 text-landing-foreground shadow-2xl"
@@ -43,7 +48,8 @@ export function Modal({
             </DialogTitle>
             <DialogClose
               aria-label={tA11y('close')}
-              className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+              disabled={!dismissible}
+              className="p-1 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-landing-muted"
             >
               <X className="h-4 w-4" />
             </DialogClose>

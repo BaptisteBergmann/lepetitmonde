@@ -334,7 +334,9 @@
       "finishPublishing": "Terminer la publication",
       "lockedNotice": "Ce post a déjà été créé. Pour modifier le texte, la date ou la visibilité, fermez cette fenêtre puis utilisez « Modifier » sur le post.",
       "pollCreateError": "Le post est créé mais le sondage n'a pas pu être ajouté. Réessayez, ou retirez le sondage pour publier sans.",
-      "uploadsFailedNotice": "{count, plural, one {# fichier n'a pas pu être envoyé} other {# fichiers n'ont pas pu être envoyés}}. Le post n'est pas encore partagé : personne n'est prévenu tant que tous les fichiers ne sont pas envoyés. Réessayez ci-dessous."
+      "uploadsFailedNotice": "{count, plural, one {# fichier n'a pas pu être envoyé} other {# fichiers n'ont pas pu être envoyés}}. Le post n'est pas encore partagé : personne n'est prévenu tant que tous les fichiers ne sont pas envoyés. Réessayez ci-dessous.",
+      "uploadProgress": "Envoi {current} sur {total}…",
+      "uploadingOne": "Envoi en cours…"
     },
     "storyForm": {
       "title": "Nouvelle story",
