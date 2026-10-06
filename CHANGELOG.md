@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `f9e1eba` fix(db): enforce poll vote option belongs to poll
 - `5180513` fix(feed): verify poll ownership and option membership
 - `d00e8d2` fix(feed): verify post/comment ownership in comment and reaction actions
 - `06eab44` fix(feed): require admin and post ownership for post views and stats
