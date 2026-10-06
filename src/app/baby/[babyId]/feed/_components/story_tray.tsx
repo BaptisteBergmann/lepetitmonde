@@ -13,9 +13,12 @@ import StoryViewer from './story_viewer'
 
 type Circle = Tables<'circles'>
 
+// Targeted by stable key/id, not array index: getActiveStories sorts groups
+// by viewed state, so a refetch (e.g. after reacting) can reorder them under
+// an open viewer.
 export type ViewerTarget =
-  | { kind: 'group'; index: number; storyId?: string }
-  | { kind: 'highlight'; index: number }
+  | { kind: 'group'; key: string; storyId?: string }
+  | { kind: 'highlight'; id: string }
 
 function bubbleImageFor(story: StoryWithUrl | undefined) {
   if (!story) return null
@@ -100,8 +103,8 @@ export default function StoryTray({
   // found and the tray renders normally with no viewer opened.
   const [viewerTarget, setViewerTarget] = useState<ViewerTarget | null>(() => {
     if (!highlightStoryId) return null
-    const groupIndex = initialStories.findIndex((g) => g.stories.some((s) => s.id === highlightStoryId))
-    return groupIndex === -1 ? null : { kind: 'group', index: groupIndex, storyId: highlightStoryId }
+    const group = initialStories.find((g) => g.stories.some((s) => s.id === highlightStoryId))
+    return group ? { kind: 'group', key: group.key, storyId: highlightStoryId } : null
   })
 
   const refresh = async () => {
@@ -138,10 +141,10 @@ export default function StoryTray({
     <div className="space-y-3">
       {highlights.length > 0 && (
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-          {highlights.map((highlight, index) => (
+          {highlights.map((highlight) => (
             <button
               key={highlight.id}
-              onClick={() => setViewerTarget({ kind: 'highlight', index })}
+              onClick={() => setViewerTarget({ kind: 'highlight', id: highlight.id })}
               className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer"
             >
               <span className="flex size-14 rounded-2xl border border-landing-border p-0.5">
@@ -172,10 +175,10 @@ export default function StoryTray({
             </button>
           )}
 
-          {groups.map((group, index) => (
+          {groups.map((group) => (
             <button
               key={group.key}
-              onClick={() => setViewerTarget({ kind: 'group', index })}
+              onClick={() => setViewerTarget({ kind: 'group', key: group.key })}
               className="flex flex-col items-center gap-1 shrink-0 w-16 cursor-pointer"
             >
               <span

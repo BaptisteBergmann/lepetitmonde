@@ -57,16 +57,18 @@ export default function StoryViewer({
   }, [])
   const confirmAction = useConfirm()
   const isHighlight = target.kind === 'highlight'
+  const targetId = target.kind === 'highlight' ? target.id : target.key
+  const source = useMemo(
+    () => isHighlight
+      ? highlights.find((h) => h.id === targetId)
+      : groups.find((g) => g.key === targetId),
+    [isHighlight, highlights, groups, targetId]
+  )
   // Stable reference across renders (not just across navigation) — the `?? []`
   // fallback would otherwise hand back a fresh empty array every render,
   // which defeats the neighbor-preload effect's dependency check below.
-  const stories: StoryWithUrl[] = useMemo(
-    () => (isHighlight ? highlights[target.index]?.stories : groups[target.index]?.stories) ?? [],
-    [isHighlight, highlights, groups, target.index]
-  )
-  const title = isHighlight
-    ? highlights[target.index]?.name ?? ''
-    : groups[target.index]?.title ?? ''
+  const stories: StoryWithUrl[] = useMemo(() => source?.stories ?? [], [source])
+  const title = !source ? '' : 'name' in source ? source.name : source.title
 
   // Resume where the user left off: land on the first unseen story in the
   // group rather than always restarting at 0. Highlights have no view-
@@ -91,10 +93,12 @@ export default function StoryViewer({
   const [manuallyPaused, setManuallyPaused] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [editing, setEditing] = useState(false)
-  const paused = holdPaused || manuallyPaused || confirming || editing
+  const [highlightPickerOpen, setHighlightPickerOpen] = useState(false)
+  // The highlight picker counts as a pause: otherwise the photo timer
+  // advances (and the reset effect closes the picker) mid-typing.
+  const paused = holdPaused || manuallyPaused || confirming || editing || highlightPickerOpen
   const [videoProgress, setVideoProgress] = useState(0)
   const [views, setViews] = useState<StoryViewsData | null>(null)
-  const [highlightPickerOpen, setHighlightPickerOpen] = useState(false)
   const [newHighlightName, setNewHighlightName] = useState("")
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -102,6 +106,11 @@ export default function StoryViewer({
   const wasHeld = useRef(false)
 
   const story = stories[index]
+  // Primitive deps for the effects below: a refetch (onChanged) hands back
+  // new story objects for the same story, which must not reset the viewer.
+  const storyId = story?.id
+  const storyCreatedBy = story?.created_by ?? null
+  const storyIsVideo = story?.mime_type.startsWith('video/') ?? false
 
   // Wraps onClose: a tap on the advance/pause zones is handled on
   // `pointerup`, one event before the browser's own synthesized "click" for
@@ -140,6 +149,10 @@ export default function StoryViewer({
     const handleKeyDown = (e: KeyboardEvent) => {
       // The delete-confirm dialog / edit modal own the keyboard while open.
       if (confirming || editing) return
+      // Typing in the highlight name field: arrows move the caret and
+      // Escape stays in the field instead of navigating/closing.
+      const el = e.target
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || (el instanceof HTMLElement && el.isContentEditable)) return
       if (e.key === 'Escape') closeViewer()
       if (e.key === 'ArrowLeft') goPrev()
       if (e.key === 'ArrowRight') goNext()
@@ -162,14 +175,20 @@ export default function StoryViewer({
     setHighlightPickerOpen(false)
     setManuallyPaused(false)
     setEditing(false)
-    if (!story) return
+    if (!storyId) return
     if (!isHighlight) {
-      markStoryViewed(story.id, babyId)
+      markStoryViewed(storyId, babyId)
     }
     if (isAdmin) {
-      getStoryViews(story.id, babyId, story.created_by).then(setViews)
+      getStoryViews(storyId, babyId, storyCreatedBy).then(setViews)
     }
-  }, [story, babyId, isAdmin, isHighlight])
+  }, [storyId, storyCreatedBy, babyId, isAdmin, isHighlight])
+
+  // The group/highlight disappeared on refetch (e.g. its last story expired
+  // or was deleted): close instead of staying mounted with nothing to show.
+  useEffect(() => {
+    if (!source) onClose()
+  }, [source, onClose])
 
   // Every story's media goes through this app's own storage proxy (auth
   // check + DB access check + an upstream fetch to Supabase Storage on every
@@ -189,11 +208,11 @@ export default function StoryViewer({
   }, [index, stories])
 
   useEffect(() => {
-    if (!story || story.mime_type.startsWith('video/')) return
+    if (!storyId || storyIsVideo) return
     if (paused) return
     const timeout = setTimeout(goNext, PHOTO_DURATION_MS)
     return () => clearTimeout(timeout)
-  }, [story, paused, goNext])
+  }, [storyId, storyIsVideo, paused, goNext])
 
   useEffect(() => {
     const video = videoRef.current
@@ -338,10 +357,9 @@ export default function StoryViewer({
           onClose={() => setEditing(false)}
           // A saved edit can change the group label, which moves the story
           // to a different tray bubble (see the `byKey` grouping in
-          // getActiveStories) — this viewer's `target.index` would then
-          // point at the wrong bubble once `onChanged` refetches. Simplest
-          // safe move: close the viewer and let the refreshed tray render;
-          // the user can re-open whichever bubble the story landed in.
+          // getActiveStories), and this viewer is targeted by group key.
+          // Simplest safe move: close the viewer and let the refreshed tray
+          // render; the user can re-open whichever bubble the story landed in.
           onSaved={() => { onChanged(); onClose() }}
         />
       )}
