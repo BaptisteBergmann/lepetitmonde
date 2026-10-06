@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `bc21cdb` fix(feed): publish post notifications after photos and poll are attached
 - `4252003` fix(feed): validate reactions, comments and text lengths server-side
 - `cf05d0a` fix(feed): verify ownership in post, story and highlight mutations
 - `f9e1eba` fix(db): enforce poll vote option belongs to poll
