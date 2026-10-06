@@ -1,14 +1,13 @@
 'use server'
 
 import { createClient } from '@utils/supabase/server'
-import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
-import { assertIsAdmin } from './access'
-import { getUserAccess, getNicknamesByBaby } from './users'
+import { getNicknamesByBaby } from './users'
 import { getDisplayName } from '../users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertAdmin, assertMember, assertOptionInPoll, assertPollVisible, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
 async function assertValidOptions(options: string[]) {
   const trimmed = options.map((option) => option.trim()).filter(Boolean)
@@ -22,7 +21,7 @@ export async function createPoll(postId: string, babyId: string, question: strin
   const supabase = await createClient()
   const contextLogger = logger.child({ function: createPoll.name, postId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  await assertPostVisible(postId, babyId, await assertAdmin(babyId))
 
   const trimmedQuestion = question.trim()
   if (!trimmedQuestion) throw await actionError('pollQuestionRequired')
@@ -51,7 +50,10 @@ export async function updatePoll(pollId: string, postId: string, babyId: string,
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updatePoll.name, pollId, postId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  // Must run before the vote count and the options delete below, which are
+  // scoped by pollId alone.
+  const { poll } = await assertPollVisible(pollId, babyId, await assertAdmin(babyId))
+  if (poll.post_id !== postId) throw await actionError('unauthorized')
 
   const { count: voteCount, error: voteCountError } = await supabase
     .from('poll_votes')
@@ -91,7 +93,8 @@ export async function deletePoll(pollId: string, postId: string, babyId: string)
   const supabase = await createClient()
   const contextLogger = logger.child({ function: deletePoll.name, pollId, postId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  const { poll } = await assertPollVisible(pollId, babyId, await assertAdmin(babyId))
+  if (poll.post_id !== postId) throw await actionError('unauthorized')
 
   const { error } = await supabase
     .from('polls')
@@ -110,11 +113,11 @@ export async function votePoll(pollId: string, babyId: string, optionId: string)
   const supabase = await createClient()
   const contextLogger = logger.child({ function: votePoll.name, pollId, babyId, optionId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw await actionError('unauthorized')
+  const { viewer } = await assertPollVisible(pollId, babyId, await assertMember(babyId))
+  // Without this, an option from another poll could be paired with this
+  // poll id to inflate that other poll's count.
+  await assertOptionInPoll(optionId, pollId)
+  const user = { id: viewer.userId }
 
   const { error } = await supabase
     .from('poll_votes')
@@ -139,7 +142,9 @@ export async function getPollWithResults(postId: string, babyId: string): Promis
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getPollWithResults.name, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
+  const found = await findVisiblePost(postId, babyId)
+  if (!found) return null
+  const user = { id: found.viewer.userId }
 
   const [{ data, error }, nicknames] = await Promise.all([
     supabase
