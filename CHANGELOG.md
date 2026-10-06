@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `73a25ef` fix(guess): keep verdict and funny flags out of the member's own guess data
 - `9250a7d` fix(guess): ignore spacing, hyphens and apostrophes when matching text answers
 - `a2827ce` fix(guess): compare pronostic distances in days, rounded numbers and wrapped times
 - `693a97e` feat(guess): show pronostic result on the member's own card
