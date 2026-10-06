@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { resolveQuestion, unresolveQuestion } from "@/utils/actions/guesses_questions";
 import { getLocaleTag } from "@/utils/formatting";
-import { formatAnswer } from "@/utils/guess_format";
+import { calendarDayToLocalDate, formatAnswer } from "@/utils/guess_format";
 import { logger } from "@/utils/logger";
 import { Tables } from "@/utils/supabase/database.types";
 import { QuestionOptions } from "../../question_wrapper";
@@ -40,10 +40,7 @@ function initialValue(question: ResolvableQuestion, prefill: boolean): PickerVal
     // The Calendar expects `Date | undefined`, never an empty string.
     return question.type === "date" ? undefined : "";
   }
-  if (question.type === "date") {
-    const d = new Date(current as string);
-    return isNaN(d.getTime()) ? undefined : d;
-  }
+  if (question.type === "date") return calendarDayToLocalDate(current);
   return typeof current === "number" ? String(current) : typeof current === "string" ? current : "";
 }
 

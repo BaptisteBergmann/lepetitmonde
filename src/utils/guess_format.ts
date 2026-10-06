@@ -14,6 +14,16 @@ export function toCalendarDay(value: Json | undefined): number | null {
   return Number.isFinite(ms) ? Math.round(ms / DAY_MS) : null
 }
 
+// The scored calendar day as a local-midnight Date, for prefilling a
+// Calendar: `new Date(stored)` would land on the day before for a viewer
+// west of whoever saved it.
+export function calendarDayToLocalDate(value: Json | undefined): Date | undefined {
+  const day = toCalendarDay(value)
+  if (day === null) return undefined
+  const utc = new Date(day * DAY_MS)
+  return new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate())
+}
+
 // One formatter for guesses and correct answers so the admin page, member
 // cards and leaderboard always show the same value the same way.
 export function formatAnswer(value: Json | undefined, type: string, options: Json | null | undefined, localeTag: string): string {
