@@ -58,7 +58,8 @@ export default function FunnyToggle({
       )}
     >
       <Laugh className="h-3.5 w-3.5" aria-hidden />
-      <span className="sr-only">{pressed ? t('unflag', { userName }) : t('flag', { userName })}</span>
+      {/* Stable label; aria-pressed announces whether it's on. */}
+      <span className="sr-only">{t('flag', { userName })}</span>
     </Button>
   );
 }

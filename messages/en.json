@@ -529,7 +529,6 @@
       "funny": {
         "badge": "Funny",
         "flag": "Mark {userName}'s answer as funny",
-        "unflag": "Remove funny mark from {userName}'s answer",
         "hiddenUntilResolved": "Shown to the family once resolved",
         "error": "Couldn't update the funny mark."
       },

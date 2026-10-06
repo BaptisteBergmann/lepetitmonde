@@ -529,7 +529,6 @@
       "funny": {
         "badge": "Drôle",
         "flag": "Marquer la réponse de {userName} comme drôle",
-        "unflag": "Retirer la mention drôle de la réponse de {userName}",
         "hiddenUntilResolved": "Visible par la famille une fois dévoilé",
         "error": "Impossible de modifier la mention drôle."
       },
