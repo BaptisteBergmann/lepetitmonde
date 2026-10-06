@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `014c5a6` fix(guess): prefill Change answer with the scored day in any timezone
 - `febb3e8` feat(guess): score choice pronostics 1 point and keep a full podium after ties
 - `8c4f3dd` fix(guess): show date pronostics as the calendar day that was scored
 - `fb939f0` docs: document the db_push TLS failure and the --debug workaround
