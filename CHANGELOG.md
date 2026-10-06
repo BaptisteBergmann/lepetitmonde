@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `6020c47` refactor(feed): copy cleanup and unused keys
 - `ec4ec48` feat(feed): card-shaped skeleton, richer empty state and reduced motion
 - `261789d` feat(feed): optimistic reactions and visible errors across the feed
 - `c4239f1` fix(feed): associate create form labels with their controls
