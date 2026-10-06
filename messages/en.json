@@ -993,7 +993,10 @@
     "inviteError": "Error sending the invitation",
     "broadcastSubjectRequired": "Please enter a subject.",
     "broadcastMessageRequired": "Please write a message.",
-    "broadcastError": "Something went wrong while sending the email."
+    "broadcastError": "Something went wrong while sending the email.",
+    "pronosticClosed": "This pronostic is closed: the answer has been revealed.",
+    "invalidCorrectAnswer": "This answer isn't valid for this pronostic.",
+    "verdictTextOnly": "Only free-text answers can be marked correct or wrong by hand."
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",

@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
-import { TablesInsert } from '@utils/supabase/database.types'
+import { Json, TablesInsert } from '@utils/supabase/database.types'
+import { toComparable } from '@utils/guess_scoring'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { getUserAccess } from './users'
@@ -355,3 +356,104 @@ export async function getQuestionsWithoutGuess(babyId: string) {
 }
 
 
+
+const MAX_TEXT_ANSWER_LENGTH = 500
+
+function revalidateGuessPages(babyId: string) {
+  revalidatePath(`/baby/${babyId}/guess`)
+  revalidatePath(`/baby/${babyId}/guess/admin`)
+  revalidatePath(`/baby/${babyId}/guess/leaderboard`)
+}
+
+// Returns the value to store, in the same JSON shape as guesses.answer for
+// that type, or null when it isn't a valid answer for the question.
+function normalizeCorrectAnswer(type: string, options: Json | null, value: unknown): Json | null {
+  switch (type) {
+    case 'option': {
+      const choices = (options as { choices?: unknown } | null)?.choices
+      if (typeof value !== 'string' || !Array.isArray(choices) || !choices.includes(value)) return null
+      return value
+    }
+    case 'number': {
+      if (typeof value !== 'string' && typeof value !== 'number') return null
+      if (typeof value === 'string' && value.trim() === '') return null
+      const n = Number(value)
+      return Number.isFinite(n) ? n : null
+    }
+    case 'date': {
+      if (typeof value !== 'string') return null
+      const d = new Date(value)
+      return Number.isFinite(d.getTime()) ? d.toISOString() : null
+    }
+    case 'time': {
+      if (typeof value !== 'string' || toComparable('time', value) === null) return null
+      return value.trim()
+    }
+    case 'text': {
+      if (typeof value !== 'string') return null
+      const trimmed = value.trim()
+      if (trimmed === '' || trimmed.length > MAX_TEXT_ANSWER_LENGTH) return null
+      return trimmed
+    }
+    default:
+      return null
+  }
+}
+
+// Also used to change the answer of an already-resolved question (owner
+// decision): the original resolved_at is kept, so fixing a typo never
+// re-opens the question to late guessers.
+export async function resolveQuestion(babyId: string, questionId: string, correctAnswer: unknown) {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: resolveQuestion.name, babyId, questionId })
+
+  const { data: question, error: fetchError } = await supabase
+    .from('guess_questions')
+    .select('type, options, resolved_at')
+    .eq('baby_id', babyId)
+    .eq('id', questionId)
+    .eq('status', 'approved')
+    .maybeSingle()
+
+  if (fetchError) { contextLogger.error(fetchError, "Error fetching question before resolve"); throw fetchError }
+  if (!question) throw await actionError('pronosticNotFound')
+
+  const normalized = normalizeCorrectAnswer(question.type, question.options, correctAnswer)
+  if (normalized === null) throw await actionError('invalidCorrectAnswer')
+
+  const { error } = await supabase
+    .from('guess_questions')
+    .update({
+      correct_answer: normalized,
+      resolved_at: question.resolved_at ?? new Date().toISOString(),
+    })
+    .eq('baby_id', babyId)
+    .eq('id', questionId)
+    .eq('status', 'approved')
+
+  if (error) { contextLogger.error(error, "Error resolving question"); throw error }
+  contextLogger.info({ wasResolved: !!question.resolved_at }, "Question resolved")
+
+  revalidateGuessPages(babyId)
+}
+
+export async function unresolveQuestion(babyId: string, questionId: string) {
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: unresolveQuestion.name, babyId, questionId })
+
+  const { error } = await supabase
+    .from('guess_questions')
+    .update({ correct_answer: null, resolved_at: null })
+    .eq('baby_id', babyId)
+    .eq('id', questionId)
+    .eq('status', 'approved')
+
+  if (error) { contextLogger.error(error, "Error re-opening question"); throw error }
+  contextLogger.info("Question re-opened")
+
+  revalidateGuessPages(babyId)
+}

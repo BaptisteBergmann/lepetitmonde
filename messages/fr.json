@@ -993,7 +993,10 @@
     "inviteError": "Erreur lors de l'invitation",
     "broadcastSubjectRequired": "Merci de renseigner un objet.",
     "broadcastMessageRequired": "Merci d'écrire un message.",
-    "broadcastError": "Erreur lors de l'envoi de l'e-mail."
+    "broadcastError": "Erreur lors de l'envoi de l'e-mail.",
+    "pronosticClosed": "Ce pronostic est clôturé : la réponse a été dévoilée.",
+    "invalidCorrectAnswer": "Cette réponse n'est pas valide pour ce pronostic.",
+    "verdictTextOnly": "Seules les réponses libres peuvent être jugées justes ou fausses à la main."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",
