@@ -1,29 +1,24 @@
 'use server'
 
 import { createClient } from '@utils/supabase/server'
-import { getAuthUser } from '@utils/supabase/auth'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
-import { getUserCircleIds } from './circles'
-import { getUserAccess, getNicknamesByBaby } from './users'
+import { getNicknamesByBaby } from './users'
 import { getBabyAdminIds } from './access'
 import { getCommentReactionsForComments } from '@utils/feed-loaders'
 import { notifyUsers } from './notify'
 import { getDisplayName } from '@utils/users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertCommentVisible, assertMember, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
 export async function addComment(postId: string, babyId: string, body: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addComment.name, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw await actionError('unauthorized')
-
-  const circleIds = await getUserCircleIds(babyId, user.id)
+  const { viewer } = await assertPostVisible(postId, babyId, await assertMember(babyId))
+  const user = { id: viewer.userId }
+  const circleIds = Array.from(viewer.circleIds)
 
   const { error } = await supabase
     .from('post_comments')
@@ -56,8 +51,9 @@ export async function updateComment(commentId: string, postId: string, babyId: s
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updateComment.name, commentId, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
+  const { viewer, comment } = await assertCommentVisible(commentId, babyId, await assertMember(babyId))
+  if (comment.post_id !== postId) throw await actionError('unauthorized')
+  const user = { id: viewer.userId }
 
   const { data, error } = await supabase
     .from('post_comments')
@@ -79,11 +75,13 @@ export async function deleteComment(commentId: string, postId: string, babyId: s
   const supabase = await createClient()
   const contextLogger = logger.child({ function: deleteComment.name, commentId, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
+  // Admin rights only apply to comments on a post of *this* baby: the
+  // ownership check below is what stops an admin of one baby deleting
+  // comments in another.
+  const { viewer, comment } = await assertCommentVisible(commentId, babyId, await assertMember(babyId))
+  if (comment.post_id !== postId) throw await actionError('unauthorized')
+  const user = { id: viewer.userId }
+  const isAdmin = viewer.isAdmin
 
   let query = supabase.from('post_comments').delete().eq('id', commentId).eq('post_id', postId)
   if (!isAdmin) query = query.eq('user_id', user.id)
@@ -102,12 +100,12 @@ export async function getComments(postId: string, babyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getComments.name, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) return []
-
-  const access = await getUserAccess(babyId)
-  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
-  const userCircleIds = new Set(await getUserCircleIds(babyId, user.id))
+  const found = await findVisiblePost(postId, babyId)
+  if (!found) return []
+  const { viewer } = found
+  const user = { id: viewer.userId }
+  const isAdmin = viewer.isAdmin
+  const userCircleIds = viewer.circleIds
 
   const [{ data, error }, nicknames] = await Promise.all([
     supabase

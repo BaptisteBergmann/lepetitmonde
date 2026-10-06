@@ -1,10 +1,9 @@
 'use server'
 
 import { createClient } from '@utils/supabase/server'
-import { getAuthUser } from '@utils/supabase/auth'
 import { getDisplayName } from '@utils/users'
 import { getTranslations } from 'next-intl/server'
-import { getUserAccess, getNicknamesByBaby } from './users'
+import { getNicknamesByBaby } from './users'
 import { logger } from '../logger'
 import { getFeedViewer, findVisiblePost } from '@utils/feed-access'
 
@@ -17,11 +16,9 @@ export async function markPostViewed(postId: string, babyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: markPostViewed.name, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) return
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) return
+  const found = await findVisiblePost(postId, babyId)
+  if (!found) return
+  const user = { id: found.viewer.userId }
 
   const { error } = await supabase
     .from('post_views')

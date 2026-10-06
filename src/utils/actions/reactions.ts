@@ -10,16 +10,14 @@ import { notifyUsers } from './notify'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertMember, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
 export async function addReaction(postId: string, babyId: string, emoji: string = '❤️') {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addReaction.name, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw await actionError('unauthorized')
+  const { viewer, post } = await assertPostVisible(postId, babyId, await assertMember(babyId))
+  const user = { id: viewer.userId }
 
   const { error } = await supabase
     .from('post_reactions')
@@ -31,8 +29,7 @@ export async function addReaction(postId: string, babyId: string, emoji: string 
 
   revalidatePath(`/baby/${babyId}/feed`)
 
-  const { data: post } = await supabase.from('posts').select('created_by').eq('id', postId).single()
-  if (post?.created_by && post.created_by !== user.id) {
+  if (post.created_by && post.created_by !== user.id) {
     const { data: reactor } = await supabase
       .from('baby_access')
       .select('nickname, users (first_name, last_name)')
@@ -82,7 +79,9 @@ export async function getReactions(postId: string, babyId: string): Promise<Reac
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getReactions.name, postId, babyId })
 
-  const { data: { user } } = await getAuthUser()
+  const found = await findVisiblePost(postId, babyId)
+  if (!found) return { breakdown: [], myEmoji: null }
+  const user = { id: found.viewer.userId }
 
   const [{ data, error }, nicknames] = await Promise.all([
     supabase

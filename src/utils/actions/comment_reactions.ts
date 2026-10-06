@@ -9,16 +9,14 @@ import { notifyUsers } from './notify'
 import { getUserAccess } from './users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertCommentVisible, assertMember } from '@utils/feed-access'
 
 export async function addCommentReaction(commentId: string, babyId: string, emoji: string = '❤️') {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addCommentReaction.name, commentId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw await actionError('unauthorized')
+  const { viewer, comment } = await assertCommentVisible(commentId, babyId, await assertMember(babyId))
+  const user = { id: viewer.userId }
 
   const { error } = await supabase
     .from('comment_reactions')
@@ -30,8 +28,7 @@ export async function addCommentReaction(commentId: string, babyId: string, emoj
 
   revalidatePath(`/baby/${babyId}/feed`)
 
-  const { data: comment } = await supabase.from('post_comments').select('user_id, post_id').eq('id', commentId).single()
-  if (comment?.user_id && comment.user_id !== user.id) {
+  if (comment.user_id !== user.id) {
     const { data: reactor } = await supabase
       .from('baby_access')
       .select('nickname, users (first_name, last_name)')
