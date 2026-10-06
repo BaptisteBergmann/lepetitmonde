@@ -7,7 +7,7 @@ import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { StoryWithUrl } from './stories'
-import { getStoryReactionsForStories } from './story_reactions'
+import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-loaders'
 import type { Tables } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 
@@ -23,20 +23,6 @@ export type HighlightWithStories = {
 
 function toStoryUrl(babyId: string, path: string) {
   return `/api/storage/${babyId}/${path.split('/').map(encodeURIComponent).join('/')}`
-}
-
-async function getViewedStoryIds(storyIds: string[], userId: string | undefined): Promise<Set<string>> {
-  if (!userId || storyIds.length === 0) return new Set()
-
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('story_views')
-    .select('story_id')
-    .eq('user_id', userId)
-    .in('story_id', storyIds)
-
-  if (error) return new Set()
-  return new Set(data.map((row) => row.story_id))
 }
 
 // Highlights have no circle scoping of their own — visibility flows entirely

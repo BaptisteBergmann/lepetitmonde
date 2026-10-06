@@ -12,7 +12,7 @@ import { getUserAccess, getNicknamesByBaby } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { copyStoryPhotoToLibrary } from './albums'
 import { notifyUsers } from './notify'
-import { getStoryReactionsForStories } from './story_reactions'
+import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-loaders'
 import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
 
@@ -221,20 +221,6 @@ async function pruneExpiredStories(babyId: string) {
   if (deleteError) { contextLogger.error(deleteError, "Error deleting expired stories"); return }
 
   contextLogger.info({ count: expired.length }, "Expired stories pruned")
-}
-
-async function getViewedStoryIds(storyIds: string[], userId: string | undefined): Promise<Set<string>> {
-  if (!userId || storyIds.length === 0) return new Set()
-
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('story_views')
-    .select('story_id')
-    .eq('user_id', userId)
-    .in('story_id', storyIds)
-
-  if (error) return new Set()
-  return new Set(data.map((row) => row.story_id))
 }
 
 export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
