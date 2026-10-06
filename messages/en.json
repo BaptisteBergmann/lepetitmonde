@@ -446,7 +446,8 @@
       "text": "Text",
       "date": "Date",
       "number": "Number",
-      "option": "Single choice"
+      "option": "Single choice",
+      "time": "Time"
     },
     "form": {
       "newAdmin": "New pronostic",
@@ -489,7 +490,44 @@
       "subtitle": "Create and review the pronostics offered to the family.",
       "empty": "No pronostics created yet.",
       "emptyHint": "Click \"New pronostic\" to add one.",
-      "noAnswersYet": "No answers yet."
+      "noAnswersYet": "No answers yet.",
+      "rankShort": "{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+      "points": "{count, plural, one {# pt} other {# pts}}",
+      "resolve": {
+        "setAnswer": "Set the correct answer",
+        "dialogTitle": "Correct answer",
+        "correctAnswer": "Correct answer",
+        "closeNotice": "Saving closes this pronostic: nobody can guess anymore and the results appear on the leaderboard.",
+        "changeNotice": "The pronostic stays closed. Points will be recalculated with the new answer.",
+        "save": "Save and close",
+        "saveChange": "Save",
+        "saving": "Saving…",
+        "cancel": "Cancel",
+        "change": "Change answer",
+        "resolvedOn": "Resolved on {date}",
+        "closed": "Closed",
+        "reopen": "Re-open",
+        "reopenConfirmTitle": "Re-open this pronostic?",
+        "reopenConfirmDescription": "This is rarely needed. To fix a typo, use \"Change answer\" instead. Re-opening removes the correct answer, its points disappear from the leaderboard, and family members who haven't answered can guess again.",
+        "reopenConfirm": "Re-open anyway",
+        "success": "Pronostic resolved",
+        "reopened": "Pronostic re-opened",
+        "error": "Something went wrong while saving the answer."
+      },
+      "verdict": {
+        "label": "Is {userName}'s answer correct?",
+        "auto": "Auto",
+        "correct": "Correct",
+        "incorrect": "Wrong",
+        "error": "Couldn't update the verdict."
+      },
+      "funny": {
+        "badge": "Funny",
+        "flag": "Mark {userName}'s answer as funny",
+        "unflag": "Remove funny mark from {userName}'s answer",
+        "hiddenUntilResolved": "Shown to the family once resolved",
+        "error": "Couldn't update the funny mark."
+      }
     },
     "pendingQuestions": {
       "titleWithCount": "Suggestions awaiting approval ({count})",

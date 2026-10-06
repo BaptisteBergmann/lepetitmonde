@@ -446,7 +446,8 @@
       "text": "Texte",
       "date": "Date",
       "number": "Nombre",
-      "option": "Choix unique"
+      "option": "Choix unique",
+      "time": "Heure"
     },
     "form": {
       "newAdmin": "Nouveau pronostic",
@@ -489,7 +490,44 @@
       "subtitle": "Créez et consultez les pronostics proposés à la famille.",
       "empty": "Aucun pronostic créé pour le moment.",
       "emptyHint": "Cliquez sur \"Nouveau pronostic\" pour en ajouter un.",
-      "noAnswersYet": "Aucune réponse pour le moment."
+      "noAnswersYet": "Aucune réponse pour le moment.",
+      "rankShort": "{rank, selectordinal, one {#er} other {#e}}",
+      "points": "{count, plural, one {# pt} other {# pts}}",
+      "resolve": {
+        "setAnswer": "Saisir la bonne réponse",
+        "dialogTitle": "Bonne réponse",
+        "correctAnswer": "Bonne réponse",
+        "closeNotice": "Enregistrer clôture ce pronostic : plus personne ne pourra répondre et les résultats apparaîtront dans le classement.",
+        "changeNotice": "Le pronostic reste clôturé. Les points seront recalculés avec la nouvelle réponse.",
+        "save": "Enregistrer et clôturer",
+        "saveChange": "Enregistrer",
+        "saving": "Enregistrement…",
+        "cancel": "Annuler",
+        "change": "Modifier la réponse",
+        "resolvedOn": "Dévoilé le {date}",
+        "closed": "Clôturé",
+        "reopen": "Rouvrir",
+        "reopenConfirmTitle": "Rouvrir ce pronostic ?",
+        "reopenConfirmDescription": "C'est rarement nécessaire. Pour corriger une faute, utilisez plutôt « Modifier la réponse ». Rouvrir efface la bonne réponse, ses points disparaissent du classement et les membres qui n'ont pas répondu pourront de nouveau deviner.",
+        "reopenConfirm": "Rouvrir quand même",
+        "success": "Pronostic dévoilé",
+        "reopened": "Pronostic rouvert",
+        "error": "Un problème est survenu lors de l'enregistrement de la réponse."
+      },
+      "verdict": {
+        "label": "La réponse de {userName} est-elle juste ?",
+        "auto": "Auto",
+        "correct": "Juste",
+        "incorrect": "Faux",
+        "error": "Impossible de modifier le verdict."
+      },
+      "funny": {
+        "badge": "Drôle",
+        "flag": "Marquer la réponse de {userName} comme drôle",
+        "unflag": "Retirer la mention drôle de la réponse de {userName}",
+        "hiddenUntilResolved": "Visible par la famille une fois dévoilé",
+        "error": "Impossible de modifier la mention drôle."
+      }
     },
     "pendingQuestions": {
       "titleWithCount": "Propositions en attente de validation ({count})",
