@@ -1,6 +1,11 @@
 # Journal (feed) UI/UX polish
 
-Status: approved
+Status: implemented
+
+## Status: implemented
+Shipped 2026-10-06 after 2 builder/reviewer rounds (reviewer approved round 2). All steps 1–9 incl. 6b. Not browser-tested before deploy.
+Deviations: story viewer and photo lightbox use Base UI Dialog directly (no fallback) with `disablePointerDismissal`; "Play video" pill only on `NotAllowedError`; Escape in a non-empty highlight-name input is ignored; bottom nav hides only when a field is focused and the visual viewport is >150px shorter than the window; reaction pickers roll back only on mutation failure; removed unused keys `feed.emptyCircleSuffix`, `feed.loading`, `feed.postCard.shareTitle`, `a11y.viewStats`, `feed.comments.empty`.
+Follow-ups: `onChanged()` refetch in comment/story pickers can reject unhandled; post ReactionPicker doesn't resync from props after refresh; create_post_modal uses fixed `id="caption"`/`id="taken_at"`; ~6 older fr « » strings lack non-breaking spaces; SSR date formatting may mismatch across time zones.
 Approved by: Baptiste (2026-10-06, user asked to work on the UI changes directly; design questions resolved with defaults: mute is per viewer session, Journal h1 stays sr-only)
 
 ## Goal
