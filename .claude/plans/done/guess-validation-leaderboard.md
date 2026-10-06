@@ -2,6 +2,8 @@
 
 ## Status: implemented
 
+**Revised 2026-10-06 (after launch):** option questions are worth 1 point (free text stays 3); closest-wins questions use a dense podium by distinct distance (correct 2: every 2 → 3, every 1 or 3 → 2, every 4 → 1); the leaderboard's player ranking is still competition (1, 1, 3). Date answers are displayed through the same `toCalendarDay` helper used for scoring. Where the sections below say "3/0 exact" or a competition-ranked podium, this note wins.
+
 Shipped 2026-10-06: per-question resolution with automatic scoring (3/0 exact, 3/2/1 closest-wins with shared ranks), free-text auto-match + admin override, funny flags (badge only), `/baby/[babyId]/guess/leaderboard`, resolved state + podium place on the member card, and hardening of `submitGuess` / `getAllGuesses`.
 
 Deviations:
