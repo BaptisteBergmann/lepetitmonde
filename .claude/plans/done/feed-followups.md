@@ -1,6 +1,11 @@
 # Feed follow-ups: action surface and publish flow
 
-## Status: approved
+## Status: implemented
+
+Shipped 2026-10-06, reviewer approved round 1. storage.ts and notify.ts are no longer server-action files; linkPostPhotos/copyStoryPhotoToLibrary/nextUnsortedPosition moved to src/utils/albums-internal.ts; createPost/createPoll roll back partial inserts; publishPost email step can't fail after the push; Dropzone gained a `disabled` prop (also hides remove buttons); 0-vote poll row votes on tap.
+Follow-ups: Dropzone root stays tabbable while disabled (pass `disabled` to useDropzone); lost-response retries can still duplicate; album/anecdote modals don't pass `disabled` yet; `src/utils/supabase/server.ts` still has `"use server"`; consider installing `server-only`; submitBugReport has no size/MIME check on screenshots; hard-coded push title.
+
+Originally approved by the user on 2026-10-06.
 
 Approved by the user on 2026-10-06 (small fixes, scope approved directly).
 
