@@ -3,8 +3,14 @@ import type { Json, Tables } from '@utils/supabase/database.types'
 
 // Pronostic scoring, computed at read time (nothing stored) so deleting a
 // guess or overriding a verdict can never leave stale points behind.
-// Rules: see .claude/plans/guess-validation-leaderboard.md, assumption 2.
+// Rules: see .claude/plans/done/guess-validation-leaderboard.md (assumption 2),
+// revised 2026-10-06: options are worth 1 point and the podium is dense.
+// Free text is harder to get exactly right than picking from a list.
 export const POINTS_EXACT = 3
+export const POINTS_OPTION = 1
+// Per distinct distance, closest first: with a correct answer of 2, everyone
+// who said 2 gets 3, everyone who said 1 or 3 gets 2, everyone who said 4
+// gets 1 — however many people share each step.
 export const PODIUM_POINTS = [3, 2, 1]
 // Free-text answers (and correct answers) are shown to the whole family on
 // the admin page and leaderboard, so they stay short.
@@ -23,7 +29,8 @@ export type ScorableGuess = Pick<Tables<'guesses'>, 'id' | 'user_id' | 'question
 export type GuessScore = {
   points: number
   isCorrect: boolean
-  // Competition rank (1, 1, 3) among parseable guesses; closest-wins types only.
+  // Dense rank (1, 1, 2, 3) by distance among parseable guesses; closest-wins
+  // types only.
   rank?: number
 }
 
@@ -112,7 +119,7 @@ export function scoreQuestion(question: ScorableQuestion, guesses: ScorableGuess
     ranked.sort((a, b) => a.distance - b.distance)
     let rank = 0
     ranked.forEach((entry, index) => {
-      if (index === 0 || entry.distance !== ranked[index - 1].distance) rank = index + 1
+      if (index === 0 || entry.distance !== ranked[index - 1].distance) rank += 1
       scores.set(entry.id, {
         points: PODIUM_POINTS[rank - 1] ?? 0,
         isCorrect: entry.distance === 0,
@@ -132,7 +139,8 @@ export function scoreQuestion(question: ScorableQuestion, guesses: ScorableGuess
       // normalized match.
       isCorrect = guess.is_correct ?? normalizeText(textOf(guess.answer)) === normalizeText(correct)
     }
-    scores.set(guess.id, { points: isCorrect ? POINTS_EXACT : 0, isCorrect })
+    const points = question.type === 'option' ? POINTS_OPTION : POINTS_EXACT
+    scores.set(guess.id, { points: isCorrect ? points : 0, isCorrect })
   }
   return scores
 }
