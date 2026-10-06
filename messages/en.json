@@ -41,7 +41,8 @@
     "playVideo": "Play video",
     "photoNOfM": "Photo {n} of {total}",
     "playVideoNOfM": "Play video {n} of {total}",
-    "moreMedia": "{count} more"
+    "moreMedia": "{count} more",
+    "postActions": "Post actions"
   },
   "versionFooter": {
     "title": "Version history",
@@ -290,7 +291,11 @@
       "deleteConfirm": "Delete this post? This action can't be undone.",
       "deleteError": "Something went wrong while deleting.",
       "shareTitle": "Share this post",
-      "linkCopied": "Link copied"
+      "linkCopied": "Link copied",
+      "share": "Share",
+      "stats": "Statistics",
+      "edit": "Edit",
+      "delete": "Delete"
     },
     "comments": {
       "empty": "No comments yet.",

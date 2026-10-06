@@ -41,7 +41,8 @@
     "playVideo": "Lire la vidéo",
     "photoNOfM": "Photo {n} sur {total}",
     "playVideoNOfM": "Lire la vidéo {n} sur {total}",
-    "moreMedia": "{count} de plus"
+    "moreMedia": "{count} de plus",
+    "postActions": "Actions sur la publication"
   },
   "versionFooter": {
     "title": "Historique des versions",
@@ -290,7 +291,11 @@
       "deleteConfirm": "Supprimer cette publication ? Cette action est irréversible.",
       "deleteError": "Une erreur est survenue lors de la suppression.",
       "shareTitle": "Partager cette publication",
-      "linkCopied": "Lien copié"
+      "linkCopied": "Lien copié",
+      "share": "Partager",
+      "stats": "Statistiques",
+      "edit": "Modifier",
+      "delete": "Supprimer"
     },
     "comments": {
       "empty": "Aucun commentaire pour l'instant.",

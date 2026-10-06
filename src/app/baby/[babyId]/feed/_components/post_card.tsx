@@ -10,9 +10,17 @@ import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { PostWithDetails, deletePost } from '@utils/actions/posts'
 import { getComments } from '@utils/actions/comments'
-import { Trash2, Pencil, Loader2, Play, BarChart3, Share2 } from 'lucide-react'
+import { Trash2, Pencil, Loader2, Play, BarChart3, Share2, MoreHorizontal } from 'lucide-react'
 import { cn } from '@utils/utils'
 import { Badge } from '@components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import CommentList from './comment_list'
 import CommentInput from './comment_input'
 import PhotoLightbox from '@/components/photo_lightbox'
@@ -226,37 +234,34 @@ export default function PostCard({
             )}
           </div>
           {isAdmin && (
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                onClick={handleShare}
-                title={t('postCard.shareTitle')}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
-              >
-                <Share2 className="h-3.5 w-3.5" />
-              </button>
-              <button
-                aria-label={tA11y('viewStats')}
-                onClick={() => setStatsOpen(true)}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
-              >
-                <BarChart3 className="h-3.5 w-3.5" />
-              </button>
-              <button
-                aria-label={tA11y('edit')}
-                onClick={() => setIsEditing(true)}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button
-                aria-label={tA11y('delete')}
-                onClick={handleDelete}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button variant="ghost" size="icon-sm" aria-label={tA11y('postActions')} />}
                 disabled={deleting}
-                className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-destructive transition-colors cursor-pointer disabled:opacity-50 touch-target relative pointer-coarse:p-2"
+                className="-mr-1.5 -mt-1 shrink-0 rounded-xl text-landing-muted hover:bg-landing-background hover:text-landing-foreground aria-expanded:bg-landing-background aria-expanded:text-landing-foreground"
               >
-                {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-              </button>
-            </div>
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4.5 w-4.5" />}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-48">
+                <DropdownMenuItem onClick={handleShare} className="min-h-10 pointer-coarse:min-h-11 gap-3 px-3 cursor-pointer">
+                  <Share2 className="text-muted-foreground" />
+                  {t('postCard.share')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setStatsOpen(true)} className="min-h-10 pointer-coarse:min-h-11 gap-3 px-3 cursor-pointer">
+                  <BarChart3 className="text-muted-foreground" />
+                  {t('postCard.stats')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsEditing(true)} className="min-h-10 pointer-coarse:min-h-11 gap-3 px-3 cursor-pointer">
+                  <Pencil className="text-muted-foreground" />
+                  {t('postCard.edit')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDelete} variant="destructive" className="min-h-10 pointer-coarse:min-h-11 gap-3 px-3 cursor-pointer">
+                  <Trash2 />
+                  {t('postCard.delete')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
