@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `261789d` feat(feed): optimistic reactions and visible errors across the feed
 - `c4239f1` fix(feed): associate create form labels with their controls
 - `46ff001` fix(feed): associate edit form labels and reuse the post's poll
 - `83cc2ec` feat(feed): collapse comment threads and hide the bottom nav while typing
