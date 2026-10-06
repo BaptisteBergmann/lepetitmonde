@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `2c16c91` fix(feed): stop story nav buttons from triggering tap zones
 - `e057641` fix(feed): story viewer targets groups by key and pauses during highlight picker
 - `9e68f6b` feat(ui): non-dismissible modal and upload progress while publishing
 - `bc21cdb` fix(feed): publish post notifications after photos and poll are attached
