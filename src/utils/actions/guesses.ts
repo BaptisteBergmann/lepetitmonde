@@ -8,7 +8,7 @@ import { getUserAccess } from './users'
 import { assertIsAdmin } from './access'
 import { actionError } from './errors'
 
-type InsertGuess = TablesInsert<"guesses">
+type InsertGuess = Pick<TablesInsert<"guesses">, "baby_id" | "question_id" | "answer">
 
 export async function submitGuess(guess: InsertGuess) {
   const contextLogger = logger.child({ function: submitGuess.name })
@@ -20,6 +20,21 @@ export async function submitGuess(guess: InsertGuess) {
 
   const access = await getUserAccess(guess.baby_id)
   if (Array.isArray(access)) throw await actionError('unauthorized')
+
+  if (!guess.question_id) throw await actionError('pronosticNotFound')
+
+  // The question must belong to this baby and still be open: once resolved,
+  // the answer is public on the leaderboard and late guesses could copy it.
+  const { data: question, error: questionError } = await supabase
+    .from('guess_questions')
+    .select('status, resolved_at')
+    .eq('id', guess.question_id)
+    .eq('baby_id', guess.baby_id)
+    .maybeSingle()
+
+  if (questionError) { contextLogger.error(questionError, "Error fetching question before guess"); throw questionError }
+  if (!question || question.status !== 'approved') throw await actionError('pronosticNotFound')
+  if (question.resolved_at) throw await actionError('pronosticClosed')
 
   // Un pronostic est définitif : on vérifie qu'aucune réponse n'existe déjà
   // pour empêcher un utilisateur de changer son pronostic après coup.
@@ -37,44 +52,24 @@ export async function submitGuess(guess: InsertGuess) {
   // 4. Insérer dans la base de données
   const { error } = await supabase
     .from('guesses')
+    // Explicit fields only: the client must not be able to set is_correct /
+    // is_funny on its own guess.
     .insert([{
-      ...guess,
+      baby_id: guess.baby_id,
+      question_id: guess.question_id,
+      answer: guess.answer,
       user_id: user.id,
     }])
 
   if (error) throw error
 }
 
-export async function getGuesses() {
-  const contextLogger = logger.child({ function: getGuesses.name })
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw await actionError('unauthorized')
-
-  contextLogger.debug(user, "Get user")
-
-  const rep = await supabase
-    .from('guesses')
-    .select("*")
-    .eq("user_id", user.id)
-
-  if (rep.error) throw rep.error
-
-  contextLogger.debug(rep, "User guesses")
-
-  return rep.data
-}
-
 export async function getAllGuesses(babyId: string) {
   const contextLogger = logger.child({ function: getAllGuesses.name, babyId })
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw await actionError('unauthorized')
+  // Everyone's answers, including on open questions: admin-only, otherwise
+  // any member could read the others' guesses before results are revealed.
+  await assertIsAdmin(supabase, babyId)
 
   const { data, error } = await supabase
     .from('guesses')

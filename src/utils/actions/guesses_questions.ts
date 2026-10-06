@@ -341,6 +341,8 @@ export async function getQuestionsWithoutGuess(babyId: string) {
     .select("*")
     .eq('baby_id', babyId)
     .eq('status', 'approved')
+    // Closed questions can't be answered anymore (see submitGuess).
+    .is('resolved_at', null)
     .order('position', { ascending: true });
 
   if (guessedQuestionIds.length > 0) {
