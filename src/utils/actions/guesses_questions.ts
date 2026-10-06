@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
 import { Json, TablesInsert } from '@utils/supabase/database.types'
-import { toComparable } from '@utils/guess_scoring'
+import { MAX_TEXT_ANSWER_LENGTH, toComparable } from '@utils/guess_scoring'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { getUserAccess } from './users'
@@ -361,7 +361,6 @@ export async function getQuestionsWithoutGuess(babyId: string) {
 
 
 
-const MAX_TEXT_ANSWER_LENGTH = 500
 
 function revalidateGuessPages(babyId: string) {
   revalidatePath(`/baby/${babyId}/guess`)

@@ -5,7 +5,7 @@ import { createClient } from '@utils/supabase/server'
 import { logger } from '../logger'
 import { getTranslations } from 'next-intl/server'
 import { Json, TablesInsert } from '../supabase/database.types'
-import { buildStandings, ScorableGuess, scoreQuestion } from '@utils/guess_scoring'
+import { buildStandings, MAX_TEXT_ANSWER_LENGTH, ScorableGuess, scoreQuestion } from '@utils/guess_scoring'
 import { getUserAccess, getUsers } from './users'
 import { assertIsAdmin } from './access'
 import { actionError } from './errors'
@@ -24,6 +24,9 @@ export async function submitGuess(guess: InsertGuess) {
   if (Array.isArray(access)) throw await actionError('unauthorized')
 
   if (!guess.question_id) throw await actionError('pronosticNotFound')
+  if (typeof guess.answer === 'string' && guess.answer.length > MAX_TEXT_ANSWER_LENGTH) {
+    throw await actionError('invalidCorrectAnswer')
+  }
 
   // The question must belong to this baby and still be open: once resolved,
   // the answer is public on the leaderboard and late guesses could copy it.

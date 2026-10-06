@@ -5,6 +5,9 @@ import type { Json, Tables } from '@utils/supabase/database.types'
 // Rules: see .claude/plans/guess-validation-leaderboard.md, assumption 2.
 export const POINTS_EXACT = 3
 export const PODIUM_POINTS = [3, 2, 1]
+// Free-text answers (and correct answers) are shown to the whole family on
+// the admin page and leaderboard, so they stay short.
+export const MAX_TEXT_ANSWER_LENGTH = 500
 
 const CLOSEST_WINS_TYPES = new Set(['number', 'date', 'time'])
 
