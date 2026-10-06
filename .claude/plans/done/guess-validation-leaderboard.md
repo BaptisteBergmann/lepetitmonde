@@ -1,6 +1,16 @@
 # Pronostic results, leaderboard and funny answers
 
-Status: approved
+## Status: implemented
+
+Shipped 2026-10-06: per-question resolution with automatic scoring (3/0 exact, 3/2/1 closest-wins with shared ranks), free-text auto-match + admin override, funny flags (badge only), `/baby/[babyId]/guess/leaderboard`, resolved state + podium place on the member card, and hardening of `submitGuess` / `getAllGuesses`.
+
+Deviations:
+- Reviewer round 2 fixes: date distances compared in whole days (DST-safe), number distances rounded to 1e-6, time distance wraps midnight, text normalization collapses spaces/hyphens/apostrophes, member guess payload no longer carries `is_funny`/`is_correct`, 500-char cap on text answers, stable funny-toggle label.
+- `guess_questions.correct_answer` / `resolved_at` already existed on the live DB from the unmerged `worktree-pronostics-leaderboard` branch (`20260919142433_add_guess_question_resolution.sql`). That file was restored verbatim on main, and `20261006140151_guess_results.sql` only adds `guesses.is_correct` / `is_funny`. That branch is now superseded for its leaderboard parts.
+- `mise run db_push` kept failing with a TLS error; `mise exec -- bash -c 'pnpm supabase db push --debug --db-url …'` worked.
+- Time answers now display in locale format; `guess.leaderboard.pointsUnit` added; `guess.admin.funny.unflag` removed.
+- Follow-ups: CalendarPicker Aug–Dec 2026 range; optional `answerTooLong` error key.
+
 Approved by: owner (2026-10-06)
 
 Owner request (verbatim): "I want to be able to validate the guess of the user
