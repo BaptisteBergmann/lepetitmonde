@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `f681017` feat(guess): add pronostic scoring helpers
 - `021369c` feat(guess): add results and funny columns to guesses
 - `b6fdf20` feat(deploy): add mise portainer_redeploy task to re-pull and recreate the stack
 - `25ac22d` chore(agents): add planner, designer, builder and reviewer subagents
