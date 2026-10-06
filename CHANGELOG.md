@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `6597267` docs(plans): mark journal review fixes implemented
 - `bf15e0b` chore(types): regenerate database types for poll vote composite FK
 - `2c16c91` fix(feed): stop story nav buttons from triggering tap zones
 - `e057641` fix(feed): story viewer targets groups by key and pauses during highlight picker
