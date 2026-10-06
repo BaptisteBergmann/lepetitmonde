@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `fb3412a` docs: document that CI builds the image on every push to main
 - `8d4f3c1` docs(plans): mark guess validation and leaderboard plan as implemented
 - `1c0dc18` fix(db): restore applied guess resolution migration and drop its duplicate columns
 - `d7f9600` fix(guess): cap free-text pronostic answers at 500 characters
