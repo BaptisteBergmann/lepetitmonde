@@ -88,6 +88,11 @@ export async function getUsers(babyId: string) {
 const nicknamesCache = createTtlCache<Record<string, string | null>>(5_000)
 
 export async function getNicknamesByBaby(babyId: string): Promise<Record<string, string | null>> {
+  // Checked before the cache lookup: the cache is keyed by babyId alone, so
+  // without this a non-member could read another baby's cached nicknames.
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) return {}
+
   return nicknamesCache.get(babyId, async () => {
     const supabase = await createClient();
     const contextLogger = logger.child({ function: getNicknamesByBaby.name, babyId })

@@ -6,6 +6,7 @@ import { getDisplayName } from '@utils/users'
 import { getTranslations } from 'next-intl/server'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { logger } from '../logger'
+import { getFeedViewer, findVisiblePost } from '@utils/feed-access'
 
 export type PostViewsData = {
   count: number
@@ -34,6 +35,10 @@ export async function markPostViewed(postId: string, babyId: string) {
 export async function getPostViews(postId: string, excludeUserId: string | null | undefined, babyId: string): Promise<PostViewsData> {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getPostViews.name, postId, babyId })
+
+  // Admin-only "seen by" report, and only for a post of this baby.
+  const viewer = await getFeedViewer(babyId)
+  if (!viewer?.isAdmin || !(await findVisiblePost(postId, babyId, viewer))) return { count: 0, names: [] }
 
   const [{ data, error }, nicknames] = await Promise.all([
     supabase

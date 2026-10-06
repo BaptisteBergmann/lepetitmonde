@@ -5,6 +5,7 @@ import { getReactions, ReactionsData } from './reactions'
 import { getPostViews, PostViewsData } from './views'
 import { getPollWithResults, PollWithResults } from './polls'
 import { logger } from '../logger'
+import { getFeedViewer, findVisiblePost } from '@utils/feed-access'
 
 export type PostStats = {
   reactions: ReactionsData['breakdown']
@@ -16,6 +17,10 @@ export type PostStats = {
 export async function getPostStats(postId: string, babyId: string, excludeUserId?: string | null): Promise<PostStats> {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: getPostStats.name, postId, babyId })
+
+  const empty: PostStats = { reactions: [], views: { count: 0, names: [] }, commentCount: 0, poll: null }
+  const viewer = await getFeedViewer(babyId)
+  if (!viewer?.isAdmin || !(await findVisiblePost(postId, babyId, viewer))) return empty
 
   const [{ breakdown }, views, { count, error }, poll] = await Promise.all([
     getReactions(postId, babyId),
