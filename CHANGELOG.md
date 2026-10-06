@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `d35c179` fix(ui): show the bottom nav again when the keyboard closes with a field focused
 - `4ca5e6b` fix(feed): only roll back a reaction when saving it fails
 - `9beb137` fix(feed): reset story reaction state when the story changes
 - `06d7df9` fix(feed): keep the story viewer open on Escape while naming a highlight
