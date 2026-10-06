@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useEffect, useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { updatePost, PostWithDetails } from '@utils/actions/posts'
-import { createPoll, updatePoll, deletePoll, getPollWithResults } from '@utils/actions/polls'
+import { createPoll, updatePoll, deletePoll } from '@utils/actions/polls'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -38,28 +38,22 @@ export default function EditPostModal({
   const router = useRouter()
   const t = useTranslations('feed.postForm')
   const tA11y = useTranslations('a11y')
+  const captionId = useId()
+  const takenAtId = useId()
+  const visibleId = useId()
 
   const [caption, setCaption] = useState(post.caption ?? "")
   const [takenAt, setTakenAt] = useState(format(parseISO(post.taken_at), 'yyyy-MM-dd'))
   const [circleIds, setCircleIds] = useState<string[]>(post.circle_ids)
   const [isPending, setIsPending] = useState(false)
 
-  const [existingPollId, setExistingPollId] = useState<string | null>(null)
-  const [pollHasVotes, setPollHasVotes] = useState(false)
-  const [pollEnabled, setPollEnabled] = useState(false)
-  const [pollQuestion, setPollQuestion] = useState("")
-  const [pollOptions, setPollOptions] = useState<string[]>(["", ""])
-
-  useEffect(() => {
-    getPollWithResults(post.id, babyId).then((poll) => {
-      if (!poll) return
-      setExistingPollId(poll.id)
-      setPollHasVotes(poll.totalVotes > 0)
-      setPollEnabled(true)
-      setPollQuestion(poll.question)
-      setPollOptions(poll.options.map((option) => option.label))
-    })
-  }, [post.id, babyId])
+  // The poll already came with the post; updatePoll still refuses edits
+  // server-side once votes exist, so a slightly stale vote count is safe.
+  const existingPollId = post.poll?.id ?? null
+  const pollHasVotes = (post.poll?.totalVotes ?? 0) > 0
+  const [pollEnabled, setPollEnabled] = useState(() => !!post.poll)
+  const [pollQuestion, setPollQuestion] = useState(() => post.poll?.question ?? "")
+  const [pollOptions, setPollOptions] = useState<string[]>(() => post.poll?.options.map((option) => option.label) ?? ["", ""])
 
   const validPollOptionsCount = pollOptions.filter((option) => option.trim()).length
   const pollValid = !pollEnabled || (pollQuestion.trim().length > 0 && validPollOptionsCount >= 2)
@@ -111,11 +105,11 @@ export default function EditPostModal({
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={captionId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('captionLabel')}
           </Label>
           <textarea
-            id="caption"
+            id={captionId}
             value={caption}
             maxLength={FEED_LIMITS.postCaption}
             onChange={(e) => setCaption(e.target.value)}
@@ -125,12 +119,12 @@ export default function EditPostModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="taken_at" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={takenAtId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photoDateLabel')}
           </Label>
           <input
             type="date"
-            id="taken_at"
+            id={takenAtId}
             value={takenAt}
             onChange={(e) => setTakenAt(e.target.value)}
             required
@@ -139,7 +133,7 @@ export default function EditPostModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={visibleId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('visibleByLabel')}
           </Label>
           <Select
@@ -148,7 +142,7 @@ export default function EditPostModal({
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
-            <SelectTrigger className="w-full text-foreground bg-input/50">
+            <SelectTrigger id={visibleId} className="w-full text-foreground bg-input/50">
               <SelectValue placeholder={t('visibleByPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
@@ -190,6 +184,7 @@ export default function EditPostModal({
                 onChange={(e) => setPollQuestion(e.target.value)}
                 disabled={pollHasVotes}
                 placeholder={t('pollQuestionPlaceholder')}
+                aria-label={t('pollQuestionLabel')}
                 className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
               />
               <div className="flex flex-col gap-1.5">
@@ -202,6 +197,7 @@ export default function EditPostModal({
                       onChange={(e) => updatePollOption(index, e.target.value)}
                       disabled={pollHasVotes}
                       placeholder={t('pollOptionPlaceholder', { number: index + 1 })}
+                      aria-label={t('pollOptionPlaceholder', { number: index + 1 })}
                       className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200 disabled:opacity-60"
                     />
                     <button

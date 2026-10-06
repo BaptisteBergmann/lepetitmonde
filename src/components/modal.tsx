@@ -37,7 +37,7 @@ export function Modal({
     <Dialog open onOpenChange={(open) => { if (!open && dismissible) onClose() }}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[90vh] max-w-[460px] gap-0 overflow-hidden border border-landing-border bg-landing-surface p-0 text-landing-foreground shadow-2xl"
+        className="max-h-[90dvh] max-w-[460px] gap-0 overflow-hidden border border-landing-border bg-landing-surface p-0 text-landing-foreground shadow-2xl"
       >
         {/* Own provider so confirmations opened from inside the modal nest in its tree
             (a dialog rendered outside would count as an "outside click" and close the modal). */}

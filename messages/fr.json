@@ -348,7 +348,8 @@
       "pollCreateError": "Le post est créé mais le sondage n'a pas pu être ajouté. Réessayez, ou retirez le sondage pour publier sans.",
       "uploadsFailedNotice": "{count, plural, one {# fichier n'a pas pu être envoyé} other {# fichiers n'ont pas pu être envoyés}}. Le post n'est pas encore partagé : personne n'est prévenu tant que tous les fichiers ne sont pas envoyés. Réessayez ci-dessous.",
       "uploadProgress": "Envoi {current} sur {total}…",
-      "uploadingOne": "Envoi en cours…"
+      "uploadingOne": "Envoi en cours…",
+      "pollQuestionLabel": "Question du sondage"
     },
     "storyForm": {
       "title": "Nouvelle story",

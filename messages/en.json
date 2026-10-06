@@ -348,7 +348,8 @@
       "pollCreateError": "The post was created but the poll couldn't be added. Try again, or remove the poll to publish without it.",
       "uploadsFailedNotice": "{count, plural, one {# file wasn't} other {# files weren't}} uploaded. The post isn't shared yet: nobody is notified until every file is uploaded. Retry below.",
       "uploadProgress": "Uploading {current} of {total}…",
-      "uploadingOne": "Uploading…"
+      "uploadingOne": "Uploading…",
+      "pollQuestionLabel": "Poll question"
     },
     "storyForm": {
       "title": "New story",
