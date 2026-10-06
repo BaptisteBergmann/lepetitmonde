@@ -100,7 +100,7 @@ The app itself ships as a multi-stage `Dockerfile` (deps → build → standalon
 
 - **Prebuilt image (recommended)**: pull `ghcr.io/baptistebergmann/lepetitmonde:latest` (multi-arch: amd64 + arm64, built by CI on every push to `main`) and run it with your own env vars — no build step needed. `docker-compose.portainer.yml` is a ready-made stack for this: set `image:` to the GHCR image, fill in the runtime env vars, deploy.
 - **Build it yourself**: `./scripts/build-docker-image.sh` — builds a local `lepetitmonde:local` image for your current platform. Useful if you want to build from a fork/branch instead of the published image.
-- **My own workflow**: same GHCR image, deployed via a Portainer stack (`docker-compose.portainer.yml`, `pull_policy: always`) that injects runtime secrets. Update the stack in Portainer to pick up a new push.
+- **My own workflow**: same GHCR image, deployed via a Portainer stack (`docker-compose.portainer.yml`, `pull_policy: always`) that injects runtime secrets. `mise run portainer_redeploy` calls the Portainer API to recreate the stack and re-pull the image (same as the UI's "Pull and redeploy"), so a new GHCR push can be picked up from the CLI instead of clicking through the Portainer UI. Needs `PORTAINER_URL` / `PORTAINER_API_KEY` (User settings > Access tokens) / `PORTAINER_STACK_ID` (the numeric id in the stack's URL) set in `mise.toml`.
 
 For local-only testing, `docker compose build && docker compose up` (root `docker-compose.yml`) builds and runs the image directly — see `.env.docker.example` for the required vars.
 

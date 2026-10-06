@@ -39,6 +39,14 @@ POSTGRES_PORT = "5432"
 DOCKER_REGISTRY = "your-registry-host:5000"
 DOCKER_IMAGE = "your-app-name"
 
+# Only needed for `mise run portainer_redeploy` — see README's "Docker Build
+# & Deploy" section. PORTAINER_API_KEY is an access token from Portainer's
+# "User settings > Access tokens". PORTAINER_STACK_ID is the numeric id in
+# the stack's URL (Stacks > your stack > id shown in the address bar).
+PORTAINER_URL = "https://your-portainer-host:9443"
+PORTAINER_API_KEY = ""
+PORTAINER_STACK_ID = ""
+
 [tasks.update_types]
 description = "Get database types"
 run = "pnpm supabase gen types typescript --db-url postgres://postgres.${POOLER_TENANT_ID}:${POSTGRES_PASSWORD}@${SUPABASE_DB_HOST}:${POSTGRES_PORT}/postgres --schema public > src/utils/supabase/database.types.ts"
@@ -71,4 +79,28 @@ run = '''
 docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
 docker tag ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:prod
 docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:prod
+'''
+
+[tasks.portainer_redeploy]
+description = "Recreate the Portainer stack, re-pulling its image (usage: mise run portainer_redeploy [stack_id] — defaults to PORTAINER_STACK_ID)"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+stack_id="${1:-$PORTAINER_STACK_ID}"
+auth=(-H "X-API-Key: ${PORTAINER_API_KEY}")
+
+stack="$(curl -sf "${auth[@]}" "${PORTAINER_URL}/api/stacks/${stack_id}")"
+endpoint_id="$(jq -r '.EndpointId' <<<"$stack")"
+env_json="$(jq -c '.Env' <<<"$stack")"
+file_content="$(curl -sf "${auth[@]}" "${PORTAINER_URL}/api/stacks/${stack_id}/file" | jq -r '.StackFileContent')"
+
+payload="$(jq -n --arg content "$file_content" --argjson env "$env_json" \
+  '{stackFileContent: $content, env: $env, prune: false, pullImage: true}')"
+
+curl -sf -X PUT "${auth[@]}" -H "Content-Type: application/json" \
+  "${PORTAINER_URL}/api/stacks/${stack_id}?endpointId=${endpoint_id}" \
+  -d "$payload" > /dev/null
+
+echo "Stack ${stack_id} redeployed with the latest image."
 '''
