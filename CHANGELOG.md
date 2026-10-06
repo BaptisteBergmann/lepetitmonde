@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `a2827ce` fix(guess): compare pronostic distances in days, rounded numbers and wrapped times
 - `693a97e` feat(guess): show pronostic result on the member's own card
 - `414e3da` feat(guess): add pronostics leaderboard page
 - `a8c78eb` feat(guess): let admins resolve pronostics and flag funny answers
