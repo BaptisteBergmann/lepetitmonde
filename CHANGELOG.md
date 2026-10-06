@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `8c4f3dd` fix(guess): show date pronostics as the calendar day that was scored
 - `fb939f0` docs: document the db_push TLS failure and the --debug workaround
 - `fb3412a` docs: document that CI builds the image on every push to main
 - `8d4f3c1` docs(plans): mark guess validation and leaderboard plan as implemented
