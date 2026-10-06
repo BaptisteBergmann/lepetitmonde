@@ -74,8 +74,7 @@ export default function PostStatsModal({
                 const isEmpty = !!circle && (circleMemberCounts[circle.id] ?? 0) === 0
                 return (
                   <Badge key={circle?.id ?? index} variant={isEmpty ? "destructive" : "secondary"}>
-                    {circle?.name ?? t('circleFallback')}
-                    {isEmpty && ` (${t('emptyCircleSuffix')})`}
+                    {t('circleBadge', { name: circle?.name ?? t('circleFallback'), empty: String(isEmpty) })}
                   </Badge>
                 )
               })
