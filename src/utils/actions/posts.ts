@@ -18,6 +18,7 @@ import type { PollWithResults } from './polls'
 import type { PostViewsData } from './views'
 import { getCommentsForPosts, getReactionsForPosts, getPollsForPosts, getPostViewsForPosts } from '@utils/feed-loaders'
 import { logger } from '../logger'
+import { assertAdmin, assertCirclesInBaby, assertPostVisible } from '@utils/feed-access'
 
 type NewPost = TablesInsert<'posts'>
 export type PostPhotoWithUrl = Tables<'post_photos'> & { url: string | null; thumbnailUrl: string | null }
@@ -35,6 +36,7 @@ export async function createPost(post: NewPost, circleIds: string[], sendEmail: 
   const contextLogger = logger.child({ function: createPost.name, babyId: post.baby_id })
 
   await assertIsAdmin(supabase, post.baby_id)
+  await assertCirclesInBaby(circleIds, post.baby_id)
   await ensureBabyBucket(post.baby_id)
 
   const { data, error } = await supabase
@@ -95,7 +97,10 @@ export async function updatePost(postId: string, babyId: string, update: PostUpd
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updatePost.name, postId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  // The posts_circles delete/insert below is keyed by postId alone, so the
+  // post must be proven to belong to this baby first.
+  await assertPostVisible(postId, babyId, await assertAdmin(babyId))
+  await assertCirclesInBaby(circleIds, babyId)
 
   // Snapshot who could see this post *before* the circle change, so that
   // after re-linking we can notify only the people newly able to see it —
@@ -162,7 +167,7 @@ export async function attachPostPhotos(
   const supabase = await createClient()
   const contextLogger = logger.child({ function: attachPostPhotos.name, postId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  await assertPostVisible(postId, babyId, await assertAdmin(babyId))
 
   const photoRows = files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
     post_id: postId,
@@ -357,7 +362,8 @@ export async function deletePost(postId: string, babyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: deletePost.name, postId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  // Before touching storage, not just before the baby-scoped row delete.
+  await assertPostVisible(postId, babyId, await assertAdmin(babyId))
 
   const { data: photos, error: photosError } = await supabase
     .from('post_photos')

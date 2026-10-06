@@ -15,6 +15,7 @@ import { notifyUsers } from './notify'
 import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-loaders'
 import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
+import { assertAdmin, assertCirclesInBaby, assertStoryVisible, findVisibleStory, getFeedViewer } from '@utils/feed-access'
 
 export type StoryWithUrl = Tables<'stories'> & {
   url: string
@@ -50,6 +51,7 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   const contextLogger = logger.child({ function: createStory.name, babyId: story.baby_id })
 
   await assertIsAdmin(supabase, story.baby_id)
+  await assertCirclesInBaby(circleIds, story.baby_id)
   await ensureBabyBucket(story.baby_id)
 
   const expiresAt = story.durationHours
@@ -121,7 +123,10 @@ export async function updateStory(storyId: string, babyId: string, update: Story
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updateStory.name, storyId, babyId })
 
-  await assertIsAdmin(supabase, babyId)
+  // The stories_circles delete/insert below is keyed by storyId alone, so
+  // the story must be proven to belong to this baby first.
+  await assertStoryVisible(storyId, babyId, await assertAdmin(babyId))
+  await assertCirclesInBaby(circleIds, babyId)
 
   // Snapshot who could see this story *before* the circle change, so that
   // after re-linking we can notify only the people newly able to see it —
@@ -301,11 +306,9 @@ export async function markStoryViewed(storyId: string, babyId: string) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: markStoryViewed.name, storyId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) return
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) return
+  const found = await findVisibleStory(storyId, babyId)
+  if (!found) return
+  const user = { id: found.viewer.userId }
 
   const { error } = await supabase
     .from('story_views')
@@ -320,9 +323,8 @@ export async function markStoryViewed(storyId: string, babyId: string) {
 export async function getStoryViews(storyId: string, babyId: string, excludeUserId?: string | null): Promise<StoryViewsData> {
   const contextLogger = logger.child({ function: getStoryViews.name, storyId, babyId })
 
-  const access = await getUserAccess(babyId)
-  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
-  if (!isAdmin) return { count: 0, names: [] }
+  const viewer = await getFeedViewer(babyId)
+  if (!viewer?.isAdmin || !(await findVisibleStory(storyId, babyId, viewer))) return { count: 0, names: [] }
 
   const supabase = await createClient()
   const [{ data, error }, nicknames] = await Promise.all([

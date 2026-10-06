@@ -9,16 +9,14 @@ import { notifyUsers } from './notify'
 import { getUserAccess } from './users'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { assertMember, assertStoryVisible } from '@utils/feed-access'
 
 export async function addStoryReaction(storyId: string, babyId: string, emoji: string = '❤️') {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: addStoryReaction.name, storyId, babyId })
 
-  const { data: { user } } = await getAuthUser()
-  if (!user) throw await actionError('unauthorized')
-
-  const access = await getUserAccess(babyId)
-  if (Array.isArray(access)) throw await actionError('unauthorized')
+  const { viewer, story } = await assertStoryVisible(storyId, babyId, await assertMember(babyId))
+  const user = { id: viewer.userId }
 
   const { error } = await supabase
     .from('story_reactions')
@@ -30,8 +28,7 @@ export async function addStoryReaction(storyId: string, babyId: string, emoji: s
 
   revalidatePath(`/baby/${babyId}/feed`)
 
-  const { data: story } = await supabase.from('stories').select('created_by').eq('id', storyId).single()
-  if (story?.created_by && story.created_by !== user.id) {
+  if (story.created_by && story.created_by !== user.id) {
     const { data: reactor } = await supabase
       .from('baby_access')
       .select('nickname, users (first_name, last_name)')
