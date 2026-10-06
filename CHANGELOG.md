@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `b14ae88` refactor(ui): build the story viewer and photo lightbox on Base UI Dialog
 - `2d30b4f` feat(feed): story viewer pause, mute and tap-to-play controls
 - `e4d0e76` docs(plans): add journal UI polish plan
 - `85b3c3d` docs(plans): mark feed follow-ups implemented
