@@ -38,7 +38,10 @@
     "hidePassword": "Hide password",
     "pause": "Pause",
     "mute": "Mute",
-    "playVideo": "Play video"
+    "playVideo": "Play video",
+    "photoNOfM": "Photo {n} of {total}",
+    "playVideoNOfM": "Play video {n} of {total}",
+    "moreMedia": "{count} more"
   },
   "versionFooter": {
     "title": "Version history",

@@ -38,7 +38,10 @@
     "hidePassword": "Masquer le mot de passe",
     "pause": "Mettre en pause",
     "mute": "Couper le son",
-    "playVideo": "Lire la vidéo"
+    "playVideo": "Lire la vidéo",
+    "photoNOfM": "Photo {n} sur {total}",
+    "playVideoNOfM": "Lire la vidéo {n} sur {total}",
+    "moreMedia": "{count} de plus"
   },
   "versionFooter": {
     "title": "Historique des versions",

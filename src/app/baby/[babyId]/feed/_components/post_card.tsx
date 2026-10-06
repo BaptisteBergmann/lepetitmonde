@@ -71,6 +71,12 @@ export default function PostCard({
     }
   }
 
+  // At most 4 tiles; the 4th carries a "+N" for the photos not shown at all.
+  const MAX_TILES = 4
+  const totalMedia = post.photos.length
+  const visibleMedia = post.photos.slice(0, MAX_TILES)
+  const hiddenCount = totalMedia - visibleMedia.length
+
   const postCircles = post.circle_ids.map((id) => circles.find((c) => c.id === id))
 
   const handleShare = async () => {
@@ -92,8 +98,9 @@ export default function PostCard({
   }
 
   return (
-    <div
+    <article
       id={`post-${post.id}`}
+      aria-labelledby={`post-${post.id}-date`}
       className={cn(
         "rounded-3xl bg-landing-surface text-landing-foreground border border-landing-border shadow-sm overflow-hidden transition-shadow duration-700",
         highlighted && "ring-2 ring-primary ring-offset-2 ring-offset-landing-background"
@@ -102,44 +109,67 @@ export default function PostCard({
       {post.photos.length > 0 && (
         <div className={cn(
           "grid gap-0.5",
-          post.photos.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          totalMedia === 1 ? "grid-cols-1" : "grid-cols-2"
         )}>
-          {post.photos.map((photo, index) => (
-            photo.url && (
-              photo.mime_type?.startsWith('video/') ? (
-                <div
-                  key={photo.id}
-                  onClick={() => setLightboxIndex(index)}
-                  className="relative w-full aspect-square cursor-pointer contain-paint"
-                >
-                  <video
-                    src={photo.url}
-                    poster={photo.thumbnailUrl ?? undefined}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    className="w-full h-full object-cover"
+          {visibleMedia.map((photo, index) => {
+            if (!photo.url) return null
+            const isVideo = photo.mime_type?.startsWith('video/') ?? false
+            const showMore = index === MAX_TILES - 1 && hiddenCount > 0
+            const baseLabel = isVideo
+              ? tA11y('playVideoNOfM', { n: index + 1, total: totalMedia })
+              : tA11y('photoNOfM', { n: index + 1, total: totalMedia })
+            return (
+              <button
+                key={photo.id}
+                type="button"
+                aria-label={showMore ? `${baseLabel}, ${tA11y('moreMedia', { count: hiddenCount })}` : baseLabel}
+                onClick={() => setLightboxIndex(index)}
+                className={cn(
+                  "relative block w-full overflow-hidden bg-landing-background cursor-pointer contain-paint outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:opacity-90",
+                  // 3 photos: a wide first tile keeps the block square, like a 2×2 grid.
+                  totalMedia === 3 && index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-square"
+                )}
+              >
+                {isVideo ? (
+                  <>
+                    <video
+                      src={photo.url}
+                      poster={photo.thumbnailUrl ?? undefined}
+                      muted
+                      playsInline
+                      preload={photo.thumbnailUrl ? 'none' : 'metadata'}
+                      aria-hidden
+                      className="h-full w-full object-cover"
+                    />
+                    {!showMore && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/10" aria-hidden>
+                        <span className="rounded-full bg-black/50 p-2.5">
+                          <Play className="h-5 w-5 text-white fill-white" />
+                        </span>
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={photo.thumbnailUrl ?? photo.url}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                    <div className="rounded-full bg-black/50 p-2.5">
-                      <Play className="h-5 w-5 text-white fill-white" />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={photo.id}
-                  src={photo.thumbnailUrl ?? photo.url}
-                  alt={post.caption ?? ""}
-                  onClick={() => setLightboxIndex(index)}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full aspect-square object-cover bg-landing-background cursor-pointer contain-paint"
-                />
-              )
+                )}
+                {showMore && (
+                  <span
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-display text-3xl font-semibold"
+                    aria-hidden
+                  >
+                    +{hiddenCount}
+                  </span>
+                )}
+              </button>
             )
-          ))}
+          })}
         </div>
       )}
 
@@ -174,9 +204,9 @@ export default function PostCard({
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-sm font-semibold text-landing-foreground capitalize">
+            <h2 id={`post-${post.id}-date`} className="text-sm font-semibold text-landing-foreground capitalize">
               {format(parseISO(post.taken_at), 'EEEE d MMMM yyyy', { locale: dateFnsLocale })}
-            </p>
+            </h2>
             {isAdmin && (
               <div className="flex flex-wrap items-center gap-1 mt-1">
                 {postCircles.length > 0 ? (
@@ -252,6 +282,6 @@ export default function PostCard({
           <CommentInput postId={post.id} babyId={babyId} onAdded={loadComments} />
         </div>
       </div>
-    </div>
+    </article>
   )
 }

@@ -38,6 +38,8 @@ export default async function FeedPage({
   return (
     <div className="overflow-hidden text-landing-foreground">
       <div className="relative mx-auto max-w-2xl px-4 pt-5 pb-10 sm:px-6 sm:pt-8 sm:pb-16 space-y-8">
+        {/* sr-only: the story tray is this page's visual header. */}
+        <h1 className="sr-only">{t('title')}</h1>
         <Suspense
           fallback={
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
