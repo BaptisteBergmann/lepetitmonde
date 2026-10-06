@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `46ff001` fix(feed): associate edit form labels and reuse the post's poll
 - `83cc2ec` feat(feed): collapse comment threads and hide the bottom nav while typing
 - `b7f0b57` feat(feed): replace post admin icons with an actions menu
 - `cdbffb9` feat(feed): accessible media tiles, 4-tile grid and post articles
