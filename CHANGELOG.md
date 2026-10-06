@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `9beb137` fix(feed): reset story reaction state when the story changes
 - `06d7df9` fix(feed): keep the story viewer open on Escape while naming a highlight
 - `6ffc781` fix(ui): reattach lightbox pinch and pan after the dialog portal mounts
 - `6020c47` refactor(feed): copy cleanup and unused keys
