@@ -449,14 +449,16 @@ export async function unresolveQuestion(babyId: string, questionId: string) {
 
   const contextLogger = logger.child({ function: unresolveQuestion.name, babyId, questionId })
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('guess_questions')
     .update({ correct_answer: null, resolved_at: null })
     .eq('baby_id', babyId)
     .eq('id', questionId)
     .eq('status', 'approved')
+    .select('id')
 
   if (error) { contextLogger.error(error, "Error re-opening question"); throw error }
+  if (data.length === 0) throw await actionError('pronosticNotFound')
   contextLogger.info("Question re-opened")
 
   revalidateGuessPages(babyId)
