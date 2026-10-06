@@ -1,5 +1,8 @@
-'use server'
-
+// Deliberately NOT a 'use server' module: these helpers take user/baby ids
+// with no auth check of their own (and getEmailsForUserIds uses the service
+// role), so exporting them from an action file would make each one a
+// publicly callable endpoint. Only import from server code that has already
+// verified the caller.
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { actionError } from './errors'
