@@ -438,8 +438,12 @@ export default function StoryViewer({
           />
         )}
 
+        {/* The tap zone acts on pointerup, which bubbles before the click
+            fires — stopping only the click let one mouse click navigate twice. */}
         <button
           aria-label={tA11y('previous')}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); goPrev() }}
           disabled={index === 0}
           className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none hidden sm:flex items-center justify-center touch-target pointer-coarse:p-2"
@@ -448,6 +452,8 @@ export default function StoryViewer({
         </button>
         <button
           aria-label={tA11y('next')}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); goNext() }}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer hidden sm:flex items-center justify-center touch-target pointer-coarse:p-2"
         >
