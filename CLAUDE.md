@@ -9,6 +9,13 @@ This project is a private, self-hosted family application (Next.js + Supabase). 
 - **Backend**: Supabase (PostgreSQL, Auth, Storage) manipulated via `@supabase/ssr`.
 - **UI**: Tailwind CSS, Shadcn UI, `cn` utility (clsx + tailwind-merge).
 
+## Working with agents
+- For any non-trivial feature: planner → designer (if UI) → wait for my
+  approval → builder → reviewer. Max 2 builder/reviewer rounds.
+- For small fixes: implement directly, then run the reviewer.
+- The project is only me so always work on main.
+- If the code is reviewed and green flag by the reviewer apply migrations, deploy, or push.
+
 ## 📝 Development Rules (Next.js)
 
 ### 1. Server / Client Separation
