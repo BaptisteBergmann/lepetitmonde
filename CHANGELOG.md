@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `a6b258d` docs(plans): mark journal UI polish implemented
 - `d35c179` fix(ui): show the bottom nav again when the keyboard closes with a field focused
 - `4ca5e6b` fix(feed): only roll back a reaction when saving it fails
 - `9beb137` fix(feed): reset story reaction state when the story changes
