@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `e057641` fix(feed): story viewer targets groups by key and pauses during highlight picker
 - `9e68f6b` feat(ui): non-dismissible modal and upload progress while publishing
 - `bc21cdb` fix(feed): publish post notifications after photos and poll are attached
 - `4252003` fix(feed): validate reactions, comments and text lengths server-side
