@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `61b1018` fix(feed): split poll option row into vote button and voters trigger
 - `31d6327` fix(feed): attach reactions and viewed to highlight stories
 - `db3d95b` fix(security): stop exposing access helpers as server actions
 - `e715838` docs(plans): approve journal review fixes plan with recorded decisions
