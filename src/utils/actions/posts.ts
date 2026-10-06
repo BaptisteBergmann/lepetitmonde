@@ -109,19 +109,26 @@ export async function publishPost(postId: string, babyId: string, sendEmail: boo
     url: `/baby/${babyId}/feed?postId=${postId}`,
   }, recipients)
 
+  // The push above has already gone out: throwing from here would make the
+  // modal retry publishPost and send it a second time, so an email failure
+  // is logged and swallowed instead.
   if (sendEmail === true) {
-    const { data: baby, error: babyError } = await supabase
-      .from('babies')
-      .select('baby_surname')
-      .eq('id', babyId)
-      .single()
+    try {
+      const { data: baby, error: babyError } = await supabase
+        .from('babies')
+        .select('baby_surname')
+        .eq('id', babyId)
+        .single()
 
-    if (babyError) {
-      contextLogger.error(babyError, "Error fetching baby for new-post email")
-    } else {
-      const emails = await getEmailsForUserIds(recipients)
-      const postUrl = `${process.env.SITE_URL}/baby/${babyId}/feed?postId=${postId}`
-      await sendNewPostEmails(emails, baby.baby_surname, body, postUrl)
+      if (babyError) {
+        contextLogger.error(babyError, "Error fetching baby for new-post email")
+      } else {
+        const emails = await getEmailsForUserIds(recipients)
+        const postUrl = `${process.env.SITE_URL}/baby/${babyId}/feed?postId=${postId}`
+        await sendNewPostEmails(emails, baby.baby_surname, body, postUrl)
+      }
+    } catch (emailError) {
+      contextLogger.error(emailError, "Error sending new-post emails")
     }
   }
 
