@@ -13,6 +13,10 @@ import { getOrderedPages } from './page_order'
 // Client boundary.
 const NON_TEXT_INPUT_TYPES = new Set(['button', 'checkbox', 'radio', 'file', 'submit', 'range', 'color', 'date'])
 
+// The visual viewport has to shrink at least this much to count as "keyboard
+// up" — enough to ignore browser toolbars collapsing/expanding.
+const KEYBOARD_MIN_HEIGHT_PX = 150
+
 // True when the focused element brings up the on-screen keyboard.
 function isTextEntry(el: Element | null): boolean {
   if (!el) return false
@@ -35,19 +39,31 @@ export default function BottomNav({ accesses }: { accesses: AccessWithPages[] })
 
   useEffect(() => {
     let frame = 0
-    const handleFocusIn = () => setKeyboardOpen(isTextEntry(document.activeElement))
+    const viewport = window.visualViewport
+    // Focus alone isn't enough: Android's Back button closes the keyboard but
+    // leaves the field focused. When visualViewport exists, also require it
+    // to be clearly shorter than the window (the keyboard is actually up);
+    // without it, fall back to focus only.
+    const check = () => {
+      const focused = isTextEntry(document.activeElement)
+      const shrunk = !viewport || window.innerHeight - viewport.height > KEYBOARD_MIN_HEIGHT_PX
+      setKeyboardOpen(focused && shrunk)
+    }
     // Re-check on the next frame: when focus moves between two fields,
     // activeElement is still <body> during focusout and the bar would flicker.
     const handleFocusOut = () => {
       cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => setKeyboardOpen(isTextEntry(document.activeElement)))
+      frame = requestAnimationFrame(check)
     }
-    document.addEventListener('focusin', handleFocusIn)
+    document.addEventListener('focusin', check)
     document.addEventListener('focusout', handleFocusOut)
+    // The keyboard opens/closes after focus changes, so follow the viewport too.
+    viewport?.addEventListener('resize', check)
     return () => {
       cancelAnimationFrame(frame)
-      document.removeEventListener('focusin', handleFocusIn)
+      document.removeEventListener('focusin', check)
       document.removeEventListener('focusout', handleFocusOut)
+      viewport?.removeEventListener('resize', check)
     }
   }, [])
 
