@@ -4,8 +4,11 @@ import { useConfirm } from '@/components/confirm_provider'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createPortal } from 'react-dom'
-import { X, ChevronLeft, ChevronRight, Eye, Pencil, Plus as PlusIcon, Sparkles, Trash2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Eye, Loader2, Pause, Pencil, Play, Plus as PlusIcon, Sparkles, Trash2, Volume2, VolumeX } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@utils/utils'
+import { logger } from '@/utils/logger'
+import { formatNamesPreview } from '@utils/users'
 import { StoryGroup, StoryWithUrl, StoryViewsData, markStoryViewed, getStoryViews, deleteStory } from '@utils/actions/stories'
 import { HighlightWithStories, createHighlight, addStoryToHighlight } from '@utils/actions/story_highlights'
 import { Tables } from '@utils/supabase/database.types'
@@ -23,6 +26,8 @@ const HOLD_THRESHOLD_MS = 200
 // the middle band in between → toggle pause.
 const LEFT_ZONE = 0.3
 const RIGHT_ZONE = 0.7
+
+const viewerIconButton = "p-1.5 pointer-coarse:p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70"
 
 export default function StoryViewer({
   babyId,
@@ -100,6 +105,13 @@ export default function StoryViewer({
   const [videoProgress, setVideoProgress] = useState(0)
   const [views, setViews] = useState<StoryViewsData | null>(null)
   const [newHighlightName, setNewHighlightName] = useState("")
+  const [highlightSaving, setHighlightSaving] = useState(false)
+  // Start muted so autoplay is allowed; the choice then sticks for the rest
+  // of this viewer session (deliberately not reset on navigation).
+  const [muted, setMuted] = useState(true)
+  // The browser refused to autoplay (e.g. iOS Low Power Mode): show an
+  // explicit "Play video" control instead of a silently frozen frame.
+  const [needsTapToPlay, setNeedsTapToPlay] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -175,6 +187,7 @@ export default function StoryViewer({
     setHighlightPickerOpen(false)
     setManuallyPaused(false)
     setEditing(false)
+    setNeedsTapToPlay(false)
     if (!storyId) return
     if (!isHighlight) {
       markStoryViewed(storyId, babyId)
@@ -218,7 +231,11 @@ export default function StoryViewer({
     const video = videoRef.current
     if (!video) return
     if (paused) video.pause()
-    else video.play().catch(() => {})
+    else video.play().catch((err: unknown) => {
+      // AbortError just means a pause/navigation interrupted play(); only a
+      // policy refusal needs the manual play control.
+      if (err instanceof DOMException && err.name === 'NotAllowedError') setNeedsTapToPlay(true)
+    })
   }, [paused, index])
 
   if (!story) return null
@@ -252,19 +269,41 @@ export default function StoryViewer({
     else setManuallyPaused((v) => !v)
   }
 
-  const handleAddToHighlight = async (highlightId: string) => {
-    await addStoryToHighlight(highlightId, story.id, babyId)
-    setHighlightPickerOpen(false)
-    onChanged()
+  const handleAddToHighlight = async (highlightId: string, name: string) => {
+    if (highlightSaving) return
+    const contextLogger = logger.child({ function: 'StoryViewer.handleAddToHighlight', babyId, storyId: story.id, highlightId })
+    setHighlightSaving(true)
+    try {
+      await addStoryToHighlight(highlightId, story.id, babyId)
+      toast.success(t('storyViewer.addedToHighlight', { name }))
+      setHighlightPickerOpen(false)
+      onChanged()
+    } catch (err) {
+      contextLogger.error(err, 'Error adding story to highlight')
+      toast.error(t('storyViewer.highlightError'))
+    } finally {
+      setHighlightSaving(false)
+    }
   }
 
   const handleCreateHighlight = async () => {
     const name = newHighlightName.trim()
-    if (!name) return
-    await createHighlight(babyId, name, story.id)
-    setNewHighlightName("")
-    setHighlightPickerOpen(false)
-    onChanged()
+    if (!name || highlightSaving) return
+    const contextLogger = logger.child({ function: 'StoryViewer.handleCreateHighlight', babyId, storyId: story.id })
+    setHighlightSaving(true)
+    try {
+      await createHighlight(babyId, name, story.id)
+      toast.success(t('storyViewer.addedToHighlight', { name }))
+      setNewHighlightName("")
+      setHighlightPickerOpen(false)
+      onChanged()
+    } catch (err) {
+      // Keep the picker open with the typed name so Enter retries.
+      contextLogger.error(err, 'Error creating highlight')
+      toast.error(t('storyViewer.highlightError'))
+    } finally {
+      setHighlightSaving(false)
+    }
   }
 
   const handleDelete = async () => {
@@ -272,9 +311,22 @@ export default function StoryViewer({
     const confirmed = await confirmAction(t('storyViewer.deleteConfirm'))
     setConfirming(false)
     if (!confirmed) return
-    await deleteStory(story.id, babyId)
+    const contextLogger = logger.child({ function: 'StoryViewer.handleDelete', babyId, storyId: story.id })
+    try {
+      await deleteStory(story.id, babyId)
+    } catch (err) {
+      contextLogger.error(err, 'Error deleting story')
+      toast.error(t('storyViewer.deleteError'))
+      return
+    }
     onChanged()
     goNext()
+  }
+
+  const handleTapToPlay = () => {
+    setNeedsTapToPlay(false)
+    setManuallyPaused(false)
+    videoRef.current?.play().catch(() => setNeedsTapToPlay(true))
   }
 
   // Portal to <body> so no ancestor stacking context can trap the overlay under the fixed header.
@@ -308,40 +360,64 @@ export default function StoryViewer({
         ))}
       </div>
 
-      <div className="flex justify-between items-center px-4 py-2.5 shrink-0 text-white">
-        <span className="text-sm font-semibold truncate">{title}</span>
-        <div className="flex items-center gap-1">
+      <div className="flex justify-between items-center gap-2 px-4 py-2.5 shrink-0 text-white">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{title}</span>
+        <div className="flex items-center gap-1 shrink-0">
           {isAdmin && !isHighlight && (
             <button
+              type="button"
               aria-label={t('storyViewer.addToHighlights')}
               onClick={() => setHighlightPickerOpen((v) => !v)}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+              className={viewerIconButton}
             >
               <Sparkles className="h-4.5 w-4.5" />
             </button>
           )}
           {isAdmin && !isHighlight && (
             <button
+              type="button"
               aria-label={tA11y('edit')}
               onClick={() => setEditing(true)}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+              className={viewerIconButton}
             >
               <Pencil className="h-4.5 w-4.5" />
             </button>
           )}
           {isAdmin && !isHighlight && (
             <button
+              type="button"
               aria-label={tA11y('delete')}
               onClick={handleDelete}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+              className={viewerIconButton}
             >
               <Trash2 className="h-4.5 w-4.5" />
             </button>
           )}
+          {isVideo && (
+            <button
+              type="button"
+              aria-label={tA11y('mute')}
+              aria-pressed={muted}
+              onClick={() => setMuted((v) => !v)}
+              className={viewerIconButton}
+            >
+              {muted ? <VolumeX className="h-4.5 w-4.5" /> : <Volume2 className="h-4.5 w-4.5" />}
+            </button>
+          )}
           <button
+            type="button"
+            aria-label={tA11y('pause')}
+            aria-pressed={manuallyPaused}
+            onClick={() => setManuallyPaused((v) => !v)}
+            className={viewerIconButton}
+          >
+            {manuallyPaused ? <Play className="h-4.5 w-4.5" /> : <Pause className="h-4.5 w-4.5" />}
+          </button>
+          <button
+            type="button"
             aria-label={tA11y('close')}
             onClick={closeViewer}
-            className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+            className={viewerIconButton}
           >
             <X className="h-5 w-5" />
           </button>
@@ -368,35 +444,45 @@ export default function StoryViewer({
         <div className="mx-4 mb-2 p-3 rounded-2xl bg-white/10 text-white space-y-2 shrink-0">
           <p className="text-xs uppercase tracking-wider text-white/60">{t('storyViewer.addToHighlights')}</p>
           {highlights.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {highlights.map((h) => (
                 <button
                   key={h.id}
-                  onClick={() => handleAddToHighlight(h.id)}
-                  className="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-xs cursor-pointer transition-colors"
+                  type="button"
+                  disabled={highlightSaving}
+                  onClick={() => handleAddToHighlight(h.id, h.name)}
+                  className="inline-flex items-center min-h-9 px-3 rounded-full bg-white/15 hover:bg-white/25 text-sm text-white cursor-pointer transition-colors touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:opacity-50"
                 >
                   {h.name}
                 </button>
               ))}
             </div>
           )}
-          <div className="flex items-center gap-1.5">
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleCreateHighlight()
+            }}
+          >
             <input
               type="text"
               value={newHighlightName}
               maxLength={FEED_LIMITS.highlightName}
               onChange={(e) => setNewHighlightName(e.target.value)}
               placeholder={t('storyViewer.newHighlightPlaceholder')}
-              className="flex-1 bg-white/10 rounded-xl px-3 py-1.5 text-base md:text-sm placeholder:text-white/40 focus:outline-none"
+              aria-label={t('storyViewer.newHighlightLabel')}
+              className="h-10 flex-1 min-w-0 rounded-xl bg-white/10 px-3 text-base md:text-sm text-white placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             />
             <button
+              type="submit"
               aria-label={tA11y('createHighlight')}
-              onClick={handleCreateHighlight}
-              className="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 cursor-pointer transition-colors touch-target relative pointer-coarse:p-2"
+              disabled={highlightSaving || !newHighlightName.trim()}
+              className="size-10 shrink-0 inline-flex items-center justify-center rounded-xl bg-white/15 hover:bg-white/25 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:opacity-40 touch-target relative"
             >
-              <PlusIcon className="h-4 w-4" />
+              {highlightSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlusIcon className="h-4 w-4" />}
             </button>
-          </div>
+          </form>
         </div>
       )}
 
@@ -419,6 +505,7 @@ export default function StoryViewer({
             src={story.url}
             poster={story.thumbnailUrl ?? undefined}
             autoPlay
+            muted={muted}
             playsInline
             className="w-full h-full object-contain"
             onTimeUpdate={(e) => {
@@ -438,6 +525,29 @@ export default function StoryViewer({
           />
         )}
 
+        {manuallyPaused && !needsTapToPlay && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
+            <span className="flex size-16 items-center justify-center rounded-full bg-black/40 animate-in fade-in-0 duration-150 motion-reduce:animate-none">
+              <Play className="h-8 w-8 text-white fill-white" />
+            </span>
+          </div>
+        )}
+
+        {isVideo && needsTapToPlay && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); handleTapToPlay() }}
+              className="pointer-events-auto inline-flex h-12 items-center gap-2 rounded-full bg-black/60 px-5 text-sm font-medium text-white backdrop-blur-sm hover:bg-black/70 outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
+            >
+              <Play className="h-5 w-5 fill-white" />
+              {tA11y('playVideo')}
+            </button>
+          </div>
+        )}
+
         {/* The tap zone acts on pointerup, which bubbles before the click
             fires — stopping only the click let one mouse click navigate twice. */}
         <button
@@ -445,45 +555,50 @@ export default function StoryViewer({
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); goPrev() }}
+          type="button"
           disabled={index === 0}
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none hidden sm:flex items-center justify-center touch-target pointer-coarse:p-2"
+          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 flex items-center justify-center size-9 sm:size-auto sm:p-2 rounded-full bg-black/30 sm:bg-black/40 text-white/70 sm:text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer disabled:opacity-0 disabled:pointer-events-none outline-none focus-visible:ring-2 focus-visible:ring-white/70 touch-target"
         >
-          <ChevronLeft className="h-6 w-6" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
         <button
           aria-label={tA11y('next')}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); goNext() }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer hidden sm:flex items-center justify-center touch-target pointer-coarse:p-2"
+          type="button"
+          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 flex items-center justify-center size-9 sm:size-auto sm:p-2 rounded-full bg-black/30 sm:bg-black/40 text-white/70 sm:text-white/80 hover:text-white hover:bg-black/60 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/70 touch-target"
         >
-          <ChevronRight className="h-6 w-6" />
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
       </div>
 
-      {story.caption && (
-        <p className="px-4 py-3 text-sm text-white shrink-0">{story.caption}</p>
-      )}
+      <div
+        className="shrink-0 px-4 pt-3 space-y-3"
+        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+      >
+        {story.caption && (
+          <p className="max-h-[30dvh] overflow-y-auto overscroll-contain text-sm text-white whitespace-pre-wrap">{story.caption}</p>
+        )}
 
-      <div className={cn("px-4 shrink-0", story.caption ? "pb-3" : "pt-3 pb-3")}>
         <StoryReactionPicker
           storyId={story.id}
           babyId={babyId}
           initialReactions={story.reactions}
           onChanged={onChanged}
         />
-      </div>
 
-      {isAdmin && !isHighlight && views && (
-        <div className="flex items-center gap-1.5 px-4 pb-4 text-white/70 text-xs shrink-0">
-          <Eye className="h-3.5 w-3.5" />
-          {views.count > 0 ? (
-            <span>{t('seenByNames', { names: views.names.join(", ") })}</span>
-          ) : (
-            <span>{t('nobodyYet')}</span>
-          )}
-        </div>
-      )}
+        {isAdmin && !isHighlight && views && (
+          <div className="flex items-center gap-1.5 text-xs text-white/70">
+            <Eye className="h-3.5 w-3.5 shrink-0" />
+            {views.count > 0 ? (
+              <span>{t('seenByNames', { names: formatNamesPreview(views.names) })}</span>
+            ) : (
+              <span>{t('nobodyYet')}</span>
+            )}
+          </div>
+        )}
+      </div>
     </div>,
     document.body,
   )

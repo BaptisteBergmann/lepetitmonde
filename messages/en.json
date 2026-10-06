@@ -35,7 +35,10 @@
     "photoViewer": "Photo viewer",
     "storyViewer": "Story",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "pause": "Pause",
+    "mute": "Mute",
+    "playVideo": "Play video"
   },
   "versionFooter": {
     "title": "Version history",
@@ -362,7 +365,11 @@
     "storyViewer": {
       "deleteConfirm": "Delete this story? This action can't be undone.",
       "addToHighlights": "Add to highlights",
-      "newHighlightPlaceholder": "New highlight"
+      "newHighlightPlaceholder": "New highlight",
+      "newHighlightLabel": "New highlight name",
+      "addedToHighlight": "Added to {name}",
+      "highlightError": "Couldn't update the highlight. Try again.",
+      "deleteError": "Couldn't delete this story."
     },
     "poll": {
       "voteCount": "{percent}% · {count}",

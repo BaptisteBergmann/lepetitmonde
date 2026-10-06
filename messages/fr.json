@@ -35,7 +35,10 @@
     "photoViewer": "Visionneuse photo",
     "storyViewer": "Story",
     "showPassword": "Afficher le mot de passe",
-    "hidePassword": "Masquer le mot de passe"
+    "hidePassword": "Masquer le mot de passe",
+    "pause": "Mettre en pause",
+    "mute": "Couper le son",
+    "playVideo": "Lire la vidéo"
   },
   "versionFooter": {
     "title": "Historique des versions",
@@ -362,7 +365,11 @@
     "storyViewer": {
       "deleteConfirm": "Supprimer cette story ? Cette action est irréversible.",
       "addToHighlights": "Ajouter aux highlights",
-      "newHighlightPlaceholder": "Nouveau highlight"
+      "newHighlightPlaceholder": "Nouveau highlight",
+      "newHighlightLabel": "Nom de la nouvelle sélection à la une",
+      "addedToHighlight": "Ajoutée à « {name} »",
+      "highlightError": "La sélection à la une n'a pas pu être mise à jour. Réessayez.",
+      "deleteError": "Impossible de supprimer cette story."
     },
     "poll": {
       "voteCount": "{percent} % · {count}",
