@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-06
 
+- `e715838` docs(plans): approve journal review fixes plan with recorded decisions
 - `81849c5` docs(claude): add working-with-agents workflow rules
 - `09cfd55` docs(plans): note the revised pronostic scoring rules
 - `014c5a6` fix(guess): prefill Change answer with the scored day in any timezone
