@@ -83,13 +83,23 @@ export default function PollVoter({
                   {option.label}
                 </span>
                 <span className="sr-only">, {t('resultSr', { percent, count: option.count })}</span>
+                {/* With no voters there is nothing to list, so "0%" lives
+                    inside the vote button and the whole row votes. Hidden
+                    from screen readers: the sr-only text above has it. */}
+                {option.count === 0 && (
+                  <span aria-hidden className="ml-auto shrink-0 pl-3 text-xs tabular-nums whitespace-nowrap text-landing-muted">
+                    {t('zeroPercent')}
+                  </span>
+                )}
               </button>
-              <PollVoteCount
-                count={option.count}
-                percent={percent}
-                names={option.voterNames}
-                optionLabel={option.label}
-              />
+              {option.count > 0 && (
+                <PollVoteCount
+                  count={option.count}
+                  percent={percent}
+                  names={option.voterNames}
+                  optionLabel={option.label}
+                />
+              )}
             </div>
           )
         })}
@@ -111,15 +121,6 @@ function PollVoteCount({
 }) {
   const t = useTranslations('feed.poll')
   const [open, setOpen] = useState(false)
-
-  if (count === 0) {
-    // The result is already in the vote button's sr-only text.
-    return (
-      <span aria-hidden className="relative shrink-0 min-w-11 flex items-center justify-end px-3 text-xs tabular-nums whitespace-nowrap text-landing-muted">
-        {t('zeroPercent')}
-      </span>
-    )
-  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
