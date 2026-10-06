@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -39,6 +39,7 @@ export default function CreatePostModal({
   const router = useRouter()
   const t = useTranslations('feed.postForm')
   const tA11y = useTranslations('a11y')
+  const visibleId = useId()
   const [postId] = useState(() => crypto.randomUUID())
 
   const [caption, setCaption] = useState("")
@@ -251,7 +252,7 @@ export default function CreatePostModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={visibleId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('visibleByLabel')}
           </Label>
           <Select
@@ -261,7 +262,7 @@ export default function CreatePostModal({
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
-            <SelectTrigger className="w-full text-foreground bg-input/50">
+            <SelectTrigger id={visibleId} className="w-full text-foreground bg-input/50">
               <SelectValue placeholder={t('visibleByPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
@@ -311,6 +312,7 @@ export default function CreatePostModal({
                 maxLength={FEED_LIMITS.pollQuestion}
                 onChange={(e) => setPollQuestion(e.target.value)}
                 placeholder={t('pollQuestionPlaceholder')}
+                aria-label={t('pollQuestionLabel')}
                 className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
               />
               <div className="flex flex-col gap-1.5">
@@ -322,6 +324,7 @@ export default function CreatePostModal({
                       maxLength={FEED_LIMITS.pollOption}
                       onChange={(e) => updatePollOption(index, e.target.value)}
                       placeholder={t('pollOptionPlaceholder', { number: index + 1 })}
+                      aria-label={t('pollOptionPlaceholder', { number: index + 1 })}
                       className="w-full border border-transparent bg-input/50 rounded-xl px-3 py-1.5 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
                     />
                     <button

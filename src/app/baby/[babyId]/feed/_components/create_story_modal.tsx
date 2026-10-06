@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import {
   Select,
@@ -39,6 +39,8 @@ export default function CreateStoryModal({
 }) {
   const t = useTranslations('feed.storyForm')
   const tShared = useTranslations('feed.postForm')
+  const durationId = useId()
+  const visibleId = useId()
   const DURATION_LABELS: Record<string, string> = {
     '24': t('duration24h'),
     '72': t('duration3d'),
@@ -178,11 +180,11 @@ export default function CreateStoryModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={durationId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('durationLabel')}
           </Label>
           <Select items={DURATION_LABELS} disabled={isPending} value={duration} onValueChange={(value) => value && setDuration(value as string)}>
-            <SelectTrigger className="w-full text-foreground bg-input/50">
+            <SelectTrigger id={durationId} className="w-full text-foreground bg-input/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -196,7 +198,7 @@ export default function CreateStoryModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={visibleId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {tShared('visibleByLabel')}
           </Label>
           <Select
@@ -206,7 +208,7 @@ export default function CreateStoryModal({
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
-            <SelectTrigger className="w-full text-foreground bg-input/50">
+            <SelectTrigger id={visibleId} className="w-full text-foreground bg-input/50">
               <SelectValue placeholder={t('visibleByPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
