@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `3c8b0df` fix(a11y): use useId for the post and story form field ids
 - `8e19ea7` fix(feed): format comment times in a hydration-safe time zone
 - `12a070f` fix(feed): resync the post reaction picker and catch refetch failures
 - `1345096` fix(ui): disable the Dropzone while uploading everywhere and drop it from the tab order
