@@ -59,18 +59,42 @@ export async function createAlbum(id: string, babyId: string, rawName: string, c
   const name = await normalizeText(rawName, ALBUM_LIMITS.name, { requiredKey: 'textRequired' })
   await ensureBabyBucket(babyId)
 
-  const { data, error } = await supabase
+  // Retry-safe: if an earlier attempt inserted the album but failed on the
+  // circles step, the client calls again with the same id. An existing row is
+  // only reused when it belongs to this baby; otherwise it's someone else's id.
+  const { data: existing, error: existingError } = await supabase
     .from('albums')
-    .insert([{ id, baby_id: babyId, name }])
-    .select('id')
-    .single()
+    .select('id, baby_id')
+    .eq('id', id)
+    .maybeSingle()
 
-  if (error) { contextLogger.error(error, "Error creating album"); throw error }
+  if (existingError) { contextLogger.error(existingError, "Error checking existing album"); throw existingError }
+  if (existing && existing.baby_id !== babyId) throw await actionError('unauthorized')
 
-  if (circleIds.length > 0) {
+  if (!existing) {
+    const { error } = await supabase
+      .from('albums')
+      .insert([{ id, baby_id: babyId, name }])
+
+    if (error) { contextLogger.error(error, "Error creating album"); throw error }
+  }
+
+  const data = { id }
+
+  const { data: currentRows, error: currentError } = await supabase
+    .from('albums_circles')
+    .select('circle_id')
+    .eq('album_id', id)
+
+  if (currentError) { contextLogger.error(currentError, "Error reading album circles"); throw currentError }
+
+  const current = new Set(currentRows.map((row) => row.circle_id))
+  const toAdd = Array.from(new Set(circleIds)).filter((circleId) => !current.has(circleId))
+
+  if (toAdd.length > 0) {
     const { error: circlesError } = await supabase
       .from('albums_circles')
-      .insert(circleIds.map((circleId) => ({ album_id: data.id, circle_id: circleId })))
+      .insert(toAdd.map((circleId) => ({ album_id: data.id, circle_id: circleId })))
 
     if (circlesError) { contextLogger.error(circlesError, "Error linking album circles"); throw circlesError }
   }
