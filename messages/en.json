@@ -896,7 +896,7 @@
     },
     "photoInfoForm": {
       "title": "Photo info",
-      "addedLabel": "Added",
+      "addedOn": "Added {date}",
       "sourcePost": "From a post",
       "sourceStory": "From a story",
       "albumLabel": "Album",

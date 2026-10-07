@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useMemo, useId, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -34,6 +34,8 @@ export default function EditAlbumModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const nameId = useId()
+  const circlesId = useId()
   const t = useTranslations('albums.form')
 
   const [name, setName] = useState(album.name)
@@ -63,12 +65,12 @@ export default function EditAlbumModal({
     <Modal onClose={onClose} title={<><Pencil className="h-4.5 w-4.5 text-primary" />{t('editTitle')}</>}>
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={nameId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('nameLabel')}
           </Label>
           <input
             type="text"
-            id="name"
+            id={nameId}
             maxLength={ALBUM_LIMITS.name}
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -77,7 +79,7 @@ export default function EditAlbumModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={circlesId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('visibleByLabel')}
           </Label>
           <Select
@@ -86,7 +88,7 @@ export default function EditAlbumModal({
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
-            <SelectTrigger className="w-full text-foreground bg-input/50">
+            <SelectTrigger id={circlesId} className="w-full text-foreground bg-input/50">
               <SelectValue placeholder={t('visibleByPlaceholder')} />
             </SelectTrigger>
             <SelectContent>

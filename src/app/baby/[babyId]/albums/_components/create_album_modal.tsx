@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useMemo, useId, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -34,6 +34,8 @@ export default function CreateAlbumModal({
   onClose: () => void
 }) {
   const router = useRouter()
+  const nameId = useId()
+  const circlesId = useId()
   const t = useTranslations('albums.form')
   const [albumId] = useState(() => crypto.randomUUID())
 
@@ -142,12 +144,12 @@ export default function CreateAlbumModal({
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={nameId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('nameLabel')}
           </Label>
           <input
             type="text"
-            id="name"
+            id={nameId}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t('namePlaceholder')}
@@ -159,9 +161,9 @@ export default function CreateAlbumModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photosLabel')}
-          </Label>
+          </p>
           <Dropzone {...upload} disabled={isPending}>
             <DropzoneEmptyState />
             <DropzoneContent />
@@ -169,7 +171,7 @@ export default function CreateAlbumModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={circlesId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('visibleByLabel')}
           </Label>
           <Select
@@ -179,7 +181,7 @@ export default function CreateAlbumModal({
             value={circleIds}
             onValueChange={(value) => setCircleIds(value as string[])}
           >
-            <SelectTrigger className="w-full text-foreground bg-input/50">
+            <SelectTrigger id={circlesId} className="w-full text-foreground bg-input/50">
               <SelectValue placeholder={t('visibleByPlaceholder')} />
             </SelectTrigger>
             <SelectContent>

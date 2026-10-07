@@ -200,7 +200,6 @@ export default function AlbumDetailView({
           babyId={babyId}
           photo={infoPhoto}
           currentAlbumId={album.id}
-          currentAlbumName={album.name}
           albums={albums}
           circles={circles}
           onClose={() => setInfoPhotoId(null)}

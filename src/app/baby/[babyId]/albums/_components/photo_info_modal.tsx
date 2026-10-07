@@ -3,7 +3,7 @@
 import { Modal } from '@/components/modal'
 import { useConfirm } from '@/components/confirm_provider'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { format } from 'date-fns'
@@ -46,12 +46,13 @@ export default function PhotoInfoModal({
   babyId: string
   photo: AlbumPhotoWithUrl
   currentAlbumId: string | null
-  currentAlbumName: string | null
   albums: AlbumOption[]
   circles: Circle[]
   onClose: () => void
 }) {
   const router = useRouter()
+  const albumSelectId = useId()
+  const newAlbumId = useId()
   const t = useTranslations('albums.photoInfoForm')
   const confirmAction = useConfirm()
   const tAlbums = useTranslations('albums')
@@ -127,13 +128,13 @@ export default function PhotoInfoModal({
           <img
             src={photo.thumbnailUrl ?? photo.url ?? undefined}
             alt=""
-            className="w-full h-56 object-cover rounded-2xl bg-landing-background"
+            className="w-full h-56 object-contain rounded-2xl bg-landing-background"
           />
         )}
 
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm text-landing-muted">
-            {t('addedLabel')} {format(new Date(photo.created_at), 'PPP', { locale: dateFnsLocale })}
+            {t('addedOn', { date: format(new Date(photo.created_at), 'PPP', { locale: dateFnsLocale }) })}
           </p>
           {photo.source_post_id && (
             <Badge variant="secondary" className="gap-1">
@@ -150,7 +151,7 @@ export default function PhotoInfoModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={albumSelectId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('albumLabel')}
           </Label>
           <div className="flex items-center gap-2">
@@ -159,7 +160,7 @@ export default function PhotoInfoModal({
               value={selectedAlbumId}
               onValueChange={(value) => setSelectedAlbumId(value as string)}
             >
-              <SelectTrigger className="flex-1 text-foreground bg-input/50">
+              <SelectTrigger id={albumSelectId} className="flex-1 text-foreground bg-input/50">
                 <SelectValue placeholder={t('existingPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -188,12 +189,13 @@ export default function PhotoInfoModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={newAlbumId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('newAlbumLabel')}
           </Label>
           <div className="flex items-center gap-2">
             <input
               type="text"
+              id={newAlbumId}
               value={newAlbumName}
               maxLength={ALBUM_LIMITS.name}
               onChange={(e) => setNewAlbumName(e.target.value)}
@@ -212,9 +214,9 @@ export default function PhotoInfoModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('circlesLabel')}
-          </Label>
+          </p>
           <div className="flex flex-wrap items-center gap-1">
             {visibleCircles.length > 0 ? (
               visibleCircles.map((circle, index) => (
@@ -236,7 +238,7 @@ export default function PhotoInfoModal({
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="flex items-center gap-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg px-3 py-1.5 transition-colors cursor-pointer disabled:opacity-50"
+          className="flex items-center gap-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg px-3 py-1.5 pointer-coarse:min-h-11 transition-colors cursor-pointer disabled:opacity-50"
         >
           {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
           {t('deletePhoto')}

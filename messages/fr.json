@@ -896,7 +896,7 @@
     },
     "photoInfoForm": {
       "title": "Infos de la photo",
-      "addedLabel": "Ajoutée le",
+      "addedOn": "Ajoutée le {date}",
       "sourcePost": "Provient d'une publication",
       "sourceStory": "Provient d'une story",
       "albumLabel": "Album",
