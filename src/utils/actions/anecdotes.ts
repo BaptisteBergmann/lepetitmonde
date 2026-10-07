@@ -11,6 +11,8 @@ import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
 import { logger } from '../logger'
+import { actionError } from './errors'
+import { hasUnsafePathSegment } from '@utils/storage-path'
 
 export type AnecdoteWithDetails = Tables<'anecdotes'> & {
   circleIds: string[]
@@ -82,6 +84,13 @@ export async function attachAnecdotePhoto(
   const contextLogger = logger.child({ function: attachAnecdotePhoto.name, anecdoteId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+
+  // Filenames come back from /api/upload as a single path segment; anything
+  // else would let the row point outside this anecdote's folder.
+  if (hasUnsafePathSegment([filename])) {
+    contextLogger.warn("Rejected unsafe filename")
+    throw await actionError('invalidFilename')
+  }
 
   const { error } = await supabase
     .from('anecdotes')

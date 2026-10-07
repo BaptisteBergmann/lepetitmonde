@@ -18,6 +18,8 @@ import type { PollWithResults } from './polls'
 import type { PostViewsData } from './views'
 import { getCommentsForPosts, getReactionsForPosts, getPollsForPosts, getPostViewsForPosts } from '@utils/feed-loaders'
 import { logger } from '../logger'
+import { actionError } from './errors'
+import { hasUnsafePathSegment } from '@utils/storage-path'
 import { assertAdmin, assertCirclesInBaby, assertPostVisible } from '@utils/feed-access'
 import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
 
@@ -215,6 +217,13 @@ export async function attachPostPhotos(
   const contextLogger = logger.child({ function: attachPostPhotos.name, postId, babyId })
 
   await assertPostVisible(postId, babyId, await assertAdmin(babyId))
+
+  // Filenames come back from /api/upload as a single path segment; anything
+  // else would let the row point outside this post's folder.
+  if (files.some(({ filename, thumbnailFilename }) => hasUnsafePathSegment(thumbnailFilename === undefined ? [filename] : [filename, thumbnailFilename]))) {
+    contextLogger.warn("Rejected unsafe filename")
+    throw await actionError('invalidFilename')
+  }
 
   const photoRows = files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
     post_id: postId,

@@ -15,6 +15,8 @@ import { notifyUsers } from './notify'
 import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-loaders'
 import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
+import { actionError } from './errors'
+import { hasUnsafePathSegment } from '@utils/storage-path'
 import { assertAdmin, assertCirclesInBaby, assertStoryVisible, findVisibleStory, getFeedViewer } from '@utils/feed-access'
 import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
 
@@ -52,6 +54,12 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   const contextLogger = logger.child({ function: createStory.name, babyId: story.baby_id })
 
   await assertIsAdmin(supabase, story.baby_id)
+  // Filenames come back from /api/upload as a single path segment; anything
+  // else would let the row point outside this story's folder.
+  if (hasUnsafePathSegment(story.thumbnailFilename === undefined ? [story.mediaFilename] : [story.mediaFilename, story.thumbnailFilename])) {
+    contextLogger.warn("Rejected unsafe filename")
+    throw await actionError('invalidFilename')
+  }
   await assertCirclesInBaby(circleIds, story.baby_id)
   const caption = await normalizeText(story.caption, FEED_LIMITS.storyCaption)
   const groupLabel = await normalizeText(story.groupLabel, FEED_LIMITS.groupLabel)

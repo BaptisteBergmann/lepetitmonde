@@ -10,6 +10,8 @@ import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { nextUnsortedPosition } from '@utils/albums-internal'
 import { logger } from '../logger'
+import { actionError } from './errors'
+import { hasUnsafePathSegment } from '@utils/storage-path'
 
 export type AlbumPhotoWithUrl = Tables<'album_photos'> & { url: string | null; thumbnailUrl: string | null }
 export type AlbumWithDetails = Tables<'albums'> & {
@@ -109,6 +111,13 @@ export async function attachAlbumPhotos(albumId: string, babyId: string, files: 
 
   await assertIsAdmin(supabase, babyId)
 
+  // Filenames come back from /api/upload as a single path segment; anything
+  // else would let the row point outside this album's folder.
+  if (files.some(({ filename, thumbnailFilename }) => hasUnsafePathSegment(thumbnailFilename === undefined ? [filename] : [filename, thumbnailFilename]))) {
+    contextLogger.warn("Rejected unsafe filename")
+    throw await actionError('invalidFilename')
+  }
+
   try {
     await insertPhotoRows(babyId, albumId, `albums/${albumId}`, files)
   } catch (error) {
@@ -130,6 +139,14 @@ export async function attachUnsortedPhotos(babyId: string, files: NewPhotoFile[]
   const contextLogger = logger.child({ function: attachUnsortedPhotos.name, babyId })
 
   await assertIsAdmin(supabase, babyId)
+
+  // Filenames come back from /api/upload as a single path segment; anything
+  // else would let the row point outside this baby's photos folder.
+  if (files.some(({ filename, thumbnailFilename }) => hasUnsafePathSegment(thumbnailFilename === undefined ? [filename] : [filename, thumbnailFilename]))) {
+    contextLogger.warn("Rejected unsafe filename")
+    throw await actionError('invalidFilename')
+  }
+
   await ensureBabyBucket(babyId)
 
   try {

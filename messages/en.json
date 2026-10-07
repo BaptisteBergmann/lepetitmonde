@@ -1097,7 +1097,8 @@
     "textTooLong": "This text is too long.",
     "textRequired": "This field can't be empty.",
     "commentRequired": "The comment can't be empty.",
-    "invalidReaction": "Unknown reaction."
+    "invalidReaction": "Unknown reaction.",
+    "invalidFilename": "Invalid file name."
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",
