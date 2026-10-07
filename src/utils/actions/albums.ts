@@ -591,7 +591,7 @@ export async function getAlbumShares(albumId: string, babyId: string) {
     .eq('album_id', albumId)
     .order('created_at', { ascending: false })
 
-  if (error) { contextLogger.error(error, "Error fetching album shares"); return [] }
+  if (error) { contextLogger.error(error, "Error fetching album shares"); throw error }
 
   return data
 }

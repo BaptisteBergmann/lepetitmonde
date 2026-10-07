@@ -707,7 +707,12 @@
       "empty": "Aucun lien d'invitation généré pour le moment.",
       "expired": "Expiré",
       "active": "Actif",
-      "expiresOn": "Expire le {date}",
+      "expiresIn": "Expire {relative}",
+      "createdOn": "Créé le {date}",
+      "copyFailed": "Copie automatique impossible. Copiez le lien ci-dessous.",
+      "newLink": "Nouveau lien",
+      "loadError": "Impossible de charger les liens.",
+      "retry": "Réessayer",
       "copyTitle": "Copier le lien"
     }
   },

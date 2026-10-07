@@ -707,7 +707,12 @@
       "empty": "No invite link generated yet.",
       "expired": "Expired",
       "active": "Active",
-      "expiresOn": "Expires on {date}",
+      "expiresIn": "Expires {relative}",
+      "createdOn": "Created {date}",
+      "copyFailed": "Couldn't copy automatically. Copy the link below.",
+      "newLink": "New link",
+      "loadError": "Couldn't load the links.",
+      "retry": "Try again",
       "copyTitle": "Copy the link"
     }
   },

@@ -5,12 +5,13 @@ import { useConfirm } from '@/components/confirm_provider'
 import { useEffect, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format, formatDistanceToNowStrict } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { createAlbumShare, getAlbumShares, revokeAlbumShare } from '@utils/actions/albums'
 import { SHARE_DURATIONS_HOURS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -42,9 +43,19 @@ export default function ShareAlbumModal({
   const [shares, setShares] = useState<AlbumShare[] | null>(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
 
+  const [loadError, setLoadError] = useState(false)
+  const [lastLink, setLastLink] = useState<string | null>(null)
+
   const loadShares = async () => {
-    const data = await getAlbumShares(albumId, babyId)
-    setShares(data)
+    try {
+      const data = await getAlbumShares(albumId, babyId)
+      setShares(data)
+      setLoadError(false)
+    } catch (err) {
+      console.error(err)
+      setShares([])
+      setLoadError(true)
+    }
   }
 
   useEffect(() => {
@@ -53,30 +64,38 @@ export default function ShareAlbumModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleGenerate = async () => {
-    setGenerating(true)
-    try {
-      const url = await createAlbumShare(albumId, babyId, SHARE_DURATIONS_HOURS[duration as keyof typeof SHARE_DURATIONS_HOURS])
-      if (url) {
-        await navigator.clipboard.writeText(url)
-        toast.success(t('copied'))
-      }
-      await loadShares()
-    } catch (err) {
-      console.error(err)
-      toast.error(t('linkError'))
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  const handleCopy = async (shareId: string) => {
-    const url = `${window.location.origin}/share/album/${shareId}`
+  const handleCopy = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url)
       toast.success(t('copied'))
     } catch (err) {
       console.error(err)
+      toast.error(t('copyFailed'))
+    }
+  }
+
+  const handleGenerate = async () => {
+    setGenerating(true)
+    let url: string
+    try {
+      url = await createAlbumShare(albumId, babyId, SHARE_DURATIONS_HOURS[duration as keyof typeof SHARE_DURATIONS_HOURS])
+      setLastLink(url)
+    } catch (err) {
+      console.error(err)
+      toast.error(t('linkError'))
+      return
+    } finally {
+      setGenerating(false)
+      void loadShares()
+    }
+
+    // Separate from the action: on iOS the clipboard often rejects after an
+    // await, but the link already exists and is shown below for manual copy.
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success(t('copied'))
+    } catch {
+      toast.info(t('copyFailed'))
     }
   }
 
@@ -120,19 +139,52 @@ export default function ShareAlbumModal({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Button className="gap-2 rounded-2xl cursor-pointer shrink-0" onClick={handleGenerate} disabled={generating}>
+          <Button className="gap-2 rounded-2xl cursor-pointer shrink-0" onClick={handleGenerate} disabled={generating} aria-busy={generating}>
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             <span>{t('generate')}</span>
           </Button>
         </div>
+
+        {lastLink && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t('newLink')}
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                readOnly
+                value={lastLink}
+                aria-label={t('newLink')}
+                onFocus={(e) => e.currentTarget.select()}
+                className="h-11 font-mono text-xs sm:flex-1"
+              />
+              <Button
+                variant="outline"
+                className="h-11 gap-2 rounded-2xl cursor-pointer"
+                onClick={() => handleCopy(lastLink)}
+              >
+                <Copy className="h-4 w-4" aria-hidden="true" />
+                <span>{tA11y('copy')}</span>
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('activeLinks')}
           </p>
           {shares === null ? (
-            <div className="flex justify-center py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-landing-muted" />
+            <div role="status" className="flex justify-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-landing-muted" aria-hidden="true" />
+              <span className="sr-only">{t('activeLinks')}</span>
+            </div>
+          ) : loadError ? (
+            <div className="flex flex-col items-start gap-2">
+              <p className="text-sm text-landing-muted">{t('loadError')}</p>
+              <Button variant="outline" className="rounded-2xl cursor-pointer pointer-coarse:min-h-11" onClick={() => void loadShares()}>
+                {t('retry')}
+              </Button>
             </div>
           ) : activeShares.length === 0 ? (
             <p className="text-sm text-landing-muted">{t('noActiveLinks')}</p>
@@ -141,26 +193,33 @@ export default function ShareAlbumModal({
               {activeShares.map((share) => (
                 <div
                   key={share.id}
-                  className="flex items-center justify-between gap-2 rounded-2xl border border-landing-border p-3"
+                  className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-landing-border p-3"
                 >
-                  <p className="text-xs text-landing-muted">
-                    {t('expiresOn', { date: format(new Date(share.expires_at), 'PPP', { locale: dateFnsLocale }) })}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {t('expiresIn', { relative: formatDistanceToNowStrict(new Date(share.expires_at), { addSuffix: true, locale: dateFnsLocale }) })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('createdOn', { date: format(new Date(share.created_at), 'PPP', { locale: dateFnsLocale }) })}
+                    </p>
+                  </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       aria-label={tA11y('copy')}
-                      onClick={() => handleCopy(share.id)}
-                      className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2"
+                      onClick={() => handleCopy(`${window.location.origin}/share/album/${share.id}`)}
+                      className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                     >
                       <Copy className="h-3.5 w-3.5" />
                     </button>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleRevoke(share.id)}
                       disabled={revokingId === share.id}
-                      className="px-2 py-1 text-xs rounded-lg text-destructive hover:bg-destructive/10 transition-colors cursor-pointer disabled:opacity-50"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer pointer-coarse:min-h-11"
                     >
                       {revokingId === share.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t('revoke')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
