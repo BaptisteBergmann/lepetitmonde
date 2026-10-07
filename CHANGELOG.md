@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `665e51c` feat(albums): accessible tabs, responsive header and empty-state actions
 - `33c20bd` fix(a11y): make album photo tiles and info buttons usable on touch and keyboard
 - `67fb794` fix(albums): keep share links usable when the clipboard fails
 - `74e9258` fix(albums): make album uploads retry-safe and report partial failures
