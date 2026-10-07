@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `4f1e2e8` refactor(albums): resolve share links with the service role
 - `62df30e` refactor(auth): read and redeem invitations with the service role
 - `ce1090c` docs(plans): approve RLS plan with recorded decisions
 - `ebc2b0b` docs(plans): mark feed cleanup implemented
