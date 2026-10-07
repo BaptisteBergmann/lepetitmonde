@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `86a4631` feat(feed): tap a reaction pill to react
 - `e43f2ea` docs(plans): add feed cleanup plan
 - `ac1efe3` fix(i18n): use non-breaking spaces inside French guillemets
 - `33acd41` fix(notifications): translate the test-push title
