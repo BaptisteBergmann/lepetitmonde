@@ -125,7 +125,15 @@ export default function AlbumDetailView({
       </div>
 
       {album.photos.length === 0 ? (
-        <p className="text-sm text-landing-muted text-center py-12">{t('emptyPhotos')}</p>
+        <div className="flex flex-col items-center gap-4 py-12 text-center">
+          <p className="text-sm text-landing-muted">{t('emptyPhotos')}</p>
+          {isAdmin && (
+            <Button variant="outline" className="h-11 gap-2 rounded-2xl cursor-pointer" onClick={() => setAddPhotosOpen(true)}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              <span>{t('addPhotos')}</span>
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
           {album.photos.map((photo, index) => (
