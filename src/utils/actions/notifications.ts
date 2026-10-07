@@ -6,6 +6,7 @@ import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
 import { actionError } from './errors'
+import { getTranslations } from 'next-intl/server'
 
 export type MemberDevice = { id: number; device_label: string | null; created_at: string; last_seen_at: string }
 
@@ -341,8 +342,9 @@ export async function sendNotification(message: string, targetUserId?: string) {
     throw await actionError('noSubscriptionFound')
   }
 
+  const tCommon = await getTranslations('common')
   const payload = JSON.stringify({
-    title: 'Le petit monde',
+    title: tCommon('appName'),
     body: message,
     icon: '/favicon-96x96.png',
   })
