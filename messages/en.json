@@ -41,6 +41,7 @@
     "photoNOfM": "Photo {n} of {total}",
     "playVideoNOfM": "Play video {n} of {total}",
     "moreMedia": "{count} more",
+    "albumActions": "Album actions",
     "postActions": "Post actions"
   },
   "versionFooter": {

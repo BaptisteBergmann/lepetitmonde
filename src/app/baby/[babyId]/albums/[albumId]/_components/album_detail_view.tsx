@@ -9,7 +9,14 @@ import { Tables } from '@utils/supabase/database.types'
 import { AlbumOption, AlbumWithDetails, deleteAlbum } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@components/ui/badge'
-import { Plus, Pencil, Trash2, Share2, Loader2, Info } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Plus, Pencil, Trash2, Share2, Loader2, Info, Lock, MoreHorizontal } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import AddPhotosModal from '../../_components/add_photos_modal'
 import PhotoInfoModal from '../../_components/photo_info_modal'
@@ -62,7 +69,7 @@ export default function AlbumDetailView({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">{album.name}</h1>
           <p className="text-sm text-landing-muted mt-1">{t('photoCount', { count: album.photos.length })}</p>
@@ -75,7 +82,10 @@ export default function AlbumDetailView({
                   </Badge>
                 ))
               ) : (
-                <Badge variant="destructive">{t('adminOnly')}</Badge>
+                <Badge variant="secondary" className="gap-1">
+                  <Lock className="h-3 w-3" aria-hidden="true" />
+                  {t('adminOnly')}
+                </Badge>
               )}
             </div>
           )}
@@ -83,27 +93,33 @@ export default function AlbumDetailView({
 
         {isAdmin && (
           <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer" onClick={() => setAddPhotosOpen(true)}>
+            <Button variant="outline" className="h-11 sm:h-9 gap-2 rounded-2xl cursor-pointer" onClick={() => setAddPhotosOpen(true)}>
               <Plus className="h-4 w-4" />
               <span>{t('addPhotos')}</span>
             </Button>
-            <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer" onClick={() => setShareOpen(true)}>
+            <Button variant="outline" className="h-11 sm:h-9 gap-2 rounded-2xl cursor-pointer" onClick={() => setShareOpen(true)}>
               <Share2 className="h-4 w-4" />
               <span>{t('share.title')}</span>
             </Button>
-            <Button aria-label={tA11y('edit')} variant="outline" size="icon" className="rounded-2xl cursor-pointer" onClick={() => setEditOpen(true)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              aria-label={tA11y('delete')}
-              variant="outline"
-              size="icon"
-              className="rounded-2xl cursor-pointer text-destructive hover:text-destructive"
-              onClick={handleDeleteAlbum}
-              disabled={deletingAlbum}
-            >
-              {deletingAlbum ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button variant="outline" size="icon" aria-label={tA11y('albumActions')} className="size-11 sm:size-9 rounded-2xl cursor-pointer" />}
+                disabled={deletingAlbum}
+              >
+                {deletingAlbum ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-48">
+                <DropdownMenuItem onClick={() => setEditOpen(true)} className="min-h-10 pointer-coarse:min-h-11 gap-3 px-3 cursor-pointer">
+                  <Pencil className="text-muted-foreground" />
+                  {tA11y('edit')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDeleteAlbum} variant="destructive" className="min-h-10 pointer-coarse:min-h-11 gap-3 px-3 cursor-pointer">
+                  <Trash2 />
+                  {tA11y('delete')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>

@@ -41,6 +41,7 @@
     "photoNOfM": "Photo {n} sur {total}",
     "playVideoNOfM": "Lire la vidéo {n} sur {total}",
     "moreMedia": "{count} de plus",
+    "albumActions": "Actions sur l'album",
     "postActions": "Actions sur la publication"
   },
   "versionFooter": {

@@ -40,9 +40,9 @@ export default async function AlbumPage({
       <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-6">
         <Link
           href={`/baby/${babyId}/albums`}
-          className="inline-flex items-center gap-1 text-sm text-landing-muted hover:text-landing-foreground transition-colors"
+          className="inline-flex min-h-11 items-center gap-1 rounded-lg py-2 text-sm text-landing-muted hover:text-landing-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           {t('backToAlbums')}
         </Link>
 

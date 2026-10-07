@@ -29,7 +29,7 @@ import { ALBUM_LIMITS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@components/ui/badge'
-import { Info, FileText, Film, Loader2, Trash2 } from 'lucide-react'
+import { Info, FileText, Film, Loader2, Trash2, Lock } from 'lucide-react'
 
 type Circle = Tables<'circles'>
 
@@ -223,7 +223,10 @@ export default function PhotoInfoModal({
                 </Badge>
               ))
             ) : (
-              <Badge variant="destructive">{t('circlesNone')}</Badge>
+              <Badge variant="secondary" className="gap-1">
+                <Lock className="h-3 w-3" aria-hidden="true" />
+                {t('circlesNone')}
+              </Badge>
             )}
           </div>
         </div>
