@@ -13,6 +13,21 @@ import { assertIsAdmin } from './access'
 import { getNicknamesByBaby } from './users'
 import { actionError } from './errors'
 
+// Matches Next's default server-action body limit, so a larger screenshot
+// is already rejected before the action runs; this keeps the action safe if
+// that limit is ever raised.
+const MAX_SCREENSHOT_BYTES = 1024 * 1024
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+
+// The upload is stored as image/png in a bucket admins open in the browser,
+// so the declared type alone isn't enough: check the magic bytes too.
+async function isValidScreenshot(value: FormDataEntryValue): Promise<boolean> {
+  if (!(value instanceof File)) return false
+  if (value.size > MAX_SCREENSHOT_BYTES || value.type !== 'image/png') return false
+  const header = new Uint8Array(await value.slice(0, PNG_SIGNATURE.length).arrayBuffer())
+  return header.length === PNG_SIGNATURE.length && PNG_SIGNATURE.every((byte, i) => header[i] === byte)
+}
+
 export async function submitBugReport(formData: FormData) {
   const contextLogger = logger.child({ function: submitBugReport.name })
 
@@ -24,13 +39,19 @@ export async function submitBugReport(formData: FormData) {
 
   const pageUrl = (formData.get('pageUrl') as string | null) || null
   const userAgent = (formData.get('userAgent') as string | null) || null
-  const screenshot = formData.get('screenshot') as File | null
+  const rawScreenshot = formData.get('screenshot')
+  // An empty file means "no screenshot", as before.
+  const screenshot = rawScreenshot instanceof File && rawScreenshot.size === 0 ? null : rawScreenshot
+  if (screenshot !== null && !(await isValidScreenshot(screenshot))) {
+    contextLogger.warn({ userId: user.id }, "Rejected invalid bug report screenshot")
+    throw await actionError('invalidScreenshot')
+  }
 
   const supabase = await createClient()
 
   let screenshotPath: string | null = null
 
-  if (screenshot && screenshot.size > 0) {
+  if (screenshot instanceof File) {
     const bucket = await ensureBugReportsBucket()
     const path = `${user.id}/${Date.now()}.png`
     const supabaseAdmin = createAdminClient()

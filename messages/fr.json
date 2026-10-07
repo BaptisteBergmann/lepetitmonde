@@ -1098,7 +1098,8 @@
     "textRequired": "Ce champ ne peut pas être vide.",
     "commentRequired": "Le commentaire ne peut pas être vide.",
     "invalidReaction": "Réaction inconnue.",
-    "invalidFilename": "Nom de fichier invalide."
+    "invalidFilename": "Nom de fichier invalide.",
+    "invalidScreenshot": "La capture d'écran doit être une image PNG de moins de 1 Mo."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",

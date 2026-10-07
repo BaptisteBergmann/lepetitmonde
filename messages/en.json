@@ -1098,7 +1098,8 @@
     "textRequired": "This field can't be empty.",
     "commentRequired": "The comment can't be empty.",
     "invalidReaction": "Unknown reaction.",
-    "invalidFilename": "Invalid file name."
+    "invalidFilename": "Invalid file name.",
+    "invalidScreenshot": "The screenshot must be a PNG image under 1 MB."
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",
