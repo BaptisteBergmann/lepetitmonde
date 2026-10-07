@@ -45,6 +45,7 @@ export async function GET(
   const headers = new Headers({
     'Content-Type': upstreamResponse.headers.get('content-type') ?? 'application/octet-stream',
     'Accept-Ranges': 'bytes',
+    'X-Content-Type-Options': 'nosniff',
     // A share link is time-boxed and revocable — cache client-side only for
     // the browser tab's lifetime, not "immutable" like the authenticated
     // storage route, since revoking a share should stop new fetches quickly.

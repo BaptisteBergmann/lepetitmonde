@@ -920,7 +920,8 @@
   },
   "shareAlbum": {
     "invalidTitle": "Link unavailable",
-    "invalidDescription": "This link is invalid or has expired. Ask whoever sent it to you for a new one.",
+    "invalidDescription": "This link is invalid, has expired or was revoked. Ask whoever sent it to you for a new one.",
+    "empty": "This album doesn't have any photos yet.",
     "photoCount": "{count, plural, one {# photo} other {# photos}}"
   },
   "profile": {

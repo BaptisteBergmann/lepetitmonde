@@ -7,7 +7,11 @@
 import 'server-only'
 import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@utils/logger'
-import type { AlbumWithDetails } from '@utils/actions/albums'
+import type { LightboxPhoto } from '@/components/photo_lightbox'
+
+// Everything the public page receives: no baby_id, storage paths, creator or
+// source ids ever reach the visitor's HTML.
+export type SharedAlbum = { name: string; photos: LightboxPhoto[] }
 
 // Public path: no session check at all — the token itself is the credential.
 // Runs on the service role because the visitor is usually logged out (anon)
@@ -34,7 +38,7 @@ async function getValidShare(token: string) {
   return { supabase, albumId: share.album_id }
 }
 
-export async function getSharedAlbum(token: string): Promise<AlbumWithDetails | null> {
+export async function getSharedAlbum(token: string): Promise<SharedAlbum | null> {
   const contextLogger = logger.child({ function: getSharedAlbum.name })
 
   const valid = await getValidShare(token)
@@ -43,24 +47,22 @@ export async function getSharedAlbum(token: string): Promise<AlbumWithDetails | 
 
   const { data: album, error } = await supabase
     .from('albums')
-    .select('*, album_photos (*)')
+    .select('name, album_photos (id, thumbnail_path, mime_type, position)')
     .eq('id', albumId)
     .single()
 
   if (error || !album) { contextLogger.warn("Share token's album is missing"); return null }
 
-  const { album_photos, ...rest } = album
-  const sortedPhotos = [...album_photos].sort((a, b) => a.position - b.position)
+  const sortedPhotos = [...album.album_photos].sort((a, b) => a.position - b.position)
 
   return {
-    ...rest,
-    circleIds: [],
+    name: album.name,
     photos: sortedPhotos.map((photo) => ({
-      ...photo,
+      id: photo.id,
       url: `/api/share/${token}/${photo.id}`,
       thumbnailUrl: photo.thumbnail_path ? `/api/share/${token}/${photo.id}?thumb=1` : null,
+      mime_type: photo.mime_type,
     })),
-    coverUrl: null,
   }
 }
 
