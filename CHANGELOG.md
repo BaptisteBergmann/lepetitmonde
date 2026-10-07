@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `1df89c9` fix(albums): label album form fields and fix the photo info modal
 - `433a81b` feat(albums): move album edit/delete into a More menu
 - `665e51c` feat(albums): accessible tabs, responsive header and empty-state actions
 - `33c20bd` fix(a11y): make album photo tiles and info buttons usable on touch and keyboard
