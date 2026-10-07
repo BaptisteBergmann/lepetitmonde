@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { getSharedAlbum } from "@/utils/actions/albums";
+import { getSharedAlbum } from "@utils/album-share";
 import SharedAlbumView from "./_components/shared_album_view";
 
 export default async function SharedAlbumPage({

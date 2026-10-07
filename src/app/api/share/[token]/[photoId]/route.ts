@@ -1,4 +1,4 @@
-import { resolveSharedPhoto } from '@utils/actions/albums'
+import { resolveSharedPhoto } from '@utils/album-share'
 import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
 
