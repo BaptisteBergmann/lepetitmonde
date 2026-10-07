@@ -8,10 +8,11 @@ import webpush, { ensureVapidConfigured } from '@utils/webpush'
 import { createAdminClient } from '@utils/supabase/admin'
 import { Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
+import { FAMILY_TIME_ZONE } from '@utils/formatting'
 
 function currentTimeInParis() {
   return new Intl.DateTimeFormat('fr-FR', {
-    timeZone: 'Europe/Paris',
+    timeZone: FAMILY_TIME_ZONE,
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',

@@ -4,8 +4,8 @@ import { useConfirm } from '@/components/confirm_provider'
 import { toast } from 'sonner'
 import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { format, isThisYear, parseISO } from 'date-fns'
-import { getDateFnsLocale } from '@utils/formatting'
+import { formatDateAtTimeParts } from '@utils/formatting'
+import { useDisplayTimeZone } from '@utils/hooks/use-display-time-zone'
 import { updateComment, deleteComment } from '@utils/actions/comments'
 import { getDisplayName } from '@utils/users'
 import { Button } from '@/components/ui/button'
@@ -33,7 +33,8 @@ export default function CommentList({
   const tA11y = useTranslations('a11y')
   const confirmAction = useConfirm()
   const tCommon = useTranslations('common')
-  const dateFnsLocale = getDateFnsLocale(useLocale())
+  const locale = useLocale()
+  const timeZone = useDisplayTimeZone()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBody, setEditBody] = useState("")
   const [savingId, setSavingId] = useState<string | null>(null)
@@ -108,7 +109,6 @@ export default function CommentList({
         </button>
       )}
       {visibleComments.map((comment) => {
-        const createdAt = parseISO(comment.created_at)
         const author = getDisplayName(comment.users, comment.nickname) || t('unknownUser')
         const isOwner = currentUserId !== null && comment.user_id === currentUserId
         const isEditing = editingId === comment.id
@@ -119,10 +119,7 @@ export default function CommentList({
               <span className="text-xs font-semibold text-landing-foreground">{author || t('unknownUser')}</span>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-xs text-landing-muted">
-                  {tCommon('dateAtTime', {
-                    date: format(createdAt, isThisYear(createdAt) ? 'd MMM' : 'd MMM yyyy', { locale: dateFnsLocale }),
-                    time: format(createdAt, 'HH:mm', { locale: dateFnsLocale }),
-                  })}
+                  {tCommon('dateAtTime', formatDateAtTimeParts(comment.created_at, locale, timeZone))}
                 </span>
                 {!isEditing && (isOwner || isAdmin) && (
                   <div className="flex items-center gap-0.5">

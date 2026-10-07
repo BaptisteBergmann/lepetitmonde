@@ -22,3 +22,27 @@ export function getLocaleTag(locale: Locale): string {
 export function formatCurrency(amount: number, locale: Locale, currency = 'EUR'): string {
   return new Intl.NumberFormat(getLocaleTag(locale), { style: 'currency', currency }).format(amount)
 }
+
+// The family lives in France. Server-rendered times use this zone (the
+// container runs in UTC) and so does the first client render, so hydration
+// always matches; useDisplayTimeZone then switches to the browser's zone.
+export const FAMILY_TIME_ZONE = 'Europe/Paris'
+
+function yearIn(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric' }).format(date)
+}
+
+export function formatDateAtTimeParts(iso: string, locale: Locale, timeZone: string): { date: string; time: string } {
+  const value = new Date(iso)
+  const tag = getLocaleTag(locale)
+  const sameYear = yearIn(value, timeZone) === yearIn(new Date(), timeZone)
+  return {
+    date: new Intl.DateTimeFormat(tag, {
+      timeZone,
+      day: 'numeric',
+      month: 'short',
+      ...(sameYear ? {} : { year: 'numeric' }),
+    }).format(value),
+    time: new Intl.DateTimeFormat(tag, { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(value),
+  }
+}
