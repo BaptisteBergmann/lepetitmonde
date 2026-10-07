@@ -501,6 +501,7 @@ export async function createAlbumShare(albumId: string, babyId: string, hoursVal
 
   await assertIsAdmin(supabase, babyId)
   await assertAlbumInBaby(albumId, babyId)
+  if (!(Object.values(SHARE_DURATIONS_HOURS) as number[]).includes(hoursValid)) throw await actionError('invalidShareDuration')
 
   const expiresAt = new Date()
   expiresAt.setHours(expiresAt.getHours() + hoursValid)
