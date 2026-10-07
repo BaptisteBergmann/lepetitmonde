@@ -69,6 +69,9 @@ const Dropzone = ({
               event.dataTransfer.dropEffect = 'none'
             },
             onDrop: blockDrag,
+            // react-dropzone always sets tabIndex 0; an explicit undefined
+            // would drop it entirely, hence the conditional spread.
+            tabIndex: -1,
           }),
           'aria-disabled': disabled || undefined,
           className: cn(
@@ -222,6 +225,7 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
               <a
                 onClick={() => { if (!disabled) inputRef.current?.click() }}
                 aria-disabled={disabled || undefined}
+                tabIndex={disabled ? -1 : undefined}
                 className={cn("underline transition", disabled ? "cursor-not-allowed" : "cursor-pointer hover:text-foreground")}
               >
                 {chunks}

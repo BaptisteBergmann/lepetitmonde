@@ -116,7 +116,7 @@ export default function CreateAlbumModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photosLabel')}
           </Label>
-          <Dropzone {...upload}>
+          <Dropzone {...upload} disabled={isPending}>
             <DropzoneEmptyState />
             <DropzoneContent />
           </Dropzone>

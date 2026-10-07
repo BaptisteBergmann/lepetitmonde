@@ -79,7 +79,7 @@ export default function AddPhotosModal({
   return (
     <Modal onClose={onClose} title={<><Plus className="h-4.5 w-4.5 text-primary" />{t('title')}</>}>
       <div className="p-5 flex-1 overflow-y-auto">
-        <Dropzone {...upload}>
+        <Dropzone {...upload} disabled={isPending}>
           <DropzoneEmptyState />
           <DropzoneContent />
         </Dropzone>

@@ -108,7 +108,7 @@ export default function CreateAnecdoteModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photoLabel')}
           </Label>
-          <Dropzone {...upload}>
+          <Dropzone {...upload} disabled={isPending}>
             <DropzoneEmptyState />
             <DropzoneContent />
           </Dropzone>
