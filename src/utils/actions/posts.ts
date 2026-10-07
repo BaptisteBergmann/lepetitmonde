@@ -44,6 +44,8 @@ export async function createPost(post: NewPost, circleIds: string[]) {
   await assertIsAdmin(supabase, post.baby_id)
   await assertCirclesInBaby(circleIds, post.baby_id)
   const caption = await normalizeText(post.caption, FEED_LIMITS.postCaption)
+  const { data: { user } } = await getAuthUser()
+  if (!user) throw await actionError('unauthenticated')
   await ensureBabyBucket(post.baby_id)
 
   const { data, error } = await supabase
@@ -57,7 +59,32 @@ export async function createPost(post: NewPost, circleIds: string[]) {
     .select('id')
     .single()
 
-  if (error) { contextLogger.error(error, "Error creating post"); throw error }
+  if (error) {
+    // The modal reuses its client-generated postId when retrying. If the
+    // first call landed but its response was lost, the retry hits the
+    // duplicate id: treat it as success when it's the caller's own post in
+    // this baby, bringing it in line with the retried values (the user may
+    // have edited them, and nobody has been notified yet). Any other
+    // existing row keeps failing with the original error.
+    if (error.code === '23505' && post.id) {
+      const { data: existing, error: existingError } = await supabase
+        .from('posts')
+        .select('id, baby_id, created_by')
+        .eq('id', post.id)
+        .maybeSingle()
+
+      if (existingError) contextLogger.error(existingError, "Error checking existing post on retry")
+
+      if (existing && existing.baby_id === post.baby_id && existing.created_by === user.id) {
+        await syncRetriedPost(existing.id, post.baby_id, post.taken_at, caption, circleIds, contextLogger)
+        contextLogger.info({ postId: existing.id }, "Post already existed (retry)")
+        return existing.id
+      }
+    }
+
+    contextLogger.error(error, "Error creating post")
+    throw error
+  }
 
   if (circleIds.length > 0) {
     const { error: circlesError } = await supabase
@@ -81,6 +108,46 @@ export async function createPost(post: NewPost, circleIds: string[]) {
   contextLogger.info({ postId: data.id }, "Post created")
 
   return data.id
+}
+
+// Also covers a retry after an earlier circles failure whose rollback failed
+// too, which left the row behind without its circles.
+async function syncRetriedPost(
+  postId: string,
+  babyId: string,
+  takenAt: string | undefined,
+  caption: string | null,
+  circleIds: string[],
+  contextLogger: typeof logger
+) {
+  const supabase = await createClient()
+
+  const { error: updateError } = await supabase
+    .from('posts')
+    .update({ taken_at: takenAt, caption })
+    .eq('id', postId)
+    .eq('baby_id', babyId)
+
+  if (updateError) { contextLogger.error(updateError, "Error updating retried post"); throw updateError }
+
+  let staleCircles = supabase.from('posts_circles').delete().eq('post_id', postId)
+  // assertCirclesInBaby already matched every circleId to a uuid row, so
+  // none can hold the commas or parentheses that would break this filter.
+  if (circleIds.length > 0) staleCircles = staleCircles.not('circle_id', 'in', `(${circleIds.join(',')})`)
+  const { error: deleteError } = await staleCircles
+
+  if (deleteError) { contextLogger.error(deleteError, "Error clearing stale circles on retried post"); throw deleteError }
+
+  if (circleIds.length > 0) {
+    const { error: circlesError } = await supabase
+      .from('posts_circles')
+      .upsert(
+        circleIds.map((circleId) => ({ post_id: postId, circle_id: circleId })),
+        { onConflict: 'post_id,circle_id', ignoreDuplicates: true }
+      )
+
+    if (circlesError) { contextLogger.error(circlesError, "Error linking circles on retried post"); throw circlesError }
+  }
 }
 
 // Sends the new-post push (and optional email) once the post is complete.
