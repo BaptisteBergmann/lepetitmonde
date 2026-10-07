@@ -306,6 +306,12 @@ export async function sendNotification(message: string, targetUserId?: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw await actionError('unauthorized')
 
+  // The device read below runs on the service role, so reject anything that
+  // isn't a plain id before it reaches a query.
+  if (targetUserId !== undefined && typeof targetUserId !== 'string') {
+    throw await actionError('unauthorized')
+  }
+
   if (!targetUserId) targetUserId = user.id
 
   if (targetUserId !== user.id) {
@@ -333,10 +339,18 @@ export async function sendNotification(message: string, targetUserId?: string) {
     }
   }
 
-  const { data: devices } = await supabase
+  // Service role: the target's devices are not the caller's own rows, so RLS
+  // won't return them. Only reached for the caller themself or after the
+  // "admin of a baby the target belongs to" check above.
+  const { data: devices, error: devicesError } = await createAdminClient()
     .from('push_subscriptions')
     .select('subscription')
     .eq('user_id', targetUserId)
+
+  if (devicesError) {
+    contextLogger.error(devicesError, "Error reading target devices")
+    throw devicesError
+  }
 
   if (!devices || devices.length === 0) {
     throw await actionError('noSubscriptionFound')

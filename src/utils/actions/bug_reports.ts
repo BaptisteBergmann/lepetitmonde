@@ -141,11 +141,19 @@ async function notifyBugReportFixed(userId: string) {
   const contextLogger = logger.child({ function: notifyBugReportFixed.name, userId })
 
   try {
-    const supabase = await createClient()
-    const { data: devices } = await supabase
+    // Service role: the reporter's devices are not the caller's own rows, so
+    // RLS won't return them. userId is the report's created_by read from the
+    // DB, never a client value, and this function is not exported (so not a
+    // callable action).
+    const { data: devices, error } = await createAdminClient()
       .from('push_subscriptions')
       .select('subscription')
       .eq('user_id', userId)
+
+    if (error) {
+      contextLogger.error(error, "Error reading reporter devices")
+      return
+    }
 
     if (!devices || devices.length === 0) return
 
