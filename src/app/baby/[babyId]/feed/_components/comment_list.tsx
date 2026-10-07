@@ -27,7 +27,7 @@ export default function CommentList({
   babyId: string
   currentUserId: string | null
   isAdmin: boolean
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
 }) {
   const t = useTranslations('feed.comments')
   const tA11y = useTranslations('a11y')

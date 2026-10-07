@@ -21,7 +21,7 @@ export default function CommentReactionPicker({
   commentId: string
   babyId: string
   initialReactions: ReactionsData
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
 }) {
   const t = useTranslations('reactions')
   const tA11y = useTranslations('a11y')
@@ -62,9 +62,14 @@ export default function CommentReactionPicker({
     } finally {
       inFlight.current = false
     }
-    // Only a failed mutation rolls back; the parent's refetch is outside the
-    // try so its problems can't undo a reaction that was saved.
-    onChanged()
+    // Only a failed mutation rolls back: the reaction is saved, so a failed
+    // refetch only means stale data. Log it instead of leaving the parent's
+    // async refetch as an unhandled rejection.
+    try {
+      await onChanged()
+    } catch (err) {
+      contextLogger.warn({ err }, 'Error refetching after reaction')
+    }
   }
 
   return (

@@ -22,11 +22,20 @@ export default function ReactionPicker({
 }) {
   const t = useTranslations('reactions')
   const tA11y = useTranslations('a11y')
-  const [reactions, setReactions] = useState(initialReactions)
   const [pickerOpen, setPickerOpen] = useState(false)
   // Ignore taps while a request runs instead of disabling the trigger, so it
   // doesn't flash dimmed on every reaction.
   const inFlight = useRef(false)
+
+  // Local copy for optimistic updates, re-synced whenever the parent hands
+  // back new data (router.refresh or a realtime refresh of the feed).
+  // Adjusted during render, same pattern as feed_view.tsx.
+  const [reactions, setReactions] = useState(initialReactions)
+  const [prevInitialReactions, setPrevInitialReactions] = useState(initialReactions)
+  if (initialReactions !== prevInitialReactions) {
+    setPrevInitialReactions(initialReactions)
+    setReactions(initialReactions)
+  }
 
   const pick = async (emoji: string) => {
     if (inFlight.current) return

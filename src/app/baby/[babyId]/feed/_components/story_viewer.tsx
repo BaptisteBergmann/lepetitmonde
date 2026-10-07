@@ -38,7 +38,7 @@ type StoryViewerProps = {
   groups: StoryGroup[]
   target: ViewerTarget
   onClose: () => void
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
 }
 
 // Dialog shell: Base UI gives the focus trap + restore, scroll lock and a
