@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `61bf0a5` fix(lightbox): keep the loading thumbnail tappable and zoomable
 - `680372e` perf(lightbox): show the cached thumbnail while the original loads
 - `7fa38be` perf(cache): share in-flight loads in the TTL cache
 - `aecf46e` docs(plans): mark albums review fixes implemented
