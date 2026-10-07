@@ -8,7 +8,8 @@ import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
-import { nextUnsortedPosition } from '@utils/albums-internal'
+import { nextUnsortedPosition, assertAlbumInBaby } from '@utils/albums-internal'
+import { assertCirclesInBaby } from '@utils/feed-access'
 import { logger } from '../logger'
 import { actionError } from './errors'
 import { hasUnsafePathSegment } from '@utils/storage-path'
@@ -50,6 +51,7 @@ export async function createAlbum(id: string, babyId: string, name: string, circ
   const contextLogger = logger.child({ function: createAlbum.name, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertCirclesInBaby(circleIds, babyId)
   await ensureBabyBucket(babyId)
 
   const { data, error } = await supabase
@@ -110,6 +112,7 @@ export async function attachAlbumPhotos(albumId: string, babyId: string, files: 
   const contextLogger = logger.child({ function: attachAlbumPhotos.name, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertAlbumInBaby(albumId, babyId)
 
   // Filenames come back from /api/upload as a single path segment; anything
   // else would let the row point outside this album's folder.
@@ -168,6 +171,7 @@ export async function assignPhotoToAlbum(photoId: string, albumId: string, babyI
   const contextLogger = logger.child({ function: assignPhotoToAlbum.name, photoId, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertAlbumInBaby(albumId, babyId)
 
   const { count, error: countError } = await supabase
     .from('album_photos')
@@ -176,13 +180,15 @@ export async function assignPhotoToAlbum(photoId: string, albumId: string, babyI
 
   if (countError) { contextLogger.error(countError, "Error counting target album photos"); throw countError }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('album_photos')
     .update({ album_id: albumId, position: count ?? 0 })
     .eq('id', photoId)
     .eq('baby_id', babyId)
+    .select('id')
 
   if (error) { contextLogger.error(error, "Error assigning photo to album"); throw error }
+  if (!updated || updated.length === 0) throw await actionError('unauthorized')
 
   contextLogger.info("Photo assigned to album")
 
@@ -228,6 +234,8 @@ export async function updateAlbum(albumId: string, babyId: string, name: string,
   const contextLogger = logger.child({ function: updateAlbum.name, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertAlbumInBaby(albumId, babyId)
+  await assertCirclesInBaby(circleIds, babyId)
 
   const { error } = await supabase
     .from('albums')
@@ -307,11 +315,13 @@ export async function deleteAlbum(albumId: string, babyId: string) {
   const contextLogger = logger.child({ function: deleteAlbum.name, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertAlbumInBaby(albumId, babyId)
 
   const { data: photos, error: fetchError } = await supabase
     .from('album_photos')
     .select('storage_path, thumbnail_path, source_post_id')
     .eq('album_id', albumId)
+    .eq('baby_id', babyId)
 
   if (fetchError) { contextLogger.error(fetchError, "Error fetching album photos before delete"); throw fetchError }
 
@@ -476,6 +486,7 @@ export async function createAlbumShare(albumId: string, babyId: string, hoursVal
   const contextLogger = logger.child({ function: createAlbumShare.name, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertAlbumInBaby(albumId, babyId)
 
   const expiresAt = new Date()
   expiresAt.setHours(expiresAt.getHours() + hoursValid)
@@ -502,6 +513,7 @@ export async function getAlbumShares(albumId: string, babyId: string) {
   const contextLogger = logger.child({ function: getAlbumShares.name, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
+  await assertAlbumInBaby(albumId, babyId)
 
   const { data, error } = await supabase
     .from('album_shares')
@@ -524,14 +536,18 @@ export async function revokeAlbumShare(shareId: string, babyId: string) {
     .from('album_shares')
     .select('album_id')
     .eq('id', shareId)
-    .single()
+    .maybeSingle()
 
   if (fetchError) { contextLogger.error(fetchError, "Error fetching share before revoke"); throw fetchError }
+  if (!share) throw await actionError('unauthorized')
+
+  await assertAlbumInBaby(share.album_id, babyId)
 
   const { error } = await supabase
     .from('album_shares')
     .update({ revoked_at: new Date().toISOString() })
     .eq('id', shareId)
+    .eq('album_id', share.album_id)
 
   if (error) { contextLogger.error(error, "Error revoking album share"); throw error }
 

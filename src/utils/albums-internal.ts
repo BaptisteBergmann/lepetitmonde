@@ -1,4 +1,5 @@
-// Photos-page mirroring helpers for posts and stories.
+// Photos-page mirroring helpers for posts and stories, plus the album
+// ownership guard used by the album Server Actions.
 //
 // Deliberately NOT a 'use server' module: these take postId/storyId, babyId
 // and storage paths with no auth or ownership check of their own (and
@@ -9,6 +10,8 @@
 import 'server-only'
 import { createClient } from '@utils/supabase/server'
 import { copyStorageObject } from '@utils/actions/storage'
+import { actionError } from '@utils/actions/errors'
+import { logger } from '@utils/logger'
 
 export async function nextUnsortedPosition(supabase: Awaited<ReturnType<typeof createClient>>, babyId: string) {
   const { count, error } = await supabase
@@ -92,4 +95,23 @@ export async function copyStoryPhotoToLibrary(
     }])
 
   if (error) throw error
+}
+
+// Album tables have no RLS yet (see .claude/plans/rls.md), so assertIsAdmin
+// alone only proves the caller administers `babyId`, not that `albumId`
+// belongs to it. Missing and foreign albums fail the same way so ids can't be
+// probed.
+export async function assertAlbumInBaby(albumId: string, babyId: string) {
+  const contextLogger = logger.child({ function: 'assertAlbumInBaby', albumId, babyId })
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('albums')
+    .select('id')
+    .eq('id', albumId)
+    .eq('baby_id', babyId)
+    .maybeSingle()
+
+  if (error) contextLogger.error(error, "Error checking album")
+  if (error || !data) throw await actionError('unauthorized')
 }
