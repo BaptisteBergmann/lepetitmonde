@@ -46,6 +46,12 @@ export default function PhotoLightbox({
   const [index, setIndex] = useState(initialIndex)
   const [scale, setScale] = useState(1)
   const [translate, setTranslate] = useState({ x: 0, y: 0 })
+  // Full-size images that have finished loading. Until then the slide shows the
+  // (already cached) grid thumbnail, so opening a photo isn't a black screen
+  // while a multi-MB original downloads.
+  const [loadedIds, setLoadedIds] = useState<Set<string>>(() => new Set())
+  const markLoaded = (id: string) =>
+    setLoadedIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
   const touchStartX = useRef<number | null>(null)
 
   // State, not a ref: the Dialog portal mounts this node a couple of commits
@@ -248,7 +254,7 @@ export default function PhotoLightbox({
               style={{ transform: `translateX(-${index * 100}%)` }}
             >
               {photos.map((photo, i) => (
-                <div key={photo.id} className="w-full h-full shrink-0 flex items-center justify-center">
+                <div key={photo.id} className="relative w-full h-full shrink-0 flex items-center justify-center">
                   {/* Only the current slide plus its immediate neighbors actually mount
                       media — this row is fully rendered (all slides exist for the
                       swipe/translateX layout), but without this guard every photo's
@@ -264,21 +270,38 @@ export default function PhotoLightbox({
                         className="max-w-full max-h-full object-contain select-none"
                       />
                     ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={photo.url}
-                        alt={alt}
-                        className={cn(
-                          "max-w-full max-h-full object-contain select-none",
-                          i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out motion-reduce:transition-none"
+                      <>
+                        {photo.thumbnailUrl && !loadedIds.has(photo.id) && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={photo.thumbnailUrl}
+                            alt=""
+                            aria-hidden
+                            className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
+                            draggable={false}
+                          />
                         )}
-                        style={
-                          i === index
-                            ? { transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)` }
-                            : undefined
-                        }
-                        draggable={false}
-                      />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photo.url}
+                          alt={alt}
+                          // The current slide must not compete for bandwidth with
+                          // the neighbors being preloaded for swiping.
+                          fetchPriority={i === index ? 'high' : 'low'}
+                          onLoad={() => markLoaded(photo.id)}
+                          className={cn(
+                            "relative max-w-full max-h-full object-contain select-none",
+                            !loadedIds.has(photo.id) && "opacity-0",
+                            i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out motion-reduce:transition-none"
+                          )}
+                          style={
+                            i === index
+                              ? { transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)` }
+                              : undefined
+                          }
+                          draggable={false}
+                        />
+                      </>
                     )
                   )}
                 </div>
