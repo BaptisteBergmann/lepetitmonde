@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles } from "@/utils/actions/circles";
-import { getAlbum, getAlbums } from "@/utils/actions/albums";
+import { getAlbum, getAlbumOptions } from "@/utils/actions/albums";
 import { logger } from "@/utils/logger";
 import AlbumDetailView from "./_components/album_detail_view";
 
@@ -30,7 +30,7 @@ export default async function AlbumPage({
   const [album, circles, albums] = await Promise.all([
     getAlbum(albumId, babyId),
     getCircles(babyId),
-    getAlbums(babyId),
+    isAdmin ? getAlbumOptions(babyId) : Promise.resolve([]),
   ])
 
   if (!album) notFound()

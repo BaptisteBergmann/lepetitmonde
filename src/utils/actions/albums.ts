@@ -32,6 +32,7 @@ export type AlbumSummary = Tables<'albums'> & {
   coverUrl: string | null
   photoCount: number
 }
+export type AlbumOption = Pick<AlbumSummary, 'id' | 'name' | 'circleIds'>
 export type AlbumPhotoWithAlbum = AlbumPhotoWithUrl & { albumId: string | null; albumName: string | null }
 
 function toStorageUrl(babyId: string, path: string) {
@@ -470,6 +471,30 @@ export async function getAlbums(babyId: string): Promise<AlbumSummary[]> {
   contextLogger.debug({ count: withCovers.length }, "Albums received")
 
   return withCovers
+}
+
+// Slim list for the admin-only "move to album" select: no cover/count
+// queries, and empty for non-admins since they never see that control.
+export async function getAlbumOptions(babyId: string): Promise<AlbumOption[]> {
+  const contextLogger = logger.child({ function: getAlbumOptions.name, babyId })
+
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access) || access.access_level !== 'admin') return []
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('albums')
+    .select('id, name, albums_circles (circle_id)')
+    .eq('baby_id', babyId)
+    .order('created_at', { ascending: false })
+
+  if (error) { contextLogger.error(error, "Error fetching album options"); return [] }
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    circleIds: row.albums_circles.map((ac: { circle_id: string }) => ac.circle_id),
+  }))
 }
 
 // Queries album_photos directly (rather than flattening getAlbums) so

@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
-import { AlbumSummary, AlbumWithDetails, deleteAlbum } from '@utils/actions/albums'
+import { AlbumOption, AlbumWithDetails, deleteAlbum } from '@utils/actions/albums'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@components/ui/badge'
 import { Plus, Pencil, Trash2, Share2, Loader2, Info } from 'lucide-react'
@@ -28,7 +28,7 @@ export default function AlbumDetailView({
   babyId: string
   isAdmin: boolean
   circles: Circle[]
-  albums: AlbumSummary[]
+  albums: AlbumOption[]
   album: AlbumWithDetails
 }) {
   const router = useRouter()

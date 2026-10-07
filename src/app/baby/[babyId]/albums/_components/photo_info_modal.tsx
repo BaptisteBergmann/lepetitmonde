@@ -11,7 +11,7 @@ import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import {
   AlbumPhotoWithUrl,
-  AlbumSummary,
+  AlbumOption,
   assignPhotoToAlbum,
   createAlbum,
   deletePhoto,
@@ -47,7 +47,7 @@ export default function PhotoInfoModal({
   photo: AlbumPhotoWithUrl
   currentAlbumId: string | null
   currentAlbumName: string | null
-  albums: AlbumSummary[]
+  albums: AlbumOption[]
   circles: Circle[]
   onClose: () => void
 }) {
