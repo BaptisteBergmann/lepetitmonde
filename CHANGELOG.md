@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `9cef3d2` fix(albums): delete DB rows before storage and diff album circles
 - `a89e74c` fix(albums): validate share duration on the server
 - `717f60e` fix(albums): validate album action inputs on the server
 - `3d9f417` fix(albums): scope album actions to the caller's baby
