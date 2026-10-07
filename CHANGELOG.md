@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `3d9f417` fix(albums): scope album actions to the caller's baby
 - `526aa0f` docs(claude): add response style rules
 - `c30ed5c` chore(agents): run planner/reviewer on opus, designer/builder on sonnet
 - `c8feec7` refactor(notifications): read other users' devices with the service role
