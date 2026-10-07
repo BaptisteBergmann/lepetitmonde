@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `33c20bd` fix(a11y): make album photo tiles and info buttons usable on touch and keyboard
 - `67fb794` fix(albums): keep share links usable when the clipboard fails
 - `74e9258` fix(albums): make album uploads retry-safe and report partial failures
 - `e0b4818` perf(albums): fetch move-target albums only for admins
