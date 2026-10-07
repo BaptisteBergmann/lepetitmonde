@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `f1756f1` fix(i18n): add a zero case to album photo counts
 - `0001a20` fix(albums): match loading skeletons and add an album error boundary
 - `1df89c9` fix(albums): label album form fields and fix the photo info modal
 - `433a81b` feat(albums): move album edit/delete into a More menu
