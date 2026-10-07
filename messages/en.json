@@ -852,7 +852,7 @@
     "emptyPhotos": "No photos yet.",
     "circleFallback": "Circle",
     "adminOnly": "Admins only",
-    "photoCount": "{count, plural, one {# photo} other {# photos}}",
+    "photoCount": "{count, plural, =0 {No photos} one {# photo} other {# photos}}",
     "addPhotos": "Add photos",
     "photoInfo": "Photo info",
     "backToAlbums": "Back to albums",
@@ -938,7 +938,7 @@
     "invalidTitle": "Link unavailable",
     "invalidDescription": "This link is invalid, has expired or was revoked. Ask whoever sent it to you for a new one.",
     "empty": "This album doesn't have any photos yet.",
-    "photoCount": "{count, plural, one {# photo} other {# photos}}"
+    "photoCount": "{count, plural, =0 {No photos} one {# photo} other {# photos}}"
   },
   "profile": {
     "settingsLink": "Settings",
