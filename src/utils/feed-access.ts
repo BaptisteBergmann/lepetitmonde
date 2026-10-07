@@ -9,6 +9,7 @@
 // action reads or writes it: feed tables have no RLS yet (see
 // .claude/plans/rls.md), so these checks are the only protection. A missing
 // item and a hidden item fail the same way so callers can't probe ids.
+import 'server-only'
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import type { Tables } from '@utils/supabase/database.types'

@@ -3,6 +3,7 @@
 // role), so exporting them from an action file would make each one a
 // publicly callable endpoint. Only import from server code that has already
 // verified the caller.
+import 'server-only'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { actionError } from './errors'

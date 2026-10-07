@@ -1,3 +1,4 @@
+import 'server-only'
 import { createClient } from '@supabase/supabase-js'
 
 // Bypasses Supabase Storage RLS: this project defines no storage.buckets /

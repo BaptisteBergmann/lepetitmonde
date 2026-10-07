@@ -3,6 +3,7 @@
 // action file would let any client create buckets or copy/delete objects in
 // any baby's bucket. Only import from server code that has already verified
 // the caller (every current importer is an action that does).
+import 'server-only'
 import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@/utils/logger'
 

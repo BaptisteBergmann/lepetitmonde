@@ -8,6 +8,7 @@
 // for the current viewer and `babyId` (attachInteractionData in posts.ts,
 // getComments, getActiveStories, getHighlights). getPostViewsForPosts keeps
 // its own admin check because the "seen by" report is admin-only.
+import 'server-only'
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { getTranslations } from 'next-intl/server'

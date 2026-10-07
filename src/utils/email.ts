@@ -1,3 +1,4 @@
+import 'server-only'
 import { Resend } from 'resend'
 import { readFile } from 'fs/promises'
 import path from 'path'

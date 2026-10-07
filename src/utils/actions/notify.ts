@@ -3,6 +3,7 @@
 // own, so exporting it from an action file would let any client write inbox
 // entries and send pushes to anyone. Only import from server code that has
 // already verified the caller and computed the recipients itself.
+import 'server-only'
 import webpush, { ensureVapidConfigured } from '@utils/webpush'
 import { createAdminClient } from '@utils/supabase/admin'
 import { Enums } from '@utils/supabase/database.types'

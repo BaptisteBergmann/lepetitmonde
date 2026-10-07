@@ -1,3 +1,4 @@
+import 'server-only'
 import { getTranslations } from 'next-intl/server'
 
 // Server actions throw these guard-clause/validation errors constantly

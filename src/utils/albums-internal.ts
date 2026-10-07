@@ -6,6 +6,7 @@
 // they must never be callable as endpoints. Callers (attachPostPhotos in
 // posts.ts, createStory in stories.ts) verify admin access and ownership
 // first.
+import 'server-only'
 import { createClient } from '@utils/supabase/server'
 import { copyStorageObject } from '@utils/actions/storage'
 

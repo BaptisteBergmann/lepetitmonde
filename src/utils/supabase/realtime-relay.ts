@@ -1,3 +1,4 @@
+import 'server-only'
 import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
