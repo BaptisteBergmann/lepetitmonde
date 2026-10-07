@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `74e9258` fix(albums): make album uploads retry-safe and report partial failures
 - `e0b4818` perf(albums): fetch move-target albums only for admins
 - `5468376` fix(share): trim the public album payload and harden the share route
 - `9cef3d2` fix(albums): delete DB rows before storage and diff album circles
