@@ -3,18 +3,27 @@
 // Deliberately TTL-only, no explicit invalidation: a short expiry bounds
 // staleness to a few seconds without needing every mutation site across the
 // codebase to remember to invalidate the right key.
-type Entry<T> = { value: T; expiresAt: number }
+//
+// Stores the in-flight promise, not the resolved value, so a burst of
+// concurrent callers (e.g. a grid's worth of /api/storage requests arriving
+// together) shares one load instead of each missing and loading separately.
+// A rejected load is evicted so the next caller retries.
+type Entry<T> = { value: Promise<T>; expiresAt: number }
 
 export function createTtlCache<T>(ttlMs: number) {
   const store = new Map<string, Entry<T>>()
 
   return {
-    async get(key: string, load: () => Promise<T>): Promise<T> {
+    get(key: string, load: () => Promise<T>): Promise<T> {
       const hit = store.get(key)
       if (hit && hit.expiresAt > Date.now()) return hit.value
 
-      const value = await load()
-      store.set(key, { value, expiresAt: Date.now() + ttlMs })
+      const value = load()
+      const entry = { value, expiresAt: Date.now() + ttlMs }
+      store.set(key, entry)
+      value.catch(() => {
+        if (store.get(key) === entry) store.delete(key)
+      })
       return value
     },
   }
