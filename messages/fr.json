@@ -843,6 +843,7 @@
     "subtitle": "Organisez les photos en albums et partagez-les en famille — même avec des personnes sans compte.",
     "loading": "Chargement des albums...",
     "pendingAccess": "Vous n'êtes pas encore rattaché à un groupe de ce journal. L'administrateur a été notifié et vous aurez accès au contenu dès qu'il vous aura ajouté à un groupe.",
+    "tabsLabel": "Affichage des photos",
     "tabAllPhotos": "Toutes les photos",
     "tabAlbums": "Albums",
     "newAlbum": "Nouvel album",

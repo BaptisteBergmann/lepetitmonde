@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Tables } from '@utils/supabase/database.types'
 import { AlbumSummary, AlbumPhotoWithAlbum } from '@utils/actions/albums'
+import { Tabs } from '@base-ui/react/tabs'
 import { Button } from '@/components/ui/button'
-import { cn } from '@utils/utils'
 import { Plus, ImagePlus, Info, Images as ImagesIcon } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import CreateAlbumModal from './create_album_modal'
@@ -41,113 +41,121 @@ export default function AlbumsView({
 
   return (
     <div className="relative space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="inline-flex rounded-2xl bg-landing-surface border border-landing-border p-1">
-          <button
-            onClick={() => setTab('photos')}
-            className={cn(
-              "px-3 py-1.5 text-sm font-medium rounded-xl transition-colors cursor-pointer",
-              tab === 'photos' ? "bg-primary text-primary-foreground" : "text-landing-muted hover:text-landing-foreground"
-            )}
-          >
-            {t('tabAllPhotos')}
-          </button>
-          <button
-            onClick={() => setTab('albums')}
-            className={cn(
-              "px-3 py-1.5 text-sm font-medium rounded-xl transition-colors cursor-pointer",
-              tab === 'albums' ? "bg-primary text-primary-foreground" : "text-landing-muted hover:text-landing-foreground"
-            )}
-          >
-            {t('tabAlbums')}
-          </button>
+      <Tabs.Root value={tab} onValueChange={(value) => setTab(value as Tab)} className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Tabs.List aria-label={t('tabsLabel')} className="isolate inline-flex w-full gap-1 rounded-full bg-muted p-1 sm:w-auto">
+            <Tabs.Tab value="photos" className="flex-1 sm:flex-none min-h-11 rounded-full border border-transparent px-4 text-center text-sm leading-tight text-muted-foreground transition-colors cursor-pointer outline-none hover:text-foreground focus-visible:z-10 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 data-[active]:bg-card data-[active]:font-medium data-[active]:text-foreground data-[active]:shadow-sm">
+              {t('tabAllPhotos')}
+            </Tabs.Tab>
+            <Tabs.Tab value="albums" className="flex-1 sm:flex-none min-h-11 rounded-full border border-transparent px-4 text-center text-sm leading-tight text-muted-foreground transition-colors cursor-pointer outline-none hover:text-foreground focus-visible:z-10 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 data-[active]:bg-card data-[active]:font-medium data-[active]:text-foreground data-[active]:shadow-sm">
+              {t('tabAlbums')}
+            </Tabs.Tab>
+          </Tabs.List>
+
+          {isAdmin && (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" className="h-11 flex-1 gap-2 rounded-2xl cursor-pointer sm:h-9 sm:flex-none pointer-coarse:min-h-11" onClick={() => setAddPhotosOpen(true)}>
+                <ImagePlus className="h-4 w-4" aria-hidden="true" />
+                <span className="whitespace-nowrap">{t('addPhotos')}</span>
+              </Button>
+              <Button className="h-11 flex-1 gap-2 rounded-2xl cursor-pointer sm:h-9 sm:flex-none pointer-coarse:min-h-11" onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                <span className="whitespace-nowrap">{t('newAlbum')}</span>
+              </Button>
+            </div>
+          )}
         </div>
 
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-2 rounded-2xl cursor-pointer" onClick={() => setAddPhotosOpen(true)}>
-              <ImagePlus className="h-4 w-4" />
-              <span>{t('addPhotos')}</span>
-            </Button>
-            <Button className="gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" />
-              <span>{t('newAlbum')}</span>
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {tab === 'photos' ? (
-        allPhotos.length === 0 ? (
-          <p className="text-sm text-landing-muted text-center py-12">{t('emptyPhotos')}</p>
-        ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
-            {allPhotos.map((photo, index) => (
-              <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
-                <button
-                  onClick={() => setLightboxIndex(index)}
-                  aria-label={tA11y('photoNOfM', { n: index + 1, total: allPhotos.length })}
-                  className="absolute inset-0 cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
-                >
-                  {(photo.thumbnailUrl ?? photo.url) && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={photo.thumbnailUrl ?? photo.url ?? undefined}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover contain-paint"
-                    />
-                  )}
-                </button>
-                {isAdmin && (
+        <Tabs.Panel value="photos" className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/30">
+          {allPhotos.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-12 text-center">
+              <p className="text-sm text-landing-muted">{t('emptyPhotos')}</p>
+              {isAdmin && (
+                <Button variant="outline" className="h-11 gap-2 rounded-2xl cursor-pointer" onClick={() => setAddPhotosOpen(true)}>
+                  <ImagePlus className="h-4 w-4" aria-hidden="true" />
+                  <span>{t('addPhotos')}</span>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+              {allPhotos.map((photo, index) => (
+                <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
                   <button
-                    onClick={() => setInfoPhotoId(photo.id)}
-                    title={t('photoInfo')}
-                  aria-label={t('photoInfo')}
-                    className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 transition-opacity cursor-pointer touch-target outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    onClick={() => setLightboxIndex(index)}
+                    aria-label={tA11y('photoNOfM', { n: index + 1, total: allPhotos.length })}
+                    className="absolute inset-0 cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                   >
-                    <Info className="h-4 w-4" aria-hidden="true" />
+                    {(photo.thumbnailUrl ?? photo.url) && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photo.thumbnailUrl ?? photo.url ?? undefined}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover contain-paint"
+                      />
+                    )}
                   </button>
-                )}
-              </div>
-            ))}
-          </div>
-        )
-      ) : (
-        albums.length === 0 ? (
-          <p className="text-sm text-landing-muted text-center py-12">{t('empty')}</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {albums.map((album) => (
-              <Link
-                key={album.id}
-                href={`/baby/${babyId}/albums/${album.id}`}
-                className="group rounded-2xl bg-landing-surface border border-landing-border overflow-hidden shadow-sm hover:shadow-md transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:border-ring"
-              >
-                <div className="relative aspect-square bg-landing-background flex items-center justify-center">
-                  {album.coverUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={album.coverUrl}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover contain-paint group-hover:scale-[1.02] transition-transform"
-                    />
-                  ) : (
-                    <ImagesIcon className="h-8 w-8 text-landing-muted" />
+                  {isAdmin && (
+                    <button
+                      onClick={() => setInfoPhotoId(photo.id)}
+                      title={t('photoInfo')}
+                      aria-label={t('photoInfo')}
+                      className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 transition-opacity cursor-pointer touch-target outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
+                      <Info className="h-4 w-4" aria-hidden="true" />
+                    </button>
                   )}
                 </div>
-                <div className="p-3">
-                  <p className="text-sm font-semibold text-landing-foreground line-clamp-2 break-words">{album.name}</p>
-                  <p className="text-xs text-landing-muted">{t('photoCount', { count: album.photoCount })}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )
-      )}
+              ))}
+            </div>
+          )}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="albums" className="rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/30">
+          {albums.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-12 text-center">
+              <p className="text-sm text-landing-muted">{t('empty')}</p>
+              {isAdmin && (
+                <Button className="h-11 gap-2 rounded-2xl cursor-pointer" onClick={() => setCreateOpen(true)}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  <span>{t('newAlbum')}</span>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {albums.map((album) => (
+                <Link
+                  key={album.id}
+                  href={`/baby/${babyId}/albums/${album.id}`}
+                  className="group rounded-2xl bg-landing-surface border border-landing-border overflow-hidden shadow-sm hover:shadow-md transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:border-ring"
+                >
+                  <div className="relative aspect-square bg-landing-background flex items-center justify-center">
+                    {album.coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={album.coverUrl}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover contain-paint group-hover:scale-[1.02] transition-transform"
+                      />
+                    ) : (
+                      <ImagesIcon className="h-8 w-8 text-landing-muted" />
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm font-semibold text-landing-foreground line-clamp-2 break-words">{album.name}</p>
+                    <p className="text-xs text-landing-muted">{t('photoCount', { count: album.photoCount })}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Tabs.Panel>
+      </Tabs.Root>
 
       {lightboxIndex !== null && (
         <PhotoLightbox
