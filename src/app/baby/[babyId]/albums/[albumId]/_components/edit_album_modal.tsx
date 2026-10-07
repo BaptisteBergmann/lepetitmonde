@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { updateAlbum, AlbumWithDetails } from '@utils/actions/albums'
 import { Tables } from '@utils/supabase/database.types'
+import { ALBUM_LIMITS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Loader2, Pencil } from 'lucide-react'
@@ -68,6 +69,7 @@ export default function EditAlbumModal({
           <input
             type="text"
             id="name"
+            maxLength={ALBUM_LIMITS.name}
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"

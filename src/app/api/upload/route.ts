@@ -9,6 +9,7 @@ import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
 import { resolveLocale } from '@/i18n/config'
 import { hasUnsafePathSegment } from '@/utils/storage-path'
+import { ALLOWED_IMAGE_CONTENT_TYPES, ALLOWED_VIDEO_CONTENT_TYPES } from '@utils/upload-content-types'
 
 async function getTranslator() {
   const locale = resolveLocale()
@@ -37,24 +38,6 @@ const MAX_IMAGE_UPLOAD_BYTES = 50 * 1024 * 1024
 const MAX_VIDEO_UPLOAD_BYTES = 500 * 1024 * 1024
 
 const THUMBNAIL_MAX_DIMENSION = 480
-
-// Explicit allowlist rather than an `image/*` / `video/*` prefix check: a prefix
-// check would also accept `image/svg+xml`, which the storage GET route serves
-// back with a matching Content-Type — an SVG can carry inline `<script>`.
-const ALLOWED_IMAGE_CONTENT_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/heic',
-  'image/heif',
-])
-
-const ALLOWED_VIDEO_CONTENT_TYPES = new Set([
-  'video/mp4',
-  'video/quicktime',
-  'video/webm',
-])
 
 function isHeicUpload(contentType: string, path: string) {
   return contentType === 'image/heic' || contentType === 'image/heif' || HEIC_EXTENSION_RE.test(path)

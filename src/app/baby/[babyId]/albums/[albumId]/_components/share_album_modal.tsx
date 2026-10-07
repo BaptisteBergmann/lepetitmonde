@@ -9,6 +9,7 @@ import { format } from 'date-fns'
 import { getDateFnsLocale } from '@utils/formatting'
 import { Tables } from '@utils/supabase/database.types'
 import { createAlbumShare, getAlbumShares, revokeAlbumShare } from '@utils/actions/albums'
+import { SHARE_DURATIONS_HOURS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -21,12 +22,6 @@ import {
 import { Loader2, Share2, Copy } from 'lucide-react'
 
 type AlbumShare = Tables<'album_shares'>
-
-const DURATIONS: Record<string, number> = {
-  '24h': 24,
-  '7d': 24 * 7,
-  '30d': 24 * 30,
-}
 
 export default function ShareAlbumModal({
   babyId,
@@ -61,7 +56,7 @@ export default function ShareAlbumModal({
   const handleGenerate = async () => {
     setGenerating(true)
     try {
-      const url = await createAlbumShare(albumId, babyId, DURATIONS[duration])
+      const url = await createAlbumShare(albumId, babyId, SHARE_DURATIONS_HOURS[duration as keyof typeof SHARE_DURATIONS_HOURS])
       if (url) {
         await navigator.clipboard.writeText(url)
         toast.success(t('copied'))

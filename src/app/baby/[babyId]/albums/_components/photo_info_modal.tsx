@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ALBUM_LIMITS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@components/ui/badge'
@@ -194,6 +195,7 @@ export default function PhotoInfoModal({
             <input
               type="text"
               value={newAlbumName}
+              maxLength={ALBUM_LIMITS.name}
               onChange={(e) => setNewAlbumName(e.target.value)}
               placeholder={t('newAlbumPlaceholder')}
               className="flex-1 border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"

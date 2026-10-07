@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
 import { useSupabaseUpload } from '@utils/actions/use-supabase-upload'
 import { attachAlbumPhotos, attachUnsortedPhotos } from '@utils/actions/albums'
+import { ALBUM_LIMITS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
 import { Loader2, Plus } from 'lucide-react'
 
@@ -31,7 +32,7 @@ export default function AddPhotosModal({
   const upload = useSupabaseUpload({
     bucketName: babyId,
     path: uploadPath,
-    maxFiles: 30,
+    maxFiles: ALBUM_LIMITS.filesPerUpload,
     maxFileSize: 50 * 1024 * 1024,
     allowedMimeTypes: ['image/*'],
   })

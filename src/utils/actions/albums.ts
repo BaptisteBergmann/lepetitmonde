@@ -10,6 +10,9 @@ import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { nextUnsortedPosition, assertAlbumInBaby } from '@utils/albums-internal'
 import { assertCirclesInBaby } from '@utils/feed-access'
+import { normalizeText } from '@utils/feed-validation'
+import { ALBUM_LIMITS, SHARE_DURATIONS_HOURS } from '@utils/album-limits'
+import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
 import { logger } from '../logger'
 import { actionError } from './errors'
 import { hasUnsafePathSegment } from '@utils/storage-path'
@@ -46,12 +49,13 @@ function toAlbumPhotoWithUrl(babyId: string, photo: Tables<'album_photos'>): Alb
 // Takes a client-generated id (like createPost/createAnecdote) so the
 // upload dropzone can start uploading to `albums/${id}/...` before the row
 // exists — attachAlbumPhotos below assumes that exact path shape.
-export async function createAlbum(id: string, babyId: string, name: string, circleIds: string[]) {
+export async function createAlbum(id: string, babyId: string, rawName: string, circleIds: string[]) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: createAlbum.name, babyId })
 
   await assertIsAdmin(supabase, babyId)
   await assertCirclesInBaby(circleIds, babyId)
+  const name = await normalizeText(rawName, ALBUM_LIMITS.name, { requiredKey: 'textRequired' })
   await ensureBabyBucket(babyId)
 
   const { data, error } = await supabase
@@ -78,6 +82,11 @@ export async function createAlbum(id: string, babyId: string, name: string, circ
 }
 
 type NewPhotoFile = { filename: string; mimeType: string; thumbnailFilename?: string }
+
+async function assertValidNewFiles(files: NewPhotoFile[]) {
+  if (files.length > ALBUM_LIMITS.filesPerUpload) throw await actionError('tooManyFiles')
+  if (files.some(({ mimeType }) => !ALLOWED_IMAGE_CONTENT_TYPES.has(mimeType))) throw await actionError('invalidFileType')
+}
 
 // Shared by attachAlbumPhotos and attachUnsortedPhotos: inserts rows appended
 // after whatever's already in that scope (album, or the baby's unsorted
@@ -114,6 +123,8 @@ export async function attachAlbumPhotos(albumId: string, babyId: string, files: 
   await assertIsAdmin(supabase, babyId)
   await assertAlbumInBaby(albumId, babyId)
 
+  await assertValidNewFiles(files)
+
   // Filenames come back from /api/upload as a single path segment; anything
   // else would let the row point outside this album's folder.
   if (files.some(({ filename, thumbnailFilename }) => hasUnsafePathSegment(thumbnailFilename === undefined ? [filename] : [filename, thumbnailFilename]))) {
@@ -142,6 +153,8 @@ export async function attachUnsortedPhotos(babyId: string, files: NewPhotoFile[]
   const contextLogger = logger.child({ function: attachUnsortedPhotos.name, babyId })
 
   await assertIsAdmin(supabase, babyId)
+
+  await assertValidNewFiles(files)
 
   // Filenames come back from /api/upload as a single path segment; anything
   // else would let the row point outside this baby's photos folder.
@@ -229,13 +242,14 @@ export async function unassignPhotoFromAlbum(photoId: string, babyId: string) {
   if (photo.album_id) revalidatePath(`/baby/${babyId}/albums/${photo.album_id}`)
 }
 
-export async function updateAlbum(albumId: string, babyId: string, name: string, circleIds: string[]) {
+export async function updateAlbum(albumId: string, babyId: string, rawName: string, circleIds: string[]) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: updateAlbum.name, albumId, babyId })
 
   await assertIsAdmin(supabase, babyId)
   await assertAlbumInBaby(albumId, babyId)
   await assertCirclesInBaby(circleIds, babyId)
+  const name = await normalizeText(rawName, ALBUM_LIMITS.name, { requiredKey: 'textRequired' })
 
   const { error } = await supabase
     .from('albums')
