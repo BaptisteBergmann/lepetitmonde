@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `1b8c38d` build: add server-only and mark server modules
 - `b7e61df` fix(security): drop "use server" from the Supabase server client
 
 ## 2026-10-06
