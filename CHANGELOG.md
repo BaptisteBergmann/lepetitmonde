@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `350739c` fix(i18n): move share link keys back into albums.share and restore invitations.expiresOn
 - `f1756f1` fix(i18n): add a zero case to album photo counts
 - `0001a20` fix(albums): match loading skeletons and add an album error boundary
 - `1df89c9` fix(albums): label album form fields and fix the photo info modal
