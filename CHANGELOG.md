@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `03dc94d` fix(security): reject unsafe filenames in attach actions
 - `1b8c38d` build: add server-only and mark server modules
 - `b7e61df` fix(security): drop "use server" from the Supabase server client
 
