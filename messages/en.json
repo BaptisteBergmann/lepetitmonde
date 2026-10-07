@@ -868,7 +868,12 @@
       "saving": "Saving...",
       "save": "Save",
       "publishError": "Something went wrong while creating the album.",
-      "editError": "Something went wrong while saving the changes."
+      "editError": "Something went wrong while saving the changes.",
+      "uploadsFailed": "{count, plural, one {# file wasn't} other {# files weren't}} uploaded. Tap \"Retry failed uploads\" to try again.",
+      "retryUploads": "Retry failed uploads",
+      "uploadProgress": "Uploading {current} of {total}…",
+      "uploadingOne": "Uploading…",
+      "albumCreatedNotice": "The album was created. Retry the failed uploads, or close to keep it with the photos already added."
     },
     "addPhotosForm": {
       "title": "Add photos",
@@ -876,7 +881,11 @@
       "cancel": "Cancel",
       "uploading": "Uploading...",
       "upload": "Add",
-      "uploadError": "Something went wrong while uploading."
+      "uploadError": "Something went wrong while uploading.",
+      "uploadsFailed": "{count, plural, one {# file wasn't} other {# files weren't}} uploaded. Tap \"Retry failed uploads\" to try again.",
+      "retryUploads": "Retry failed uploads",
+      "uploadProgress": "Uploading {current} of {total}…",
+      "uploadingOne": "Uploading…"
     },
     "photoInfoForm": {
       "title": "Photo info",

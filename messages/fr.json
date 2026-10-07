@@ -868,7 +868,12 @@
       "saving": "Enregistrement...",
       "save": "Enregistrer",
       "publishError": "Une erreur est survenue lors de la création de l'album.",
-      "editError": "Une erreur est survenue lors de la modification."
+      "editError": "Une erreur est survenue lors de la modification.",
+      "uploadsFailed": "{count, plural, one {# fichier n'a pas pu être envoyé} other {# fichiers n'ont pas pu être envoyés}}. Touchez « Réessayer les envois ».",
+      "retryUploads": "Réessayer les envois",
+      "uploadProgress": "Envoi {current} sur {total}…",
+      "uploadingOne": "Envoi…",
+      "albumCreatedNotice": "L'album a été créé. Réessayez les envois, ou fermez pour le garder avec les photos déjà ajoutées."
     },
     "addPhotosForm": {
       "title": "Ajouter des photos",
@@ -876,7 +881,11 @@
       "cancel": "Annuler",
       "uploading": "Envoi...",
       "upload": "Ajouter",
-      "uploadError": "Une erreur est survenue lors de l'envoi."
+      "uploadError": "Une erreur est survenue lors de l'envoi.",
+      "uploadsFailed": "{count, plural, one {# fichier n'a pas pu être envoyé} other {# fichiers n'ont pas pu être envoyés}}. Touchez « Réessayer les envois ».",
+      "retryUploads": "Réessayer les envois",
+      "uploadProgress": "Envoi {current} sur {total}…",
+      "uploadingOne": "Envoi…"
     },
     "photoInfoForm": {
       "title": "Infos de la photo",
