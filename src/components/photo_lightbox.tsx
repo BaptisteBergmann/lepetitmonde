@@ -253,7 +253,12 @@ export default function PhotoLightbox({
               className="flex h-full transition-transform duration-300 ease-out motion-reduce:transition-none"
               style={{ transform: `translateX(-${index * 100}%)` }}
             >
-              {photos.map((photo, i) => (
+              {photos.map((photo, i) => {
+                const showThumbnail = !!photo.thumbnailUrl && !loadedIds.has(photo.id)
+                const zoomStyle = i === index
+                  ? { transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)` }
+                  : undefined
+                return (
                 <div key={photo.id} className="relative w-full h-full shrink-0 flex items-center justify-center">
                   {/* Only the current slide plus its immediate neighbors actually mount
                       media — this row is fully rendered (all slides exist for the
@@ -271,13 +276,17 @@ export default function PhotoLightbox({
                       />
                     ) : (
                       <>
-                        {photo.thumbnailUrl && !loadedIds.has(photo.id) && (
+                        {showThumbnail && (
+                          // Not pointer-events-none: tapping it must count as tapping the
+                          // photo (zoom), not the backdrop (close). Same zoom transform as
+                          // the original so gestures during loading are visible.
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={photo.thumbnailUrl}
+                            src={photo.thumbnailUrl!}
                             alt=""
                             aria-hidden
-                            className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
+                            className="absolute inset-0 w-full h-full object-contain select-none"
+                            style={zoomStyle}
                             draggable={false}
                           />
                         )}
@@ -288,24 +297,24 @@ export default function PhotoLightbox({
                           // The current slide must not compete for bandwidth with
                           // the neighbors being preloaded for swiping.
                           fetchPriority={i === index ? 'high' : 'low'}
-                          onLoad={() => markLoaded(photo.id)}
+                          // Wait for decode so swapping out the thumbnail doesn't flash a
+                          // blank frame; on error, drop the thumbnail so the failure shows.
+                          onLoad={(e) => { e.currentTarget.decode().catch(() => {}).finally(() => markLoaded(photo.id)) }}
+                          onError={() => markLoaded(photo.id)}
                           className={cn(
                             "relative max-w-full max-h-full object-contain select-none",
-                            !loadedIds.has(photo.id) && "opacity-0",
+                            showThumbnail && "opacity-0",
                             i === index && scale > 1 ? "" : "transition-transform duration-200 ease-out motion-reduce:transition-none"
                           )}
-                          style={
-                            i === index
-                              ? { transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)` }
-                              : undefined
-                          }
+                          style={zoomStyle}
                           draggable={false}
                         />
                       </>
                     )
                   )}
                 </div>
-              ))}
+                )
+              })}
             </div>
 
             {photos.length > 1 && (
