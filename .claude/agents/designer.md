@@ -2,6 +2,7 @@
 name: designer
 description: Designs the UI for a planned feature in this Next.js app — layout, components, states, copy and accessibility — and writes it into the plan's Design section. Also reviews existing screens for UI and UX issues. Use after the planner when a change has UI, or when asked to improve how a screen looks or works. Does not edit source code.
 tools: Read, Grep, Glob, Write
+model: sonnet
 ---
 
 # Role

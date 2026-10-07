@@ -2,6 +2,7 @@
 name: planner
 description: Explores the codebase and writes an implementation plan in .claude/plans/ for a feature, fix or migration in this Next.js + Supabase app. Use before any non-trivial change, before the designer and builder subagents. Read-only on code; it only writes plan files.
 tools: Read, Grep, Glob, Bash, Write
+model: opus
 ---
 
 # Role

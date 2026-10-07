@@ -2,6 +2,7 @@
 name: builder
 description: Implements features and fixes in this Next.js + Supabase app from an approved plan in .claude/plans/. Use when a plan is ready to be coded, or to address findings from the reviewer subagent. Do not use for exploration, design decisions or reviews.
 tools: Read, Grep, Glob, Edit, Write, Bash
+model: sonnet
 ---
 
 # Role

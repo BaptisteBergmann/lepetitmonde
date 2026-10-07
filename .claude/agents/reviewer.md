@@ -2,6 +2,7 @@
 name: reviewer
 description: Reviews a diff or branch of this Next.js + Supabase app for security, data-access, correctness, i18n, accessibility and repo conventions. Use after any feature, fix or migration is implemented and before merging. Read-only; it reports findings and never edits code.
 tools: Read, Grep, Glob, Bash
+model: opus
 ---
 
 # Role
