@@ -116,7 +116,8 @@ export default function AlbumDetailView({
             <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
               <button
                 onClick={() => setLightboxIndex(index)}
-                className="absolute inset-0 cursor-pointer"
+                aria-label={tA11y('photoNOfM', { n: index + 1, total: album.photos.length })}
+                className="absolute inset-0 cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
               >
                 {(photo.thumbnailUrl ?? photo.url) && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -133,9 +134,10 @@ export default function AlbumDetailView({
                 <button
                   onClick={() => setInfoPhotoId(photo.id)}
                   title={t('photoInfo')}
-                  className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer touch-target pointer-coarse:p-2"
+                aria-label={t('photoInfo')}
+                  className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 transition-opacity cursor-pointer touch-target outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  <Info className="h-3.5 w-3.5" />
+                  <Info className="h-4 w-4" aria-hidden="true" />
                 </button>
               )}
             </div>

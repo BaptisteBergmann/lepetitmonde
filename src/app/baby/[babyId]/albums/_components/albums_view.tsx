@@ -30,6 +30,7 @@ export default function AlbumsView({
   allPhotos: AlbumPhotoWithAlbum[]
 }) {
   const t = useTranslations('albums')
+  const tA11y = useTranslations('a11y')
   const [tab, setTab] = useState<Tab>('photos')
   const [createOpen, setCreateOpen] = useState(false)
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
@@ -85,7 +86,8 @@ export default function AlbumsView({
               <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
                 <button
                   onClick={() => setLightboxIndex(index)}
-                  className="absolute inset-0 cursor-pointer"
+                  aria-label={tA11y('photoNOfM', { n: index + 1, total: allPhotos.length })}
+                  className="absolute inset-0 cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                 >
                   {(photo.thumbnailUrl ?? photo.url) && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -102,9 +104,10 @@ export default function AlbumsView({
                   <button
                     onClick={() => setInfoPhotoId(photo.id)}
                     title={t('photoInfo')}
-                    className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer touch-target pointer-coarse:p-2"
+                  aria-label={t('photoInfo')}
+                    className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 transition-opacity cursor-pointer touch-target outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
-                    <Info className="h-3.5 w-3.5" />
+                    <Info className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -120,7 +123,7 @@ export default function AlbumsView({
               <Link
                 key={album.id}
                 href={`/baby/${babyId}/albums/${album.id}`}
-                className="group rounded-2xl bg-landing-surface border border-landing-border overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                className="group rounded-2xl bg-landing-surface border border-landing-border overflow-hidden shadow-sm hover:shadow-md transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:border-ring"
               >
                 <div className="relative aspect-square bg-landing-background flex items-center justify-center">
                   {album.coverUrl ? (
@@ -137,7 +140,7 @@ export default function AlbumsView({
                   )}
                 </div>
                 <div className="p-3">
-                  <p className="text-sm font-semibold text-landing-foreground truncate">{album.name}</p>
+                  <p className="text-sm font-semibold text-landing-foreground line-clamp-2 break-words">{album.name}</p>
                   <p className="text-xs text-landing-muted">{t('photoCount', { count: album.photoCount })}</p>
                 </div>
               </Link>
@@ -150,7 +153,7 @@ export default function AlbumsView({
         <PhotoLightbox
           photos={allPhotos}
           initialIndex={lightboxIndex}
-          alt=""
+          alt={t('tabAllPhotos')}
           onClose={() => setLightboxIndex(null)}
         />
       )}
