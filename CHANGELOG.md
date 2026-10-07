@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `e43f2ea` docs(plans): add feed cleanup plan
 - `ac1efe3` fix(i18n): use non-breaking spaces inside French guillemets
 - `33acd41` fix(notifications): translate the test-push title
 - `3c8b0df` fix(a11y): use useId for the post and story form field ids
