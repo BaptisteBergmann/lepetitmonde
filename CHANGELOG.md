@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `a89e74c` fix(albums): validate share duration on the server
 - `717f60e` fix(albums): validate album action inputs on the server
 - `3d9f417` fix(albums): scope album actions to the caller's baby
 - `526aa0f` docs(claude): add response style rules
