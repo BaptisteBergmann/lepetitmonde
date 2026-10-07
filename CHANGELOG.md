@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `aecf46e` docs(plans): mark albums review fixes implemented
 - `e81437c` fix(albums): make createAlbum safe to retry after a partial failure
 - `cfcb7ff` fix(albums): add an Add photos action to the empty album state
 - `350739c` fix(i18n): move share link keys back into albums.share and restore invitations.expiresOn
