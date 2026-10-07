@@ -5,12 +5,9 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { addStoryReaction, removeStoryReaction } from '@utils/actions/story_reactions'
 import { ReactionsData } from '@utils/actions/reactions'
-import { REACTIONS, applyMyReaction } from '@utils/reactions'
-import { formatNamesPreview } from '@utils/users'
-import { cn } from '@utils/utils'
+import { applyMyReaction } from '@utils/reactions'
 import { logger } from '@/utils/logger'
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import { SmilePlus } from 'lucide-react'
+import ReactionBar from './reaction_bar'
 
 export default function StoryReactionPicker({
   storyId,
@@ -24,9 +21,7 @@ export default function StoryReactionPicker({
   onChanged: () => void | Promise<void>
 }) {
   const t = useTranslations('reactions')
-  const tA11y = useTranslations('a11y')
-  const [pickerOpen, setPickerOpen] = useState(false)
-  // Ignore taps while a request runs instead of disabling the trigger, so it
+  // Ignore taps while a request runs instead of disabling the bar, so it
   // doesn't flash dimmed on every reaction.
   const inFlight = useRef(false)
 
@@ -47,7 +42,6 @@ export default function StoryReactionPicker({
     const snapshot = reactions
     const wasMine = snapshot.myEmoji === emoji
     setReactions(applyMyReaction(snapshot, wasMine ? null : emoji))
-    setPickerOpen(false)
     try {
       if (wasMine) {
         await removeStoryReaction(storyId, babyId)
@@ -72,64 +66,5 @@ export default function StoryReactionPicker({
     }
   }
 
-  return (
-    <div className="flex items-center gap-1.5 flex-wrap">
-      <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-        <PopoverTrigger
-          aria-label={tA11y('react')}
-          className={cn(
-            "flex items-center justify-center h-7 w-7 rounded-full cursor-pointer transition-colors bg-white/10 hover:bg-white/20 touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70",
-            reactions.myEmoji ? "text-rose-400" : "text-white/80 hover:text-white"
-          )}
-        >
-          {reactions.myEmoji ? (
-            <span className="text-base leading-none">{reactions.myEmoji}</span>
-          ) : (
-            <SmilePlus className="h-4 w-4" />
-          )}
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto flex-row gap-0.5 p-1.5">
-          {REACTIONS.map(({ emoji, key }) => (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => pick(emoji)}
-              aria-label={t(key)}
-              aria-pressed={reactions.myEmoji === emoji}
-              className={cn(
-                "inline-flex min-h-9 min-w-9 items-center justify-center rounded-full text-xl leading-none cursor-pointer transition-transform hover:scale-110 hover:bg-landing-background outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none motion-reduce:hover:scale-100",
-                reactions.myEmoji === emoji && "bg-landing-background ring-1 ring-primary/40 scale-110 motion-reduce:scale-100"
-              )}
-            >
-              {emoji}
-            </button>
-          ))}
-        </PopoverContent>
-      </Popover>
-
-      {reactions.breakdown.map(({ emoji, count, names }) => (
-        <StoryReactionPill key={emoji} emoji={emoji} count={count} names={names} />
-      ))}
-    </div>
-  )
-}
-
-function StoryReactionPill({ emoji, count, names }: { emoji: string; count: number; names: string[] }) {
-  const t = useTranslations('reactions')
-  const [open, setOpen] = useState(false)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        aria-label={t('pillLabel', { emoji, count })}
-        className="flex items-center gap-1 h-7 px-2 rounded-full bg-white/10 text-white cursor-pointer hover:bg-white/20 transition-colors touch-target relative outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-      >
-        <span className="text-base leading-none">{emoji}</span>
-        <span className="text-xs">{count}</span>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-2">
-        <p className="text-xs text-landing-foreground whitespace-nowrap">{formatNamesPreview(names)}</p>
-      </PopoverContent>
-    </Popover>
-  )
+  return <ReactionBar reactions={reactions} onPick={pick} variant="dark" />
 }

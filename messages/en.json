@@ -1134,7 +1134,9 @@
     "heart": "Heart",
     "laughing": "Laughing",
     "error": "Couldn't save your reaction.",
-    "pillLabel": "{emoji} {count}, see who reacted"
+    "pillLabel": "{emoji} {count}, react",
+    "whoReactedLabel": "See who reacted: {names}",
+    "whoReactedTitle": "Who reacted"
   },
   "notifications": {
     "title": "Notifications",

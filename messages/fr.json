@@ -1134,7 +1134,9 @@
     "heart": "Cœur",
     "laughing": "Rire",
     "error": "Votre réaction n'a pas pu être enregistrée.",
-    "pillLabel": "{emoji} {count}, voir qui a réagi"
+    "pillLabel": "{emoji} {count}, réagir",
+    "whoReactedLabel": "Voir qui a réagi : {names}",
+    "whoReactedTitle": "Qui a réagi"
   },
   "notifications": {
     "title": "Notifications",
