@@ -8,6 +8,7 @@ import { logger } from '../logger'
 import { sendWelcomeEmail } from '@/utils/email'
 import { getBabyAdminIds } from './access'
 import { notifyUsers } from './notify'
+import { createUserProfile, findValidInvitation, grantViewerAccess } from '@utils/invitations'
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
@@ -21,19 +22,11 @@ export async function signup(formData: FormData) {
   const contextLogger = logger.child({ function: signup.name })
   const tAuth = await getTranslations('auth')
 
-  const invitation = await supabase
-    .from('invitations')
-    .select('*')
-    .eq("id", token)
-    .single();
+  // Re-checked here (not only on the invite page): the form posts the token
+  // back, so it must be validated again before anything is created.
+  const invitation = await findValidInvitation(token)
 
-  contextLogger.info(invitation, "Get invitation data")
-
-  if (invitation.error || !invitation.data) {
-    return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
-  }
-
-  if (new Date(invitation.data.expires_at) < new Date()) {
+  if (!invitation) {
     return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
   }
 
@@ -57,35 +50,22 @@ export async function signup(formData: FormData) {
   const [firstName, ...rest] = name.trim().split(" ")
   const lastName = rest.length > 0 ? rest.join(" ") : null
 
-  const addUser = await supabase
-    .from("users")
-    .insert({
-      first_name: firstName,
-      last_name: lastName,
-      id: user.user.id
-    })
-
-  contextLogger.info(addUser, "Add user")
-
-  const access = await supabase
-    .from('baby_access')
-    .insert({
-      user_id: user.user.id,
-      baby_id: invitation.data.baby_id,
-    })
-
-  contextLogger.info(access, "Add access")
+  // Service role: right after signUp there may be no session yet (email
+  // confirmation), and these rows are the new user's own. The id comes from
+  // auth.signUp, never from the form.
+  await createUserProfile(user.user.id, firstName, lastName)
+  await grantViewerAccess(invitation, user.user.id)
 
   await sendWelcomeEmail(email, firstName)
 
-  const adminIds = await getBabyAdminIds(invitation.data.baby_id, user.user.id)
+  const adminIds = await getBabyAdminIds(invitation.babyId, user.user.id)
   const t = await getTranslations('pushNotifications')
-  await notifyUsers(invitation.data.baby_id, 'new_member', {
+  await notifyUsers(invitation.babyId, 'new_member', {
     title: t('newMember.title'),
     body: t('newMember.body', { name: firstName }),
-    url: `/baby/${invitation.data.baby_id}/admin`,
+    url: `/baby/${invitation.babyId}/admin`,
   }, adminIds)
 
   revalidatePath('/', 'layout')
-  redirect(`/baby/${invitation.data.baby_id}/onboarding`)
+  redirect(`/baby/${invitation.babyId}/onboarding`)
 }

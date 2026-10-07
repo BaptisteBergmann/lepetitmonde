@@ -3,6 +3,7 @@ import { SignupForm } from "@components/signup-form"
 import { JoinBabyCard } from "@components/join-baby-card"
 import { getAuthUser } from "@utils/supabase/auth"
 import { createClient } from "@utils/supabase/server"
+import { findValidInvitation } from "@utils/invitations"
 
 export default async function InvitePage({
   searchParams,
@@ -32,17 +33,11 @@ export default async function InvitePage({
   const { data: { user } } = await getAuthUser()
 
   if (user) {
-    const supabase = await createClient()
+    // Service role: the caller isn't a member of this baby yet, so the user
+    // client can't read the invitation or the baby's name.
+    const invitation = await findValidInvitation(token)
 
-    const invitation = await supabase
-      .from('invitations')
-      .select('*, babies(baby_surname)')
-      .eq('id', token)
-      .single()
-
-    const expired = !invitation.data || new Date(invitation.data.expires_at) < new Date()
-
-    if (expired) {
+    if (!invitation) {
       return (
         <div className="max-w-md space-y-4 text-center mx-auto">
           <h1 className="font-display text-2xl font-semibold text-destructive">{t("invalidTitle")}</h1>
@@ -51,18 +46,20 @@ export default async function InvitePage({
       )
     }
 
+    // Own row only, so the user client is enough.
+    const supabase = await createClient()
     const access = await supabase
       .from('baby_access')
       .select('user_id')
-      .eq('baby_id', invitation.data.baby_id)
+      .eq('baby_id', invitation.babyId)
       .eq('user_id', user.id)
       .maybeSingle()
 
     return (
       <JoinBabyCard
         token={token}
-        babyId={invitation.data.baby_id}
-        babySurname={invitation.data.babies?.baby_surname ?? ''}
+        babyId={invitation.babyId}
+        babySurname={invitation.babySurname}
         alreadyMember={!!access.data}
       />
     )
