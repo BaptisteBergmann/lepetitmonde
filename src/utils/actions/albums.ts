@@ -259,19 +259,37 @@ export async function updateAlbum(albumId: string, babyId: string, rawName: stri
 
   if (error) { contextLogger.error(error, "Error updating album"); throw error }
 
-  const { error: deleteCirclesError } = await supabase
+  // Insert-before-delete (no transaction available): if the second step fails
+  // the album stays visible to a circle that was meant to lose access until the
+  // next save, rather than silently becoming admin-only.
+  const { data: currentRows, error: currentError } = await supabase
     .from('albums_circles')
-    .delete()
+    .select('circle_id')
     .eq('album_id', albumId)
 
-  if (deleteCirclesError) { contextLogger.error(deleteCirclesError, "Error clearing album circles"); throw deleteCirclesError }
+  if (currentError) { contextLogger.error(currentError, "Error reading album circles"); throw currentError }
 
-  if (circleIds.length > 0) {
+  const current = new Set(currentRows.map((row) => row.circle_id))
+  const next = new Set(circleIds)
+  const toAdd = [...next].filter((id) => !current.has(id))
+  const toRemove = [...current].filter((id) => !next.has(id))
+
+  if (toAdd.length > 0) {
     const { error: circlesError } = await supabase
       .from('albums_circles')
-      .insert(circleIds.map((circleId) => ({ album_id: albumId, circle_id: circleId })))
+      .insert(toAdd.map((circleId) => ({ album_id: albumId, circle_id: circleId })))
 
     if (circlesError) { contextLogger.error(circlesError, "Error linking album circles"); throw circlesError }
+  }
+
+  if (toRemove.length > 0) {
+    const { error: deleteCirclesError } = await supabase
+      .from('albums_circles')
+      .delete()
+      .eq('album_id', albumId)
+      .in('circle_id', toRemove)
+
+    if (deleteCirclesError) { contextLogger.error(deleteCirclesError, "Error unlinking album circles"); throw deleteCirclesError }
   }
 
   contextLogger.info("Album updated")
@@ -298,6 +316,16 @@ export async function deletePhoto(photoId: string, babyId: string) {
 
   if (fetchError) { contextLogger.error(fetchError, "Error fetching photo before delete"); throw fetchError }
 
+  const { error } = await supabase
+    .from('album_photos')
+    .delete()
+    .eq('id', photoId)
+    .eq('baby_id', babyId)
+
+  if (error) { contextLogger.error(error, "Error deleting photo"); throw error }
+
+  // Row first, storage second: a leftover object is harmless, a row pointing
+  // at a missing file is not.
   // A photo linked from a post (source_post_id) shares its storage object
   // with that post's own post_photos row — removing it here would break the
   // still-live post. Only unlink it from the Photos page; the post's delete
@@ -307,16 +335,12 @@ export async function deletePhoto(photoId: string, babyId: string) {
   // both are safe to remove normally.
   if (!photo.source_post_id) {
     const paths = photo.thumbnail_path ? [photo.storage_path, photo.thumbnail_path] : [photo.storage_path]
-    await removeStorageObjects(babyId, paths)
+    try {
+      await removeStorageObjects(babyId, paths)
+    } catch (err) {
+      contextLogger.warn({ err }, "Photo row deleted but storage cleanup failed")
+    }
   }
-
-  const { error } = await supabase
-    .from('album_photos')
-    .delete()
-    .eq('id', photoId)
-    .eq('baby_id', babyId)
-
-  if (error) { contextLogger.error(error, "Error deleting photo"); throw error }
 
   contextLogger.info("Photo deleted")
 
@@ -344,8 +368,6 @@ export async function deleteAlbum(albumId: string, babyId: string) {
   const paths = photos
     .filter((photo) => !photo.source_post_id)
     .flatMap((photo) => (photo.thumbnail_path ? [photo.storage_path, photo.thumbnail_path] : [photo.storage_path]))
-  if (paths.length > 0) await removeStorageObjects(babyId, paths)
-
   const { error } = await supabase
     .from('albums')
     .delete()
@@ -353,6 +375,14 @@ export async function deleteAlbum(albumId: string, babyId: string) {
     .eq('baby_id', babyId)
 
   if (error) { contextLogger.error(error, "Error deleting album"); throw error }
+
+  if (paths.length > 0) {
+    try {
+      await removeStorageObjects(babyId, paths)
+    } catch (err) {
+      contextLogger.warn({ err }, "Album row deleted but storage cleanup failed")
+    }
+  }
 
   contextLogger.info("Album deleted")
 
