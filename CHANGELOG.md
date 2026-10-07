@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `c30ed5c` chore(agents): run planner/reviewer on opus, designer/builder on sonnet
 - `c8feec7` refactor(notifications): read other users' devices with the service role
 - `4f1e2e8` refactor(albums): resolve share links with the service role
 - `62df30e` refactor(auth): read and redeem invitations with the service role
