@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-07
 
+- `44010e1` fix(feed): make createPoll retry-safe after a lost response
 - `d8137f5` fix(feed): make createPost retry-safe after a lost response
 - `9ddc8b6` fix(security): validate bug report screenshots
 - `03dc94d` fix(security): reject unsafe filenames in attach actions
