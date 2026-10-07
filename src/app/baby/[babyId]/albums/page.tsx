@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
-import { Loader2, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { getUserAccess } from "@/utils/actions/users";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getCircles, getUserCircleIds } from "@/utils/actions/circles";
@@ -8,6 +8,7 @@ import { getAlbums, getAllAlbumPhotos } from "@/utils/actions/albums";
 import { getAuthUser } from "@/utils/supabase/auth";
 import { logger } from "@/utils/logger";
 import AlbumsView from "./_components/albums_view";
+import AlbumsSkeleton from "./_components/albums_skeleton";
 
 export default async function AlbumsPage({
   params,
@@ -15,7 +16,6 @@ export default async function AlbumsPage({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
-  const t = await getTranslations('albums')
 
   await assertPageAccess(babyId, 'albums')
 
@@ -29,14 +29,7 @@ export default async function AlbumsPage({
   return (
     <div className="overflow-hidden text-landing-foreground">
       <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-8">
-        <Suspense
-          fallback={
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-landing-muted">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm">{t('loading')}</p>
-            </div>
-          }
-        >
+        <Suspense fallback={<AlbumsSkeleton />}>
           <AlbumsContent babyId={babyId} isAdmin={isAdmin} />
         </Suspense>
       </div>
