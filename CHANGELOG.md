@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-07
+
+- `b7e61df` fix(security): drop "use server" from the Supabase server client
+
 ## 2026-10-06
 
 - `a6b258d` docs(plans): mark journal UI polish implemented
