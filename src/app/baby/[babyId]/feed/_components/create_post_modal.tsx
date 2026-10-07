@@ -39,6 +39,8 @@ export default function CreatePostModal({
   const router = useRouter()
   const t = useTranslations('feed.postForm')
   const tA11y = useTranslations('a11y')
+  const captionId = useId()
+  const takenAtId = useId()
   const visibleId = useId()
   const [postId] = useState(() => crypto.randomUUID())
 
@@ -224,11 +226,11 @@ export default function CreatePostModal({
             on retry, so they lock once the post exists. */}
         <fieldset disabled={isPending || postCreated} className="min-w-0 space-y-4 disabled:opacity-60">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={captionId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('captionLabel')}
           </Label>
           <textarea
-            id="caption"
+            id={captionId}
             value={caption}
             maxLength={FEED_LIMITS.postCaption}
             onChange={(e) => setCaption(e.target.value)}
@@ -238,12 +240,12 @@ export default function CreatePostModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="taken_at" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={takenAtId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photoDateLabel')}
           </Label>
           <input
             type="date"
-            id="taken_at"
+            id={takenAtId}
             value={takenAt}
             onChange={(e) => setTakenAt(e.target.value)}
             required

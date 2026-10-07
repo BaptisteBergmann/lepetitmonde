@@ -39,6 +39,9 @@ export default function EditStoryModal({
 }) {
   const t = useTranslations('feed.storyForm')
   const tShared = useTranslations('feed.postForm')
+  const captionId = useId()
+  const groupId = useId()
+  const groupLabelsId = useId()
   const visibleId = useId()
 
   const [caption, setCaption] = useState(story.caption ?? "")
@@ -74,11 +77,11 @@ export default function EditStoryModal({
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="story-edit-caption" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={captionId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {tShared('captionLabel')}
           </Label>
           <textarea
-            id="story-edit-caption"
+            id={captionId}
             value={caption}
             maxLength={FEED_LIMITS.storyCaption}
             onChange={(e) => setCaption(e.target.value)}
@@ -88,20 +91,20 @@ export default function EditStoryModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="story-edit-group" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor={groupId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('groupLabel')}
           </Label>
           <input
             type="text"
-            id="story-edit-group"
-            list="story-edit-group-labels"
+            id={groupId}
+            list={groupLabelsId}
             value={groupLabel}
             maxLength={FEED_LIMITS.groupLabel}
             onChange={(e) => setGroupLabel(e.target.value)}
             placeholder={t('groupPlaceholder')}
             className="w-full border border-transparent bg-input/50 rounded-2xl px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-3 focus:ring-ring/30 focus:border-ring placeholder:text-muted-foreground transition-[color,box-shadow] duration-200"
           />
-          <datalist id="story-edit-group-labels">
+          <datalist id={groupLabelsId}>
             {existingGroupLabels.map((label) => (
               <option key={label} value={label} />
             ))}
