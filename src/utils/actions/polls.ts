@@ -35,7 +35,30 @@ export async function createPoll(postId: string, babyId: string, question: strin
     .select('id')
     .single()
 
-  if (error) { contextLogger.error(error, "Error creating poll"); throw error }
+  if (error) {
+    // polls has UNIQUE(post_id). If the first call landed but its response
+    // was lost, the modal's retry hits that constraint: rewrite the existing
+    // poll with what the user just submitted instead of failing for good.
+    // updatePoll repeats the admin and visibility checks and still refuses
+    // a poll that already has votes.
+    if (error.code === '23505') {
+      const { data: existing, error: existingError } = await supabase
+        .from('polls')
+        .select('id')
+        .eq('post_id', postId)
+        .maybeSingle()
+
+      if (existingError) contextLogger.error(existingError, "Error checking existing poll on retry")
+
+      if (existing) {
+        contextLogger.info({ pollId: existing.id }, "Poll already existed (retry)")
+        return updatePoll(existing.id, postId, babyId, question, options)
+      }
+    }
+
+    contextLogger.error(error, "Error creating poll")
+    throw error
+  }
 
   const { error: optionsError } = await supabase
     .from('poll_options')
@@ -43,8 +66,8 @@ export async function createPoll(postId: string, babyId: string, question: strin
 
   if (optionsError) {
     contextLogger.error(optionsError, "Error creating poll options")
-    // An option-less poll would block the modal's retry (a second insert
-    // would leave two polls on the post), so undo it before failing.
+    // Undo the option-less poll before failing so the modal's retry starts
+    // from a clean insert.
     const { error: rollbackError } = await supabase
       .from('polls')
       .delete()
