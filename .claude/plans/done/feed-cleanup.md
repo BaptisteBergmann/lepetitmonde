@@ -1,6 +1,11 @@
 # Feed cleanup: reaction pills, server-only, validation, retries, polish
 
-Status: approved (steps 1–13; step 13 design questions resolved with defaults: trigger always shows SmilePlus, no "You" marker, no hover tooltip)
+Status: implemented
+
+## Status: implemented
+Shipped 2026-10-07, reviewer approved round 1. All 13 steps; `pnpm build` passed locally. Deviations: createPost also requires an auth user (type-only); notify.ts uses FAMILY_TIME_ZONE; ReactionBar sorts pills into REACTIONS order at render; one commit for step 13.
+Follow-ups (reviewer, low): focus jumps to ☺+ when an in-flight tap is dropped; pill fade/zoom runs on every render, not only new pills; a retry racing the original createPost can trip the circles rollback and delete the post (use upsert/ignoreDuplicates in the normal path). Also: Dropzone "select" `<a>` isn't keyboard-reachable; albumId/anecdoteId/story.id path segments unvalidated; bug report UI never shows `invalidScreenshot`; phone screenshots >1 MB block bug reports; attachPostPhotos/publishPost not lost-response safe; some `onChanged()` calls not awaited.
+Originally approved: approved (steps 1–13; step 13 design questions resolved with defaults: trigger always shows SmilePlus, no "You" marker, no hover tooltip)
 Approved by: Baptiste (2026-10-07, user asked to plan, build and review the open items directly; open questions resolved with the plan defaults)
 
 Scope requested by the user on 2026-10-07 (plan, build and review directly). It collects the open follow-ups from `done/journal-review-fixes.md`, `done/feed-followups.md` and `done/journal-ui-polish.md`.
