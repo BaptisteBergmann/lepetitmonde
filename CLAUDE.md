@@ -2,6 +2,16 @@
 
 This project is a private, self-hosted family application (Next.js + Supabase). Below are the strict architectural rules of our "Golden Stack" that you must follow for all your code suggestions.
 
+## 💬 Response style
+
+- Lead with the answer or next action. No preamble.
+- Number multi-step instructions.
+- Max 3–5 sentences unless I ask for detail.
+- No restating my question, no summaries of what you just did.
+- Don't mention what you didn't do or what code doesn't do.
+- No hedging or filler ("Great question", "I hope this helps").
+- If unsure, say so in one line and ask one question.
+
 ## 🏗️ Tech Stack
 
 - **Framework**: Next.js with the App Router system (`app/`).
