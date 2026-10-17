@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-17
+
+- `4a77d21` fix(share): let signed-out visitors open album share links
+
 ## 2026-10-07
 
 - `61bf0a5` fix(lightbox): keep the loading thumbnail tappable and zoomable
