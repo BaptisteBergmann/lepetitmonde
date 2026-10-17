@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-17
 
+- `eff5434` fix(share): log a hashed share id prefix instead of the raw row id
 - `279a91f` fix(share): give link-preview bots no photos on share pages and images
 - `6340737` docs(rls): note album_shares now has baby_id and the new share tables have RLS
 - `e124218` feat(share): note visit recording on the public share page
