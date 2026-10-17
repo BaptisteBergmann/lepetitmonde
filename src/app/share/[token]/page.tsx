@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Link2Off } from "lucide-react";
+import { Eye, Link2Off } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { openSharedPhotos } from "@utils/album-share";
@@ -42,6 +42,10 @@ export default async function SharedPhotosPage({
           {shared.photos.length > 0 && !isSingle && (
             <p className="text-sm text-landing-muted">{t('photoCount', { count: shared.photos.length })}</p>
           )}
+          <p className="mx-auto flex max-w-xs items-center justify-center gap-1.5 pt-1 text-xs text-muted-foreground">
+            <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>{t('visitsRecorded')}</span>
+          </p>
         </div>
 
         {shared.photos.length === 0 ? (
