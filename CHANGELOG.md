@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-17
 
+- `2745791` feat(share): add single-use links consumed atomically on first human open
 - `dbf9f43` feat(share): add generic share actions with access stats
 - `4c9a3b0` feat(share): record each visit to a share link
 - `f27cb0b` feat(share): serve photo selections from a single /share/[token] page
