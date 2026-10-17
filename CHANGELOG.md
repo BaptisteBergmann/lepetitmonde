@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-17
 
+- `f27cb0b` feat(share): serve photo selections from a single /share/[token] page
 - `97dd4e5` refactor(share): resolve share links by token hash
 - `3a7854b` feat(db): add share kinds, hashed tokens and access log tables
 - `4a77d21` fix(share): let signed-out visitors open album share links
