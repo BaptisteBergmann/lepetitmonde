@@ -67,9 +67,12 @@ ALTER TABLE ONLY "public"."album_share_accesses"
     ADD CONSTRAINT "album_share_accesses_share_id_fkey" FOREIGN KEY ("share_id") REFERENCES "public"."album_shares"("id") ON DELETE CASCADE;
 CREATE INDEX "album_share_accesses_share_id_accessed_at_idx" ON "public"."album_share_accesses" ("share_id", "accessed_at" DESC);
 
--- RLS from birth on the two new tables, no anon grant.
+-- RLS from birth on the two new tables. The baseline's default privileges
+-- grant anon on new tables, so revoke it explicitly.
 ALTER TABLE "public"."album_share_photos" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."album_share_accesses" ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE "public"."album_share_photos", "public"."album_share_accesses" FROM "anon";
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "public"."album_share_photos" TO "authenticated";
 GRANT ALL ON TABLE "public"."album_share_photos" TO "service_role";
