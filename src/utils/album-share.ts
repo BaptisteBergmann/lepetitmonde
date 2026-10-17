@@ -126,8 +126,12 @@ async function loadSharedPhotos(token: string, valid: ValidShare): Promise<Share
 // `wantsThumbnail` serves the smaller thumbnail_path when the caller asked
 // for it and one exists, falling back to the full-size storage_path
 // otherwise (older photos, or thumbnail generation failed client-side).
-export async function resolveSharedPhoto(token: string, photoId: string, wantsThumbnail: boolean) {
+export async function resolveSharedPhoto(token: string, photoId: string, wantsThumbnail: boolean, userAgent: string | null = null) {
   const contextLogger = logger.child({ function: resolveSharedPhoto.name, photoId })
+
+  // Previews never get image bytes: they don't consume a single-use link, so
+  // serving them would bypass the limit.
+  if (isLinkPreviewBot(userAgent)) return null
 
   const valid = await getValidShare(token)
   if (!valid) { contextLogger.warn("Share token not found, expired, or revoked"); return null }
@@ -237,11 +241,13 @@ export async function openSharedPhotos(token: string, requestHeaders: Headers): 
 
   await recordShareAccess(valid.shareId, requestHeaders)
 
+  const isBot = isLinkPreviewBot(requestHeaders.get('user-agent'))
+
   if (valid.singleUse) {
     if (valid.openedAt) { contextLogger.info({ shareId: valid.shareId }, "Single-use share already opened"); return null }
 
     // Previews never consume: only a human visit does.
-    if (!isLinkPreviewBot(requestHeaders.get('user-agent'))) {
+    if (!isBot) {
       // One conditional UPDATE: of two simultaneous opens only one matches
       // `opened_at IS NULL` and gets a row back.
       const nowIso = new Date().toISOString()
@@ -258,5 +264,9 @@ export async function openSharedPhotos(token: string, requestHeaders: Headers): 
     }
   }
 
-  return loadSharedPhotos(token, valid)
+  const shared = await loadSharedPhotos(token, valid)
+  // Previews only get the title (for the unfurl card), never any photo: they
+  // don't consume single-use links, so photos would bypass the limit.
+  if (shared && isBot) return { ...shared, photos: [] }
+  return shared
 }
