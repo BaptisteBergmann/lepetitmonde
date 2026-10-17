@@ -7,13 +7,14 @@
 import 'server-only'
 import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@utils/logger'
+import { getClientIp } from '@utils/client-ip'
 import { hashShareToken, isPlausibleShareToken } from '@utils/share-token'
 import type { LightboxPhoto } from '@/components/photo_lightbox'
 
 // Everything the public page receives: no baby_id, storage paths, creator or
 // source ids ever reach the visitor's HTML.
 // `name` is the album's name, or null for a photo selection (the page picks a generic title).
-export type SharedPhotos = { kind: 'album' | 'photos'; name: string | null; photos: LightboxPhoto[] }
+export type SharedPhotos = { shareId: string; kind: 'album' | 'photos'; name: string | null; photos: LightboxPhoto[] }
 
 // Public path: no session check at all — the token itself is the credential.
 // Runs on the service role because the visitor is usually logged out (anon)
@@ -73,7 +74,7 @@ export async function getSharedPhotos(token: string): Promise<SharedPhotos | nul
     if (linksError) { contextLogger.error(linksError, "Error reading shared selection"); return null }
 
     const ids = links.map((l) => l.photo_id)
-    if (ids.length === 0) return { kind, name: null, photos: [] }
+    if (ids.length === 0) return { shareId, kind, name: null, photos: [] }
 
     const { data: photos, error } = await supabase
       .from('album_photos')
@@ -85,6 +86,7 @@ export async function getSharedPhotos(token: string): Promise<SharedPhotos | nul
 
     const byId = new Map(photos.map((p) => [p.id, p]))
     return {
+      shareId,
       kind,
       name: null,
       photos: ids.flatMap((id) => {
@@ -106,7 +108,7 @@ export async function getSharedPhotos(token: string): Promise<SharedPhotos | nul
 
   const sortedPhotos = [...album.album_photos].sort((a, b) => a.position - b.position)
 
-  return { kind, name: album.name, photos: sortedPhotos.map((photo) => toLightboxPhoto(token, photo)) }
+  return { shareId, kind, name: album.name, photos: sortedPhotos.map((photo) => toLightboxPhoto(token, photo)) }
 }
 
 // Re-validates the token exactly like getSharedPhotos, then confirms photoId
@@ -158,4 +160,38 @@ export async function resolveSharedPhoto(token: string, photoId: string, wantsTh
   const storagePath = (wantsThumbnail && photo.thumbnail_path) ? photo.thumbnail_path : photo.storage_path
 
   return { babyId, storagePath }
+}
+
+const ACCESS_DEDUP_SECONDS = 60
+const USER_AGENT_MAX = 512
+
+// Logs one row per page open. Never throws: the visitor must see the page even
+// if logging fails. A refresh within 60s from the same (ip, user agent) is not
+// logged again, which caps how fast a token holder can fill the table.
+export async function recordShareAccess(shareId: string, requestHeaders: Headers) {
+  const contextLogger = logger.child({ function: recordShareAccess.name, shareId })
+  try {
+    const supabase = createAdminClient()
+    const ip = getClientIp(requestHeaders)
+    const userAgent = requestHeaders.get('user-agent')?.slice(0, USER_AGENT_MAX) ?? null
+
+    const since = new Date(Date.now() - ACCESS_DEDUP_SECONDS * 1000).toISOString()
+    let recent = supabase
+      .from('album_share_accesses')
+      .select('id')
+      .eq('share_id', shareId)
+      .gte('accessed_at', since)
+    recent = ip ? recent.eq('ip', ip) : recent.is('ip', null)
+    recent = userAgent ? recent.eq('user_agent', userAgent) : recent.is('user_agent', null)
+    const { data: existing, error: lookupError } = await recent.limit(1)
+    if (lookupError) contextLogger.error(lookupError, "Error checking recent share accesses")
+    else if (existing && existing.length > 0) return
+
+    const { error } = await supabase
+      .from('album_share_accesses')
+      .insert({ share_id: shareId, ip, user_agent: userAgent })
+    if (error) contextLogger.error(error, "Error recording share access")
+  } catch (err) {
+    contextLogger.error(err, "Error recording share access")
+  }
 }

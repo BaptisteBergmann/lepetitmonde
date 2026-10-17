@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Link2Off } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { getSharedPhotos } from "@utils/album-share";
+import { headers } from "next/headers";
+import { getSharedPhotos, recordShareAccess } from "@utils/album-share";
 import SharedPhotosView from "./_components/shared_photos_view";
 
 // Share links are bearer URLs: keep them out of search indexes.
-export const metadata: Metadata = { robots: { index: false, follow: false } };
+// referrer: the token is in the URL, so never leak it via Referer if the page links out.
+export const metadata: Metadata = { robots: { index: false, follow: false }, referrer: "no-referrer" };
 
 export default async function SharedPhotosPage({
   params,
@@ -28,6 +30,8 @@ export default async function SharedPhotosPage({
       </div>
     )
   }
+
+  await recordShareAccess(shared.shareId, await headers())
 
   const isSingle = shared.kind === 'photos' && shared.photos.length === 1
   const title = shared.name ?? (isSingle ? t('photoTitle') : t('selectionTitle'))
