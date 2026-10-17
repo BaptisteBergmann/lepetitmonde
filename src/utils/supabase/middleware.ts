@@ -15,6 +15,10 @@ const AUTH_ONLY_PAGES = ['/login', '/forgot-password']
 // HTTP without a session; redirecting them to /login made it send the login page
 // as the email body.
 const ALWAYS_PUBLIC_PATHS = ['/auth', '/emails']
+// '/share' is the token-gated public share page: the link is the credential, so
+// visitors have no session. Matched on the exact segment (not a bare prefix) so
+// a future '/shared-...' route doesn't become public by accident.
+const isSharePath = (pathname: string) => pathname === '/share' || pathname.startsWith('/share/')
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -40,7 +44,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  if (ALWAYS_PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
+  if (isSharePath(pathname) || ALWAYS_PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
     return supabaseResponse
   }
 
