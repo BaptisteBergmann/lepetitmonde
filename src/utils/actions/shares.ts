@@ -135,16 +135,19 @@ export async function getBabyShares(babyId: string, options: { albumId?: string 
   const ids = data.map((s) => s.id)
   const lastAccess = new Map<string, string>()
   if (ids.length > 0) {
-    // PostgREST aggregates (max) may be disabled; newest-first rows with a
-    // first-wins map give the same answer.
-    const { data: rows, error: accessError } = await supabase
+    // One newest-row lookup per share (hits the share_id, accessed_at DESC
+    // index) rather than a shared LIMIT, which starves quiet shares when a
+    // busy one fills the window. PostgREST aggregates may be disabled.
+    const results = await Promise.all(ids.map((id) => supabase
       .from('album_share_accesses')
-      .select('share_id, accessed_at')
-      .in('share_id', ids)
+      .select('accessed_at')
+      .eq('share_id', id)
       .order('accessed_at', { ascending: false })
-      .limit(1000)
-    if (accessError) contextLogger.error(accessError, "Error fetching last accesses")
-    for (const row of rows ?? []) if (!lastAccess.has(row.share_id)) lastAccess.set(row.share_id, row.accessed_at)
+      .limit(1)))
+    results.forEach((res, i) => {
+      if (res.error) contextLogger.error(res.error, "Error fetching last access")
+      else if (res.data[0]) lastAccess.set(ids[i], res.data[0].accessed_at)
+    })
   }
 
   // Housekeeping, off the request path (same idea as pruneExpiredStories).
