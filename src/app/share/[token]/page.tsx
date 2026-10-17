@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Link2Off } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
-import { getSharedPhotos, recordShareAccess } from "@utils/album-share";
+import { openSharedPhotos } from "@utils/album-share";
 import SharedPhotosView from "./_components/shared_photos_view";
 
 // Share links are bearer URLs: keep them out of search indexes.
@@ -17,7 +17,7 @@ export default async function SharedPhotosPage({
   const { token } = await params;
   const t = await getTranslations('shareAlbum')
 
-  const shared = await getSharedPhotos(token)
+  const shared = await openSharedPhotos(token, await headers())
 
   if (!shared) {
     return (
@@ -30,8 +30,6 @@ export default async function SharedPhotosPage({
       </div>
     )
   }
-
-  await recordShareAccess(shared.shareId, await headers())
 
   const isSingle = shared.kind === 'photos' && shared.photos.length === 1
   const title = shared.name ?? (isSingle ? t('photoTitle') : t('selectionTitle'))

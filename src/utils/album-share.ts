@@ -26,13 +26,15 @@ export type SharedPhotos = { shareId: string; kind: 'album' | 'photos'; name: st
 // Flat queries rather than a nested `albums (...)` embed — supabase-js's
 // typed-select inference can't resolve the embed's cardinality reliably
 // here, and a couple of plain queries are simpler to keep correct anyway.
+type ValidShare = NonNullable<Awaited<ReturnType<typeof getValidShare>>>
+
 async function getValidShare(token: string) {
   if (!isPlausibleShareToken(token)) return null
   const supabase = createAdminClient()
 
   const { data: share, error } = await supabase
     .from('album_shares')
-    .select('id, kind, baby_id, album_id, expires_at, revoked_at')
+    .select('id, kind, baby_id, album_id, expires_at, revoked_at, single_use, opened_at')
     .eq('token_hash', hashShareToken(token))
     .maybeSingle()
 
@@ -41,7 +43,15 @@ async function getValidShare(token: string) {
 
   // baby_id can still be null on rows inserted by older code between the
   // migration and the NOT NULL follow-up; the album knows it.
-  return { supabase, shareId: share.id, kind: share.kind, babyId: share.baby_id, albumId: share.album_id }
+  return {
+    supabase,
+    shareId: share.id,
+    kind: share.kind,
+    babyId: share.baby_id,
+    albumId: share.album_id,
+    singleUse: share.single_use,
+    openedAt: share.opened_at,
+  }
 }
 
 function toLightboxPhoto(token: string, photo: { id: string; thumbnail_path: string | null; mime_type: string | null }): LightboxPhoto {
@@ -55,11 +65,8 @@ function toLightboxPhoto(token: string, photo: { id: string; thumbnail_path: str
 
 // Handles both kinds: 'album' (live: photos added later appear) and 'photos'
 // (a fixed selection from album_share_photos).
-export async function getSharedPhotos(token: string): Promise<SharedPhotos | null> {
-  const contextLogger = logger.child({ function: getSharedPhotos.name })
-
-  const valid = await getValidShare(token)
-  if (!valid) { contextLogger.warn("Share token not found, expired, or revoked"); return null }
+async function loadSharedPhotos(token: string, valid: ValidShare): Promise<SharedPhotos | null> {
+  const contextLogger = logger.child({ function: loadSharedPhotos.name })
   const { supabase, shareId, kind, babyId, albumId } = valid
 
   if (kind === 'photos') {
@@ -124,6 +131,14 @@ export async function resolveSharedPhoto(token: string, photoId: string, wantsTh
 
   const valid = await getValidShare(token)
   if (!valid) { contextLogger.warn("Share token not found, expired, or revoked"); return null }
+  // The person who consumed a single-use link is still loading its images, so
+  // they keep working for a short grace window. Without it the page would
+  // render with broken images; after it, the images stop too. Image ids are
+  // unguessable and only the page that consumed the link lists them.
+  if (valid.singleUse && valid.openedAt && Date.now() - new Date(valid.openedAt).getTime() > SINGLE_USE_IMAGE_GRACE_MS) {
+    contextLogger.warn("Single-use share past its image grace window")
+    return null
+  }
   const { supabase, shareId, kind, albumId } = valid
   let { babyId } = valid
 
@@ -162,6 +177,8 @@ export async function resolveSharedPhoto(token: string, photoId: string, wantsTh
   return { babyId, storagePath }
 }
 
+const SINGLE_USE_IMAGE_GRACE_MS = 30 * 60 * 1000
+
 const ACCESS_DEDUP_SECONDS = 60
 const USER_AGENT_MAX = 512
 
@@ -194,4 +211,52 @@ export async function recordShareAccess(shareId: string, requestHeaders: Headers
   } catch (err) {
     contextLogger.error(err, "Error recording share access")
   }
+}
+
+// Known link-preview fetchers (chat apps unfurling a pasted link). Explicit
+// allowlist on purpose: a bot that isn't listed here will consume a
+// single-use link, which is the safe failure for the sender to notice and
+// recreate; guessing at "anything bot-like" could let a human skip consumption.
+// iMessage's preview fetcher identifies as Facebot/Twitterbot, so it is covered.
+const LINK_PREVIEW_BOT_PATTERN = /WhatsApp|facebookexternalhit|Facebot|Twitterbot|Slackbot|Slack-ImgProxy|TelegramBot|Discordbot|LinkedInBot|SkypeUriPreview|Applebot|Signal-Desktop|Mastodon|Google-PageRenderer|GoogleOther/i
+
+export function isLinkPreviewBot(userAgent: string | null) {
+  return !!userAgent && LINK_PREVIEW_BOT_PATTERN.test(userAgent)
+}
+
+// Entry point for the public page: validates the link, logs the visit, and for
+// single-use links consumes them. Returns null for unavailable links.
+// Order matters: the visit is logged even when the link was already used (the
+// admin wants to see who retried it), but nothing is logged for unknown,
+// expired or revoked tokens.
+export async function openSharedPhotos(token: string, requestHeaders: Headers): Promise<SharedPhotos | null> {
+  const contextLogger = logger.child({ function: openSharedPhotos.name })
+
+  const valid = await getValidShare(token)
+  if (!valid) { contextLogger.warn("Share token not found, expired, or revoked"); return null }
+
+  await recordShareAccess(valid.shareId, requestHeaders)
+
+  if (valid.singleUse) {
+    if (valid.openedAt) { contextLogger.info({ shareId: valid.shareId }, "Single-use share already opened"); return null }
+
+    // Previews never consume: only a human visit does.
+    if (!isLinkPreviewBot(requestHeaders.get('user-agent'))) {
+      // One conditional UPDATE: of two simultaneous opens only one matches
+      // `opened_at IS NULL` and gets a row back.
+      const nowIso = new Date().toISOString()
+      const { data: consumed, error } = await valid.supabase
+        .from('album_shares')
+        .update({ opened_at: nowIso })
+        .eq('id', valid.shareId)
+        .is('opened_at', null)
+        .is('revoked_at', null)
+        .gt('expires_at', nowIso)
+        .select('id')
+      if (error) { contextLogger.error(error, "Error consuming single-use share"); return null }
+      if (!consumed || consumed.length === 0) return null
+    }
+  }
+
+  return loadSharedPhotos(token, valid)
 }

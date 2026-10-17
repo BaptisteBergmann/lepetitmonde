@@ -15,6 +15,8 @@ export type ShareSummary = {
   id: string
   kind: 'album' | 'photos'
   label: string | null
+  singleUse: boolean
+  openedAt: string | null
   albumId: string | null
   albumName: string | null
   photoCount: number | null
@@ -34,6 +36,9 @@ type CreateShareInput = {
   photoIds?: string[]
   hoursValid: number
   label?: string | null
+  // Link stops working after its first human page open. Expiry still applies
+  // (the UI sends the longest preset, 30 days, so it is capped like the rest).
+  singleUse?: boolean
 }
 
 // Returns the full URL, which is the only time the token exists in clear:
@@ -80,6 +85,7 @@ export async function createShare(input: CreateShareInput) {
       album_id: kind === 'album' ? albumId : null,
       token_hash: hashShareToken(token),
       label,
+      single_use: input.singleUse === true,
       created_by: user?.id ?? null,
       expires_at: expiresAt.toISOString(),
     }])
@@ -117,7 +123,7 @@ export async function getBabyShares(babyId: string, options: { albumId?: string 
 
   let query = supabase
     .from('album_shares')
-    .select('id, kind, label, album_id, created_at, expires_at, revoked_at, albums (name), album_share_photos (count), album_share_accesses (count)')
+    .select('id, kind, label, single_use, opened_at, album_id, created_at, expires_at, revoked_at, albums (name), album_share_photos (count), album_share_accesses (count)')
     .eq('baby_id', babyId)
     .gt('expires_at', endedCutoff)
     .order('created_at', { ascending: false })
@@ -148,6 +154,8 @@ export async function getBabyShares(babyId: string, options: { albumId?: string 
     id: s.id,
     kind: s.kind === 'photos' ? 'photos' : 'album',
     label: s.label,
+    singleUse: s.single_use,
+    openedAt: s.opened_at,
     albumId: s.album_id,
     albumName: (Array.isArray(s.albums) ? s.albums[0]?.name : (s.albums as { name: string } | null)?.name) ?? null,
     photoCount: s.kind === 'photos' ? (s.album_share_photos[0]?.count ?? 0) : null,
