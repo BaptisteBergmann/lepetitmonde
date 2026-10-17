@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-17
 
+- `6340737` docs(rls): note album_shares now has baby_id and the new share tables have RLS
 - `e124218` feat(share): note visit recording on the public share page
 - `75955fd` feat(albums): show share links and their access log
 - `96ffe1f` feat(albums): select several photos to share as one link
