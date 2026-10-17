@@ -7,11 +7,14 @@ import { Tables } from '@utils/supabase/database.types'
 import { AlbumSummary, AlbumPhotoWithAlbum } from '@utils/actions/albums'
 import { Tabs } from '@base-ui/react/tabs'
 import { Button } from '@/components/ui/button'
-import { Plus, ImagePlus, Info, Images as ImagesIcon } from 'lucide-react'
+import { Plus, ImagePlus, Info, Images as ImagesIcon, Check, CheckSquare } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import CreateAlbumModal from './create_album_modal'
 import AddPhotosModal from './add_photos_modal'
 import PhotoInfoModal from './photo_info_modal'
+import ShareModal from './share_modal'
+import { SelectionBar } from './selection_bar'
+import { usePhotoSelection } from './use_photo_selection'
 
 type Circle = Tables<'circles'>
 type Tab = 'photos' | 'albums'
@@ -36,12 +39,15 @@ export default function AlbumsView({
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
   const [infoPhotoId, setInfoPhotoId] = useState<string | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [shareOpen, setShareOpen] = useState(false)
+  const selection = usePhotoSelection()
+  const tShare = useTranslations('albums.share')
 
   const infoPhoto = infoPhotoId ? allPhotos.find((photo) => photo.id === infoPhotoId) ?? null : null
 
   return (
     <div className="relative space-y-4">
-      <Tabs.Root value={tab} onValueChange={(value) => setTab(value as Tab)} className="space-y-4">
+      <Tabs.Root value={tab} onValueChange={(value) => { selection.cancel(); setTab(value as Tab) }} className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Tabs.List aria-label={t('tabsLabel')} className="isolate inline-flex w-full gap-1 rounded-full bg-muted p-1 sm:w-auto">
             <Tabs.Tab value="photos" className="flex-1 sm:flex-none min-h-11 rounded-full border border-transparent px-4 text-center text-sm leading-tight text-muted-foreground transition-colors cursor-pointer outline-none hover:text-foreground focus-visible:z-10 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 data-[active]:bg-card data-[active]:font-medium data-[active]:text-foreground data-[active]:shadow-sm">
@@ -54,6 +60,16 @@ export default function AlbumsView({
 
           {isAdmin && (
             <div className="flex flex-wrap gap-2">
+              {tab === 'photos' && allPhotos.length > 0 && (
+                <Button
+                  variant="outline"
+                  className="h-11 flex-1 gap-2 rounded-2xl cursor-pointer sm:h-9 sm:flex-none pointer-coarse:min-h-11"
+                  onClick={selection.selecting ? selection.cancel : selection.start}
+                >
+                  <CheckSquare className="h-4 w-4" aria-hidden="true" />
+                  <span className="whitespace-nowrap">{selection.selecting ? tShare('cancelSelect') : tShare('selectMode')}</span>
+                </Button>
+              )}
               <Button variant="outline" className="h-11 flex-1 gap-2 rounded-2xl cursor-pointer sm:h-9 sm:flex-none pointer-coarse:min-h-11" onClick={() => setAddPhotosOpen(true)}>
                 <ImagePlus className="h-4 w-4" aria-hidden="true" />
                 <span className="whitespace-nowrap">{t('addPhotos')}</span>
@@ -78,11 +94,13 @@ export default function AlbumsView({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+            <div className={`grid grid-cols-3 sm:grid-cols-4 gap-1.5${selection.selecting ? ' pb-24' : ''}`}>
               {allPhotos.map((photo, index) => (
                 <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
                   <button
-                    onClick={() => setLightboxIndex(index)}
+                    onClick={() => (selection.selecting ? selection.toggle(photo.id) : setLightboxIndex(index))}
+                    role={selection.selecting ? 'checkbox' : undefined}
+                    aria-checked={selection.selecting ? selection.selectedIds.has(photo.id) : undefined}
                     aria-label={tA11y('photoNOfM', { n: index + 1, total: allPhotos.length })}
                     className="absolute inset-0 cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                   >
@@ -96,8 +114,16 @@ export default function AlbumsView({
                         className="w-full h-full object-cover contain-paint"
                       />
                     )}
+                    {selection.selecting && (
+                      <span
+                        aria-hidden="true"
+                        className={`absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white ${selection.selectedIds.has(photo.id) ? 'bg-primary text-primary-foreground' : 'bg-black/30'}`}
+                      >
+                        {selection.selectedIds.has(photo.id) && <Check className="h-3.5 w-3.5" />}
+                      </span>
+                    )}
                   </button>
-                  {isAdmin && (
+                  {isAdmin && !selection.selecting && (
                     <button
                       onClick={() => setInfoPhotoId(photo.id)}
                       title={t('photoInfo')}
@@ -156,6 +182,23 @@ export default function AlbumsView({
           )}
         </Tabs.Panel>
       </Tabs.Root>
+
+      {selection.selecting && (
+        <SelectionBar
+          count={selection.selectedIds.size}
+          onCancel={selection.cancel}
+          onShare={() => setShareOpen(true)}
+        />
+      )}
+
+      {shareOpen && (
+        <ShareModal
+          babyId={babyId}
+          target={{ kind: 'photos', photoIds: allPhotos.filter((p) => selection.selectedIds.has(p.id)).map((p) => p.id) }}
+          onClose={() => setShareOpen(false)}
+          onDone={selection.cancel}
+        />
+      )}
 
       {lightboxIndex !== null && (
         <PhotoLightbox

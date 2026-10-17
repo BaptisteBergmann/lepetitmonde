@@ -967,8 +967,7 @@
       "cancelSelect": "Annuler",
       "shareSelection": "Partager ({count})",
       "selectedCount": "{count, plural, one {# photo sélectionnée} other {# photos sélectionnées}}",
-      "tooManyPhotos": "Vous pouvez partager jusqu'à {max} photos à la fois.",
-      "photoSelect": "Sélectionner la photo {n} sur {total}"
+      "tooManyPhotos": "Vous pouvez partager jusqu'à {max} photos à la fois."
     }
   },
   "shareAlbum": {

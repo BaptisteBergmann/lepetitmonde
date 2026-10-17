@@ -16,12 +16,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Plus, Pencil, Trash2, Share2, Loader2, Info, Lock, MoreHorizontal } from 'lucide-react'
+import { Plus, Pencil, Trash2, Share2, Loader2, Info, Lock, MoreHorizontal, Check, CheckSquare } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import AddPhotosModal from '../../_components/add_photos_modal'
 import PhotoInfoModal from '../../_components/photo_info_modal'
 import EditAlbumModal from './edit_album_modal'
 import ShareModal from '../../_components/share_modal'
+import { SelectionBar } from '../../_components/selection_bar'
+import { usePhotoSelection } from '../../_components/use_photo_selection'
 
 type Circle = Tables<'circles'>
 
@@ -46,6 +48,9 @@ export default function AlbumDetailView({
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [shareSelectionOpen, setShareSelectionOpen] = useState(false)
+  const selection = usePhotoSelection()
+  const tShare = useTranslations('albums.share')
   const [deletingAlbum, setDeletingAlbum] = useState(false)
   const [infoPhotoId, setInfoPhotoId] = useState<string | null>(null)
 
@@ -97,6 +102,12 @@ export default function AlbumDetailView({
               <Plus className="h-4 w-4" />
               <span>{t('addPhotos')}</span>
             </Button>
+            {album.photos.length > 0 && (
+              <Button variant="outline" className="h-11 sm:h-9 gap-2 rounded-2xl cursor-pointer" onClick={selection.selecting ? selection.cancel : selection.start}>
+                <CheckSquare className="h-4 w-4" aria-hidden="true" />
+                <span>{selection.selecting ? tShare('cancelSelect') : tShare('selectMode')}</span>
+              </Button>
+            )}
             <Button variant="outline" className="h-11 sm:h-9 gap-2 rounded-2xl cursor-pointer" onClick={() => setShareOpen(true)}>
               <Share2 className="h-4 w-4" />
               <span>{t('share.title')}</span>
@@ -135,11 +146,13 @@ export default function AlbumDetailView({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+        <div className={`grid grid-cols-3 sm:grid-cols-4 gap-1.5${selection.selecting ? ' pb-24' : ''}`}>
           {album.photos.map((photo, index) => (
             <div key={photo.id} className="relative group aspect-square overflow-hidden rounded-xl bg-landing-background">
               <button
-                onClick={() => setLightboxIndex(index)}
+                onClick={() => (selection.selecting ? selection.toggle(photo.id) : setLightboxIndex(index))}
+                role={selection.selecting ? 'checkbox' : undefined}
+                aria-checked={selection.selecting ? selection.selectedIds.has(photo.id) : undefined}
                 aria-label={tA11y('photoNOfM', { n: index + 1, total: album.photos.length })}
                 className="absolute inset-0 cursor-pointer outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
               >
@@ -153,8 +166,16 @@ export default function AlbumDetailView({
                     className="w-full h-full object-cover contain-paint"
                   />
                 )}
+                {selection.selecting && (
+                  <span
+                    aria-hidden="true"
+                    className={`absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white ${selection.selectedIds.has(photo.id) ? 'bg-primary text-primary-foreground' : 'bg-black/30'}`}
+                  >
+                    {selection.selectedIds.has(photo.id) && <Check className="h-3.5 w-3.5" />}
+                  </span>
+                )}
               </button>
-              {isAdmin && (
+              {isAdmin && !selection.selecting && (
                 <button
                   onClick={() => setInfoPhotoId(photo.id)}
                   title={t('photoInfo')}
@@ -167,6 +188,23 @@ export default function AlbumDetailView({
             </div>
           ))}
         </div>
+      )}
+
+      {selection.selecting && (
+        <SelectionBar
+          count={selection.selectedIds.size}
+          onCancel={selection.cancel}
+          onShare={() => setShareSelectionOpen(true)}
+        />
+      )}
+
+      {shareSelectionOpen && (
+        <ShareModal
+          babyId={babyId}
+          target={{ kind: 'photos', photoIds: album.photos.filter((p) => selection.selectedIds.has(p.id)).map((p) => p.id) }}
+          onClose={() => setShareSelectionOpen(false)}
+          onDone={selection.cancel}
+        />
       )}
 
       {lightboxIndex !== null && (
