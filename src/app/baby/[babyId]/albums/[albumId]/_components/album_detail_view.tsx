@@ -22,6 +22,7 @@ import AddPhotosModal from '../../_components/add_photos_modal'
 import PhotoInfoModal from '../../_components/photo_info_modal'
 import EditAlbumModal from './edit_album_modal'
 import ShareModal from '../../_components/share_modal'
+import ShareLinksModal from '../../_components/share_links_modal'
 import { SelectionBar } from '../../_components/selection_bar'
 import { usePhotoSelection } from '../../_components/use_photo_selection'
 
@@ -48,6 +49,7 @@ export default function AlbumDetailView({
   const [addPhotosOpen, setAddPhotosOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [linksOpen, setLinksOpen] = useState(false)
   const [shareSelectionOpen, setShareSelectionOpen] = useState(false)
   const selection = usePhotoSelection()
   const tShare = useTranslations('albums.share')
@@ -238,8 +240,11 @@ export default function AlbumDetailView({
           babyId={babyId}
           target={{ kind: 'album', albumId: album.id }}
           onClose={() => setShareOpen(false)}
+          onShowLinks={() => { setShareOpen(false); setLinksOpen(true) }}
         />
       )}
+
+      {linksOpen && <ShareLinksModal babyId={babyId} onClose={() => setLinksOpen(false)} />}
 
       {infoPhoto && (
         <PhotoInfoModal

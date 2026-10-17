@@ -7,12 +7,13 @@ import { Tables } from '@utils/supabase/database.types'
 import { AlbumSummary, AlbumPhotoWithAlbum } from '@utils/actions/albums'
 import { Tabs } from '@base-ui/react/tabs'
 import { Button } from '@/components/ui/button'
-import { Plus, ImagePlus, Info, Images as ImagesIcon, Check, CheckSquare } from 'lucide-react'
+import { Plus, ImagePlus, Info, Images as ImagesIcon, Check, CheckSquare, Link2 } from 'lucide-react'
 import PhotoLightbox from '@/components/photo_lightbox'
 import CreateAlbumModal from './create_album_modal'
 import AddPhotosModal from './add_photos_modal'
 import PhotoInfoModal from './photo_info_modal'
 import ShareModal from './share_modal'
+import ShareLinksModal from './share_links_modal'
 import { SelectionBar } from './selection_bar'
 import { usePhotoSelection } from './use_photo_selection'
 
@@ -40,6 +41,7 @@ export default function AlbumsView({
   const [infoPhotoId, setInfoPhotoId] = useState<string | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
+  const [linksOpen, setLinksOpen] = useState(false)
   const selection = usePhotoSelection()
   const tShare = useTranslations('albums.share')
 
@@ -70,6 +72,10 @@ export default function AlbumsView({
                   <span className="whitespace-nowrap">{selection.selecting ? tShare('cancelSelect') : tShare('selectMode')}</span>
                 </Button>
               )}
+              <Button variant="outline" className="h-11 flex-1 gap-2 rounded-2xl cursor-pointer sm:h-9 sm:flex-none pointer-coarse:min-h-11" onClick={() => setLinksOpen(true)}>
+                <Link2 className="h-4 w-4" aria-hidden="true" />
+                <span className="whitespace-nowrap">{tShare('openLinks')}</span>
+              </Button>
               <Button variant="outline" className="h-11 flex-1 gap-2 rounded-2xl cursor-pointer sm:h-9 sm:flex-none pointer-coarse:min-h-11" onClick={() => setAddPhotosOpen(true)}>
                 <ImagePlus className="h-4 w-4" aria-hidden="true" />
                 <span className="whitespace-nowrap">{t('addPhotos')}</span>
@@ -197,8 +203,11 @@ export default function AlbumsView({
           target={{ kind: 'photos', photoIds: allPhotos.filter((p) => selection.selectedIds.has(p.id)).map((p) => p.id) }}
           onClose={() => setShareOpen(false)}
           onDone={selection.cancel}
+          onShowLinks={() => { setShareOpen(false); setLinksOpen(true) }}
         />
       )}
+
+      {linksOpen && <ShareLinksModal babyId={babyId} onClose={() => setLinksOpen(false)} />}
 
       {lightboxIndex !== null && (
         <PhotoLightbox
