@@ -278,7 +278,7 @@ Conventions:
 | `anecdotes` / `anecdotes_circles` | same pattern via `can_see_anecdote` | admin (+ circle check) | admin (anecdotes) | admin | B5 |
 | `albums` / `albums_circles` | same pattern via `can_see_album` | admin (+ circle check) | admin (albums) | admin | B6 |
 | `album_photos` | `ADMIN(baby_id) OR (album_id IS NOT NULL AND can_see_album(album_id))` (unsorted = admin-only, same as `getAllAlbumPhotos`) | `ADMIN(baby_id) AND (album_id IS NULL OR album_baby_id(album_id) = baby_id)` | same as INSERT | admin | B6 |
-| `album_shares` | `ADMIN(album_baby_id(album_id))` | same | same | — | B6 |
+| `album_shares` | `ADMIN(baby_id)` (column added by share-links migration; `album_share_photos` and `album_share_accesses` already have RLS from creation) | same | same | — | B6 |
 | `posts` | `can_see_post(id)` | admin | admin | admin | B7 |
 | `posts_circles` | `can_see_post(post_id)` | admin + same-baby circle | — | admin | B7 |
 | `post_photos` | `can_see_post(post_id)` | admin | — | admin | B7 |
