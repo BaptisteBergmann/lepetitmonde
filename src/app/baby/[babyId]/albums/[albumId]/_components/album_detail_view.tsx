@@ -21,7 +21,7 @@ import PhotoLightbox from '@/components/photo_lightbox'
 import AddPhotosModal from '../../_components/add_photos_modal'
 import PhotoInfoModal from '../../_components/photo_info_modal'
 import EditAlbumModal from './edit_album_modal'
-import ShareAlbumModal from './share_album_modal'
+import ShareModal from '../../_components/share_modal'
 
 type Circle = Tables<'circles'>
 
@@ -196,9 +196,9 @@ export default function AlbumDetailView({
       )}
 
       {shareOpen && (
-        <ShareAlbumModal
+        <ShareModal
           babyId={babyId}
-          albumId={album.id}
+          target={{ kind: 'album', albumId: album.id }}
           onClose={() => setShareOpen(false)}
         />
       )}

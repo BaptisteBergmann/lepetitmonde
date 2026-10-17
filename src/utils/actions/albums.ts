@@ -14,7 +14,6 @@ import { normalizeText } from '@utils/feed-validation'
 import { ALBUM_LIMITS } from '@utils/album-limits'
 import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
 import { logger } from '../logger'
-import { createShare, revokeShare } from './shares'
 import { actionError } from './errors'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 
@@ -573,31 +572,4 @@ export async function getAlbum(albumId: string, babyId: string): Promise<AlbumWi
   if (!visible) { contextLogger.warn("Album not visible to caller"); return null }
 
   return toAlbumWithDetails(babyId, data)
-}
-
-// Thin wrapper kept until the share modal moves to createShare.
-export async function createAlbumShare(albumId: string, babyId: string, hoursValid: number) {
-  return createShare({ babyId, kind: 'album', albumId, hoursValid })
-}
-
-export async function getAlbumShares(albumId: string, babyId: string) {
-  const supabase = await createClient()
-  const contextLogger = logger.child({ function: getAlbumShares.name, albumId, babyId })
-
-  await assertIsAdmin(supabase, babyId)
-  await assertAlbumInBaby(albumId, babyId)
-
-  const { data, error } = await supabase
-    .from('album_shares')
-    .select('*')
-    .eq('album_id', albumId)
-    .order('created_at', { ascending: false })
-
-  if (error) { contextLogger.error(error, "Error fetching album shares"); throw error }
-
-  return data
-}
-
-export async function revokeAlbumShare(shareId: string, babyId: string) {
-  return revokeShare(shareId, babyId)
 }

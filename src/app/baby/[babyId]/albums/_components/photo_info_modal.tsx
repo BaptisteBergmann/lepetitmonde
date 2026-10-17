@@ -29,7 +29,8 @@ import { ALBUM_LIMITS } from '@utils/album-limits'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@components/ui/badge'
-import { Info, FileText, Film, Loader2, Trash2, Lock } from 'lucide-react'
+import { Info, FileText, Film, Loader2, Trash2, Lock, Share2 } from 'lucide-react'
+import ShareModal from './share_modal'
 
 type Circle = Tables<'circles'>
 
@@ -56,12 +57,14 @@ export default function PhotoInfoModal({
   const t = useTranslations('albums.photoInfoForm')
   const confirmAction = useConfirm()
   const tAlbums = useTranslations('albums')
+  const tShare = useTranslations('albums.share')
   const dateFnsLocale = getDateFnsLocale(useLocale())
 
   const [selectedAlbumId, setSelectedAlbumId] = useState<string>(currentAlbumId ?? UNSORTED)
   const [newAlbumName, setNewAlbumName] = useState("")
   const [isMoving, setIsMoving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const albumItems = { [UNSORTED]: t('unsortedOption'), ...Object.fromEntries(albums.map((album) => [album.id, album.name])) }
   const hasChanges = selectedAlbumId !== (currentAlbumId ?? UNSORTED)
@@ -121,6 +124,7 @@ export default function PhotoInfoModal({
   }
 
   return (
+    <>
     <Modal onClose={onClose} title={<><Info className="h-4.5 w-4.5 text-primary" />{t('title')}</>}>
       <div className="p-5 space-y-4 flex-1 overflow-y-auto">
         {(photo.thumbnailUrl ?? photo.url) && (
@@ -234,16 +238,29 @@ export default function PhotoInfoModal({
         </div>
       </div>
 
-      <div className="border-t border-landing-border bg-landing-background flex justify-end px-5 py-3.5">
+      <div className="border-t border-landing-border bg-landing-background flex flex-col gap-2 px-5 py-3.5">
+        <Button variant="outline" className="rounded-2xl gap-2 h-11 w-full cursor-pointer" onClick={() => setShareOpen(true)}>
+          <Share2 className="h-4 w-4" aria-hidden="true" />
+          {tShare('titlePhoto')}
+        </Button>
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="flex items-center gap-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg px-3 py-1.5 pointer-coarse:min-h-11 transition-colors cursor-pointer disabled:opacity-50"
+          className="flex items-center justify-end gap-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg px-3 py-1.5 pointer-coarse:min-h-11 transition-colors cursor-pointer disabled:opacity-50"
         >
           {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
           {t('deletePhoto')}
         </button>
       </div>
     </Modal>
+
+    {shareOpen && (
+      <ShareModal
+        babyId={babyId}
+        target={{ kind: 'photos', photoIds: [photo.id] }}
+        onClose={() => setShareOpen(false)}
+      />
+    )}
+    </>
   )
 }
