@@ -11,10 +11,10 @@ import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { nextUnsortedPosition, assertAlbumInBaby } from '@utils/albums-internal'
 import { assertCirclesInBaby } from '@utils/feed-access'
 import { normalizeText } from '@utils/feed-validation'
-import { ALBUM_LIMITS, SHARE_DURATIONS_HOURS } from '@utils/album-limits'
+import { ALBUM_LIMITS } from '@utils/album-limits'
 import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
 import { logger } from '../logger'
-import { generateShareToken, hashShareToken } from '@utils/share-token'
+import { createShare, revokeShare } from './shares'
 import { actionError } from './errors'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 
@@ -575,41 +575,9 @@ export async function getAlbum(albumId: string, babyId: string): Promise<AlbumWi
   return toAlbumWithDetails(babyId, data)
 }
 
+// Thin wrapper kept until the share modal moves to createShare.
 export async function createAlbumShare(albumId: string, babyId: string, hoursValid: number) {
-  const supabase = await createClient()
-  const contextLogger = logger.child({ function: createAlbumShare.name, albumId, babyId })
-
-  await assertIsAdmin(supabase, babyId)
-  await assertAlbumInBaby(albumId, babyId)
-  if (!(Object.values(SHARE_DURATIONS_HOURS) as number[]).includes(hoursValid)) throw await actionError('invalidShareDuration')
-
-  const expiresAt = new Date()
-  expiresAt.setHours(expiresAt.getHours() + hoursValid)
-
-  const { data: { user } } = await supabase.auth.getUser()
-  // Never logged: the token is the credential and is shown to the admin once.
-  const token = generateShareToken()
-
-  const { data, error } = await supabase
-    .from('album_shares')
-    .insert([{
-      album_id: albumId,
-      baby_id: babyId,
-      kind: 'album',
-      token_hash: hashShareToken(token),
-      created_by: user?.id ?? null,
-      expires_at: expiresAt.toISOString(),
-    }])
-    .select('id')
-    .single()
-
-  if (error) { contextLogger.error(error, "Error creating album share"); throw error }
-
-  contextLogger.info({ shareId: data.id }, "Album share created")
-
-  revalidatePath(`/baby/${babyId}/albums/${albumId}`)
-
-  return `${process.env.SITE_URL}/share/${token}`
+  return createShare({ babyId, kind: 'album', albumId, hoursValid })
 }
 
 export async function getAlbumShares(albumId: string, babyId: string) {
@@ -631,31 +599,5 @@ export async function getAlbumShares(albumId: string, babyId: string) {
 }
 
 export async function revokeAlbumShare(shareId: string, babyId: string) {
-  const supabase = await createClient()
-  const contextLogger = logger.child({ function: revokeAlbumShare.name, shareId, babyId })
-
-  await assertIsAdmin(supabase, babyId)
-
-  const { data: share, error: fetchError } = await supabase
-    .from('album_shares')
-    .select('album_id')
-    .eq('id', shareId)
-    .maybeSingle()
-
-  if (fetchError) { contextLogger.error(fetchError, "Error fetching share before revoke"); throw fetchError }
-  if (!share) throw await actionError('unauthorized')
-
-  await assertAlbumInBaby(share.album_id, babyId)
-
-  const { error } = await supabase
-    .from('album_shares')
-    .update({ revoked_at: new Date().toISOString() })
-    .eq('id', shareId)
-    .eq('album_id', share.album_id)
-
-  if (error) { contextLogger.error(error, "Error revoking album share"); throw error }
-
-  contextLogger.info("Album share revoked")
-
-  revalidatePath(`/baby/${babyId}/albums/${share.album_id}`)
+  return revokeShare(shareId, babyId)
 }

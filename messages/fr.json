@@ -1124,7 +1124,9 @@
     "commentRequired": "Le commentaire ne peut pas être vide.",
     "invalidReaction": "Réaction inconnue.",
     "invalidFilename": "Nom de fichier invalide.",
-    "invalidScreenshot": "La capture d'écran doit être une image PNG de moins de 1 Mo."
+    "invalidScreenshot": "La capture d'écran doit être une image PNG de moins de 1 Mo.",
+    "invalidSharePhotos": "Certaines de ces photos ne peuvent pas être partagées.",
+    "tooManySharePhotos": "Trop de photos sélectionnées pour un seul lien."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",
