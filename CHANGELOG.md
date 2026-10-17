@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-17
 
+- `e124218` feat(share): note visit recording on the public share page
 - `75955fd` feat(albums): show share links and their access log
 - `96ffe1f` feat(albums): select several photos to share as one link
 - `940bcec` feat(albums): share an album or a single photo with a one-time link
