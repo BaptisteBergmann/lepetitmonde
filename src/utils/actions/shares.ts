@@ -7,7 +7,7 @@ import { assertIsAdmin } from './access'
 import { assertAlbumInBaby } from '@utils/albums-internal'
 import { normalizeText } from '@utils/feed-validation'
 import { SHARE_DURATIONS_HOURS, SHARE_LIMITS } from '@utils/album-limits'
-import { generateShareToken, hashShareToken } from '@utils/share-token'
+import { generateShareToken, hashShareToken, shareLogId } from '@utils/share-token'
 import { logger } from '../logger'
 import { actionError } from './errors'
 
@@ -42,7 +42,7 @@ type CreateShareInput = {
 }
 
 // Returns the full URL, which is the only time the token exists in clear:
-// only its hash is stored. Never log the token; log shareId only.
+// only its hash is stored. Never log the token; log shareLogId(id) only.
 export async function createShare(input: CreateShareInput) {
   const { babyId, kind, albumId, hoursValid } = input
   const supabase = await createClient()
@@ -106,7 +106,7 @@ export async function createShare(input: CreateShareInput) {
     }
   }
 
-  contextLogger.info({ shareId: data.id }, "Share created")
+  contextLogger.info({ share: shareLogId(data.id) }, "Share created")
 
   revalidatePath(`/baby/${babyId}/albums`, 'layout')
 
@@ -193,7 +193,7 @@ async function assertShareInBaby(supabase: Awaited<ReturnType<typeof createClien
 
 export async function getShareAccesses(shareId: string, babyId: string): Promise<ShareAccess[]> {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: getShareAccesses.name, babyId, shareId })
+  const contextLogger = logger.child({ function: getShareAccesses.name, babyId, share: shareLogId(shareId) })
 
   await assertIsAdmin(supabase, babyId)
   await assertShareInBaby(supabase, shareId, babyId)
@@ -212,7 +212,7 @@ export async function getShareAccesses(shareId: string, babyId: string): Promise
 
 export async function revokeShare(shareId: string, babyId: string) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: revokeShare.name, babyId, shareId })
+  const contextLogger = logger.child({ function: revokeShare.name, babyId, share: shareLogId(shareId) })
 
   await assertIsAdmin(supabase, babyId)
   await assertShareInBaby(supabase, shareId, babyId)

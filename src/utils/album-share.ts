@@ -8,7 +8,7 @@ import 'server-only'
 import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@utils/logger'
 import { getClientIp } from '@utils/client-ip'
-import { hashShareToken, isPlausibleShareToken } from '@utils/share-token'
+import { hashShareToken, shareLogId, isPlausibleShareToken } from '@utils/share-token'
 import type { LightboxPhoto } from '@/components/photo_lightbox'
 
 // Everything the public page receives: no baby_id, storage paths, creator or
@@ -190,7 +190,7 @@ const USER_AGENT_MAX = 512
 // if logging fails. A refresh within 60s from the same (ip, user agent) is not
 // logged again, which caps how fast a token holder can fill the table.
 export async function recordShareAccess(shareId: string, requestHeaders: Headers) {
-  const contextLogger = logger.child({ function: recordShareAccess.name, shareId })
+  const contextLogger = logger.child({ function: recordShareAccess.name, share: shareLogId(shareId) })
   try {
     const supabase = createAdminClient()
     const ip = getClientIp(requestHeaders)
@@ -244,7 +244,7 @@ export async function openSharedPhotos(token: string, requestHeaders: Headers): 
   const isBot = isLinkPreviewBot(requestHeaders.get('user-agent'))
 
   if (valid.singleUse) {
-    if (valid.openedAt) { contextLogger.info({ shareId: valid.shareId }, "Single-use share already opened"); return null }
+    if (valid.openedAt) { contextLogger.info({ share: shareLogId(valid.shareId) }, "Single-use share already opened"); return null }
 
     // Previews never consume: only a human visit does.
     if (!isBot) {

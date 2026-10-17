@@ -17,3 +17,9 @@ export function hashShareToken(token: string) {
 export function isPlausibleShareToken(token: string) {
   return /^[A-Za-z0-9_-]{20,100}$/.test(token)
 }
+
+// Short, non-reversible id for logs. The row id is itself a credential for
+// legacy links (old code resolved them by id), so it must never be logged raw.
+export function shareLogId(shareId: string) {
+  return createHash('sha256').update(shareId, 'utf8').digest('hex').slice(0, 8)
+}
