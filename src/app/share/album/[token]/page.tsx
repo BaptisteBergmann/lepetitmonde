@@ -1,48 +1,11 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { getSharedAlbum } from "@utils/album-share";
-import SharedAlbumView from "./_components/shared_album_view";
+import { redirect } from "next/navigation";
 
-// Share links are bearer URLs: keep them out of search indexes.
-export const metadata: Metadata = { robots: { index: false, follow: false } };
-
-export default async function SharedAlbumPage({
+// Links already sent use /share/album/<token>; keep them working.
+export default async function LegacySharedAlbumPage({
   params,
 }: {
   params: Promise<{ token: string }>
 }) {
   const { token } = await params;
-  const t = await getTranslations('shareAlbum')
-
-  const album = await getSharedAlbum(token)
-
-  if (!album) {
-    return (
-      <div className="bg-landing-background text-landing-foreground min-h-[60vh] flex items-center justify-center px-4">
-        <div className="max-w-md space-y-3 text-center">
-          <h1 className="font-display text-2xl font-semibold text-destructive">{t('invalidTitle')}</h1>
-          <p className="text-muted-foreground">{t('invalidDescription')}</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="bg-landing-background text-landing-foreground">
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16 space-y-6">
-        <div className="text-center space-y-1">
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">{album.name}</h1>
-          {album.photos.length > 0 && (
-            <p className="text-sm text-landing-muted">{t('photoCount', { count: album.photos.length })}</p>
-          )}
-        </div>
-
-        {album.photos.length === 0 ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">{t('empty')}</p>
-        ) : (
-          <SharedAlbumView album={album} />
-        )}
-      </div>
-    </div>
-  );
+  redirect(`/share/${encodeURIComponent(token)}`);
 }

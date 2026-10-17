@@ -938,7 +938,12 @@
     "invalidTitle": "Lien indisponible",
     "invalidDescription": "Ce lien est invalide, a expiré ou a été révoqué. Demandez un nouveau lien à la personne qui vous l'a envoyé.",
     "empty": "Cet album ne contient pas encore de photos.",
-    "photoCount": "{count, plural, =0 {Aucune photo} one {# photo} other {# photos}}"
+    "photoCount": "{count, plural, =0 {Aucune photo} one {# photo} other {# photos}}",
+    "selectionTitle": "Photos partagées",
+    "photoTitle": "Photo partagée",
+    "errorTitle": "Une erreur est survenue",
+    "errorDescription": "Impossible de charger ces photos. Réessayez.",
+    "retry": "Réessayer"
   },
   "profile": {
     "settingsLink": "Paramètres",

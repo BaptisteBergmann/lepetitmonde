@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // all, since a signed-out share-link visitor has none. The share token itself
 // (re-validated on every request, not just at page render) is the only
 // credential — see resolveSharedPhoto's comment for why photoId is also
-// checked against the token's own album instead of trusting the URL.
+// checked against the share (its album, or its selection) instead of trusting the URL.
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ token: string; photoId: string }> }

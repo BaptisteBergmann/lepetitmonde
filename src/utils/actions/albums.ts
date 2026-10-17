@@ -609,7 +609,7 @@ export async function createAlbumShare(albumId: string, babyId: string, hoursVal
 
   revalidatePath(`/baby/${babyId}/albums/${albumId}`)
 
-  return `${process.env.SITE_URL}/share/album/${token}`
+  return `${process.env.SITE_URL}/share/${token}`
 }
 
 export async function getAlbumShares(albumId: string, babyId: string) {
