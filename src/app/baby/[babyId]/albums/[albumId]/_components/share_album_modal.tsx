@@ -204,13 +204,6 @@ export default function ShareAlbumModal({
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      aria-label={tA11y('copy')}
-                      onClick={() => handleCopy(`${window.location.origin}/share/album/${share.id}`)}
-                      className="p-1.5 hover:bg-landing-background rounded-lg text-landing-muted hover:text-landing-foreground transition-colors cursor-pointer touch-target relative pointer-coarse:p-2 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </button>
                     <Button
                       variant="ghost"
                       size="sm"

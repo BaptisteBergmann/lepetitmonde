@@ -14,6 +14,7 @@ import { normalizeText } from '@utils/feed-validation'
 import { ALBUM_LIMITS, SHARE_DURATIONS_HOURS } from '@utils/album-limits'
 import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
 import { logger } from '../logger'
+import { generateShareToken, hashShareToken } from '@utils/share-token'
 import { actionError } from './errors'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 
@@ -586,10 +587,19 @@ export async function createAlbumShare(albumId: string, babyId: string, hoursVal
   expiresAt.setHours(expiresAt.getHours() + hoursValid)
 
   const { data: { user } } = await supabase.auth.getUser()
+  // Never logged: the token is the credential and is shown to the admin once.
+  const token = generateShareToken()
 
   const { data, error } = await supabase
     .from('album_shares')
-    .insert([{ album_id: albumId, created_by: user?.id ?? null, expires_at: expiresAt.toISOString() }])
+    .insert([{
+      album_id: albumId,
+      baby_id: babyId,
+      kind: 'album',
+      token_hash: hashShareToken(token),
+      created_by: user?.id ?? null,
+      expires_at: expiresAt.toISOString(),
+    }])
     .select('id')
     .single()
 
@@ -599,7 +609,7 @@ export async function createAlbumShare(albumId: string, babyId: string, hoursVal
 
   revalidatePath(`/baby/${babyId}/albums/${albumId}`)
 
-  return `${process.env.SITE_URL}/share/album/${data.id}`
+  return `${process.env.SITE_URL}/share/album/${token}`
 }
 
 export async function getAlbumShares(albumId: string, babyId: string) {

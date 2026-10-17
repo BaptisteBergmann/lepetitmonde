@@ -7,6 +7,7 @@
 import 'server-only'
 import { createAdminClient } from '@utils/supabase/admin'
 import { logger } from '@utils/logger'
+import { hashShareToken, isPlausibleShareToken } from '@utils/share-token'
 import type { LightboxPhoto } from '@/components/photo_lightbox'
 
 // Everything the public page receives: no baby_id, storage paths, creator or
@@ -24,18 +25,21 @@ export type SharedAlbum = { name: string; photos: LightboxPhoto[] }
 // typed-select inference can't resolve the embed's cardinality reliably
 // here, and a couple of plain queries are simpler to keep correct anyway.
 async function getValidShare(token: string) {
+  if (!isPlausibleShareToken(token)) return null
   const supabase = createAdminClient()
 
   const { data: share, error } = await supabase
     .from('album_shares')
-    .select('album_id, expires_at, revoked_at')
-    .eq('id', token)
-    .single()
+    .select('id, kind, baby_id, album_id, expires_at, revoked_at')
+    .eq('token_hash', hashShareToken(token))
+    .maybeSingle()
 
   if (error || !share) return null
   if (share.revoked_at || new Date(share.expires_at) < new Date()) return null
 
-  return { supabase, albumId: share.album_id }
+  // baby_id can still be null on rows inserted by older code between the
+  // migration and the NOT NULL follow-up; the album knows it.
+  return { supabase, shareId: share.id, kind: share.kind, babyId: share.baby_id, albumId: share.album_id }
 }
 
 export async function getSharedAlbum(token: string): Promise<SharedAlbum | null> {
@@ -44,6 +48,7 @@ export async function getSharedAlbum(token: string): Promise<SharedAlbum | null>
   const valid = await getValidShare(token)
   if (!valid) { contextLogger.warn("Share token not found, expired, or revoked"); return null }
   const { supabase, albumId } = valid
+  if (!albumId) return null
 
   const { data: album, error } = await supabase
     .from('albums')
@@ -78,6 +83,7 @@ export async function resolveSharedPhoto(token: string, photoId: string, wantsTh
   const valid = await getValidShare(token)
   if (!valid) { contextLogger.warn("Share token not found, expired, or revoked"); return null }
   const { supabase, albumId } = valid
+  if (!albumId) return null
 
   const { data: album, error: albumError } = await supabase
     .from('albums')
