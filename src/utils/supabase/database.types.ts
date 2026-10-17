@@ -77,30 +77,113 @@ export type Database = {
           },
         ]
       }
+      album_share_accesses: {
+        Row: {
+          accessed_at: string
+          id: number
+          ip: unknown
+          share_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          id?: never
+          ip?: unknown
+          share_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          id?: never
+          ip?: unknown
+          share_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_share_accesses_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "album_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      album_share_photos: {
+        Row: {
+          photo_id: string
+          position: number
+          share_id: string
+        }
+        Insert: {
+          photo_id: string
+          position?: number
+          share_id: string
+        }
+        Update: {
+          photo_id?: string
+          position?: number
+          share_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_share_photos_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "album_photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_share_photos_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "album_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       album_shares: {
         Row: {
-          album_id: string
+          album_id: string | null
+          baby_id: string | null
           created_at: string
           created_by: string | null
           expires_at: string
           id: string
+          kind: string
+          label: string | null
+          opened_at: string | null
           revoked_at: string | null
+          single_use: boolean
+          token_hash: string | null
         }
         Insert: {
-          album_id: string
+          album_id?: string | null
+          baby_id?: string | null
           created_at?: string
           created_by?: string | null
           expires_at: string
           id?: string
+          kind?: string
+          label?: string | null
+          opened_at?: string | null
           revoked_at?: string | null
+          single_use?: boolean
+          token_hash?: string | null
         }
         Update: {
-          album_id?: string
+          album_id?: string | null
+          baby_id?: string | null
           created_at?: string
           created_by?: string | null
           expires_at?: string
           id?: string
+          kind?: string
+          label?: string | null
+          opened_at?: string | null
           revoked_at?: string | null
+          single_use?: boolean
+          token_hash?: string | null
         }
         Relationships: [
           {
@@ -108,6 +191,13 @@ export type Database = {
             columns: ["album_id"]
             isOneToOne: false
             referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_shares_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
             referencedColumns: ["id"]
           },
           {
