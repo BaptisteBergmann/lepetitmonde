@@ -1168,7 +1168,16 @@
     "invalidFilename": "Nom de fichier invalide.",
     "invalidScreenshot": "La capture d'écran doit être une image PNG de moins de 1 Mo.",
     "invalidSharePhotos": "Certaines de ces photos ne peuvent pas être partagées.",
-    "tooManySharePhotos": "Trop de photos sélectionnées pour un seul lien."
+    "tooManySharePhotos": "Trop de photos sélectionnées pour un seul lien.",
+    "careEventNotFound": "Entrée introuvable",
+    "careAlreadyOngoing": "Déjà en cours",
+    "careInvalidKind": "Type d'entrée invalide",
+    "careInvalidSide": "Côté invalide",
+    "careInvalidTime": "Date ou heure invalide",
+    "careEndBeforeStart": "La fin doit être après le début",
+    "careTooLong": "Une entrée ne peut pas durer plus de 24 heures",
+    "careInFuture": "L'heure ne peut pas être dans le futur",
+    "careInvalidAmount": "La quantité doit être comprise entre 1 et 1000 ml"
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",

@@ -1168,7 +1168,16 @@
     "invalidFilename": "Invalid file name.",
     "invalidScreenshot": "The screenshot must be a PNG image under 1 MB.",
     "invalidSharePhotos": "Some of these photos can't be shared.",
-    "tooManySharePhotos": "Too many photos selected for one link."
+    "tooManySharePhotos": "Too many photos selected for one link.",
+    "careEventNotFound": "Entry not found",
+    "careAlreadyOngoing": "Already running",
+    "careInvalidKind": "Invalid entry type",
+    "careInvalidSide": "Invalid side",
+    "careInvalidTime": "Invalid date or time",
+    "careEndBeforeStart": "The end must be after the start",
+    "careTooLong": "An entry can't last more than 24 hours",
+    "careInFuture": "The time can't be in the future",
+    "careInvalidAmount": "The amount must be between 1 and 1000 ml"
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",
