@@ -463,6 +463,76 @@ export type Database = {
           },
         ]
       }
+      care_events: {
+        Row: {
+          amount_ml: number | null
+          baby_id: string
+          breast_side: Database["public"]["Enums"]["breast_side"] | null
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["care_event_kind"]
+          note: string | null
+          ongoing: boolean
+          started_at: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount_ml?: number | null
+          baby_id: string
+          breast_side?: Database["public"]["Enums"]["breast_side"] | null
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["care_event_kind"]
+          note?: string | null
+          ongoing?: boolean
+          started_at: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount_ml?: number | null
+          baby_id?: string
+          breast_side?: Database["public"]["Enums"]["breast_side"] | null
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["care_event_kind"]
+          note?: string | null
+          ongoing?: boolean
+          started_at?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_events_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_events_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       circles: {
         Row: {
           baby_id: string | null
@@ -1758,7 +1828,9 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      breast_side: "left" | "right" | "both"
       bug_report_status: "new" | "reviewed" | "fixed"
+      care_event_kind: "sleep" | "breastfeed" | "bottle"
       event_kind: "occasion" | "life_stage" | "medical"
       item_condition: "new" | "secondhand"
       milestone_type:
@@ -1909,7 +1981,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      breast_side: ["left", "right", "both"],
       bug_report_status: ["new", "reviewed", "fixed"],
+      care_event_kind: ["sleep", "breastfeed", "bottle"],
       event_kind: ["occasion", "life_stage", "medical"],
       item_condition: ["new", "secondhand"],
       milestone_type: [
