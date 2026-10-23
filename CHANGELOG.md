@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `95daf9b` fix(db): revoke default table-wide grants on care_events
 - `b424fc7` docs(plans): mark baby-tracker implemented
 - `33a4d6c` feat(tracker): live-refresh tracker across devices
 - `dcf3633` feat(tracker): add manual add, edit and delete of entries
