@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `b706877` docs(plans): approve baby-tracker with device timezone decision
 - `a5b8e83` feat(agents): add security subagent for audits and change reviews
 
 ## 2026-10-17
