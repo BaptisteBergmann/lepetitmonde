@@ -3,7 +3,7 @@ import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
 type RealtimeEvent = {
-  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories' | 'story_highlights'
+  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories' | 'story_highlights' | 'care_events'
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: unknown
   old: unknown
@@ -135,6 +135,42 @@ function openChannel(babyId: string): Entry {
       () => {
         for (const listener of listeners) {
           listener({ table: 'story_highlights', eventType: 'DELETE', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // Not every member may open the tracker (the page role is app-level and
+      // this client bypasses RLS), so forward a bare signal, never the row;
+      // consumers refresh through the page, which re-checks access. Realtime
+      // can't apply a baby_id filter to DELETE events, so DELETE gets its own
+      // binding below and INSERT/UPDATE are filtered here.
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'care_events', filter: `baby_id=eq.${babyId}` },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'care_events', eventType: 'INSERT', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'care_events', filter: `baby_id=eq.${babyId}` },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'care_events', eventType: 'UPDATE', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // DELETE payloads carry only the id and can't be filtered by baby_id, so
+      // this fans out to every baby's channel (same tradeoff as
+      // `story_highlight_items` above). The signal has no data; at worst another
+      // baby's viewer does one harmless router.refresh().
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'care_events' },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'care_events', eventType: 'DELETE', new: null, old: null })
         }
       }
     )

@@ -10,6 +10,7 @@ import { AddEntryButton } from "./_components/add_entry_button";
 import { CareLog } from "./_components/care_log";
 import { NowPanel } from "./_components/now_panel";
 import { DayNav } from "./_components/day_nav";
+import { TrackerLive } from "./_components/tracker_live";
 import { TzCookie } from "./_components/tz_cookie";
 
 export default async function TrackerPage({
@@ -51,6 +52,7 @@ export default async function TrackerPage({
   return (
     <div className="text-landing-foreground">
       <TzCookie />
+      <TrackerLive babyId={babyId} />
       <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-16">
         <Reveal className="border-b border-landing-border pb-4 mb-6">
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">
