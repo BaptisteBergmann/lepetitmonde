@@ -4,6 +4,13 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `a372800` fix(auth): make session cookies HttpOnly, Secure and 30-day
+- `b8c2ee8` feat(auth): throttle login and password reset attempts
+- `629f9a2` fix(auth): require 10-character passwords
+- `9c090e1` fix(vitals): never send or log share tokens in web vitals or bug reports
+- `b8224b0` fix(email): escape all template values in emails
+- `d8a9fc3` fix(auth): build password reset redirect from SITE_URL
+- `2651814` fix(auth): restrict auth/confirm redirects to same-site paths
 - `bda5c26` docs(plans): record security access control fixes
 - `3cd7a97` fix(security): check membership in getPageSettings and before pruning stories
 - `b243174` fix(security): scope addUserToCircle to the admin's baby
