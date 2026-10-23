@@ -7,7 +7,7 @@ import { Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
-import { assertIsAdmin } from './access'
+import { assertIsAdmin, getAllBabyMemberIds } from './access'
 import { getUserAccess } from './users'
 import { notifyUsers } from './notify'
 import { actionError } from './errors'
@@ -161,17 +161,31 @@ export async function addUserToCircle(circleId: string, userId: string, babyId: 
   const contextLogger = logger.child({ function: addUserToCircle.name, babyId, circleId, userId })
   await assertIsAdmin(supabase, babyId)
 
+  // Inline instead of assertCirclesInBaby: feed-access imports this module.
+  const { data: circle, error: circleError } = await supabase
+    .from('circles')
+    .select('name')
+    .eq('id', circleId)
+    .eq('baby_id', babyId)
+    .maybeSingle()
+
+  if (circleError) { contextLogger.error(circleError, "Error checking circle"); throw circleError }
+  if (!circle) {
+    contextLogger.warn("Circle not found in baby")
+    throw await actionError('unauthorized')
+  }
+
+  const memberIds = await getAllBabyMemberIds(babyId)
+  if (!memberIds.includes(userId)) {
+    contextLogger.warn("Target user is not a member of the baby")
+    throw await actionError('unauthorized')
+  }
+
   const rep = await supabase
     .from('circles_access')
     .insert([{ circle_id: circleId, user_id: userId, baby_id: babyId }])
 
   if (rep.error) throw rep.error
-
-  const { data: circle } = await supabase
-    .from('circles')
-    .select('name')
-    .eq('id', circleId)
-    .single()
 
   const t = await getTranslations('pushNotifications')
   await notifyUsers(babyId, 'circle_access_granted', {
