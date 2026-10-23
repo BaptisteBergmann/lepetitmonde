@@ -13,6 +13,7 @@ import { notifyUsers } from './notify'
 import { logger } from '../logger'
 import { actionError } from './errors'
 import { hasUnsafePathSegment } from '@utils/storage-path'
+import { assertCirclesInBaby } from '@utils/feed-access'
 
 export type AnecdoteWithDetails = Tables<'anecdotes'> & {
   circleIds: string[]
@@ -36,6 +37,14 @@ export async function createAnecdote(anecdote: NewAnecdote, circleIds: string[])
   const contextLogger = logger.child({ function: createAnecdote.name, babyId: anecdote.baby_id })
 
   await assertIsAdmin(supabase, anecdote.baby_id)
+
+  // Shape first: new Set("abc") would split a string into characters.
+  if (!Array.isArray(circleIds) || !circleIds.every((id) => typeof id === 'string')) {
+    contextLogger.warn("Rejected malformed circleIds")
+    throw await actionError('unauthorized')
+  }
+  await assertCirclesInBaby(circleIds, anecdote.baby_id)
+
   await ensureBabyBucket(anecdote.baby_id)
 
   const { data, error } = await supabase
@@ -119,7 +128,13 @@ export async function updateAnecdote(
 
   await assertIsAdmin(supabase, babyId)
 
-  const { error } = await supabase
+  if (!Array.isArray(circleIds) || !circleIds.every((id) => typeof id === 'string')) {
+    contextLogger.warn("Rejected malformed circleIds")
+    throw await actionError('unauthorized')
+  }
+  await assertCirclesInBaby(circleIds, babyId)
+
+  const { data: updated, error } = await supabase
     .from('anecdotes')
     .update({
       content: update.content,
@@ -127,8 +142,17 @@ export async function updateAnecdote(
     })
     .eq('id', anecdoteId)
     .eq('baby_id', babyId)
+    .select('id')
+    .maybeSingle()
 
   if (error) { contextLogger.error(error, "Error updating anecdote"); throw error }
+
+  // anecdotes_circles is keyed by anecdoteId alone: only touch it once the
+  // anecdote is confirmed to belong to this baby.
+  if (!updated) {
+    contextLogger.warn("Anecdote not found in baby")
+    throw await actionError('unauthorized')
+  }
 
   const { error: deleteCirclesError } = await supabase
     .from('anecdotes_circles')

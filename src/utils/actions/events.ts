@@ -10,6 +10,8 @@ import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { notifyUsers } from './notify'
 import { logger } from '../logger'
+import { actionError } from './errors'
+import { assertCirclesInBaby } from '@utils/feed-access'
 
 type NewEvent = TablesInsert<'events'>;
 export type EventWithCircles = Tables<'events'> & { circle_ids: string[] };
@@ -19,6 +21,13 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
   const contextLogger = logger.child({ function: createEvent.name, babyId: event.baby_id })
 
   await assertIsAdmin(supabase, event.baby_id)
+
+  // Shape first: new Set("abc") would split a string into characters.
+  if (!Array.isArray(circleIds) || !circleIds.every((id) => typeof id === 'string')) {
+    contextLogger.warn("Rejected malformed circleIds")
+    throw await actionError('unauthorized')
+  }
+  await assertCirclesInBaby(circleIds, event.baby_id)
 
   const kind = event.kind ?? 'occasion'
 
@@ -75,7 +84,15 @@ export async function updateEvent(eventId: string, babyId: string, patch: {
   const contextLogger = logger.child({ function: updateEvent.name, eventId, babyId })
   await assertIsAdmin(supabase, babyId)
 
-  const { error } = await supabase
+  if (patch.circleIds !== undefined) {
+    if (!Array.isArray(patch.circleIds) || !patch.circleIds.every((id) => typeof id === 'string')) {
+      contextLogger.warn("Rejected malformed circleIds")
+      throw await actionError('unauthorized')
+    }
+    await assertCirclesInBaby(patch.circleIds, babyId)
+  }
+
+  const { data: updated, error } = await supabase
     .from('events')
     .update({
       event_date: patch.eventDate,
@@ -87,8 +104,17 @@ export async function updateEvent(eventId: string, babyId: string, patch: {
     })
     .eq('id', eventId)
     .eq('baby_id', babyId)
+    .select('id')
+    .maybeSingle()
 
   if (error) { contextLogger.error(error, "Error updating event"); throw error }
+
+  // The link table is keyed by eventId alone, so it must not be touched
+  // unless the event really belongs to this baby.
+  if (!updated) {
+    contextLogger.warn("Event not found in baby")
+    throw await actionError('unauthorized')
+  }
 
   if (patch.circleIds) {
     const { error: deleteError } = await supabase
