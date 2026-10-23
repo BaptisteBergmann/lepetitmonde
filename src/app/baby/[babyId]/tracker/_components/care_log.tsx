@@ -6,14 +6,17 @@ import { formatDuration } from '@utils/care-duration'
 import { todayInZone } from '@utils/care-time'
 import { formatDateAtTimeParts } from '@utils/formatting'
 import { cn } from '@utils/utils'
+import { CareLogRow } from './care_log_row'
 import { describeEvent } from './kind_ui'
 
 export async function CareLog({
+  babyId,
   events,
   day,
   tz,
   isToday,
 }: {
+  babyId: string
   events: CareEvent[]
   day: string
   tz: string
@@ -52,29 +55,32 @@ export async function CareLog({
             : start
 
         return (
-          <li
-            key={event.id}
-            className="flex min-h-16 w-full items-center gap-3 rounded-2xl border border-landing-border bg-landing-surface p-3"
-          >
-            <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-full', CARE_TONE_CLASSES[config.tone])}>
-              <Icon className="size-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{describeEvent(event, t)}</p>
-              <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                {timeLine}
-                {event.ongoing && (
-                  <Badge variant="secondary">
-                    <span className="size-1.5 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />
-                    {t('log.ongoing')}
-                  </Badge>
-                )}
-              </p>
-              {event.note && <p className="line-clamp-2 text-sm text-landing-foreground">{event.note}</p>}
-              <p className="text-xs text-muted-foreground">
-                {t('log.by', { name: event.created_by_name ?? tCommon('userFallback') })}
-              </p>
-            </div>
+          <li key={event.id}>
+            <CareLogRow
+              babyId={babyId}
+              event={event}
+              ariaLabel={t('log.editEntry', { summary: `${describeEvent(event, t)}, ${start}` })}
+            >
+              <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-full', CARE_TONE_CLASSES[config.tone])}>
+                <Icon className="size-5" aria-hidden="true" />
+              </span>
+              <span className="block min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">{describeEvent(event, t)}</span>
+                <span className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  {timeLine}
+                  {event.ongoing && (
+                    <Badge variant="secondary">
+                      <span className="size-1.5 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />
+                      {t('log.ongoing')}
+                    </Badge>
+                  )}
+                </span>
+                {event.note && <span className="line-clamp-2 block text-sm text-landing-foreground">{event.note}</span>}
+                <span className="block text-xs text-muted-foreground">
+                  {t('log.by', { name: event.created_by_name ?? tCommon('userFallback') })}
+                </span>
+              </span>
+            </CareLogRow>
           </li>
         )
       })}

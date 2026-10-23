@@ -6,6 +6,7 @@ import { parseDayParam, todayInZone, totalSleepMs, zonedDayBounds } from "@/util
 import { formatDuration } from "@/utils/care-duration";
 import { FEED_KINDS } from "@/utils/care-events";
 import { Reveal } from "@components/reveal";
+import { AddEntryButton } from "./_components/add_entry_button";
 import { CareLog } from "./_components/care_log";
 import { NowPanel } from "./_components/now_panel";
 import { DayNav } from "./_components/day_nav";
@@ -78,10 +79,13 @@ export default async function TrackerPage({
             </dl>
 
             <section className="space-y-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t('log.heading')}
-              </h2>
-              <CareLog events={events} day={day} tz={tz} isToday={day === today} />
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t('log.heading')}
+                </h2>
+                <AddEntryButton babyId={babyId} />
+              </div>
+              <CareLog babyId={babyId} events={events} day={day} tz={tz} isToday={day === today} />
             </section>
           </div>
         </div>

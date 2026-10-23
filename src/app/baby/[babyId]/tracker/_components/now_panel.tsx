@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -26,22 +26,11 @@ import { suggestNextSide } from '@utils/care-time'
 import { formatDateAtTimeParts } from '@utils/formatting'
 import { cn } from '@utils/utils'
 import { ChoiceGroup } from './choice_group'
+import { CareEventModal } from './care_event_modal'
 import { Elapsed } from './elapsed'
+import { useOnline } from './use_online'
 
 type OpenAction = 'breastfeed' | 'bottle' | null
-
-const subscribeOnline = (cb: () => void) => {
-  window.addEventListener('online', cb)
-  window.addEventListener('offline', cb)
-  return () => {
-    window.removeEventListener('online', cb)
-    window.removeEventListener('offline', cb)
-  }
-}
-
-function useOnline() {
-  return useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true)
-}
 
 export function NowPanel({
   babyId,
@@ -327,6 +316,7 @@ function BottlePanel({
 }
 
 function RunningCard({
+  babyId,
   kind,
   event,
   now,
@@ -350,6 +340,7 @@ function RunningCard({
   const config = CARE_KIND_CONFIG[kind]
   const Icon = config.icon
   const [side, setSide] = useState<BreastSide | null>(event.breast_side)
+  const [editing, setEditing] = useState(false)
   const time = formatDateAtTimeParts(event.started_at, locale, tz).time
   const tooLong = new Date(now).getTime() - new Date(event.started_at).getTime() > CARE_LIMITS.staleTimerMs
 
@@ -372,6 +363,9 @@ function RunningCard({
             <p className="text-sm text-muted-foreground">
               {t('running.startedBy', { time, name: event.created_by_name ?? tCommon('userFallback') })}
             </p>
+            <Button type="button" variant="ghost" size="sm" className="-ml-3 mt-1" aria-disabled={disabled || undefined} onClick={() => { if (!disabled) setEditing(true) }}>
+              {t('running.editStart')}
+            </Button>
           </div>
         </div>
 
@@ -397,6 +391,7 @@ function RunningCard({
           {t(kind === 'sleep' ? 'running.stopSleep' : 'running.stopFeed')}
         </Button>
       </CardContent>
+      {editing && <CareEventModal babyId={babyId} event={event} onClose={() => setEditing(false)} />}
     </Card>
   )
 }

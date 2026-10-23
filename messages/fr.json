@@ -1282,7 +1282,8 @@
       "by": "par {name}",
       "ongoing": "En cours",
       "noAmount": "Quantité non notée",
-      "editEntry": "Modifier : {summary}"
+      "editEntry": "Modifier : {summary}",
+      "add": "Ajouter une entrée"
     },
     "now": {
       "heading": "En ce moment"
@@ -1334,6 +1335,36 @@
       "delete": "Une erreur est survenue lors de la suppression.",
       "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
       "alreadyRunning": "Déjà en cours, l'écran a été mis à jour."
+    },
+    "form": {
+      "addTitle": "Nouvelle entrée",
+      "editTitle": "Modifier l'entrée",
+      "kind": "Type",
+      "start": "Début",
+      "time": "Heure",
+      "end": "Fin (facultatif)",
+      "endHint": "Laissez vide si ce n'était pas chronométré.",
+      "endNow": "Maintenant",
+      "duration": "Durée : {duration}",
+      "runningNote": "Le chronomètre tourne. Arrêtez-le depuis la section En ce moment.",
+      "side": "Côté",
+      "amount": "Quantité (ml)",
+      "amountPlaceholder": "ex. : 120",
+      "note": "Note (facultatif)",
+      "notePlaceholder": "ex. : agité, a fini son biberon",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette entrée ?",
+      "errors": {
+        "sideRequired": "Choisissez un côté.",
+        "endBeforeStart": "La fin doit être après le début.",
+        "future": "L'heure ne peut pas être dans le futur.",
+        "tooLong": "Une entrée ne peut pas durer plus de 24 heures.",
+        "amount": "Saisissez une quantité entre 1 et 1000 ml.",
+        "invalidTime": "Saisissez une date et une heure valides."
+      }
     }
   }
 }

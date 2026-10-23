@@ -1282,7 +1282,8 @@
       "by": "by {name}",
       "ongoing": "Ongoing",
       "noAmount": "Amount not set",
-      "editEntry": "Edit: {summary}"
+      "editEntry": "Edit: {summary}",
+      "add": "Add entry"
     },
     "now": {
       "heading": "Right now"
@@ -1334,6 +1335,36 @@
       "delete": "Something went wrong while deleting.",
       "network": "Couldn't reach the server. Check your connection and try again.",
       "alreadyRunning": "Already running, the screen has been updated."
+    },
+    "form": {
+      "addTitle": "New entry",
+      "editTitle": "Edit entry",
+      "kind": "Type",
+      "start": "Start",
+      "time": "Time",
+      "end": "End (optional)",
+      "endHint": "Leave empty if it wasn't timed.",
+      "endNow": "Now",
+      "duration": "Duration: {duration}",
+      "runningNote": "The timer is running. Stop it from the Right now section.",
+      "side": "Side",
+      "amount": "Amount (ml)",
+      "amountPlaceholder": "e.g. 120",
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g. Fussy, finished the bottle",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this entry?",
+      "errors": {
+        "sideRequired": "Choose a side.",
+        "endBeforeStart": "The end must be after the start.",
+        "future": "The time can't be in the future.",
+        "tooLong": "An entry can't last more than 24 hours.",
+        "amount": "Enter an amount between 1 and 1000 ml.",
+        "invalidTime": "Enter a valid date and time."
+      }
     }
   }
 }
