@@ -243,15 +243,18 @@ async function pruneExpiredStories(babyId: string) {
 
 export async function getActiveStories(babyId: string): Promise<StoryGroup[]> {
   const contextLogger = logger.child({ function: getActiveStories.name, babyId })
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) return []
+
   // Fire-and-forget: the query below already filters out expired rows, so
   // the sweep is pure housekeeping and shouldn't delay the feed render.
+  // Only after the membership check so outsiders can't trigger deletes.
   pruneExpiredStories(babyId).catch((err) => contextLogger.error(err, "Error pruning expired stories"))
 
   const supabase = await createClient()
   const { data: { user } } = await getAuthUser()
 
-  const access = await getUserAccess(babyId)
-  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
+  const isAdmin = access.access_level === 'admin'
   const userCircleIds = new Set(user ? await getUserCircleIds(babyId, user.id) : [])
 
   const { data, error } = await supabase

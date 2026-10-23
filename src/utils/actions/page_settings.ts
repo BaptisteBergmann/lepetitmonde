@@ -41,6 +41,10 @@ async function fetchPageOverrides(babyId: string) {
 }
 
 export async function getPageSettings(babyId: string): Promise<ResolvedPage[]> {
+  // Before the cache, which is keyed by babyId alone.
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) return []
+
   const overrides = await pageOverridesCache.get(babyId, () => fetchPageOverrides(babyId))
   const overrideByPageId = new Map(overrides.map((row) => [row.page_id, row]))
   const t = await getTranslations('pages')
