@@ -6,6 +6,7 @@ export function isValidPasswordLength(password: unknown): password is string {
   return (
     typeof password === 'string' &&
     password.length >= PASSWORD_MIN_LENGTH &&
-    password.length <= PASSWORD_MAX_LENGTH
+    // Bytes, not characters: multi-byte characters hit bcrypt's limit sooner.
+    new TextEncoder().encode(password).length <= PASSWORD_MAX_LENGTH
   )
 }
