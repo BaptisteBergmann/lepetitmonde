@@ -34,8 +34,16 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   // SITE_URL, not the Origin header: the header is client-controlled.
+  const siteUrl = process.env.SITE_URL
+  if (!siteUrl) {
+    // Never build a link from "undefined"; keep the generic response so the
+    // misconfiguration doesn't reveal anything to the caller.
+    contextLogger.error('SITE_URL not set')
+    redirect(`/forgot-password?message=${encodeURIComponent(t('resetLinkSentMessage'))}`)
+  }
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.SITE_URL}/auth/confirm?next=/reset-password`,
+    redirectTo: `${siteUrl}/auth/confirm?next=/reset-password`,
   })
 
   if (error) {
