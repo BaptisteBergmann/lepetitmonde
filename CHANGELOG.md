@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `7688fe1` fix(auth): fail reset when SITE_URL is unset
+- `6e46919` fix(auth): count password maximum in bytes
 - `a372800` fix(auth): make session cookies HttpOnly, Secure and 30-day
 - `b8c2ee8` feat(auth): throttle login and password reset attempts
 - `629f9a2` fix(auth): require 10-character passwords
