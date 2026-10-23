@@ -4,6 +4,12 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `3cd7a97` fix(security): check membership in getPageSettings and before pruning stories
+- `b243174` fix(security): scope addUserToCircle to the admin's baby
+- `8c96499` fix(security): scope event and anecdote circle links to their baby
+- `cb1639b` fix(security): gate the admin page on admin access
+- `a21c648` fix(security): require baby membership in circle reads
+- `f32a2cc` fix(security): require baby membership in getUsers and getBaby
 - `436ab99` ci: restrict default token and pin actions to commit SHAs
 - `f62b72c` build(docker): pin node and cloudflared images by digest
 - `812a4d4` build(docker): exclude mise config and .claude from build context
