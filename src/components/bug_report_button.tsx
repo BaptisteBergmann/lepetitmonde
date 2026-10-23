@@ -4,12 +4,15 @@ import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { usePathname } from 'next/navigation'
+import { isSharePath } from '@/utils/vitals-path'
 import { Bug, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { submitBugReport } from '@utils/actions/bug_reports'
 
 export default function BugReportButton() {
   const t = useTranslations('bugReport')
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [isCapturing, setIsCapturing] = useState(false)
   const [isPending, setIsPending] = useState(false)
@@ -81,6 +84,9 @@ export default function BugReportButton() {
       setIsPending(false)
     }
   }
+
+  // window.location.href would store the share token in bug_reports.page_url.
+  if (isSharePath(pathname)) return null
 
   return (
     <>
