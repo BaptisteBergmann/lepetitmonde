@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `6ea120a` fix(tracker): enlarge edit-start and now buttons for touch
 - `086c6c1` fix(tracker): return action results instead of throwing, keep running end time, default bottle time server-side
 - `c584c06` fix(tracker): announce the disabled next-day control with a real disabled button
 - `95daf9b` fix(db): revoke default table-wide grants on care_events
