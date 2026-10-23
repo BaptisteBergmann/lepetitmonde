@@ -361,7 +361,7 @@ function RunningCard({
             <p className="text-sm text-muted-foreground">
               {t('running.startedBy', { time, name: event.created_by_name ?? tCommon('userFallback') })}
             </p>
-            <Button type="button" variant="ghost" size="sm" className="-ml-3 mt-1" aria-disabled={disabled || undefined} onClick={() => { if (!disabled) setEditing(true) }}>
+            <Button type="button" variant="ghost" size="lg" className="-ml-3 mt-1" aria-disabled={disabled || undefined} onClick={() => { if (!disabled) setEditing(true) }}>
               {t('running.editStart')}
             </Button>
           </div>

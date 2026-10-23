@@ -247,7 +247,7 @@ function CareEventForm({
                 aria-describedby={touched.end && errors.end ? 'end-error' : undefined}
                 className="h-11"
               />
-              <Button type="button" variant="outline" size="sm" onClick={() => { setEnd(toLocalInput(new Date())); touch('end') }}>
+              <Button type="button" variant="outline" size="lg" onClick={() => { setEnd(toLocalInput(new Date())); touch('end') }}>
                 {t('form.endNow')}
               </Button>
             </div>
