@@ -4,6 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
+import { isValidPasswordLength, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/utils/password-policy'
 
 export async function requestPasswordReset(formData: FormData) {
   const contextLogger = logger.child({ function: requestPasswordReset.name })
@@ -41,6 +42,10 @@ export async function updatePassword(formData: FormData) {
 
   if (password !== confirmPassword) {
     redirect(`/reset-password?message=${encodeURIComponent(t('passwordMismatch'))}`)
+  }
+
+  if (!isValidPasswordLength(password)) {
+    redirect(`/reset-password?message=${encodeURIComponent(t('passwordTooShort', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }))}`)
   }
 
   const { error } = await supabase.auth.updateUser({ password })

@@ -117,7 +117,8 @@
     "sessionExpiredMessage": "Session expired, please try again.",
     "updatePasswordError": "Error updating the password",
     "passwordUpdatedMessage": "Password updated, you can now log in",
-    "passwordMismatch": "Passwords don't match"
+    "passwordMismatch": "Passwords don't match",
+    "passwordTooShort": "Password must be between {min} and {max} characters."
   },
   "nav": {
     "siteTitleWithBaby": "{appName} — {babyName}",

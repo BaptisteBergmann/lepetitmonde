@@ -8,6 +8,7 @@ import { logger } from '../logger'
 import { sendWelcomeEmail } from '@/utils/email'
 import { getBabyAdminIds } from './access'
 import { notifyUsers } from './notify'
+import { isValidPasswordLength, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/utils/password-policy'
 import { createUserProfile, findValidInvitation, grantViewerAccess } from '@utils/invitations'
 
 export async function signup(formData: FormData) {
@@ -28,6 +29,10 @@ export async function signup(formData: FormData) {
 
   if (!invitation) {
     return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
+  }
+
+  if (!isValidPasswordLength(password)) {
+    return redirect(`/invite?token=${encodeURIComponent(token)}&message=${encodeURIComponent(tAuth('passwordTooShort', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }))}`)
   }
 
   // On tente de créer le compte via Supabase

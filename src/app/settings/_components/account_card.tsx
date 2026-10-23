@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { PasswordInput } from '@/components/ui/password-input'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/utils/password-policy'
 import { LogOut, UserCircle } from 'lucide-react'
 
 interface AccountCardProps {
@@ -113,11 +114,11 @@ export default function AccountCard({ initials, fullName, email, firstName, last
             <p className="text-xs font-semibold text-landing-muted -mt-1">{t('passwordSection')}</p>
             <Field>
               <FieldLabel htmlFor="password">{t('newPasswordLabel')}</FieldLabel>
-              <PasswordInput name="password" id="password" autoComplete="new-password" required minLength={6} />
+              <PasswordInput name="password" id="password" autoComplete="new-password" required minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} />
             </Field>
             <Field>
               <FieldLabel htmlFor="confirmPassword">{t('confirmPasswordLabel')}</FieldLabel>
-              <PasswordInput name="confirmPassword" id="confirmPassword" autoComplete="new-password" required minLength={6} />
+              <PasswordInput name="confirmPassword" id="confirmPassword" autoComplete="new-password" required minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} />
             </Field>
             <Field>
               <Button type="submit" size="sm" variant="outline" className="cursor-pointer">
