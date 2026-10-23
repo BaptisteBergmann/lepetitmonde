@@ -32,8 +32,8 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
   const templatePath = path.join(process.cwd(), 'public/emails', locale, 'welcome.html')
   const template = await readFile(templatePath, 'utf-8')
   const html = template
-    .replaceAll('{{FIRST_NAME}}', firstName)
-    .replaceAll('{{SITE_URL}}', siteUrl)
+    .replaceAll('{{FIRST_NAME}}', escapeHtml(firstName))
+    .replaceAll('{{SITE_URL}}', escapeHtml(siteUrl))
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
@@ -56,9 +56,9 @@ export async function sendInviteEmail(to: string, babyName: string, inviteUrl: s
   const templatePath = path.join(process.cwd(), 'public/emails', locale, 'invite-member.html')
   const template = await readFile(templatePath, 'utf-8')
   const html = template
-    .replaceAll('{{BABY_NAME}}', babyName)
-    .replaceAll('{{INVITE_URL}}', inviteUrl)
-    .replaceAll('{{SITE_URL}}', siteUrl)
+    .replaceAll('{{BABY_NAME}}', escapeHtml(babyName))
+    .replaceAll('{{INVITE_URL}}', escapeHtml(inviteUrl))
+    .replaceAll('{{SITE_URL}}', escapeHtml(siteUrl))
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
@@ -101,10 +101,10 @@ export async function sendBroadcastEmail(
   const escapedSubject = escapeHtml(subject)
   const escapedMessage = escapeHtml(message).replaceAll('\n', '<br>')
   const html = template
-    .replaceAll('{{BABY_NAME}}', babyName)
+    .replaceAll('{{BABY_NAME}}', escapeHtml(babyName))
     .replaceAll('{{SUBJECT}}', escapedSubject)
     .replaceAll('{{MESSAGE}}', escapedMessage)
-    .replaceAll('{{SITE_URL}}', siteUrl)
+    .replaceAll('{{SITE_URL}}', escapeHtml(siteUrl))
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
@@ -141,10 +141,10 @@ export async function sendNewPostEmails(recipients: string[], babyName: string, 
   // message, since it can carry user-authored text.
   const escapedBody = escapeHtml(body).replaceAll('\n', '<br>')
   const html = template
-    .replaceAll('{{BABY_NAME}}', babyName)
+    .replaceAll('{{BABY_NAME}}', escapeHtml(babyName))
     .replaceAll('{{BODY}}', escapedBody)
-    .replaceAll('{{POST_URL}}', postUrl)
-    .replaceAll('{{SITE_URL}}', siteUrl)
+    .replaceAll('{{POST_URL}}', escapeHtml(postUrl))
+    .replaceAll('{{SITE_URL}}', escapeHtml(siteUrl))
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const subject = t('newPostSubject', { babyName })
