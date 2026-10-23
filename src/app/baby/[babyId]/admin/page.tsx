@@ -12,7 +12,7 @@ import InvitationsList from "./_components/display_invitations";
 import { getUsers, getUserAccess } from "@/utils/actions/users";
 import { getMembersDevices } from "@/utils/actions/notifications";
 import { getBugReports } from "@/utils/actions/bug_reports";
-import { getPageSettings } from "@/utils/actions/page_settings";
+import { getPageSettings, assertPageAccess } from "@/utils/actions/page_settings";
 import DisplayBugReports from "./_components/display_bug_reports";
 import DisplayPageSettings from "./_components/display_page_settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +26,8 @@ export default async function InviteForm({
   params: Promise<{ babyId: string }>
 }) {
   const { babyId } = await params;
+  // Before any data call: non-members and viewers must not receive member or circle data.
+  await assertPageAccess(babyId, 'admin');
   const t = await getTranslations('admin');
   const access = await getUserAccess(babyId);
   const isAdmin = !Array.isArray(access) && access?.access_level === "admin";
