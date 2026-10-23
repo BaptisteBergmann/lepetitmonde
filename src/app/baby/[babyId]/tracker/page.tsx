@@ -1,12 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
-import { getTrackerDay } from "@/utils/actions/care_events";
+import { getTrackerDay, getTrackerNow } from "@/utils/actions/care_events";
 import { getRequestTimeZone } from "@/utils/care-timezone";
 import { parseDayParam, todayInZone, totalSleepMs, zonedDayBounds } from "@/utils/care-time";
 import { formatDuration } from "@/utils/care-duration";
 import { FEED_KINDS } from "@/utils/care-events";
 import { Reveal } from "@components/reveal";
 import { CareLog } from "./_components/care_log";
+import { NowPanel } from "./_components/now_panel";
 import { DayNav } from "./_components/day_nav";
 import { TzCookie } from "./_components/tz_cookie";
 
@@ -29,7 +30,7 @@ export default async function TrackerPage({
   const day = parseDayParam(dayParam, tz, now);
   const bounds = zonedDayBounds(day, tz);
 
-  const events = await getTrackerDay(babyId, day);
+  const [events, nowState] = await Promise.all([getTrackerDay(babyId, day), getTrackerNow(babyId)]);
 
   // Feeds and bottles count by the day they started on; sleep is clamped to the day.
   const startedToday = events.filter(
@@ -59,24 +60,30 @@ export default async function TrackerPage({
           </p>
         </Reveal>
 
-        <div className="space-y-8">
-          <DayNav babyId={babyId} day={day} today={today} />
+        <div className="space-y-8 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:items-start md:gap-8 md:space-y-0">
+          <div className="md:sticky md:top-24">
+            <NowPanel babyId={babyId} tz={tz} state={nowState} />
+          </div>
 
-          <dl aria-label={t('summary.label')} className="grid grid-cols-3 gap-2">
-            {stats.map((stat) => (
-              <div key={stat.id} className="flex flex-col-reverse rounded-2xl border border-landing-border bg-landing-surface p-3 text-center">
-                <dd className="font-display text-xl font-semibold">{stat.value}</dd>
-                <dt className="text-xs text-muted-foreground">{stat.label}</dt>
-              </div>
-            ))}
-          </dl>
+          <div className="space-y-8">
+            <DayNav babyId={babyId} day={day} today={today} />
 
-          <section className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t('log.heading')}
-            </h2>
-            <CareLog events={events} day={day} tz={tz} isToday={day === today} />
-          </section>
+            <dl aria-label={t('summary.label')} className="grid grid-cols-3 gap-2">
+              {stats.map((stat) => (
+                <div key={stat.id} className="flex flex-col-reverse rounded-2xl border border-landing-border bg-landing-surface p-3 text-center">
+                  <dd className="font-display text-xl font-semibold">{stat.value}</dd>
+                  <dt className="text-xs text-muted-foreground">{stat.label}</dt>
+                </div>
+              ))}
+            </dl>
+
+            <section className="space-y-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('log.heading')}
+              </h2>
+              <CareLog events={events} day={day} tz={tz} isToday={day === today} />
+            </section>
+          </div>
         </div>
       </div>
     </div>

@@ -1283,6 +1283,57 @@
       "ongoing": "Ongoing",
       "noAmount": "Amount not set",
       "editEntry": "Edit: {summary}"
+    },
+    "now": {
+      "heading": "Right now"
+    },
+    "quick": {
+      "start": "Start",
+      "log": "Log",
+      "running": "Running",
+      "sideTitle": "Which side?",
+      "suggested": "Suggested",
+      "bottleTitle": "How much?",
+      "amountLabel": "Amount (ml)",
+      "decrease": "Remove 10 ml",
+      "increase": "Add 10 ml",
+      "logBottle": "Log bottle",
+      "logBottleNoAmount": "Log without amount",
+      "cancel": "Cancel"
+    },
+    "running": {
+      "sleepingFor": "Sleeping for {duration}",
+      "feedingFor": "Feeding for {duration}",
+      "startedBy": "Started at {time} by {name}",
+      "editStart": "Edit start time",
+      "side": "Side",
+      "stopSleep": "Stop sleep",
+      "stopFeed": "Stop feed",
+      "tooLong": "Running for over 12 hours. Stop it, then fix the times if needed."
+    },
+    "lastFeed": {
+      "title": "Last feed",
+      "breast": "{ago} · {side}",
+      "bottle": "{ago} · Bottle {amount} ml",
+      "bottleNoAmount": "{ago} · Bottle",
+      "none": "No feed logged yet",
+      "nextSide": "Next side: {side}"
+    },
+    "offline": "You're offline. Reconnect to log or edit entries.",
+    "announce": {
+      "sleepStarted": "Sleep started",
+      "sleepStopped": "Sleep stopped",
+      "feedStarted": "Feed started",
+      "feedStopped": "Feed stopped",
+      "bottleLogged": "Bottle logged"
+    },
+    "errors": {
+      "start": "Couldn't start. Please try again.",
+      "stop": "Couldn't stop. Please try again.",
+      "save": "Something went wrong while saving.",
+      "delete": "Something went wrong while deleting.",
+      "network": "Couldn't reach the server. Check your connection and try again.",
+      "alreadyRunning": "Already running, the screen has been updated."
     }
   }
 }

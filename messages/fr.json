@@ -1283,6 +1283,57 @@
       "ongoing": "En cours",
       "noAmount": "Quantité non notée",
       "editEntry": "Modifier : {summary}"
+    },
+    "now": {
+      "heading": "En ce moment"
+    },
+    "quick": {
+      "start": "Démarrer",
+      "log": "Noter",
+      "running": "En cours",
+      "sideTitle": "Quel côté ?",
+      "suggested": "Suggéré",
+      "bottleTitle": "Quelle quantité ?",
+      "amountLabel": "Quantité (ml)",
+      "decrease": "Retirer 10 ml",
+      "increase": "Ajouter 10 ml",
+      "logBottle": "Noter le biberon",
+      "logBottleNoAmount": "Noter sans quantité",
+      "cancel": "Annuler"
+    },
+    "running": {
+      "sleepingFor": "Dort depuis {duration}",
+      "feedingFor": "Tétée depuis {duration}",
+      "startedBy": "Commencé à {time} par {name}",
+      "editStart": "Modifier l'heure de début",
+      "side": "Côté",
+      "stopSleep": "Arrêter le sommeil",
+      "stopFeed": "Terminer la tétée",
+      "tooLong": "En cours depuis plus de 12 heures. Arrêtez-le, puis corrigez les heures si besoin."
+    },
+    "lastFeed": {
+      "title": "Dernier repas",
+      "breast": "{ago} · {side}",
+      "bottle": "{ago} · Biberon {amount} ml",
+      "bottleNoAmount": "{ago} · Biberon",
+      "none": "Aucun repas noté pour l'instant",
+      "nextSide": "Prochain côté : {side}"
+    },
+    "offline": "Vous êtes hors ligne. Reconnectez-vous pour noter ou modifier des entrées.",
+    "announce": {
+      "sleepStarted": "Sommeil démarré",
+      "sleepStopped": "Sommeil arrêté",
+      "feedStarted": "Tétée démarrée",
+      "feedStopped": "Tétée terminée",
+      "bottleLogged": "Biberon noté"
+    },
+    "errors": {
+      "start": "Impossible de démarrer. Veuillez réessayer.",
+      "stop": "Impossible d'arrêter. Veuillez réessayer.",
+      "save": "Une erreur est survenue lors de l'enregistrement.",
+      "delete": "Une erreur est survenue lors de la suppression.",
+      "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
+      "alreadyRunning": "Déjà en cours, l'écran a été mis à jour."
     }
   }
 }
