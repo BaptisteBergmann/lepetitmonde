@@ -104,12 +104,11 @@ export async function updatePageSetting(babyId: string, pageId: PageId, settings
   revalidatePath(`/baby/${babyId}`, 'layout')
 }
 
-// The enforcement primitive every protected page calls — blocks direct URL
-// access, not just nav visibility. Redirects to the baby's own landing page,
-// which is safe from a loop perspective: it never redirects further, it only
-// filters which section cards it shows.
-export async function assertPageAccess(babyId: string, pageId: PageId) {
-  const contextLogger = logger.child({ function: assertPageAccess.name, babyId, pageId })
+// Non-redirecting core of assertPageAccess, for Server Actions that must
+// throw instead of redirect. It only answers "can the *caller* open this
+// page", so exposing it from a 'use server' file leaks nothing.
+export async function hasPageAccess(babyId: string, pageId: PageId): Promise<boolean> {
+  const contextLogger = logger.child({ function: hasPageAccess.name, babyId, pageId })
 
   const settings = await getPageSettings(babyId)
   const page = settings.find((p) => p.id === pageId)
@@ -120,6 +119,16 @@ export async function assertPageAccess(babyId: string, pageId: PageId) {
   const allowed = !!page?.enabled && !!accessLevel && (accessLevel === 'admin' || accessLevel === page.role)
   if (!allowed) {
     contextLogger.warn({ accessLevel, pageEnabled: page?.enabled, requiredRole: page?.role }, "Blocked page access")
+  }
+  return allowed
+}
+
+// The enforcement primitive every protected page calls — blocks direct URL
+// access, not just nav visibility. Redirects to the baby's own landing page,
+// which is safe from a loop perspective: it never redirects further, it only
+// filters which section cards it shows.
+export async function assertPageAccess(babyId: string, pageId: PageId) {
+  if (!(await hasPageAccess(babyId, pageId))) {
     redirect(`/baby/${babyId}`)
   }
 }
