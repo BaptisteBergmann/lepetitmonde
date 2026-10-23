@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `f2ea4e9` fix(db): revoke default table-wide grants on share tables
 - `4a01b13` docs(plans): move baby-tracker plan to done
 - `eec26dc` fix(tracker): freeze ongoing flag when the edit modal opens
 - `451e5e1` fix(i18n): use Tète depuis for the running feed title in French
