@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `6cbeb76` feat(tracker): show day log, summary and day navigation
 - `3c5a6ac` feat(tracker): add care event server actions
 - `015a1ae` feat(tracker): add care time and kind helpers
 - `e790631` feat(tracker): register tracker page
