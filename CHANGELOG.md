@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `eec26dc` fix(tracker): freeze ongoing flag when the edit modal opens
 - `451e5e1` fix(i18n): use Tète depuis for the running feed title in French
 - `6ea120a` fix(tracker): enlarge edit-start and now buttons for touch
 - `086c6c1` fix(tracker): return action results instead of throwing, keep running end time, default bottle time server-side
