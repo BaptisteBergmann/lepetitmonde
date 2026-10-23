@@ -1,6 +1,6 @@
 ## Status: implemented
 
-All steps shipped on main (pending reviewer). Deviations: `getRequestTimeZone` lives in `src/utils/care-timezone.ts` (server-only) and the pure `resolveTimeZone` in `care-time.ts`, so `care-time.ts` stays client-safe; the realtime binding is split into filtered INSERT/UPDATE plus an unfiltered DELETE (DELETE events can't be filtered by baby_id); `ChoiceGroup` shipped with the now panel (step 7); `getTrackerDay` reads the tz cookie itself.
+All steps shipped on main; reviewer GREEN after 2 rounds plus a one-line fix (eec26dc). A follow-up migration `20261023120000_harden_care_events_grants.sql` revokes the default table-wide grants so only listed columns are updatable. Device timezone via a `tz` cookie, falling back to FAMILY_TIME_ZONE. Deferred lows: no stored-end check when only the start is edited (generic error), and unused `serverErrors.care*` keys. Deviations: `getRequestTimeZone` lives in `src/utils/care-timezone.ts` (server-only) and the pure `resolveTimeZone` in `care-time.ts`, so `care-time.ts` stays client-safe; the realtime binding is split into filtered INSERT/UPDATE plus an unfiltered DELETE (DELETE events can't be filtered by baby_id); `ChoiceGroup` shipped with the now panel (step 7); `getTrackerDay` reads the tz cookie itself.
 
 # Baby tracker (sleep and feeds)
 
