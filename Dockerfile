@@ -1,5 +1,7 @@
+# Base image is digest-pinned (multi-arch index). Bump the digest by hand or via
+# Dependabot to pick up Node/Alpine security patches.
 # --- Stage 1: Dependencies ---
-FROM node:24-alpine AS deps
+FROM node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -8,7 +10,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
 # --- Stage 2: Builder ---
-FROM node:24-alpine AS builder
+FROM node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -27,7 +29,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable pnpm && pnpm build
 
 # --- Stage 3: Runner ---
-FROM node:24-alpine AS runner
+FROM node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
