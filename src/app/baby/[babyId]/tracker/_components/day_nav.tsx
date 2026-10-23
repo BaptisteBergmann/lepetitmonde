@@ -33,9 +33,9 @@ export async function DayNav({ babyId, day, today }: { babyId: string; day: stri
         )}
       </div>
       {isToday ? (
-        <span aria-disabled="true" aria-label={t('next')} className={cn(navClass, 'pointer-events-none opacity-50')}>
+        <button type="button" disabled aria-label={t('next')} className={cn(navClass, 'opacity-50')}>
           <ChevronRight aria-hidden="true" />
-        </span>
+        </button>
       ) : (
         <Link href={hrefFor(shiftDay(day, 1))} aria-label={t('next')} className={navClass}>
           <ChevronRight aria-hidden="true" />
