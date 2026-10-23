@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-23
+
+- `a5b8e83` feat(agents): add security subagent for audits and change reviews
+
 ## 2026-10-17
 
 - `3f281a4` fix(share): compute last access per share
