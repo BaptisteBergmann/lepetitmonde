@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `015a1ae` feat(tracker): add care time and kind helpers
 - `e790631` feat(tracker): register tracker page
 - `011093c` refactor(pages): extract hasPageAccess from assertPageAccess
 - `e67d601` chore(types): regenerate Supabase types for care_events
