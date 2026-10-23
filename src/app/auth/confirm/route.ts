@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createTranslator } from 'next-intl'
 import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
+import { toSiteUrl } from '@/utils/safe-redirect'
 import { resolveLocale } from '@/i18n/config'
 
 // Redirects are built from SITE_URL rather than request.url: behind the
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash })
 
     if (!error) {
-      return NextResponse.redirect(new URL(next, siteUrl))
+      return NextResponse.redirect(toSiteUrl(next, siteUrl))
     }
 
     contextLogger.error({ err: error, type }, "verifyOtp failed")

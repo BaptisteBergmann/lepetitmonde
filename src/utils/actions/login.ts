@@ -4,15 +4,7 @@ import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-
-// N'autorise que les chemins relatifs internes (évite les open redirects du type
-// "//evil.com" ou "/\evil.com" qui sont interprétés comme des URLs absolues par le navigateur).
-function safeRedirectPath(path: FormDataEntryValue | null): string {
-  if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//') || path.startsWith('/\\')) {
-    return '/'
-  }
-  return path
-}
+import { safeRedirectPath } from '@/utils/safe-redirect'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
