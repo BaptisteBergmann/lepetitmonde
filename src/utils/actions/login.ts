@@ -4,15 +4,49 @@ import { createClient } from '@utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
+import { headers } from 'next/headers'
 import { safeRedirectPath } from '@/utils/safe-redirect'
+import { createRateLimiter } from '@/utils/rate-limit'
+import { getClientIp } from '@/utils/client-ip'
+import { logger } from '@/utils/logger'
+
+const WINDOW_MS = 15 * 60 * 1000
+// Strict on email+ip, looser per email so a stranger can't lock a family
+// member out from one IP, and a per-IP cap. NOTE: the per-IP limit and the IP
+// half of the strict key are bypassable until the L9 port bind ships (a
+// request reaching the app port directly can forge cf-connecting-ip); the
+// per-email limit is the guarantee until then.
+const strictLimiter = createRateLimiter({ windowMs: WINDOW_MS, max: 5 })
+const emailLimiter = createRateLimiter({ windowMs: WINDOW_MS, max: 20 })
+const ipLimiter = createRateLimiter({ windowMs: WINDOW_MS, max: 30 })
 
 export async function login(formData: FormData) {
+  const contextLogger = logger.child({ function: login.name })
   const supabase = await createClient()
 
   // On récupère les données du formulaire
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const redirectTo = safeRedirectPath(formData.get('redirectTo'))
+
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+  const ip = getClientIp(await headers()) ?? 'unknown'
+  const strictKey = `${normalizedEmail}|${ip}`
+  // Evaluate all three so every limiter counts the attempt.
+  const allowed = [
+    ['email_ip', strictLimiter.hit(strictKey)],
+    ['email', emailLimiter.hit(normalizedEmail)],
+    ['ip', ipLimiter.hit(ip)],
+  ] as const
+  const blocked = allowed.find(([, ok]) => !ok)
+  if (blocked) {
+    // No email and no IP in the log on purpose.
+    contextLogger.warn({ reason: blocked[0] }, 'Login throttled')
+    const t = await getTranslations('auth')
+    const params = new URLSearchParams({ message: t('tooManyAttempts') })
+    if (redirectTo !== '/') params.set('redirectTo', redirectTo)
+    return redirect(`/login?${params.toString()}`)
+  }
 
   // On tente de se connecter via Supabase
   const { error } = await supabase.auth.signInWithPassword({
@@ -27,6 +61,8 @@ export async function login(formData: FormData) {
     if (redirectTo !== '/') params.set('redirectTo', redirectTo)
     return redirect(`/login?${params.toString()}`)
   }
+
+  strictLimiter.reset(strictKey)
 
   // Si ça marche, on rafraîchit le cache Next.js et on redirige vers la page d'origine (ou l'accueil)
   revalidatePath('/', 'layout')

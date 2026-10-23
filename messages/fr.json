@@ -118,6 +118,7 @@
     "updatePasswordError": "Erreur lors de la mise à jour du mot de passe",
     "passwordUpdatedMessage": "Mot de passe mis à jour, vous pouvez vous connecter",
     "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "tooManyAttempts": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
     "passwordTooShort": "Le mot de passe doit contenir entre {min} et {max} caractères."
   },
   "nav": {

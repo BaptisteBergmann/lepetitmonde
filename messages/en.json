@@ -118,6 +118,7 @@
     "updatePasswordError": "Error updating the password",
     "passwordUpdatedMessage": "Password updated, you can now log in",
     "passwordMismatch": "Passwords don't match",
+    "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
     "passwordTooShort": "Password must be between {min} and {max} characters."
   },
   "nav": {

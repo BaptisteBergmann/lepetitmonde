@@ -4,7 +4,17 @@ import { createClient } from '@utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
+import { headers } from 'next/headers'
+import { createRateLimiter } from '@/utils/rate-limit'
+import { getClientIp } from '@/utils/client-ip'
 import { isValidPasswordLength, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/utils/password-policy'
+
+const HOUR_MS = 60 * 60 * 1000
+// NOTE: the per-IP limit is bypassable until the L9 port bind ships (a
+// request reaching the app port directly can forge cf-connecting-ip); the
+// per-email limit is the guarantee until then.
+const resetEmailLimiter = createRateLimiter({ windowMs: HOUR_MS, max: 3 })
+const resetIpLimiter = createRateLimiter({ windowMs: HOUR_MS, max: 10 })
 
 export async function requestPasswordReset(formData: FormData) {
   const contextLogger = logger.child({ function: requestPasswordReset.name })
@@ -12,6 +22,16 @@ export async function requestPasswordReset(formData: FormData) {
   const t = await getTranslations('auth')
 
   const email = formData.get('email') as string
+
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+  const ip = getClientIp(await headers()) ?? 'unknown'
+  const emailOk = resetEmailLimiter.hit(normalizedEmail)
+  const ipOk = resetIpLimiter.hit(ip)
+  if (!emailOk || !ipOk) {
+    // Same "link sent" message as below so throttling doesn't reveal anything.
+    contextLogger.warn({ reason: emailOk ? 'ip' : 'email' }, 'Password reset throttled')
+    redirect(`/forgot-password?message=${encodeURIComponent(t('resetLinkSentMessage'))}`)
+  }
 
   // SITE_URL, not the Origin header: the header is client-controlled.
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
