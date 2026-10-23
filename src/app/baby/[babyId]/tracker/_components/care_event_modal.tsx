@@ -143,17 +143,27 @@ function CareEventForm({
       const input = {
         kind,
         startedAt: startDate.toISOString(),
-        endedAt: endDate ? endDate.toISOString() : null,
+        // undefined = "leave the stored end alone" (running entries have none to edit).
+        endedAt: ongoing ? undefined : endDate ? endDate.toISOString() : null,
         side: config.fields.includes('side') ? side : null,
         amountMl: config.fields.includes('amount') ? amountNumber : null,
         note: note.trim() || null,
       }
-      if (event) await updateCareEvent(babyId, event.id, input)
-      else await createCareEvent(babyId, input)
+      const result = event ? await updateCareEvent(babyId, event.id, input) : await createCareEvent(babyId, input)
+      if (!result.ok) {
+        toast.error(t(`errors.codes.${result.error}`))
+        // A conflict or missing entry means the screen is stale.
+        if (result.error === 'conflict' || result.error === 'notFound') {
+          onClose()
+          router.refresh()
+        }
+        return
+      }
       onClose()
       router.refresh()
     } catch (err) {
-      toast.error(err instanceof TypeError ? t('errors.network') : err instanceof Error && err.message ? err.message : t('errors.save'))
+      // Thrown messages are masked in production, so only a translated fallback is shown.
+      toast.error(err instanceof TypeError ? t('errors.network') : t('errors.save'))
     } finally {
       setSaving(false)
     }
@@ -164,11 +174,12 @@ function CareEventForm({
     if (!(await confirmAction({ title: t('form.deleteConfirm'), confirmLabel: t('form.delete'), destructive: true }))) return
     setSaving(true)
     try {
-      await deleteCareEvent(babyId, event.id)
+      const result = await deleteCareEvent(babyId, event.id)
+      if (!result.ok) toast.error(t(`errors.codes.${result.error}`))
       onClose()
       router.refresh()
     } catch (err) {
-      toast.error(err instanceof TypeError ? t('errors.network') : err instanceof Error && err.message ? err.message : t('errors.delete'))
+      toast.error(err instanceof TypeError ? t('errors.network') : t('errors.delete'))
     } finally {
       setSaving(false)
     }

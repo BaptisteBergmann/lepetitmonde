@@ -1334,7 +1334,20 @@
       "save": "Something went wrong while saving.",
       "delete": "Something went wrong while deleting.",
       "network": "Couldn't reach the server. Check your connection and try again.",
-      "alreadyRunning": "Already running, the screen has been updated."
+      "alreadyRunning": "Already running, the screen has been updated.",
+      "codes": {
+        "notFound": "This entry no longer exists.",
+        "conflict": "This entry was changed by someone else. The screen has been updated, please try again.",
+        "alreadyRunning": "Already running, the screen has been updated.",
+        "future": "The time can't be in the future.",
+        "invalidTime": "Enter a valid date and time.",
+        "endBeforeStart": "The end must be after the start.",
+        "tooLong": "An entry can't last more than 24 hours.",
+        "invalidAmount": "Enter an amount between 1 and 1000 ml.",
+        "invalidSide": "Choose a side.",
+        "invalidKind": "Invalid entry type.",
+        "noteTooLong": "The note is too long (500 characters max)."
+      }
     },
     "form": {
       "addTitle": "New entry",

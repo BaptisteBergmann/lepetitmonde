@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { CareResult } from '@utils/care-validation'
 import { createCareEvent, startCareTimer, stopCareTimer } from '@utils/actions/care_events'
 import type { CareEvent, TrackerNow } from '@utils/actions/care_events'
 import {
@@ -43,7 +44,6 @@ export function NowPanel({
 }) {
   const router = useRouter()
   const t = useTranslations('tracker')
-  const tServer = useTranslations('serverErrors')
   const [openAction, setOpenAction] = useState<OpenAction>(null)
   const [pendingKey, setPendingKey] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
@@ -71,24 +71,23 @@ export function NowPanel({
 
   async function run(
     key: string,
-    action: () => Promise<void>,
+    action: () => Promise<CareResult>,
     options: { announce: string; errorKey: 'start' | 'stop' | 'save'; onSuccess?: () => void },
   ) {
     if (busy) return
     setPendingKey(key)
     try {
-      await action()
+      const result = await action()
+      if (!result.ok) {
+        if (result.error === 'alreadyRunning') toast.info(t('errors.alreadyRunning'))
+        else toast.error(t(`errors.codes.${result.error}`))
+        return
+      }
       setAnnouncement(options.announce)
       options.onSuccess?.()
     } catch (err) {
-      const message = err instanceof Error ? err.message : ''
-      if (message && message === tServer('careAlreadyOngoing')) {
-        toast.info(t('errors.alreadyRunning'))
-      } else if (err instanceof TypeError) {
-        toast.error(t('errors.network'))
-      } else {
-        toast.error(message || t(`errors.${options.errorKey}`))
-      }
+      // Thrown messages are masked in production, so only translated fallbacks are shown.
+      toast.error(err instanceof TypeError ? t('errors.network') : t(`errors.${options.errorKey}`))
     } finally {
       setPendingKey(null)
       // Also on failure: the other parent may have changed the state already.
@@ -117,7 +116,6 @@ export function NowPanel({
   const logBottle = (amountMl?: number) =>
     run(amountMl ? 'bottle' : 'bottle-none', () => createCareEvent(babyId, {
       kind: 'bottle',
-      startedAt: new Date().toISOString(),
       ...(amountMl ? { amountMl } : {}),
     }), {
       announce: t('announce.bottleLogged'),
