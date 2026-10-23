@@ -1241,6 +1241,48 @@
   },
   "tracker": {
     "title": "Tracker",
-    "subtitle": "Sleep and feeds, logged by the whole family."
+    "subtitle": "Sleep and feeds, logged by the whole family.",
+    "kinds": {
+      "sleep": "Sleep",
+      "breastfeed": "Breastfeed",
+      "bottle": "Bottle"
+    },
+    "sides": {
+      "left": "Left",
+      "right": "Right",
+      "both": "Both"
+    },
+    "day": {
+      "today": "Today",
+      "previous": "Previous day",
+      "next": "Next day",
+      "backToToday": "Back to today"
+    },
+    "summary": {
+      "label": "Totals for the day",
+      "sleep": "Sleep",
+      "feeds": "{count, plural, one {feed} other {feeds}}",
+      "bottles": "Bottles",
+      "amount": "{amount} ml",
+      "none": "—"
+    },
+    "duration": {
+      "hm": "{h}h {m}m",
+      "h": "{h}h",
+      "m": "{m} min",
+      "now": "just now",
+      "ago": "{duration} ago"
+    },
+    "log": {
+      "heading": "Day log",
+      "emptyToday": "Nothing logged yet today",
+      "emptyTodayHint": "Tap Sleep, Breastfeed or Bottle above to log the first one.",
+      "emptyDay": "Nothing logged on this day",
+      "emptyDayHint": "Use Add entry to log something afterwards.",
+      "by": "by {name}",
+      "ongoing": "Ongoing",
+      "noAmount": "Amount not set",
+      "editEntry": "Edit: {summary}"
+    }
   }
 }

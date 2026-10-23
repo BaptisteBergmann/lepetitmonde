@@ -1241,6 +1241,48 @@
   },
   "tracker": {
     "title": "Suivi",
-    "subtitle": "Sommeil et tétées, notés par toute la famille."
+    "subtitle": "Sommeil et tétées, notés par toute la famille.",
+    "kinds": {
+      "sleep": "Sommeil",
+      "breastfeed": "Tétée",
+      "bottle": "Biberon"
+    },
+    "sides": {
+      "left": "Gauche",
+      "right": "Droite",
+      "both": "Les deux"
+    },
+    "day": {
+      "today": "Aujourd'hui",
+      "previous": "Jour précédent",
+      "next": "Jour suivant",
+      "backToToday": "Revenir à aujourd'hui"
+    },
+    "summary": {
+      "label": "Bilan de la journée",
+      "sleep": "Sommeil",
+      "feeds": "{count, plural, one {repas} other {repas}}",
+      "bottles": "Biberons",
+      "amount": "{amount} ml",
+      "none": "—"
+    },
+    "duration": {
+      "hm": "{h} h {m} min",
+      "h": "{h} h",
+      "m": "{m} min",
+      "now": "à l'instant",
+      "ago": "il y a {duration}"
+    },
+    "log": {
+      "heading": "Journal du jour",
+      "emptyToday": "Rien de noté pour l'instant aujourd'hui",
+      "emptyTodayHint": "Touchez Sommeil, Tétée ou Biberon ci-dessus pour noter le premier.",
+      "emptyDay": "Rien de noté ce jour-là",
+      "emptyDayHint": "Utilisez Ajouter une entrée pour noter quelque chose après coup.",
+      "by": "par {name}",
+      "ongoing": "En cours",
+      "noAmount": "Quantité non notée",
+      "editEntry": "Modifier : {summary}"
+    }
   }
 }
