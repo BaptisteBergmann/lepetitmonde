@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `c584c06` fix(tracker): announce the disabled next-day control with a real disabled button
 - `95daf9b` fix(db): revoke default table-wide grants on care_events
 - `b424fc7` docs(plans): mark baby-tracker implemented
 - `33a4d6c` feat(tracker): live-refresh tracker across devices
