@@ -246,7 +246,12 @@
       "description": "Gérez qui a accès au journal et organisez le cercle de partage."
     },
     "cannotConfigure": "Cette page ne peut pas être configurée",
-    "updateError": "Erreur lors de la mise à jour de la page."
+    "updateError": "Erreur lors de la mise à jour de la page.",
+    "tracker": {
+      "name": "Suivi",
+      "eyebrow": "Page — Au quotidien",
+      "description": "Sommeil et tétées, notés par toute la famille."
+    }
   },
   "roles": {
     "viewer": "Tout le monde",
@@ -1224,5 +1229,9 @@
     "enablePromptDescription": "Soyez averti des nouvelles publications, commentaires et pronostics.",
     "enable": "Activer",
     "decline": "Non"
+  },
+  "tracker": {
+    "title": "Suivi",
+    "subtitle": "Sommeil et tétées, notés par toute la famille."
   }
 }

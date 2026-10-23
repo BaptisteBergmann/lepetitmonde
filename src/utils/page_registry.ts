@@ -1,7 +1,7 @@
-import { BookOpen, CalendarDays, Dices, Images, ListChecks, Package, ShoppingCart, Sparkles, Users, LucideIcon } from 'lucide-react'
+import { Baby, BookOpen, CalendarDays, Dices, Images, ListChecks, Package, ShoppingCart, Sparkles, Users, LucideIcon } from 'lucide-react'
 import { Enums } from '@utils/supabase/database.types'
 
-export type PageId = 'feed' | 'calendar' | 'guess' | 'anecdotes' | 'albums' | 'inventory' | 'buy-list' | 'todo' | 'admin'
+export type PageId = 'feed' | 'calendar' | 'guess' | 'anecdotes' | 'albums' | 'inventory' | 'buy-list' | 'todo' | 'tracker' | 'admin'
 
 export type PageRegistryEntry = {
   id: PageId
@@ -73,6 +73,13 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
   {
     id: 'todo',
     icon: ListChecks,
+    defaultRole: 'admin',
+    defaultEnabled: false,
+    manageable: true,
+  },
+  {
+    id: 'tracker',
+    icon: Baby,
     defaultRole: 'admin',
     defaultEnabled: false,
     manageable: true,

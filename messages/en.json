@@ -246,7 +246,12 @@
       "description": "Manage who has access to the journal and organize the sharing circle."
     },
     "cannotConfigure": "This page can't be configured",
-    "updateError": "Error updating the page."
+    "updateError": "Error updating the page.",
+    "tracker": {
+      "name": "Tracker",
+      "eyebrow": "Page — Day to day",
+      "description": "Sleep and feeds, logged by the whole family."
+    }
   },
   "roles": {
     "viewer": "Everyone",
@@ -1224,5 +1229,9 @@
     "enablePromptDescription": "Get notified about new posts, comments, and pronostics.",
     "enable": "Enable",
     "decline": "No"
+  },
+  "tracker": {
+    "title": "Tracker",
+    "subtitle": "Sleep and feeds, logged by the whole family."
   }
 }
