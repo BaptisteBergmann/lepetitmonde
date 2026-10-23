@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `e67d601` chore(types): regenerate Supabase types for care_events
+- `a68ec14` fix(db): restrict care_events update columns and updated_by
 - `0ccd156` feat(db): create care_events table with RLS
 - `b706877` docs(plans): approve baby-tracker with device timezone decision
 - `a5b8e83` feat(agents): add security subagent for audits and change reviews
