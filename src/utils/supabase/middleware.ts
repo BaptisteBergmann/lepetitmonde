@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { clampCookieMaxAge, SUPABASE_COOKIE_OPTIONS } from './cookie-options'
 
 // Pages reachable without being logged in.
 const PUBLIC_PAGES = ['/login', '/signup', '/forgot-password', '/invite']
@@ -27,6 +28,7 @@ export async function updateSession(request: NextRequest) {
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_PUBLISHABLE_KEY!,
     {
+      cookieOptions: SUPABASE_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -35,7 +37,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, clampCookieMaxAge(options))
           )
         },
       },
