@@ -2,7 +2,6 @@
 
 import { createClient } from '@utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 
@@ -12,10 +11,10 @@ export async function requestPasswordReset(formData: FormData) {
   const t = await getTranslations('auth')
 
   const email = formData.get('email') as string
-  const origin = (await headers()).get('origin')
 
+  // SITE_URL, not the Origin header: the header is client-controlled.
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+    redirectTo: `${process.env.SITE_URL}/auth/confirm?next=/reset-password`,
   })
 
   if (error) {
