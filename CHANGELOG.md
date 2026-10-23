@@ -4,6 +4,10 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `436ab99` ci: restrict default token and pin actions to commit SHAs
+- `f62b72c` build(docker): pin node and cloudflared images by digest
+- `812a4d4` build(docker): exclude mise config and .claude from build context
+- `ba5f019` build(deps): move shadcn to devDependencies
 - `6a2e2eb` fix(deps): upgrade next to 16.4.2 and sharp to 0.35.5
 - `a1069b4` fix(security): disable next/image optimizer
 - `3b48d1f` fix(security): validate bug report screenshot paths before download
