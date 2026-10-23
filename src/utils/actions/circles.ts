@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
+import { getUserAccess } from './users'
 import { notifyUsers } from './notify'
 import { actionError } from './errors'
 import { createTtlCache } from '../cache/ttl-cache'
@@ -54,11 +55,21 @@ export async function deleteCircle(circleId: string, babyId: string) {
 
 type Circle = Tables<'circles'>;
 
+// Inline membership check (getUserAccess) instead of assertMember from
+// feed-access: feed-access imports this module, and assertMember goes through
+// getUserCircleIds -> getCirclesAccess, so using it here would recurse.
+async function assertBabyMember(babyId: string) {
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) throw await actionError('unauthorized')
+  return access
+}
+
 export async function getCircles(babyId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await getAuthUser()
   if (!user) throw await actionError('unauthorized')
+  await assertBabyMember(babyId)
 
   const rep = await supabase
     .from('circles')
@@ -96,6 +107,12 @@ export const getCirclesAccess = cache(async (babyId: string, userId: string) => 
   const { data: { user } } = await getAuthUser()
   if (!user) throw await actionError('unauthorized')
 
+  // Checked before the cache: it is keyed by baby:user and would otherwise
+  // serve a non-member (or a non-admin asking about someone else).
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) return []
+  if (userId !== user.id && access.access_level !== 'admin') throw await actionError('unauthorized')
+
   return circlesAccessCache.get(`${babyId}:${userId}`, () => fetchCirclesAccess(babyId, userId))
 })
 
@@ -109,6 +126,7 @@ export async function getCircleMemberCounts(babyId: string): Promise<Record<stri
 
   const { data: { user } } = await getAuthUser()
   if (!user) throw await actionError('unauthorized')
+  await assertBabyMember(babyId)
 
   const rep = await supabase
     .from('circles_access')
@@ -127,8 +145,7 @@ export async function getCircleMemberCounts(babyId: string): Promise<Record<stri
 export async function getAllCirclesAccess(babyId: string) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw await actionError('unauthorized')
+  await assertIsAdmin(supabase, babyId)
 
   const rep = await supabase
     .from('circles_access')
