@@ -1304,7 +1304,7 @@
     },
     "running": {
       "sleepingFor": "Dort depuis {duration}",
-      "feedingFor": "Tétée depuis {duration}",
+      "feedingFor": "Tète depuis {duration}",
       "startedBy": "Commencé à {time} par {name}",
       "editStart": "Modifier l'heure de début",
       "side": "Côté",
