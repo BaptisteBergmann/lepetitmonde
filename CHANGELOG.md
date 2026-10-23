@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `bda5c26` docs(plans): record security access control fixes
 - `3cd7a97` fix(security): check membership in getPageSettings and before pruning stories
 - `b243174` fix(security): scope addUserToCircle to the admin's baby
 - `8c96499` fix(security): scope event and anecdote circle links to their baby
