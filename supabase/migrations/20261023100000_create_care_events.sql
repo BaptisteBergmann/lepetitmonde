@@ -47,18 +47,23 @@ CREATE UNIQUE INDEX "care_events_one_ongoing_per_kind" ON "public"."care_events"
 
 ALTER TABLE "public"."care_events" ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE "public"."care_events" FROM "anon";
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "public"."care_events" TO "authenticated";
+GRANT SELECT, INSERT, DELETE ON TABLE "public"."care_events" TO "authenticated";
+-- Column-level UPDATE: policies can't see OLD values, so this is what stops a member
+-- moving a row to another baby or rewriting who created it.
+GRANT UPDATE ("kind", "started_at", "ended_at", "ongoing", "breast_side", "amount_ml", "note", "updated_at", "updated_by")
+    ON TABLE "public"."care_events" TO "authenticated";
 GRANT ALL ON TABLE "public"."care_events" TO "service_role";
 
 CREATE POLICY "care_events_select_member" ON "public"."care_events"
     FOR SELECT TO "authenticated" USING ("public"."is_baby_member"("baby_id"));
 CREATE POLICY "care_events_insert_member" ON "public"."care_events"
     FOR INSERT TO "authenticated"
-    WITH CHECK ("public"."is_baby_member"("baby_id") AND "created_by" = "auth"."uid"());
+    WITH CHECK ("public"."is_baby_member"("baby_id") AND "created_by" = "auth"."uid"()
+        AND ("updated_by" IS NULL OR "updated_by" = "auth"."uid"()));
 CREATE POLICY "care_events_update_member" ON "public"."care_events"
     FOR UPDATE TO "authenticated"
     USING ("public"."is_baby_member"("baby_id"))
-    WITH CHECK ("public"."is_baby_member"("baby_id"));
+    WITH CHECK ("public"."is_baby_member"("baby_id") AND ("updated_by" IS NULL OR "updated_by" = "auth"."uid"()));
 CREATE POLICY "care_events_delete_member" ON "public"."care_events"
     FOR DELETE TO "authenticated" USING ("public"."is_baby_member"("baby_id"));
 
