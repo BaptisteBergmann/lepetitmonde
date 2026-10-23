@@ -63,6 +63,9 @@ export async function getUsers(babyId: string) {
   const contextLogger = logger.child({ function: getUsers.name, babyId })
   const { data: { user } } = await getAuthUser()
   if (!user) return []
+  // Members only: otherwise any signed-in user could list another family's members.
+  const access = await getUserAccess(babyId)
+  if (Array.isArray(access)) return []
   const { data, error } = await supabase
     .from('baby_access') // Assurez-vous du nom exact de votre table
     .select(`
