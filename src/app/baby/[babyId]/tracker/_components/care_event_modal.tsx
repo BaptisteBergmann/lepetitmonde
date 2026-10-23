@@ -87,7 +87,9 @@ function CareEventForm({
   const t = useTranslations('tracker')
   const confirmAction = useConfirm()
   const isEdit = !!event
-  const ongoing = !!event?.ongoing
+  // Frozen at open: if the other parent stops the timer mid-edit, keep sending
+  // `endedAt: undefined` so the server keeps the stored end instead of clearing it.
+  const [ongoing] = useState(() => !!event?.ongoing)
 
   // Frozen at open: mirrors the server's "no later than now + 5 min" rule.
   const [openedAt] = useState(() => Date.now())
