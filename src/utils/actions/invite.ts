@@ -6,6 +6,9 @@ import { revalidatePath } from 'next/cache'
 import { assertIsAdmin } from './access'
 import { sendInviteEmail } from '@/utils/email'
 import { actionError } from './errors'
+import { INVITE_DURATIONS_HOURS, isInviteDurationHours } from '@/utils/invite-limits'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function sendInvite(formData: FormData) {
   const babyId = formData.get('babyId') as string
@@ -49,10 +52,13 @@ export async function sendInvite(formData: FormData) {
 }
 
 
-export async function generateShortLivedLink(babyId: string, hoursValid: number = 24) {
+export async function generateShortLivedLink(babyId: string, hoursValid: number = INVITE_DURATIONS_HOURS[0]) {
   const contextLogger = logger.child({ function: generateShortLivedLink.name, babyId })
   const supabase = await createClient();
   await assertIsAdmin(supabase, babyId)
+
+  // Client-supplied: only the fixed durations are allowed.
+  if (!isInviteDurationHours(hoursValid)) throw await actionError('invalidInviteDuration')
 
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + hoursValid);
@@ -82,11 +88,39 @@ export async function getInvitations(babyId: string) {
 
   const { data, error } = await supabase
     .from('invitations')
-    .select('*')
+    .select('id, created_at, expires_at, used_at, revoked_at, used_by, users:used_by(first_name, last_name)')
     .eq('baby_id', babyId)
     .order('created_at', { ascending: false })
 
   if (error) { contextLogger.error(error, "Error fetching invitations"); return [] }
 
   return data
+}
+
+export async function revokeInvitation(babyId: string, invitationId: string) {
+  const contextLogger = logger.child({ function: revokeInvitation.name, babyId, invitationId })
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  if (typeof invitationId !== 'string' || !UUID_RE.test(invitationId)) {
+    throw await actionError('invitationNotFound')
+  }
+
+  // The baby_id filter stops an admin of one baby revoking another's links.
+  const { data, error } = await supabase
+    .from('invitations')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('id', invitationId)
+    .eq('baby_id', babyId)
+    .is('revoked_at', null)
+    .select('id')
+
+  if (error) {
+    contextLogger.error(error, 'Error revoking invitation')
+    throw await actionError('inviteError')
+  }
+  if (!data || data.length === 0) throw await actionError('invitationNotFound')
+
+  contextLogger.info('Invitation revoked')
+  revalidatePath(`/baby/${babyId}/admin`)
 }

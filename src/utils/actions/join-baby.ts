@@ -47,8 +47,12 @@ export async function joinBabyWithInvitation(formData: FormData) {
   // the verified getUser() one and the baby comes from the validated token.
   const { error: accessError } = await grantViewerAccess(invitation, user.id)
 
+  if (accessError === 'invitationUnavailable') {
+    return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
+  }
+
   if (accessError) {
-    contextLogger.error({ babyId }, "Error adding baby access for existing user")
+    contextLogger.error({ babyId, reason: accessError }, "Error adding baby access for existing user")
     return redirect(`/invite?token=${token}&message=${encodeURIComponent(tAuth('addAccessError'))}`)
   }
 

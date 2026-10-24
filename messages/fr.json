@@ -1154,6 +1154,8 @@
     "emailRequired": "Adresse email requise",
     "noSubscriptionFound": "Aucun abonnement trouvé pour cet utilisateur",
     "inviteError": "Erreur lors de l'invitation",
+    "invalidInviteDuration": "Durée d'invitation invalide",
+    "invitationNotFound": "Invitation introuvable",
     "broadcastSubjectRequired": "Merci de renseigner un objet.",
     "broadcastMessageRequired": "Merci d'écrire un message.",
     "broadcastError": "Erreur lors de l'envoi de l'e-mail.",

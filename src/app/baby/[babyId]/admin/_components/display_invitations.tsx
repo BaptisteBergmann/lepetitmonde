@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check, Link2 } from "lucide-react";
 import { getLocaleTag } from "@utils/formatting";
 
-type Invitation = Tables<'invitations'>;
+type Invitation = Pick<Tables<'invitations'>, 'id' | 'created_at' | 'expires_at'>;
 
 interface InvitationsListProps {
   invitations: Invitation[];

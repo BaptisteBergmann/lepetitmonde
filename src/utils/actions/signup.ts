@@ -58,8 +58,21 @@ export async function signup(formData: FormData) {
   // Service role: right after signUp there may be no session yet (email
   // confirmation), and these rows are the new user's own. The id comes from
   // auth.signUp, never from the form.
-  await createUserProfile(user.user.id, firstName, lastName)
-  await grantViewerAccess(invitation, user.user.id)
+  // Profile first: invitations.used_by references it, and a failed profile
+  // must not burn the link.
+  const { error: profileError } = await createUserProfile(user.user.id, firstName, lastName)
+  if (profileError) {
+    return redirect(`/invite?token=${encodeURIComponent(token)}&message=${encodeURIComponent(tAuth('createAccountError'))}`)
+  }
+
+  const { error: accessError } = await grantViewerAccess(invitation, user.user.id)
+  if (accessError) {
+    contextLogger.error({ babyId: invitation.babyId, reason: accessError }, 'Signup could not redeem invitation')
+    if (accessError === 'invitationUnavailable') {
+      return redirect(`/invite?message=${encodeURIComponent(tAuth('invalidOrExpiredLink'))}`)
+    }
+    return redirect(`/invite?token=${encodeURIComponent(token)}&message=${encodeURIComponent(tAuth('addAccessError'))}`)
+  }
 
   await sendWelcomeEmail(email, firstName)
 
