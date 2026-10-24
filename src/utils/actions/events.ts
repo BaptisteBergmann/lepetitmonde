@@ -2,7 +2,7 @@
 
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
-import { Enums, Tables, TablesInsert } from '@utils/supabase/database.types'
+import { Constants, Enums, Tables, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { assertIsAdmin, getVisibleUserIds } from './access'
@@ -12,6 +12,9 @@ import { notifyUsers } from './notify'
 import { logger } from '../logger'
 import { actionError } from './errors'
 import { assertCirclesInBaby } from '@utils/feed-access'
+import { normalizeText } from '@utils/feed-validation'
+import { INPUT_LIMITS } from '@utils/input-limits'
+import { assertOneOf } from '@utils/input-validation'
 
 type NewEvent = TablesInsert<'events'>;
 export type EventWithCircles = Tables<'events'> & { circle_ids: string[] };
@@ -29,7 +32,12 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
   }
   await assertCirclesInBaby(circleIds, event.baby_id)
 
-  const kind = event.kind ?? 'occasion'
+  const kind = await assertOneOf(event.kind ?? 'occasion', Constants.public.Enums.event_kind)
+  const milestoneType = kind === 'life_stage'
+    ? await assertOneOf(event.milestone_type, Constants.public.Enums.milestone_type, { nullable: true })
+    : null
+  const title = await normalizeText(event.title, INPUT_LIMITS.eventTitle, { requiredKey: 'textRequired' })
+  const description = await normalizeText(event.description, INPUT_LIMITS.eventDescription)
 
   const { data, error } = await supabase
     .from('events')
@@ -38,9 +46,9 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
       event_date: event.event_date,
       event_time: event.event_time ?? null,
       kind,
-      milestone_type: kind === 'life_stage' ? event.milestone_type : null,
-      title: event.title,
-      description: event.description || null,
+      milestone_type: milestoneType,
+      title,
+      description,
     }])
     .select('id')
     .single()
@@ -65,7 +73,7 @@ export async function createEvent(event: NewEvent, circleIds: string[]) {
     const t = await getTranslations('pushNotifications')
     await notifyUsers(event.baby_id, 'new_life_stage', {
       title: t('newLifeStage.title'),
-      body: event.title,
+      body: title,
       url: `/baby/${event.baby_id}/calendar`,
     }, recipients)
   }
@@ -92,15 +100,27 @@ export async function updateEvent(eventId: string, babyId: string, patch: {
     await assertCirclesInBaby(patch.circleIds, babyId)
   }
 
+  const kind = patch.kind === undefined ? undefined : await assertOneOf(patch.kind, Constants.public.Enums.event_kind)
+  const milestoneType = kind === 'life_stage'
+    ? await assertOneOf(patch.milestoneType, Constants.public.Enums.milestone_type, { nullable: true })
+    : null
+  const title = patch.title === undefined
+    ? undefined
+    : await normalizeText(patch.title, INPUT_LIMITS.eventTitle, { requiredKey: 'textRequired' })
+  // null clears the description; undefined leaves it untouched.
+  const description = patch.description === undefined
+    ? undefined
+    : await normalizeText(patch.description, INPUT_LIMITS.eventDescription)
+
   const { data: updated, error } = await supabase
     .from('events')
     .update({
       event_date: patch.eventDate,
       event_time: patch.eventTime,
-      kind: patch.kind,
-      milestone_type: patch.kind === 'life_stage' ? patch.milestoneType : null,
-      title: patch.title,
-      description: patch.description,
+      kind,
+      milestone_type: milestoneType,
+      title,
+      description,
     })
     .eq('id', eventId)
     .eq('baby_id', babyId)

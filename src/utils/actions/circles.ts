@@ -11,6 +11,8 @@ import { assertIsAdmin, getAllBabyMemberIds } from './access'
 import { getUserAccess } from './users'
 import { notifyUsers } from './notify'
 import { actionError } from './errors'
+import { normalizeText } from '@utils/feed-validation'
+import { INPUT_LIMITS } from '@utils/input-limits'
 import { createTtlCache } from '../cache/ttl-cache'
 
 type NewCircle = TablesInsert<'circles'>;
@@ -23,9 +25,11 @@ export async function createCircle(circle: FormData) {
 
   await assertIsAdmin(supabase, babyId)
 
+  const validName = await normalizeText(name, INPUT_LIMITS.circleName, { requiredKey: 'textRequired' })
+
   const rep = await supabase
     .from('circles')
-    .insert([{ name, baby_id: babyId }])
+    .insert([{ name: validName, baby_id: babyId }])
 
   if (rep.error) throw rep.error
 

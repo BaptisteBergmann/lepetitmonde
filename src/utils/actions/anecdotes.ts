@@ -12,6 +12,8 @@ import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { normalizeText } from '@utils/feed-validation'
+import { INPUT_LIMITS } from '@utils/input-limits'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 import { assertCirclesInBaby } from '@utils/feed-access'
 
@@ -45,6 +47,8 @@ export async function createAnecdote(anecdote: NewAnecdote, circleIds: string[])
   }
   await assertCirclesInBaby(circleIds, anecdote.baby_id)
 
+  const content = await normalizeText(anecdote.content, INPUT_LIMITS.anecdoteContent, { requiredKey: 'textRequired' })
+
   await ensureBabyBucket(anecdote.baby_id)
 
   const { data, error } = await supabase
@@ -52,7 +56,7 @@ export async function createAnecdote(anecdote: NewAnecdote, circleIds: string[])
     .insert([{
       id: anecdote.id,
       baby_id: anecdote.baby_id,
-      content: anecdote.content,
+      content,
       happened_at: anecdote.happened_at,
     }])
     .select('id')
@@ -134,10 +138,12 @@ export async function updateAnecdote(
   }
   await assertCirclesInBaby(circleIds, babyId)
 
+  const content = await normalizeText(update?.content, INPUT_LIMITS.anecdoteContent, { requiredKey: 'textRequired' })
+
   const { data: updated, error } = await supabase
     .from('anecdotes')
     .update({
-      content: update.content,
+      content,
       happened_at: update.happened_at,
     })
     .eq('id', anecdoteId)

@@ -1,3 +1,4 @@
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { getTranslations } from "next-intl/server";
 import { createCircle } from "@utils/actions/circles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export default async function CreateCircle({ babyId }: { babyId: string }) {
           <div className="flex flex-col gap-1.5">
             <Input
               name="name"
+              maxLength={INPUT_LIMITS.circleName}
               type="text"
               placeholder={t('namePlaceholder')}
               required

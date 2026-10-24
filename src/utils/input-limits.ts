@@ -10,4 +10,8 @@ export const INPUT_LIMITS = {
   inventoryPurchasedFrom: 200,
   inventoryQuantityMax: 9999,
   inventoryPriceMax: 1_000_000,
+  eventTitle: 200,
+  eventDescription: 2000,
+  anecdoteContent: 5000,
+  circleName: 50,
 } as const

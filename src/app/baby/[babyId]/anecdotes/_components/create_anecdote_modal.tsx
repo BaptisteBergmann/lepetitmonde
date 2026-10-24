@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
@@ -95,6 +96,7 @@ export default function CreateAnecdoteModal({
           </Label>
           <textarea
             id="content"
+            maxLength={INPUT_LIMITS.anecdoteContent}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={3}
