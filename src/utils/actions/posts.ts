@@ -383,6 +383,21 @@ async function attachInteractionData(babyId: string, posts: PostWithDetails[]): 
   }))
 }
 
+// Cursor values are interpolated into a PostgREST .or() filter string, so only
+// well-formed values are accepted: commas or parentheses would otherwise inject
+// extra filter clauses. posts.taken_at is a `date` column (plain YYYY-MM-DD),
+// created_at is a timestamptz (ISO-8601 with an offset).
+const CURSOR_DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const CURSOR_TIMESTAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/
+
+function isCursorDate(value: unknown): value is string {
+  return typeof value === 'string' && CURSOR_DATE_RE.test(value) && Number.isFinite(Date.parse(value))
+}
+
+function isCursorTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && CURSOR_TIMESTAMP_RE.test(value) && Number.isFinite(Date.parse(value))
+}
+
 export async function getPosts(
   babyId: string,
   { limit, before }: { limit: number; before?: { takenAt: string; createdAt: string } }
@@ -390,14 +405,23 @@ export async function getPosts(
   const contextLogger = logger.child({ function: getPosts.name, babyId, limit, before })
   const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
 
+  const safeLimit = Math.min(Math.max(Math.trunc(Number(limit)) || 10, 1), 50)
+
+  if (before && !(isCursorDate(before.takenAt) && isCursorTimestamp(before.createdAt))) {
+    contextLogger.warn("Rejected malformed getPosts cursor")
+    return []
+  }
+
   let query = supabase
     .from('posts')
     .select('*, posts_circles (circle_id), post_photos (*)')
     .eq('baby_id', babyId)
     .order('taken_at', { ascending: false })
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .limit(safeLimit)
 
+  // The original strings go into the filter unchanged: re-serialising with
+  // toISOString() would drop microseconds and break the created_at tie-break.
   if (before) {
     query = query.or(
       `taken_at.lt.${before.takenAt},and(taken_at.eq.${before.takenAt},created_at.lt.${before.createdAt})`
