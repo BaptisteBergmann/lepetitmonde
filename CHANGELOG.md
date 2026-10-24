@@ -4,6 +4,22 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `584cfa1` fix(logging): redact personal fields and stop logging nicknames
+- `85868b6` fix(footer): hide changelog when signed out; move dev origins to env
+- `bc4ccaa` fix(upload): sniff video signatures, force upsert=false, allowlist paths, generic errors
+- `fd01f8a` fix(realtime): strip inventory and membership payloads and recycle streams every 5 minutes
+- `e4be9aa` fix(posts): validate getPosts cursor timestamps and clamp limit
+- `88c4295` fix(bug-reports): store and link page_url as a same-origin path only
+- `b7a2a0a` feat(security): add security headers and a baseline CSP
+- `4958adf` fix(cache): evict expired entries and cap TTL cache size
+- `69a8511` fix(validation): enforce MIME allowlist on stored media types
+- `5585cf1` fix(validation): bound profile, nickname, quiet hours and bug report fields
+- `8a65fc7` fix(validation): bound pronostic questions
+- `d542bee` fix(validation): bound event, anecdote and circle text
+- `9aa6c3e` fix(todo,inventory): build insert and update payloads from picked fields
+- `9b90c1f` fix(upload): strip image metadata on upload and on share links
+- `60645b8` fix(vitals): disable in production by default and cap the body
+- `8a4b4de` fix(storage): enforce circle visibility on the media proxy
 - `7688fe1` fix(auth): fail reset when SITE_URL is unset
 - `6e46919` fix(auth): count password maximum in bytes
 - `a372800` fix(auth): make session cookies HttpOnly, Secure and 30-day
