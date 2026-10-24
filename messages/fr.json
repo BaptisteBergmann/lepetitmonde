@@ -50,7 +50,7 @@
   },
   "auth": {
     "invalidCredentials": "Identifiants incorrects ou compte inexistant",
-    "invalidOrExpiredLink": "Lien invalide ou expiré",
+    "invalidOrExpiredLink": "Ce lien est invalide, a expiré ou a déjà été utilisé.",
     "login": {
       "title": "Bon retour",
       "subtitle": "Connectez-vous à votre compte",
@@ -716,7 +716,21 @@
       "expired": "Expiré",
       "active": "Actif",
       "expiresOn": "Expire le {date}",
-      "copyTitle": "Copier le lien"
+      "copyTitle": "Copier le lien",
+      "used": "Utilisé",
+      "revoked": "Révoqué",
+      "usedBy": "Utilisé par {name}",
+      "usedByUnknown": "Utilisé par un ancien membre",
+      "copy": "Copier",
+      "copied": "Copié",
+      "copyError": "Impossible de copier le lien.",
+      "copyAria": "Copier le lien d'invitation {id}",
+      "revoke": "Révoquer",
+      "revokeAria": "Révoquer le lien d'invitation {id}",
+      "revokeConfirmTitle": "Révoquer ce lien ?",
+      "revokeConfirm": "Plus personne ne pourra rejoindre avec ce lien. Les personnes déjà inscrites gardent leur accès.",
+      "revokeSuccess": "Lien révoqué",
+      "revokeError": "Impossible de révoquer le lien. Réessayez."
     }
   },
   "buyList": {

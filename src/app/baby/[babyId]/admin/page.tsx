@@ -179,7 +179,7 @@ export default async function InviteForm({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0 pb-2">
-                  <InvitationsList invitations={await getInvitations(babyId)} />
+                  <InvitationsList babyId={babyId} invitations={await getInvitations(babyId)} />
                 </CardContent>
               </Card>
             )}
