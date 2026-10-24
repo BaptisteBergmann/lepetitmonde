@@ -10,6 +10,9 @@ import { getUserAccess } from './users'
 import { assertIsAdmin, getAllBabyMemberIds } from './access'
 import { notifyUsers } from './notify'
 import { actionError } from './errors'
+import { normalizeText } from '../feed-validation'
+import { INPUT_LIMITS } from '../input-limits'
+import { assertOneOf, normalizeInteger, normalizeNumber } from '../input-validation'
 
 export async function getQuestions(babyId: string) {
   const supabase = await createClient()
@@ -178,6 +181,61 @@ export async function moveQuestion(babyId: string, questionId: string, direction
 }
 
 type NewGuess = TablesInsert<'guess_questions'>;
+const QUESTION_TYPES = ['option', 'number', 'date', 'time', 'text'] as const
+
+type QuestionInput = Pick<NewGuess, 'title' | 'description' | 'type' | 'options' | 'is_active'>
+
+// Rebuilds the question fields from validated pieces instead of passing the
+// client's object through. `options` is rebuilt per type, with the same keys
+// and key order the editor (guess/_components/modal.tsx) sends, because
+// updateQuestion compares it to the stored value with JSON.stringify.
+async function pickQuestionFields(raw: QuestionInput) {
+  if (typeof raw !== 'object' || raw === null) throw await actionError('invalidInput')
+
+  const type = await assertOneOf(raw.type, QUESTION_TYPES)
+  const title = await normalizeText(raw.title, INPUT_LIMITS.pronosticTitle, { requiredKey: 'textRequired' })
+  const description = await normalizeText(raw.description, INPUT_LIMITS.pronosticDescription)
+  if (typeof raw.is_active !== 'boolean') throw await actionError('invalidInput')
+
+  const rawOptions = (raw.options ?? null) as Record<string, unknown> | null
+  if (rawOptions !== null && (typeof rawOptions !== 'object' || Array.isArray(rawOptions))) {
+    throw await actionError('invalidInput')
+  }
+
+  let options: Json | null = null
+  if (type === 'option') {
+    const rawChoices = rawOptions?.choices
+    if (!Array.isArray(rawChoices)
+      || rawChoices.length < INPUT_LIMITS.pronosticChoicesMin
+      || rawChoices.length > INPUT_LIMITS.pronosticChoicesMax) {
+      throw await actionError('invalidInput')
+    }
+    const choices: string[] = []
+    for (const choice of rawChoices) {
+      choices.push(await normalizeText(choice, INPUT_LIMITS.pronosticChoice, { requiredKey: 'textRequired' }))
+    }
+    if (new Set(choices).size !== choices.length) throw await actionError('invalidInput')
+    options = { choices }
+  } else if (type === 'number') {
+    options = {
+      min: await normalizeNumber(rawOptions?.min, { min: -1e12, max: 1e12, nullable: true }),
+      max: await normalizeNumber(rawOptions?.max, { min: -1e12, max: 1e12, nullable: true }),
+      precision: await normalizeInteger(rawOptions?.precision, { min: 0, max: 10 }),
+    }
+  } else if (type === 'date') {
+    // <input type="month"> / type="date" values.
+    const monthOrDate = async (value: unknown) => value === null || value === undefined
+      ? null
+      : await normalizeText(value, 10, { requiredKey: 'invalidInput' })
+    options = {
+      defaultMonth: await monthOrDate(rawOptions?.defaultMonth),
+      highlightedDate: await monthOrDate(rawOptions?.highlightedDate),
+    }
+  }
+
+  return { type, title, description, options, is_active: raw.is_active }
+}
+
 type QuestionUpdate = Omit<NewGuess, 'baby_id'>;
 
 export async function updateQuestion(babyId: string, questionId: string, formData: QuestionUpdate) {
@@ -185,6 +243,8 @@ export async function updateQuestion(babyId: string, questionId: string, formDat
   await assertIsAdmin(supabase, babyId)
 
   const contextLogger = logger.child({ function: updateQuestion.name, babyId, questionId })
+
+  const fields = await pickQuestionFields(formData)
 
   const { count, error: countError } = await supabase
     .from('guesses')
@@ -205,8 +265,8 @@ export async function updateQuestion(babyId: string, questionId: string, formDat
 
     if (fetchError) { contextLogger.error(fetchError, "Error fetching question before update"); throw fetchError }
 
-    const structureChanged = existing.type !== formData.type
-      || JSON.stringify(existing.options) !== JSON.stringify(formData.options ?? null)
+    const structureChanged = existing.type !== fields.type
+      || JSON.stringify(existing.options) !== JSON.stringify(fields.options)
 
     if (structureChanged) {
       throw await actionError('cannotEditAnsweredPronostic')
@@ -215,13 +275,7 @@ export async function updateQuestion(babyId: string, questionId: string, formDat
 
   const { error } = await supabase
     .from('guess_questions')
-    .update({
-      title: formData.title,
-      description: formData.description,
-      type: formData.type,
-      options: formData.options,
-      is_active: formData.is_active,
-    })
+    .update(fields)
     .eq('id', questionId)
     .eq('baby_id', babyId)
 
@@ -247,6 +301,10 @@ export async function addQuestion(formData: NewGuess) {
 
   const isAdmin = access.access_level === "admin"
 
+  // A member's proposal is always created active (what the proposal form sends);
+  // only admins can create an inactive question.
+  const fields = await pickQuestionFields({ ...formData, is_active: isAdmin ? formData.is_active : true })
+
   const { data: lastQuestion } = await supabase
     .from('guess_questions')
     .select('position')
@@ -259,11 +317,7 @@ export async function addQuestion(formData: NewGuess) {
     .from('guess_questions')
     .insert({
       baby_id: formData.baby_id,
-      title: formData.title,
-      description: formData.description,
-      type: formData.type,
-      options: formData.options,
-      is_active: formData.is_active,
+      ...fields,
       created_by: user.id,
       status: isAdmin ? 'approved' : 'pending',
       position: (lastQuestion?.position ?? 0) + 1,

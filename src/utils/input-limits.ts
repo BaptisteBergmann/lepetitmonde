@@ -14,4 +14,9 @@ export const INPUT_LIMITS = {
   eventDescription: 2000,
   anecdoteContent: 5000,
   circleName: 50,
+  pronosticTitle: 200,
+  pronosticDescription: 1000,
+  pronosticChoice: 100,
+  pronosticChoicesMin: 2,
+  pronosticChoicesMax: 20,
 } as const

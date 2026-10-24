@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { Modal as ModalShell } from '@/components/modal'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -192,6 +193,7 @@ export default function Modal({
               <Input
                 type="text"
                 id="title"
+                maxLength={INPUT_LIMITS.pronosticTitle}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('titlePlaceholder')}
@@ -206,6 +208,7 @@ export default function Modal({
               </Label>
               <textarea
                 id="description"
+                maxLength={INPUT_LIMITS.pronosticDescription}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={t('descriptionPlaceholder')}
@@ -261,6 +264,7 @@ export default function Modal({
                       <Input
                         type="text"
                         value={choice}
+                        maxLength={INPUT_LIMITS.pronosticChoice}
                         onChange={(e) => handleChoiceChange(index, e.target.value)}
                         placeholder={t('choicePlaceholder', { number: index + 1 })}
                         className="flex-1"
