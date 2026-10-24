@@ -101,6 +101,7 @@ block release
 - Suggested fix: Map the requested path to its owning row (`post_photos`, `album_photos`, `stories`, `anecdotes`) and apply the `canSee` rule from `feed-access.ts` before streaming. Drop `immutable` for restricted content, or shorten it.
 
 #### M2. Session cookies are readable from JavaScript, not `Secure`, and last 400 days
+- Fixed: `a372800` (HttpOnly, Secure, SameSite=lax, 30-day cookies). Manual: set `GOTRUE_SESSIONS_INACTIVITY_TIMEOUT=720h` on the auth service and restart it.
 - Status: confirmed
 - Area: 1 Auth / session
 - Location: `src/utils/supabase/server.ts:8-24`, `src/utils/supabase/middleware.ts:26-41`; defaults in `node_modules/@supabase/ssr/dist/main/utils/constants.js:6-10`
@@ -109,6 +110,7 @@ block release
 - Suggested fix: Pass `cookieOptions: { httpOnly: true, secure: true, sameSite: 'lax', maxAge: <e.g. 30 days> }` in both places. There is no browser Supabase client, so `httpOnly` breaks nothing.
 
 #### M3. Open redirect in `/auth/confirm`
+- Fixed: `2651814` (`auth/confirm` and `login` only follow same-site relative paths).
 - Status: confirmed
 - Area: 1 Auth
 - Location: `src/app/auth/confirm/route.ts:18`, `:25`
@@ -117,6 +119,7 @@ block release
 - Suggested fix: Reuse `safeRedirectPath` from `src/utils/actions/login.ts:10-15`, and also reject control characters such as `\t` and `\n`.
 
 #### M4. Share tokens are written to server logs through web vitals
+- Fixed: `9c090e1` (web vitals and bug reports no longer carry share tokens; bug report button hidden on `/share`). Bug reports filed before the fix may still hold tokens: see `security-hardening.md` Step 8 manual step.
 - Status: confirmed
 - Area: 11 Logging / 5 Share links
 - Location: `src/app/web-vitals-reporter.tsx:15`; `src/app/layout.tsx:120`; `src/app/api/vitals/route.ts:21`
@@ -142,6 +145,7 @@ block release
 - How to confirm: Upload a GPS-tagged JPEG from an Android phone, open it through a share link, and run `exiftool` on the downloaded file.
 
 #### M7. Invitation links can be reused, cannot be revoked, and their lifetime is set by the client
+- Fixed: `c93ce65` (schema), `aab2d95` (single-use, clamped lifetime, `revokeInvitation`), `f940f96` (status and Revoke in the admin list). Needs the 20261024090000 migration applied (done).
 - Status: confirmed
 - Area: 1 Auth
 - Location: `src/utils/invitations.ts:30-61`; `src/utils/actions/invite.ts:52-58`
@@ -176,6 +180,7 @@ block release
 - Suggested fix: Sweep expired entries on `set` and cap the size (LRU).
 
 #### L2. Weak password policy and no login or reset rate limiting (prior findings 5 and 6)
+- Fixed: `629f9a2` (10-character minimum, no class rule), `6e46919` (72-byte maximum), `b8c2ee8` (login and reset throttling). The per-IP limits are effective once L9 (app port bind, `security-deps-and-ci.md` Step 8) is deployed; per-email limits apply now. Manual: set `GOTRUE_PASSWORD_MIN_LENGTH=10` on the auth service.
 - Status: confirmed in code; GoTrue settings are suspected
 - Area: 1 Auth
 - Location: `src/components/signup-form.tsx:80` (no `minLength`); `src/components/reset-password-form.tsx:40` (`minLength={6}`); `src/utils/actions/login.ts:17-29`
@@ -192,6 +197,7 @@ block release
 - Suggested fix: Add `headers()` with `frame-ancestors 'none'`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS, and a CSP with a hash for the theme script (`src/app/layout.tsx:90`).
 
 #### L4. Welcome email puts the user-typed first name into HTML unescaped
+- Fixed: `b8224b0` (every template value goes through `escapeHtml`).
 - Status: confirmed
 - Area: 7 Input validation
 - Location: `src/utils/email.ts:34-36`; `src/utils/actions/signup.ts:59`
@@ -286,6 +292,7 @@ block release
 - Suggested fix: Add pino `redact` for `to`, `email`, `token`, `*.token_hash`, `subscription`, `ip`, `path` (see M4), and stop logging nicknames.
 
 #### L15. Password-reset `redirectTo` is built from the request `Origin` header
+- Fixed: `d8a9fc3`, `7688fe1` (`redirectTo` built from `SITE_URL`; reset fails closed when it is unset).
 - Status: confirmed
 - Area: 1 Auth
 - Location: `src/utils/actions/reset-password.ts:15-19`
@@ -353,9 +360,9 @@ Storage: buckets are created with `public: false` (`src/utils/actions/storage.ts
 | 1 | Write actions check identity but not membership (IDOR) | fixed for write actions that check circle visibility via `feed-access.ts`. Other IDORs found elsewhere. | H2, H3 (new) |
 | 2 | No RLS anywhere | changed: 2 of 42 tables have RLS; `rls.md` approved, rollout in progress | H5 |
 | 3 | Storage has no RLS; app routes are the only gate | changed: the bug-report route is now traversable, and the media route lacks circle checks | C1, M1 |
-| 4 | Invitation tokens don't expire server-side | fixed (`invitations.ts:48`). Tokens can still be reused and cannot be revoked. | M7 |
-| 5 | No password strength enforcement | open | L2 |
-| 6 | No rate limiting on login or reset | open | L2 |
+| 4 | Invitation tokens don't expire server-side | fixed (`invitations.ts:48`). Tokens are now single-use and revocable (`aab2d95`, `f940f96`). | M7 |
+| 5 | No password strength enforcement | fixed (`629f9a2`, `6e46919`) | L2 |
+| 6 | No rate limiting on login or reset | fixed (`b8c2ee8`); per-IP part effective once L9 is deployed | L2 |
 | 7 | No security headers | open (partly mitigated: `/share` sets `no-referrer`, media routes set `nosniff`) | L3 |
 | 8 | Secrets not committed | still holds (history searched; example files hold placeholders only) | — |
 | 9 | User text never rendered as HTML | still holds for React. Exceptions: the welcome email and the bug-report link | L4, L5 |
@@ -426,7 +433,7 @@ Every export of every `'use server'` file in `src/utils/actions/`. "Gate" is wha
 | post_stats.ts | getPostStats: `getFeedViewer` admin + `findVisiblePost`. |
 | posts.ts | createPost, publishPost, updatePost, attachPostPhotos, deletePost: `assertIsAdmin` / `assertAdmin`. getPosts, getPostById, getPostsForRange, getPostActivityBeyond: `getUserAccess` + circles via `withVisibility`. |
 | reactions.ts | addReaction: `assertMember`. removeReaction: `getUserAccess`, own row. getReactions: `findVisiblePost`. |
-| reset-password.ts | requestPasswordReset: none, public auth action. updatePassword: session, own account (no current-password check, see review item "Also"). |
+| reset-password.ts | requestPasswordReset: none, public auth action. updatePassword: session, own account (reset flow). changePassword: session, own account, current password verified and throttled (`b29fcfa`). |
 | shares.ts | createShare, getBabyShares, getShareAccesses, revokeShare: `assertIsAdmin`. |
 | signup.ts | signup: none, public auth action (invitation token checked inside). |
 | stories.ts | createStory, deleteStory: `assertIsAdmin`. updateStory: `assertAdmin`. getActiveStories: `getUserAccess` (prune only after). markStoryViewed, getStoryViews: `findVisible*` / `getFeedViewer`. |
@@ -436,4 +443,4 @@ Every export of every `'use server'` file in `src/utils/actions/`. "Gate" is wha
 | users.ts | getUserAccess, getAllUserAccess, getUser, updateProfile, requestEmailChange, updateBabyAccessSettings: own row. getUsers, getNicknamesByBaby: `getUserAccess`. updateUserAccessLevel: `assertIsAdmin`. |
 | views.ts | markPostViewed: `findVisiblePost`. getPostViews: admin + `findVisiblePost`. |
 
-No export was found without a gate. Open items: `getBugReports` and `updateBugReportStatus` (H1), and `updatePassword` (no current-password check).
+No export was found without a gate. Open items: `getBugReports` and `updateBugReportStatus` (H1). The settings password change now checks the current password (`b29fcfa`). Manual: set `GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION=true` on the auth service and restart it.
