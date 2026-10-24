@@ -4,6 +4,12 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-23
 
+- `d7fed25` fix(logging): redact top-level auth headers
+- `3a79b81` fix(upload): report oversized images as too large
+- `72c8c26` fix(anecdotes): send the converted content type on photo attach
+- `96be1f5` fix(bug-reports): strip token query parameters from stored page urls
+- `aa43eaa` fix(share): queue share strips instead of failing fast
+- `8710fd3` fix(share): strip originals served for thumbnail requests
 - `584cfa1` fix(logging): redact personal fields and stop logging nicknames
 - `85868b6` fix(footer): hide changelog when signed out; move dev origins to env
 - `bc4ccaa` fix(upload): sniff video signatures, force upsert=false, allowlist paths, generic errors
