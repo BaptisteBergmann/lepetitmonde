@@ -12,6 +12,8 @@ import { ensureBugReportsBucket } from './storage'
 import { assertIsAdmin } from './access'
 import { getNicknamesByBaby } from './users'
 import { actionError } from './errors'
+import { normalizeText } from '../feed-validation'
+import { INPUT_LIMITS } from '../input-limits'
 
 // Matches Next's default server-action body limit, so a larger screenshot
 // is already rejected before the action runs; this keeps the action safe if
@@ -34,11 +36,12 @@ export async function submitBugReport(formData: FormData) {
   const { data: { user } } = await getAuthUser()
   if (!user) throw await actionError('unauthenticated')
 
-  const description = (formData.get('description') as string | null)?.trim()
-  if (!description) throw await actionError('describeIssue')
+  const description = await normalizeText(formData.get('description'), INPUT_LIMITS.bugReportDescription, { requiredKey: 'describeIssue' })
 
   const pageUrl = (formData.get('pageUrl') as string | null) || null
-  const userAgent = (formData.get('userAgent') as string | null) || null
+  // Truncated, not rejected: a long user agent shouldn't lose the report.
+  const rawUserAgent = formData.get('userAgent')
+  const userAgent = typeof rawUserAgent === 'string' && rawUserAgent ? rawUserAgent.slice(0, INPUT_LIMITS.userAgent) : null
   const rawScreenshot = formData.get('screenshot')
   // An empty file means "no screenshot", as before.
   const screenshot = rawScreenshot instanceof File && rawScreenshot.size === 0 ? null : rawScreenshot

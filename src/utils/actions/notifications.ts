@@ -214,11 +214,19 @@ export async function getQuietHours() {
   return data
 }
 
+const QUIET_HOURS_RE = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/
+
 export async function setQuietHours(start: string | null, end: string | null) {
   const supabase = await createClient()
   const contextLogger = logger.child({ function: setQuietHours.name })
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw await actionError('unauthorized')
+
+  // Both times or neither: a half-set window has no meaning.
+  const valid = (value: unknown) => value === null || (typeof value === 'string' && QUIET_HOURS_RE.test(value))
+  if (!valid(start) || !valid(end) || (start === null) !== (end === null)) {
+    throw await actionError('invalidInput')
+  }
 
   const { error } = await supabase
     .from('notification_settings')

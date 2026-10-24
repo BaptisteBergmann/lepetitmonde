@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -77,6 +78,7 @@ export default function BabySettingsCard({
               <FieldLabel htmlFor={`nickname-${babyId}`}>{t('nicknameLabel')}</FieldLabel>
               <Input
                 name="nickname"
+                maxLength={INPUT_LIMITS.nickname}
                 id={`nickname-${babyId}`}
                 defaultValue={nickname}
                 placeholder={t('nicknamePlaceholder')}
@@ -86,6 +88,7 @@ export default function BabySettingsCard({
               <FieldLabel htmlFor={`relation-${babyId}`}>{t('relationLabel', { babySurname })}</FieldLabel>
               <Input
                 name="relationToBaby"
+                maxLength={INPUT_LIMITS.relationToBaby}
                 id={`relation-${babyId}`}
                 defaultValue={relationToBaby}
                 placeholder={t('relationPlaceholder')}

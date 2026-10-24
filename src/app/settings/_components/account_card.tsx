@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -79,11 +80,11 @@ export default function AccountCard({ initials, fullName, email, firstName, last
             <div className="grid grid-cols-2 gap-3">
               <Field>
                 <FieldLabel htmlFor="firstName">{t('firstNameLabel')}</FieldLabel>
-                <Input name="firstName" id="firstName" autoComplete="given-name" defaultValue={firstName} />
+                <Input name="firstName" id="firstName" maxLength={INPUT_LIMITS.personName} autoComplete="given-name" defaultValue={firstName} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="lastName">{t('lastNameLabel')}</FieldLabel>
-                <Input name="lastName" id="lastName" autoComplete="family-name" defaultValue={lastName} />
+                <Input name="lastName" id="lastName" maxLength={INPUT_LIMITS.personName} autoComplete="family-name" defaultValue={lastName} />
               </Field>
             </div>
             <Field>

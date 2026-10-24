@@ -4,11 +4,13 @@ import { createClient } from '@utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { normalizeText } from '@/utils/feed-validation'
+import { INPUT_LIMITS } from '@/utils/input-limits'
 
 export async function completeOnboarding(formData: FormData) {
   const babyId = formData.get('babyId') as string
-  const nickname = (formData.get('nickname') as string || '').trim()
-  const relationToBaby = (formData.get('relationToBaby') as string || '').trim()
+  const nickname = (await normalizeText(formData.get('nickname'), INPUT_LIMITS.nickname)) ?? ''
+  const relationToBaby = (await normalizeText(formData.get('relationToBaby'), INPUT_LIMITS.relationToBaby)) ?? ''
 
   const supabase = await createClient()
   const contextLogger = logger.child({ function: completeOnboarding.name, babyId })

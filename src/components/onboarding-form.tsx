@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -73,6 +74,7 @@ export function OnboardingForm({
                   <FieldLabel htmlFor="nickname">{t('nicknameLabel')}</FieldLabel>
                   <Input
                     name="nickname"
+                    maxLength={INPUT_LIMITS.nickname}
                     id="nickname"
                     type="text"
                     autoComplete="nickname"
@@ -86,6 +88,7 @@ export function OnboardingForm({
                   <FieldLabel htmlFor="relationToBaby">{t('relationLabel', { babySurname })}</FieldLabel>
                   <Input
                     name="relationToBaby"
+                    maxLength={INPUT_LIMITS.relationToBaby}
                     id="relationToBaby"
                     type="text"
                     placeholder={t('relationPlaceholder')}

@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -126,6 +127,7 @@ export default function BugReportButton() {
               </label>
               <textarea
                 id="bug_description"
+                maxLength={INPUT_LIMITS.bugReportDescription}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}

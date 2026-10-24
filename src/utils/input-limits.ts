@@ -19,4 +19,9 @@ export const INPUT_LIMITS = {
   pronosticChoice: 100,
   pronosticChoicesMin: 2,
   pronosticChoicesMax: 20,
+  personName: 50,
+  nickname: 50,
+  relationToBaby: 50,
+  bugReportDescription: 5000,
+  userAgent: 512,
 } as const

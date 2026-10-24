@@ -9,6 +9,8 @@ import { logger } from '../logger';
 import { assertIsAdmin } from './access'
 import { createTtlCache } from '../cache/ttl-cache'
 import { actionError } from './errors'
+import { normalizeText } from '../feed-validation'
+import { INPUT_LIMITS } from '../input-limits'
 
 // Every comment/reaction/poll/view read (and the media proxy) checks
 // getUserAccess, often several times per page load and again for every
@@ -160,8 +162,8 @@ export async function updateProfile(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw await actionError('unauthorized')
 
-  const firstName = (formData.get('firstName') as string || '').trim()
-  const lastName = (formData.get('lastName') as string || '').trim()
+  const firstName = (await normalizeText(formData.get('firstName'), INPUT_LIMITS.personName)) ?? ''
+  const lastName = (await normalizeText(formData.get('lastName'), INPUT_LIMITS.personName)) ?? ''
 
   const { error: profileError } = await supabase
     .from('users')
@@ -204,8 +206,8 @@ export async function updateBabyAccessSettings(babyId: string, formData: FormDat
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw await actionError('unauthorized')
 
-  const nickname = (formData.get('nickname') as string || '').trim()
-  const relationToBaby = (formData.get('relationToBaby') as string || '').trim()
+  const nickname = (await normalizeText(formData.get('nickname'), INPUT_LIMITS.nickname)) ?? ''
+  const relationToBaby = (await normalizeText(formData.get('relationToBaby'), INPUT_LIMITS.relationToBaby)) ?? ''
 
   const { error } = await supabase
     .from('baby_access')
