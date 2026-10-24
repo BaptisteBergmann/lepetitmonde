@@ -338,6 +338,11 @@ export async function POST(request: Request) {
         release()
       }
     } catch (err) {
+      // sharp's limitInputPixels error is a size problem, not a bad format.
+      if (err instanceof Error && /pixel limit/i.test(err.message)) {
+        contextLoggerWithPath.warn('Rejected oversized image: pixel limit exceeded')
+        return Response.json({ error: t('imageTooLarge') }, { status: 413 })
+      }
       contextLoggerWithPath.warn(err, 'Rejected upload: image could not be decoded and stripped')
       return Response.json({ error: t('unsupportedType') }, { status: 415 })
     }
