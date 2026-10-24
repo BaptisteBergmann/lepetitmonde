@@ -5,6 +5,8 @@ import { createClient } from '@utils/supabase/server'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
 import { actionError } from './errors'
+import { normalizeText } from '../feed-validation'
+import { INPUT_LIMITS } from '../input-limits'
 
 export async function getTodoItems(babyId: string) {
   const supabase = await createClient()
@@ -24,18 +26,25 @@ export async function getTodoItems(babyId: string) {
   return data
 }
 
+// Insert/update payloads are built from picked fields only: spreading the
+// client's object would let it set created_by, position, done or even baby_id.
 export async function createTodoItem(payload: { baby_id: string; title: string }) {
-  const supabase = await createClient()
-  await assertIsAdmin(supabase, payload.baby_id)
+  const babyId = payload?.baby_id
+  if (typeof babyId !== 'string') throw await actionError('invalidInput')
 
-  const contextLogger = logger.child({ function: createTodoItem.name, babyId: payload.baby_id })
+  const supabase = await createClient()
+  await assertIsAdmin(supabase, babyId)
+
+  const contextLogger = logger.child({ function: createTodoItem.name, babyId })
+
+  const title = await normalizeText(payload.title, INPUT_LIMITS.todoTitle, { requiredKey: 'textRequired' })
 
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: lastItem } = await supabase
     .from('todo_items')
     .select('position')
-    .eq('baby_id', payload.baby_id)
+    .eq('baby_id', babyId)
     .order('position', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -43,7 +52,8 @@ export async function createTodoItem(payload: { baby_id: string; title: string }
   const { error } = await supabase
     .from('todo_items')
     .insert({
-      ...payload,
+      baby_id: babyId,
+      title,
       created_by: user?.id ?? null,
       position: (lastItem?.position ?? 0) + 1,
     })
@@ -51,7 +61,7 @@ export async function createTodoItem(payload: { baby_id: string; title: string }
   if (error) { contextLogger.error(error, "Error creating todo item"); throw error }
   contextLogger.info("Todo item created")
 
-  revalidatePath(`/baby/${payload.baby_id}/todo`)
+  revalidatePath(`/baby/${babyId}/todo`)
 }
 
 export async function updateTodoItem(babyId: string, itemId: string, fields: { title: string }) {
@@ -60,9 +70,11 @@ export async function updateTodoItem(babyId: string, itemId: string, fields: { t
 
   const contextLogger = logger.child({ function: updateTodoItem.name, babyId, itemId })
 
+  const title = await normalizeText(fields?.title, INPUT_LIMITS.todoTitle, { requiredKey: 'textRequired' })
+
   const { error } = await supabase
     .from('todo_items')
-    .update(fields)
+    .update({ title })
     .eq('id', itemId)
     .eq('baby_id', babyId)
 

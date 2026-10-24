@@ -2,12 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@utils/supabase/server'
-import { TablesInsert, TablesUpdate } from '@utils/supabase/database.types'
+import { Constants, type Enums } from '@utils/supabase/database.types'
 import { logger } from '../logger'
 import { getDisplayName } from '../users'
 import { assertIsAdmin } from './access'
 import { getUserAccess, getNicknamesByBaby } from './users'
 import { actionError } from './errors'
+import { normalizeText } from '../feed-validation'
+import { INPUT_LIMITS } from '../input-limits'
+import { assertOneOf, normalizeInteger, normalizeNumber } from '../input-validation'
 
 export async function getInventoryItems(babyId: string) {
   const supabase = await createClient()
@@ -27,20 +30,53 @@ export async function getInventoryItems(babyId: string) {
   return data
 }
 
-type NewInventoryItem = Omit<TablesInsert<'inventory_items'>, 'id' | 'created_at' | 'created_by' | 'position'>
+export type InventoryItemFields = {
+  kind: string
+  name: string
+  size: string | null
+  detail: string | null
+  quantity_owned: number
+  quantity_target: number | null
+  price_paid: number | null
+  purchased_from: string | null
+  condition: Enums<'item_condition'> | null
+}
 
-export async function createInventoryItem(payload: NewInventoryItem) {
+// Validates and rebuilds the client's object field by field, so anything extra
+// (baby_id, id, created_by, position, ...) is dropped rather than written.
+async function pickInventoryFields(raw: Partial<Record<keyof InventoryItemFields, unknown>>): Promise<InventoryItemFields> {
+  if (typeof raw !== 'object' || raw === null) throw await actionError('invalidInput')
+
+  return {
+    kind: await normalizeText(raw.kind, INPUT_LIMITS.inventoryKind, { requiredKey: 'textRequired' }),
+    name: await normalizeText(raw.name, INPUT_LIMITS.inventoryName, { requiredKey: 'textRequired' }),
+    size: await normalizeText(raw.size, INPUT_LIMITS.inventorySize),
+    detail: await normalizeText(raw.detail, INPUT_LIMITS.inventoryDetail),
+    quantity_owned: await normalizeInteger(raw.quantity_owned, { min: 0, max: INPUT_LIMITS.inventoryQuantityMax }),
+    quantity_target: await normalizeInteger(raw.quantity_target, { min: 0, max: INPUT_LIMITS.inventoryQuantityMax, nullable: true }),
+    price_paid: await normalizeNumber(raw.price_paid, { min: 0, max: INPUT_LIMITS.inventoryPriceMax, nullable: true }),
+    purchased_from: await normalizeText(raw.purchased_from, INPUT_LIMITS.inventoryPurchasedFrom),
+    condition: await assertOneOf(raw.condition, Constants.public.Enums.item_condition, { nullable: true }),
+  }
+}
+
+export async function createInventoryItem(payload: InventoryItemFields & { baby_id: string }) {
+  const babyId = payload?.baby_id
+  if (typeof babyId !== 'string') throw await actionError('invalidInput')
+
   const supabase = await createClient()
-  await assertIsAdmin(supabase, payload.baby_id)
+  await assertIsAdmin(supabase, babyId)
 
-  const contextLogger = logger.child({ function: createInventoryItem.name, babyId: payload.baby_id })
+  const contextLogger = logger.child({ function: createInventoryItem.name, babyId })
+
+  const fields = await pickInventoryFields(payload)
 
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: lastItem } = await supabase
     .from('inventory_items')
     .select('position')
-    .eq('baby_id', payload.baby_id)
+    .eq('baby_id', babyId)
     .order('position', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -48,7 +84,8 @@ export async function createInventoryItem(payload: NewInventoryItem) {
   const { error } = await supabase
     .from('inventory_items')
     .insert({
-      ...payload,
+      ...fields,
+      baby_id: babyId,
       created_by: user?.id ?? null,
       position: (lastItem?.position ?? 0) + 1,
     })
@@ -56,20 +93,23 @@ export async function createInventoryItem(payload: NewInventoryItem) {
   if (error) { contextLogger.error(error, "Error creating inventory item"); throw error }
   contextLogger.info("Inventory item created")
 
-  revalidatePath(`/baby/${payload.baby_id}/inventory`)
+  revalidatePath(`/baby/${babyId}/inventory`)
 }
 
-type InventoryItemUpdate = Omit<TablesUpdate<'inventory_items'>, 'id' | 'baby_id' | 'created_at' | 'created_by' | 'position'>
-
-export async function updateInventoryItem(babyId: string, itemId: string, fields: InventoryItemUpdate) {
+export async function updateInventoryItem(babyId: string, itemId: string, raw: InventoryItemFields) {
   const supabase = await createClient()
   await assertIsAdmin(supabase, babyId)
 
   const contextLogger = logger.child({ function: updateInventoryItem.name, babyId, itemId })
 
+  const fields = await pickInventoryFields(raw)
+
+  // Same bookkeeping as adjust_inventory_owned(), which the buy list uses.
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { error } = await supabase
     .from('inventory_items')
-    .update(fields)
+    .update({ ...fields, updated_by: user?.id ?? null, updated_at: new Date().toISOString() })
     .eq('id', itemId)
     .eq('baby_id', babyId)
 

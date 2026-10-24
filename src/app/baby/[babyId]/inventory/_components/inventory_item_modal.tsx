@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { Modal } from '@/components/modal'
 import { useConfirm } from '@/components/confirm_provider'
 import { toast } from 'sonner'
@@ -164,6 +165,7 @@ export default function InventoryItemModal({
                 </Label>
                 <Input
                   id="kind"
+                  maxLength={INPUT_LIMITS.inventoryKind}
                   list="inventory-kinds"
                   value={kind}
                   onChange={(e) => setKind(e.target.value)}
@@ -181,6 +183,7 @@ export default function InventoryItemModal({
                 </Label>
                 <Input
                   id="size"
+                  maxLength={INPUT_LIMITS.inventorySize}
                   list="inventory-subtypes"
                   value={size}
                   onChange={(e) => setSize(e.target.value)}
@@ -197,6 +200,7 @@ export default function InventoryItemModal({
                 </Label>
                 <Input
                   id="name"
+                  maxLength={INPUT_LIMITS.inventoryName}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t('articlePlaceholder')}
@@ -227,6 +231,7 @@ export default function InventoryItemModal({
                 </Label>
                 <Input
                   id="detail"
+                  maxLength={INPUT_LIMITS.inventoryDetail}
                   value={detail}
                   onChange={(e) => setDetail(e.target.value)}
                   placeholder={t('detailPlaceholder')}
@@ -299,6 +304,7 @@ export default function InventoryItemModal({
                 </Label>
                 <Input
                   id="purchased_from"
+                  maxLength={INPUT_LIMITS.inventoryPurchasedFrom}
                   list="inventory-sources"
                   value={purchasedFrom}
                   onChange={(e) => setPurchasedFrom(e.target.value)}

@@ -1164,6 +1164,7 @@
     "invalidFileType": "Ce type de fichier n'est pas pris en charge.",
     "invalidShareDuration": "Durée de lien invalide.",
     "textTooLong": "Ce texte est trop long.",
+    "invalidInput": "Cette valeur n'est pas valide.",
     "textRequired": "Ce champ ne peut pas être vide.",
     "commentRequired": "Le commentaire ne peut pas être vide.",
     "invalidReaction": "Réaction inconnue.",
@@ -1189,7 +1190,8 @@
     "heicConversionFailed": "Impossible de convertir l'image HEIC",
     "imageTooLarge": "Fichier image trop volumineux",
     "videoTooLarge": "Fichier vidéo trop volumineux",
-    "unsupportedType": "Type de fichier non autorisé"
+    "unsupportedType": "Type de fichier non autorisé",
+    "uploadFailed": "L'envoi a échoué. Veuillez réessayer."
   },
   "dropzone": {
     "uploadedSuccess": "{count, plural, one {# fichier téléversé avec succès} other {# fichiers téléversés avec succès}}",

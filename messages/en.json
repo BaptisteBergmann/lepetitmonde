@@ -1164,6 +1164,7 @@
     "invalidFileType": "This file type isn't supported.",
     "invalidShareDuration": "Invalid link duration.",
     "textTooLong": "This text is too long.",
+    "invalidInput": "This value isn't valid.",
     "textRequired": "This field can't be empty.",
     "commentRequired": "The comment can't be empty.",
     "invalidReaction": "Unknown reaction.",
@@ -1189,7 +1190,8 @@
     "heicConversionFailed": "Couldn't convert the HEIC image",
     "imageTooLarge": "Image file too large",
     "videoTooLarge": "Video file too large",
-    "unsupportedType": "Unsupported file type"
+    "unsupportedType": "Unsupported file type",
+    "uploadFailed": "Upload failed. Please try again."
   },
   "dropzone": {
     "uploadedSuccess": "{count, plural, one {# file uploaded successfully} other {# files uploaded successfully}}",

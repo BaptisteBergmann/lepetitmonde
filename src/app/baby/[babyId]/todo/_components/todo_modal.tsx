@@ -1,5 +1,6 @@
 'use client'
 
+import { INPUT_LIMITS } from '@/utils/input-limits'
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -80,6 +81,7 @@ export default function TodoModal({
               </Label>
               <Input
                 id="title"
+                maxLength={INPUT_LIMITS.todoTitle}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('titlePlaceholder')}
