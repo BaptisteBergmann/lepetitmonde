@@ -14,7 +14,7 @@ async function verifyUser(supabase: Awaited<ReturnType<typeof createClient>>) {
 // decodes the cookie locally (no network call), so it's safe to use purely as
 // a cache key — verifyUser() still re-verifies the token against Supabase's
 // auth server on every cache miss, at least once every few seconds per token.
-const authUserCache = createTtlCache<Awaited<ReturnType<typeof verifyUser>>>(5_000)
+const authUserCache = createTtlCache<Awaited<ReturnType<typeof verifyUser>>>(5_000, { maxEntries: 1000 })
 
 // Dedupes repeat auth.getUser() calls within a single request/render.
 // Still verifies the JWT against Supabase once per request — safe per
