@@ -123,6 +123,89 @@ export async function assertStoryVisible(storyId: string, babyId: string, viewer
   return found
 }
 
+export async function findVisibleAnecdote(
+  anecdoteId: string,
+  babyId: string,
+  viewerArg?: FeedViewer | null
+): Promise<{ viewer: FeedViewer; anecdote: { id: string; circleIds: string[] } } | null> {
+  const contextLogger = logger.child({ function: 'findVisibleAnecdote', anecdoteId, babyId })
+  const viewer = viewerArg === undefined ? await getFeedViewer(babyId) : viewerArg
+  if (!viewer) return null
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('anecdotes')
+    .select('id, anecdotes_circles (circle_id)')
+    .eq('id', anecdoteId)
+    .eq('baby_id', babyId)
+    .maybeSingle()
+
+  if (error) { contextLogger.error(error, "Error checking anecdote visibility"); return null }
+  if (!data) return null
+
+  const circleIds = data.anecdotes_circles.map((ac) => ac.circle_id)
+  if (!canSee(viewer, circleIds)) return null
+
+  return { viewer, anecdote: { id: data.id, circleIds } }
+}
+
+// True when an album_photos row of this baby owns the storage path and sits in
+// an album the viewer can see. Unsorted photos (album_id null) are admin-only,
+// so they never count here. Two .eq() queries rather than an .or() filter
+// string: camera filenames can hold commas/parentheses that break PostgREST's
+// unquoted `or` syntax.
+export async function canSeeAlbumPhotoPath(
+  objectPath: string,
+  babyId: string,
+  viewer: FeedViewer
+): Promise<boolean> {
+  const contextLogger = logger.child({ function: 'canSeeAlbumPhotoPath', babyId })
+  const supabase = await createClient()
+
+  for (const column of ['storage_path', 'thumbnail_path'] as const) {
+    const { data, error } = await supabase
+      .from('album_photos')
+      .select('album_id, albums (albums_circles (circle_id))')
+      .eq('baby_id', babyId)
+      .eq(column, objectPath)
+
+    if (error) { contextLogger.error(error, "Error checking album photo visibility"); return false }
+
+    for (const row of data) {
+      if (!row.album_id) continue
+      const album = Array.isArray(row.albums) ? row.albums[0] : row.albums
+      if (!album) continue
+      if (canSee(viewer, album.albums_circles.map((ac) => ac.circle_id))) return true
+    }
+  }
+
+  return false
+}
+
+// Visibility of a storage object for the media proxy. Admins see everything;
+// others need the owning post/story/anecdote, or an album they can see, to be
+// visible. Missing and hidden are indistinguishable to the caller.
+export async function canViewStorageObject(
+  babyId: string,
+  segments: string[],
+  viewer: FeedViewer
+): Promise<boolean> {
+  if (viewer.isAdmin) return true
+
+  const [kind, ownerId] = segments
+  const objectPath = segments.join('/')
+
+  if (ownerId) {
+    if (kind === 'posts' && await findVisiblePost(ownerId, babyId, viewer)) return true
+    if (kind === 'stories' && await findVisibleStory(ownerId, babyId, viewer)) return true
+    if (kind === 'anecdotes' && await findVisibleAnecdote(ownerId, babyId, viewer)) return true
+  }
+
+  // Post photos mirrored into a visible album, story copies under
+  // photos/<babyId>/<storyId>/, and photos moved between albums.
+  return canSeeAlbumPhotoPath(objectPath, babyId, viewer)
+}
+
 export type VisibleComment = Pick<Tables<'post_comments'>, 'id' | 'post_id' | 'user_id' | 'circle_ids'>
 
 // The parent post must be visible AND the comment itself must be visible
