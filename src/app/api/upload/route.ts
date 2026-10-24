@@ -73,6 +73,90 @@ function limitStream(stream: ReadableStream<Uint8Array>, maxBytes: number): Read
   })
 }
 
+// Reads up to `count` bytes off the front of `stream` and returns them along
+// with a stream that still yields the whole body (peeked bytes first), so the
+// original can then be passed to Storage unbuffered.
+async function peekStream(stream: ReadableStream<Uint8Array>, count: number) {
+  const reader = stream.getReader()
+  const peeked: Uint8Array[] = []
+  let peekedLength = 0
+  let finished = false
+
+  while (peekedLength < count && !finished) {
+    const { done, value } = await reader.read()
+    if (done) finished = true
+    else {
+      peeked.push(value)
+      peekedLength += value.byteLength
+    }
+  }
+
+  const head = new Uint8Array(Math.min(peekedLength, count))
+  let offset = 0
+  for (const chunk of peeked) {
+    if (offset >= head.length) break
+    head.set(chunk.subarray(0, head.length - offset), offset)
+    offset += chunk.byteLength
+  }
+
+  let replayed = 0
+  const body = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      if (replayed < peeked.length) {
+        controller.enqueue(peeked[replayed++])
+        return
+      }
+      if (finished) {
+        controller.close()
+        return
+      }
+      const { done, value } = await reader.read()
+      if (done) controller.close()
+      else controller.enqueue(value)
+    },
+    cancel(reason) {
+      return reader.cancel(reason)
+    },
+  })
+
+  return { head, body }
+}
+
+const ISO_BMFF_BRANDS = ['ftyp', 'moov', 'wide', 'mdat', 'free', 'skip']
+const WEBM_MAGIC = [0x1a, 0x45, 0xdf, 0xa3]
+
+// Magic-byte check so a file can't be stored as a video just by claiming a
+// video Content-Type. Images are verified by decoding them instead.
+function hasVideoSignature(contentType: string, head: Uint8Array) {
+  if (contentType === 'video/webm') return head.length >= 4 && WEBM_MAGIC.every((byte, i) => head[i] === byte)
+  if (head.length < 8) return false
+  return ISO_BMFF_BRANDS.includes(String.fromCharCode(...head.subarray(4, 8)))
+}
+
+// Upload paths the client builds (create_post_modal, create_story_modal,
+// create_album_modal, add_photos_modal, create_anecdote_modal), nothing else.
+const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+// One segment, 1-255 characters, no slash or control characters.
+const FILE_SEGMENT = '[^/\\u0000-\\u001F\\u007F]{1,255}'
+const OWNED_PATH_RE = new RegExp(`^(posts|stories|albums|anecdotes)/${UUID}/(thumbnails/)?${FILE_SEGMENT}$`, 'i')
+
+function isAllowedUploadPath(path: string, bucketName: string) {
+  if (OWNED_PATH_RE.test(path)) return true
+  const segments = path.split('/')
+  return segments.length === 3
+    && segments[0] === 'photos'
+    && segments[1] === bucketName
+    && new RegExp(`^${FILE_SEGMENT}$`).test(segments[2])
+}
+
+// Digits only, bounded to a year, so the client can't set a nonsense header on
+// stored objects.
+const MAX_CACHE_CONTROL_SECONDS = 31536000
+function clampCacheControl(value: string | null) {
+  if (!value || !/^\d{1,10}$/.test(value)) return '3600'
+  return String(Math.min(Number(value), MAX_CACHE_CONTROL_SECONDS))
+}
+
 function withJpegExtension(path: string) {
   return HEIC_EXTENSION_RE.test(path) ? path.replace(HEIC_EXTENSION_RE, '.jpg') : `${path}.jpg`
 }
@@ -136,8 +220,11 @@ export async function POST(request: Request) {
   const { searchParams } = new URL(request.url)
   const bucketName = searchParams.get('bucket')
   const path = searchParams.get('path')
-  const upsert = searchParams.get('upsert') === 'true'
-  const cacheControl = searchParams.get('cacheControl') ?? '3600'
+  // Never overwrite: the client's `upsert` query parameter is ignored, so an
+  // admin session can't replace an existing object (the media proxy and share
+  // links serve stored paths as immutable content).
+  const upsert = false
+  const cacheControl = clampCacheControl(searchParams.get('cacheControl'))
   const contentType = request.headers.get('content-type') ?? 'application/octet-stream'
 
   if (!bucketName || !path || !request.body) {
@@ -146,6 +233,11 @@ export async function POST(request: Request) {
 
   if (hasUnsafePathSegment(path.split('/'))) {
     contextLogger.warn({ bucketName, path }, 'Rejected upload: unsafe path segment')
+    return Response.json({ error: t('invalidRequest') }, { status: 400 })
+  }
+
+  if (!isAllowedUploadPath(path, bucketName)) {
+    contextLogger.warn({ bucketName }, 'Rejected upload: path outside the allowed layouts')
     return Response.json({ error: t('invalidRequest') }, { status: 400 })
   }
 
@@ -210,6 +302,26 @@ export async function POST(request: Request) {
     }
   }
 
+  if (isVideo) {
+    let peek
+    try {
+      peek = await peekStream(limitedBody, 12)
+    } catch (err) {
+      if (err instanceof PayloadTooLargeError) {
+        contextLoggerWithPath.warn('Rejected oversized video upload')
+        return Response.json({ error: t('videoTooLarge') }, { status: 413 })
+      }
+      throw err
+    }
+    const { head, body } = peek
+    if (!hasVideoSignature(contentType, head)) {
+      contextLoggerWithPath.warn({ contentType }, 'Rejected upload: video signature mismatch')
+      await body.cancel()
+      return Response.json({ error: t('unsupportedType') }, { status: 415 })
+    }
+    uploadBody = body
+  }
+
   // Also runs on the HEIC branch's JPEG output: heic-convert's handling of the
   // source EXIF/GPS block is not something we want to depend on.
   if (isImage && uploadBody instanceof Buffer) {
@@ -248,8 +360,10 @@ export async function POST(request: Request) {
   contextLoggerWithPath.info({ durationMs, isHeic }, 'Upload to storage completed')
 
   if (result.error) {
+    // Detailed cause stays in the log; Storage messages can echo paths and
+    // would tell the caller whether an object already exists.
     contextLoggerWithPath.error(result.error, 'Error uploading file')
-    return Response.json({ error: result.error.message }, { status: 400 })
+    return Response.json({ error: t('uploadFailed') }, { status: 400 })
   }
 
   let thumbnailFilename: string | undefined
