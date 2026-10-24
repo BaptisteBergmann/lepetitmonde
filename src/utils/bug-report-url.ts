@@ -13,11 +13,26 @@ export function redactSharePath(path: string): string {
   return pathname === '/share' || pathname.startsWith('/share/') ? '/share/[token]' : path
 }
 
+const SENSITIVE_QUERY_PARAMS = ['token', 'token_hash', 'code', 'access_token', 'refresh_token']
+const TOKEN_PAGE_PATTERN = /^\/(invite|signup|reset-password|auth)(\/|$)/
+
+// Invitation and auth links carry credentials in the query or hash. The hash
+// is always dropped; known credential params are removed everywhere, and on
+// token-bearing pages the whole query goes since other params may be derived.
+export function redactPageUrl(path: string): string {
+  const shareRedacted = redactSharePath(path)
+  if (shareRedacted !== path) return shareRedacted
+  const url = new URL(path, 'http://x')
+  if (TOKEN_PAGE_PATTERN.test(url.pathname)) return url.pathname
+  for (const key of SENSITIVE_QUERY_PARAMS) url.searchParams.delete(key)
+  return url.pathname + url.search
+}
+
 // What submitBugReport stores: null for anything that isn't a short same-origin
 // path (a report never fails because of its URL), a redacted path otherwise.
 export function toStoredPageUrl(value: unknown): string | null {
   if (!isSafeRelativePath(value) || value.length > BUG_REPORT_URL_MAX) return null
-  return redactSharePath(value)
+  return redactPageUrl(value)
 }
 
 // For display: legacy rows hold absolute URLs. Returns a relative, redacted
@@ -27,7 +42,7 @@ export function toDisplayPageUrl(value: string): string | null {
     const url = new URL(value, 'http://x')
     const relative = url.pathname + url.search + url.hash
     // Opaque URLs (e.g. "javascript:...") don't yield a rooted path.
-    return isSafeRelativePath(relative) ? redactSharePath(relative) : null
+    return isSafeRelativePath(relative) ? redactPageUrl(relative) : null
   } catch {
     return null
   }
