@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-24
+
+- `c93ce65` feat(db): track invitation use and revocation
+
 ## 2026-10-23
 
 - `d7fed25` fix(logging): redact top-level auth headers
