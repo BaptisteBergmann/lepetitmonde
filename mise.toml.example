@@ -21,6 +21,9 @@ EMAIL_FROM = "Your App <noreply@example.com>"
 # /api/vitals is public, so Web Vitals are off in production unless this is "true".
 WEB_VITALS_ENABLED = "false"
 
+# Dev only: comma-separated hosts (LAN / Tailscale IPs) allowed to load `pnpm dev`.
+ALLOWED_DEV_ORIGINS = "localhost"
+
 VAPID_PUBLIC_KEY = ""
 VAPID_PRIVATE_KEY = ""
 VAPID_CONTACT_EMAIL = "you@example.com"

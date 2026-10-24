@@ -13,8 +13,11 @@ export default async function VersionFooter({
   changelog,
 }: {
   commitSha: string;
-  changelog: ChangelogGroup[];
+  changelog: ChangelogGroup[] | null;
 }) {
+  // Signed out: just the version label, no dialog.
+  if (changelog === null) return <span>v{commitSha}</span>;
+
   const t = await getTranslations('versionFooter');
   return (
     <Dialog>

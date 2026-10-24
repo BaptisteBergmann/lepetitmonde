@@ -38,7 +38,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   images: { unoptimized: true },
-  allowedDevOrigins: ["localhost", "192.168.2.168", "100.64.0.54"],
+  // Comma-separated hosts allowed to load the dev server (LAN / Tailscale IPs),
+  // set in the developer's own mise.toml.
+  allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS ?? "localhost")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

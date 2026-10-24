@@ -77,7 +77,8 @@ export default async function RootLayout({
 }>) {
   const { data: { user } } = await getAuthUser()
   const commitSha = process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'dev'
-  const changelog = getChangelog()
+  // Commit messages are internal; only signed-in members get them.
+  const changelog = user ? getChangelog() : null
   const locale = await getLocale()
   const messages = await getMessages()
 
