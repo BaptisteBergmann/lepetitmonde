@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-24
 
+- `aab2d95` fix(invite): make invitation links single-use and clamp their lifetime
 - `c93ce65` feat(db): track invitation use and revocation
 
 ## 2026-10-23
