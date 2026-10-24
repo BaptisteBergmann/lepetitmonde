@@ -14,6 +14,8 @@ export const logger = pino({
       'subscription', '*.subscription', 'endpoint', '*.endpoint',
       'ip', '*.ip',
       'nickname', '*.nickname',
+      'cookie', '*.cookie', 'authorization', '*.authorization',
+      'headers.cookie', 'headers.authorization',
       '*.headers.cookie', '*.headers.authorization',
       'access_token', '*.access_token', 'refresh_token', '*.refresh_token',
       'password', '*.password',
