@@ -1,5 +1,6 @@
 "use client";
 
+import { toDisplayPageUrl } from '@/utils/bug-report-url';
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -85,6 +86,9 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
             ? `/api/bug-reports/${report.screenshot_path}`
             : null;
 
+          // Legacy rows hold absolute URLs; link a redacted relative path only.
+          const pageHref = report.page_url ? toDisplayPageUrl(report.page_url) : null;
+
           return (
             <div key={report.id} className="flex gap-4 py-3.5 px-6 hover:bg-landing-background/60 transition-colors">
               {screenshotUrl ? (
@@ -120,9 +124,9 @@ export default function DisplayBugReports({ bugReports: initialBugReports, babyI
                       time: format(new Date(report.created_at), 'HH:mm', { locale: dateFnsLocale }),
                     })}
                   </span>
-                  {report.page_url && (
+                  {pageHref && (
                     <a
-                      href={report.page_url}
+                      href={pageHref}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-1 hover:text-landing-foreground transition-colors"

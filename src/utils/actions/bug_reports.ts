@@ -14,6 +14,7 @@ import { getNicknamesByBaby } from './users'
 import { actionError } from './errors'
 import { normalizeText } from '../feed-validation'
 import { INPUT_LIMITS } from '../input-limits'
+import { toStoredPageUrl } from '../bug-report-url'
 
 // Matches Next's default server-action body limit, so a larger screenshot
 // is already rejected before the action runs; this keeps the action safe if
@@ -38,7 +39,8 @@ export async function submitBugReport(formData: FormData) {
 
   const description = await normalizeText(formData.get('description'), INPUT_LIMITS.bugReportDescription, { requiredKey: 'describeIssue' })
 
-  const pageUrl = (formData.get('pageUrl') as string | null) || null
+  // Same-origin path only, share tokens redacted; invalid values store null.
+  const pageUrl = toStoredPageUrl(formData.get('pageUrl'))
   // Truncated, not rejected: a long user agent shouldn't lose the report.
   const rawUserAgent = formData.get('userAgent')
   const userAgent = typeof rawUserAgent === 'string' && rawUserAgent ? rawUserAgent.slice(0, INPUT_LIMITS.userAgent) : null

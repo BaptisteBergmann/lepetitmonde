@@ -71,7 +71,7 @@ export default function BugReportButton() {
     try {
       const formData = new FormData()
       formData.set('description', description)
-      formData.set('pageUrl', window.location.href)
+      formData.set('pageUrl', window.location.pathname + window.location.search + window.location.hash)
       formData.set('userAgent', navigator.userAgent)
       if (screenshotBlob) formData.set('screenshot', screenshotBlob, 'screenshot.png')
 
