@@ -25,7 +25,7 @@ export async function sendThrottled<T>(items: T[], send: (item: T) => Promise<vo
 }
 
 export async function sendWelcomeEmail(to: string, firstName: string) {
-  const contextLogger = logger.child({ function: sendWelcomeEmail.name, to })
+  const contextLogger = logger.child({ function: sendWelcomeEmail.name, recipientCount: 1 })
   const locale = await getLocale()
   const t = await getTranslations('email')
 
@@ -49,7 +49,7 @@ export async function sendWelcomeEmail(to: string, firstName: string) {
 }
 
 export async function sendInviteEmail(to: string, babyName: string, inviteUrl: string) {
-  const contextLogger = logger.child({ function: sendInviteEmail.name, to })
+  const contextLogger = logger.child({ function: sendInviteEmail.name, recipientCount: 1 })
   const locale = await getLocale()
   const t = await getTranslations('email')
 
@@ -89,7 +89,7 @@ export async function sendBroadcastEmail(
   message: string,
   photo?: { filename: string; content: Buffer },
 ) {
-  const contextLogger = logger.child({ function: sendBroadcastEmail.name, to })
+  const contextLogger = logger.child({ function: sendBroadcastEmail.name, recipientCount: 1 })
   const locale = await getLocale()
 
   const templatePath = path.join(process.cwd(), 'public/emails', locale, 'broadcast.html')

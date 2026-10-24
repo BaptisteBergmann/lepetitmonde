@@ -217,7 +217,7 @@ export async function updateBabyAccessSettings(babyId: string, formData: FormDat
 
   if (error) { contextLogger.error(error, "Error updating baby access settings"); throw error }
 
-  contextLogger.info({ nickname, relationToBaby }, "Baby access settings updated")
+  contextLogger.info({ hasNickname: !!nickname }, "Baby access settings updated")
 
   revalidatePath('/settings')
 }

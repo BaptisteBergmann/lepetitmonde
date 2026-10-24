@@ -26,7 +26,7 @@ export async function completeOnboarding(formData: FormData) {
 
   if (accessError) contextLogger.error(accessError, "Error updating nickname/relation to baby")
 
-  contextLogger.info({ nickname, relationToBaby }, "Onboarding completed")
+  contextLogger.info({ hasNickname: !!nickname }, "Onboarding completed")
 
   revalidatePath('/', 'layout')
 }
