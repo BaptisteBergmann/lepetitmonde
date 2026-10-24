@@ -9,6 +9,12 @@ import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
 import { resolveLocale } from '@/i18n/config'
 import { hasUnsafePathSegment } from '@/utils/storage-path'
+import {
+  MAX_IMAGE_UPLOAD_BYTES,
+  SHARP_INPUT_OPTIONS,
+  acquireStripSlot,
+  stripImageMetadata,
+} from '@/utils/image-metadata'
 import { ALLOWED_IMAGE_CONTENT_TYPES, ALLOWED_VIDEO_CONTENT_TYPES } from '@utils/upload-content-types'
 
 async function getTranslator() {
@@ -26,11 +32,6 @@ const HEIC_EXTENSION_RE = /\.hei[cf]$/i
 // typical iPhone HEIC photo (a few MB), to reject pathological uploads
 // instead of a decode that blows up the container's memory.
 const MAX_HEIC_UPLOAD_BYTES = 30 * 1024 * 1024
-
-// Same reasoning as MAX_HEIC_UPLOAD_BYTES, applied to buffering any image
-// for thumbnail generation below — bounded by the client's own
-// maxFileSize (add_photos_modal.tsx / create_album_modal.tsx: 50MB).
-const MAX_IMAGE_UPLOAD_BYTES = 50 * 1024 * 1024
 
 // Matches the client's own maxFileSize for video uploads (create_post_modal.tsx /
 // create_story_modal.tsx: 500MB) — streamed straight through to Storage rather
@@ -104,7 +105,7 @@ function toThumbnailPath(uploadPath: string) {
 // photo exceeds — sharp shrinks JPEGs during decode, so memory stays small.
 async function generateThumbnail(buffer: Buffer, contextLogger: typeof logger): Promise<Buffer | null> {
   try {
-    return await sharp(buffer)
+    return await sharp(buffer, SHARP_INPUT_OPTIONS)
       .rotate()
       .resize(THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 80 })
@@ -206,6 +207,27 @@ export async function POST(request: Request) {
         return Response.json({ error: t('imageTooLarge') }, { status: 413 })
       }
       throw err
+    }
+  }
+
+  // Also runs on the HEIC branch's JPEG output: heic-convert's handling of the
+  // source EXIF/GPS block is not something we want to depend on.
+  if (isImage && uploadBody instanceof Buffer) {
+    // Fails closed: bytes sharp can't decode as an allowed format (this is
+    // also the magic-byte check for images) are rejected rather than stored
+    // with their EXIF/GPS intact.
+    try {
+      const release = await acquireStripSlot()
+      try {
+        const stripped = await stripImageMetadata(uploadBody as Buffer)
+        uploadBody = stripped.buffer
+        uploadContentType = stripped.contentType
+      } finally {
+        release()
+      }
+    } catch (err) {
+      contextLoggerWithPath.warn(err, 'Rejected upload: image could not be decoded and stripped')
+      return Response.json({ error: t('unsupportedType') }, { status: 415 })
     }
   }
 
