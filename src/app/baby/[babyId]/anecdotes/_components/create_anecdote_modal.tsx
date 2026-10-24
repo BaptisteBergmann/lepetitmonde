@@ -64,12 +64,13 @@ export default function CreateAnecdoteModal({
       if (upload.files.length > 0) {
         const newlyUploaded = await upload.onUpload()
         const finalNames = { ...upload.finalNames, ...newlyUploaded.names }
+        const finalContentTypes = { ...upload.finalContentTypes, ...newlyUploaded.contentTypes }
         const successNames = new Set([...upload.successes, ...Object.keys(newlyUploaded.names)])
         const successFile = upload.files.find((f) => successNames.has(f.name))
 
         if (successFile) {
           const filename = finalNames[successFile.name] ?? successFile.name
-          const mimeType = successFile.type || 'application/octet-stream'
+          const mimeType = finalContentTypes[successFile.name] ?? (successFile.type || 'application/octet-stream')
           await attachAnecdotePhoto(anecdoteId, babyId, { filename, mimeType })
         }
       }
