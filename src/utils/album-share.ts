@@ -176,9 +176,12 @@ export async function resolveSharedPhoto(token: string, photoId: string, wantsTh
 
   if (photoError || !photo) { contextLogger.warn("Photo not part of share"); return null }
 
-  const storagePath = (wantsThumbnail && photo.thumbnail_path) ? photo.thumbnail_path : photo.storage_path
+  // A thumbnail request falls back to the original when none exists; callers
+  // need to know, since only real thumbnails may skip the metadata strip.
+  const isThumbnail = wantsThumbnail && !!photo.thumbnail_path
+  const storagePath = isThumbnail && photo.thumbnail_path ? photo.thumbnail_path : photo.storage_path
 
-  return { babyId, storagePath }
+  return { babyId, storagePath, isThumbnail }
 }
 
 const SINGLE_USE_IMAGE_GRACE_MS = 30 * 60 * 1000

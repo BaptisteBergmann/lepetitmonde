@@ -73,7 +73,7 @@ export async function GET(
   // link is public, so full-size images are re-encoded here, at most two at a
   // time. Thumbnails and videos keep streaming.
   const upstreamType = (upstreamResponse.headers.get('content-type') ?? '').split(';')[0].trim()
-  if (!wantsThumbnail && ALLOWED_IMAGE_CONTENT_TYPES.has(upstreamType) && upstreamType !== 'image/gif') {
+  if (!resolved.isThumbnail && ALLOWED_IMAGE_CONTENT_TYPES.has(upstreamType) && upstreamType !== 'image/gif') {
     const release = tryAcquireStripSlot()
     if (!release) {
       await upstreamResponse.body?.cancel()
