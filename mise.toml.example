@@ -18,6 +18,9 @@ SERVICE_ROLE_KEY = ""
 RESEND_API_KEY = ""
 EMAIL_FROM = "Your App <noreply@example.com>"
 
+# /api/vitals is public, so Web Vitals are off in production unless this is "true".
+WEB_VITALS_ENABLED = "false"
+
 VAPID_PUBLIC_KEY = ""
 VAPID_PRIVATE_KEY = ""
 VAPID_CONTACT_EMAIL = "you@example.com"

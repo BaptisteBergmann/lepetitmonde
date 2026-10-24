@@ -15,6 +15,7 @@ import { getAuthUser } from '@utils/supabase/auth';
 import { getChangelog } from '@utils/changelog';
 import VersionFooter from '@/components/version_footer';
 import { WebVitalsReporter } from './web-vitals-reporter';
+import { isWebVitalsEnabled } from '@/utils/web-vitals';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -117,7 +118,7 @@ export default async function RootLayout({
             </footer>
             <PwaRegistry />
             <PwaHistoryTracker />
-            <WebVitalsReporter />
+            {isWebVitalsEnabled() && <WebVitalsReporter />}
             {user && <BugReportButton />}
             <Toaster position="bottom-center" />
           </ConfirmProvider>
