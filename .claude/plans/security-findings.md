@@ -93,6 +93,7 @@ block release
 ### Medium
 
 #### M1. Media proxy checks baby membership, not circle visibility
+- Fixed: `8a4b4de` (media proxy applies circle visibility).
 - Status: confirmed
 - Area: 4 Route handlers / 6 Storage
 - Location: `src/app/api/storage/[babyId]/[...path]/route.ts:37-41`, `:78`
@@ -128,6 +129,7 @@ block release
 - Suggested fix: Strip or replace the token segment (`/share/[token]`) before sending or logging. Better, don't mount the reporter on `/share`, and log the route template instead of the pathname.
 
 #### M5. Unauthenticated `/api/vitals` accepts an unbounded body and logs arbitrary keys
+- Fixed: `60645b8` (vitals disabled in production by default; body cap). Set `WEB_VITALS_ENABLED=true` on a stack to turn it back on.
 - Status: confirmed
 - Area: 4 Route handlers / 11 Logging
 - Location: `src/app/api/vitals/route.ts:12-21`
@@ -136,6 +138,7 @@ block release
 - Suggested fix: Reject when `content-length` is over ~2 KB and read the body with a cap. Log only whitelisted fields (`name`, `value`, `rating`, `id`, a sanitised route) after type and length checks. Rate-limit per IP, or drop the endpoint in production.
 
 #### M6. EXIF and GPS metadata are kept in originals served to share-link visitors
+- Fixed: partially: `9b90c1f` (metadata stripped on upload and on share links), `8710fd3`, `aa43eaa` (share route strip hardening). Step 3b (one-off backfill of existing originals, then removing the interim backstop) is NOT done: it is irreversible and skipped pending owner approval, so the on-the-fly strip on the share route stays and members viewing older originals through `/api/storage` can still see their metadata until the backfill runs.
 - Status: suspected
 - Area: 5 Share links / 6 Uploads
 - Location: `src/app/api/upload/route.ts:197-218`; `src/app/api/share/[token]/[photoId]/route.ts:28-62`
@@ -154,6 +157,7 @@ block release
 - Suggested fix: Add `used_at`/`max_uses` and `revoked_at` columns, consume the token atomically in `grantViewerAccess`, add a revoke action, and clamp `hoursValid` to a fixed set of values (as `SHARE_DURATIONS_HOURS` does for shares).
 
 #### M8. Mass assignment in todo and inventory actions
+- Fixed: `9aa6c3e` (insert and update payloads built from picked fields).
 - Status: confirmed
 - Area: 3 Server Actions / 7 Input validation
 - Location: `src/utils/actions/todo.ts:44-47`, `:63-67`; `src/utils/actions/inventory.ts:49-52`, `:70-74`
@@ -162,6 +166,7 @@ block release
 - Suggested fix: Build the payload from explicitly picked and validated fields, as `createEvent` and `submitGuess` already do.
 
 #### M9. Missing type and length validation on authenticated inputs
+- Fixed: `d542bee`, `8a65fc7`, `5585cf1`, `69a8511` (length, type and MIME validation on text inputs, pronostics, profile and stored media types).
 - Status: confirmed
 - Area: 7 Input validation
 - Location: `src/utils/actions/events.ts:27-35`, `:78-87` (title, description); `src/utils/actions/anecdotes.ts:43-48`, `:122-127` (content); `src/utils/actions/guesses_questions.ts:258-270` (any member can propose; title, description and options unbounded); `src/utils/actions/circles.ts:17-27` (name); `src/utils/actions/bug_reports.ts:37-41` (description, page_url, user_agent); `src/utils/actions/users.ts:160-166`, `:204-205` (names, nickname); `src/utils/actions/notifications.ts:217` (quiet-hours format); `src/utils/actions/posts.ts:300`, `src/utils/actions/stories.ts:85`, `src/utils/actions/anecdotes.ts:99` (`mime_type` stored without the allowlist)
@@ -172,6 +177,7 @@ block release
 ### Low
 
 #### L1. In-process TTL caches grow without bound
+- Fixed: `4958adf` (expired entries evicted, cache size capped).
 - Status: confirmed
 - Area: 1 Auth / 8 Availability
 - Location: `src/utils/cache/ttl-cache.ts:13-29`; `src/utils/supabase/auth.ts:17-27`
@@ -189,6 +195,7 @@ block release
 - Suggested fix: Set `PASSWORD_MIN_LENGTH` of at least 10 in GoTrue, match it in the forms, and add per-email and per-IP throttling (using the Cloudflare IP) in `login()` and `requestPasswordReset()`.
 
 #### L3. No security headers (prior finding 7, pre-existing)
+- Fixed: `b7a2a0a` (security headers and a baseline CSP; `script-src 'unsafe-inline'` remains, nonce CSP is a follow-up).
 - Status: confirmed in code; the proxy is unknown
 - Area: 9 Headers
 - Location: `next.config.ts:5-8`
@@ -206,6 +213,7 @@ block release
 - Suggested fix: Run the name through `escapeHtml` (already in `email.ts`), and consider requiring email confirmation before sending the welcome email.
 
 #### L5. Bug-report `page_url` is shown to admins as a clickable link
+- Fixed: `88c4295`, `96be1f5` (`page_url` stored and linked as a same-origin path, share tokens stripped). Manual: clean bug reports filed before the fix.
 - Status: confirmed
 - Area: 7 Input validation
 - Location: `src/app/baby/[babyId]/admin/_components/display_bug_reports.tsx:124-127`; `src/utils/actions/bug_reports.ts:40`
@@ -214,6 +222,7 @@ block release
 - Suggested fix: Accept only same-origin paths when the report is submitted, and render them as relative links.
 
 #### L6. PostgREST filter built from client strings, and an unbounded `limit` in `getPosts`
+- Fixed: `e4be9aa` (cursor timestamps validated, limit clamped).
 - Status: confirmed
 - Area: 7 Input validation
 - Location: `src/utils/actions/posts.ts:395-401`
@@ -231,6 +240,7 @@ block release
 - Suggested fix: Add a membership check, or move both into non-`'use server'` modules.
 
 #### L8. Realtime relay sends viewers the full inventory rows and checks access only at connect
+- Fixed: `fd01f8a` (inventory and membership payloads stripped; streams recycled every 5 minutes).
 - Status: confirmed
 - Area: 4 Realtime
 - Location: `src/utils/supabase/realtime-relay.ts:87-95`; `src/app/api/realtime/[babyId]/route.ts:23-27`
@@ -263,6 +273,7 @@ block release
 - Suggested fix: Add `mise.toml`, `mise.*.toml` and `.claude/` to `.dockerignore`.
 
 #### L12. Upload route trusts the client
+- Fixed: `bc4ccaa`, `3a79b81`, `72c8c26` (video signature sniffing, no upsert, path allowlist, generic errors; oversized images reported as too large; converted content type sent on attach).
 - Status: confirmed
 - Area: 6 Uploads
 - Location: `src/app/api/upload/route.ts:138-140`, `:161-168`, `:230`
@@ -276,6 +287,7 @@ block release
 - Suggested fix: Sniff the first bytes, force `upsert=false` server-side, restrict the path to `posts|stories|photos|anecdotes/<uuid>/<file>`, and return a generic error.
 
 #### L13. Information disclosure to anonymous visitors and in the repo
+- Fixed: `85868b6` (changelog hidden when signed out; dev origins moved to env).
 - Status: confirmed
 - Area: 8 Secrets
 - Location: `src/app/layout.tsx:79`, `:116` (full `CHANGELOG.md` shown in the footer on `/login` and `/share`); `next.config.ts:6` (LAN and VPN IPs); `.claude/plans/security-review.md:35` (internal Supabase host)
@@ -284,6 +296,7 @@ block release
 - Suggested fix: Show the changelog only when signed in. Move the IPs to env.
 
 #### L14. Logger has no redaction
+- Fixed: `584cfa1`, `d7fed25` (pino redaction, no nicknames or recipient addresses in logs).
 - Status: confirmed
 - Area: 11 Logging
 - Location: `src/utils/logger.ts:3-18`; `src/utils/email.ts:28`, `:52`, `:92` (recipient email in the logger context); `src/utils/actions/users.ts:215`, `src/utils/actions/onboarding.ts:27` (nicknames logged at info)
