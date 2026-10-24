@@ -12,6 +12,7 @@ import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { notifyUsers } from './notify'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
 import { normalizeText } from '@utils/feed-validation'
 import { INPUT_LIMITS } from '@utils/input-limits'
 import { hasUnsafePathSegment } from '@utils/storage-path'
@@ -104,6 +105,7 @@ export async function attachAnecdotePhoto(
     contextLogger.warn("Rejected unsafe filename")
     throw await actionError('invalidFilename')
   }
+  if (!ALLOWED_IMAGE_CONTENT_TYPES.has(mimeType)) throw await actionError('invalidFileType')
 
   const { error } = await supabase
     .from('anecdotes')

@@ -16,6 +16,7 @@ import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-load
 import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { ALLOWED_IMAGE_CONTENT_TYPES, ALLOWED_VIDEO_CONTENT_TYPES } from '@utils/upload-content-types'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 import { assertAdmin, assertCirclesInBaby, assertStoryVisible, findVisibleStory, getFeedViewer } from '@utils/feed-access'
 import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
@@ -59,6 +60,9 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   if (hasUnsafePathSegment(story.thumbnailFilename === undefined ? [story.mediaFilename] : [story.mediaFilename, story.thumbnailFilename])) {
     contextLogger.warn("Rejected unsafe filename")
     throw await actionError('invalidFilename')
+  }
+  if (!ALLOWED_IMAGE_CONTENT_TYPES.has(story.mimeType) && !ALLOWED_VIDEO_CONTENT_TYPES.has(story.mimeType)) {
+    throw await actionError('invalidFileType')
   }
   await assertCirclesInBaby(circleIds, story.baby_id)
   const caption = await normalizeText(story.caption, FEED_LIMITS.storyCaption)

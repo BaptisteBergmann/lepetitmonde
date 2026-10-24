@@ -19,6 +19,7 @@ import type { PostViewsData } from './views'
 import { getCommentsForPosts, getReactionsForPosts, getPollsForPosts, getPostViewsForPosts } from '@utils/feed-loaders'
 import { logger } from '../logger'
 import { actionError } from './errors'
+import { ALLOWED_IMAGE_CONTENT_TYPES, ALLOWED_VIDEO_CONTENT_TYPES } from '@utils/upload-content-types'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 import { assertAdmin, assertCirclesInBaby, assertPostVisible } from '@utils/feed-access'
 import { FEED_LIMITS, normalizeText } from '@utils/feed-validation'
@@ -290,6 +291,9 @@ export async function attachPostPhotos(
   if (files.some(({ filename, thumbnailFilename }) => hasUnsafePathSegment(thumbnailFilename === undefined ? [filename] : [filename, thumbnailFilename]))) {
     contextLogger.warn("Rejected unsafe filename")
     throw await actionError('invalidFilename')
+  }
+  if (files.some(({ mimeType }) => !ALLOWED_IMAGE_CONTENT_TYPES.has(mimeType) && !ALLOWED_VIDEO_CONTENT_TYPES.has(mimeType))) {
+    throw await actionError('invalidFileType')
   }
 
   const photoRows = files.map(({ filename, mimeType, thumbnailFilename }, index) => ({
