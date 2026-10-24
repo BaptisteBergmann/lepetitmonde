@@ -4,6 +4,7 @@
 import { useConfirm } from '@/components/confirm_provider'
 import { toast } from 'sonner'
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
 import { useBabyRealtime } from "@/utils/hooks/use-baby-realtime";
@@ -45,6 +46,7 @@ export default function RealtimeCirclesList({
 }: RealtimeCirclesListProps) {
   const t = useTranslations('admin.circles');
   const confirmAction = useConfirm()
+  const router = useRouter();
   const [circles, setCircles] = useState<Circle[]>(initialCircles);
   const [circlesAccess, setCirclesAccess] = useState<CircleAccess[]>(initialCirclesAccess);
   const [selectedUserByCircle, setSelectedUserByCircle] = useState<Record<string, string>>({});
@@ -80,13 +82,9 @@ export default function RealtimeCirclesList({
         );
       }
     } else if (event.table === "circles_access") {
-      if (event.eventType === "INSERT") {
-        const newAccess = event.new as CircleAccess;
-        setCirclesAccess((prev) => [...prev, newAccess]);
-      } else if (event.eventType === "DELETE") {
-        const oldAccess = event.old as CircleAccess;
-        setCirclesAccess((prev) => prev.filter((a) => a.id !== oldAccess.id));
-      }
+      // The relay sends a bare signal (no row); the refreshed server props are
+      // picked up by the sync block above.
+      router.refresh();
     }
   });
 

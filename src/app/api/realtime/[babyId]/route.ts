@@ -7,6 +7,12 @@ export const dynamic = 'force-dynamic'
 
 const HEARTBEAT_INTERVAL_MS = 20_000
 
+// Streams are recycled so a removed member or an expired session stops
+// receiving events: EventSource reconnects on its own, which re-runs the
+// session and membership checks above (a 401/403 then stops it for good).
+const MAX_STREAM_MS = 5 * 60_000
+const RECONNECT_DELAY_MS = 5_000
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ babyId: string }> }
@@ -28,10 +34,23 @@ export async function GET(
 
   const encoder = new TextEncoder()
   let heartbeat: ReturnType<typeof setInterval>
+  let maxLifetime: ReturnType<typeof setTimeout>
   let unsubscribe: () => void
+  let cleanedUp = false
+
+  // Shared by the lifetime timeout and the client disconnecting; runs once.
+  const cleanup = () => {
+    if (cleanedUp) return
+    cleanedUp = true
+    clearInterval(heartbeat)
+    clearTimeout(maxLifetime)
+    unsubscribe()
+  }
 
   const stream = new ReadableStream({
     start(controller) {
+      controller.enqueue(encoder.encode(`retry: ${RECONNECT_DELAY_MS}\n\n`))
+
       unsubscribe = subscribe(babyId, (event) => {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
       })
@@ -39,10 +58,14 @@ export async function GET(
       heartbeat = setInterval(() => {
         controller.enqueue(encoder.encode(':\n\n'))
       }, HEARTBEAT_INTERVAL_MS)
+
+      maxLifetime = setTimeout(() => {
+        cleanup()
+        controller.close()
+      }, MAX_STREAM_MS)
     },
     cancel() {
-      clearInterval(heartbeat)
-      unsubscribe()
+      cleanup()
     },
   })
 

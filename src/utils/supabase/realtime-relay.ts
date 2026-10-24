@@ -33,12 +33,14 @@ function openChannel(babyId: string): Entry {
       // `users` has no baby_id column — membership changes (join/leave/access level)
       // live on `baby_access`, which does. Nickname edits live here too (nickname is
       // per user+baby); first/last name edits are handled by the unfiltered `users`
-      // UPDATE binding below.
+      // UPDATE binding below. Stripped to a bare signal like `stories`: the service-
+      // role client has no RLS, and consumers refresh through the page, which
+      // re-checks access.
       'postgres_changes',
       { event: '*', schema: 'public', table: 'baby_access', filter: `baby_id=eq.${babyId}` },
       (payload) => {
         for (const listener of listeners) {
-          listener({ table: 'baby_access', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+          listener({ table: 'baby_access', eventType: payload.eventType as RealtimeEvent['eventType'], new: null, old: null })
         }
       }
     )
@@ -76,20 +78,22 @@ function openChannel(babyId: string): Entry {
       }
     )
     .on(
+      // Bare signal, same reasoning as `stories`: no row data over the relay; consumers refetch via the page.
       'postgres_changes',
       { event: '*', schema: 'public', table: 'circles_access', filter: `baby_id=eq.${babyId}` },
       (payload) => {
         for (const listener of listeners) {
-          listener({ table: 'circles_access', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+          listener({ table: 'circles_access', eventType: payload.eventType as RealtimeEvent['eventType'], new: null, old: null })
         }
       }
     )
     .on(
+      // Bare signal, same reasoning as `stories`: no row data over the relay; consumers refresh via the page.
       'postgres_changes',
       { event: '*', schema: 'public', table: 'inventory_items', filter: `baby_id=eq.${babyId}` },
       (payload) => {
         for (const listener of listeners) {
-          listener({ table: 'inventory_items', eventType: payload.eventType as RealtimeEvent['eventType'], new: payload.new, old: payload.old })
+          listener({ table: 'inventory_items', eventType: payload.eventType as RealtimeEvent['eventType'], new: null, old: null })
         }
       }
     )
