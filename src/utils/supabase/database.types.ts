@@ -923,18 +923,27 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          revoked_at: string | null
+          used_at: string | null
+          used_by: string | null
         }
         Insert: {
           baby_id: string
           created_at?: string
           expires_at: string
           id?: string
+          revoked_at?: string | null
+          used_at?: string | null
+          used_by?: string | null
         }
         Update: {
           baby_id?: string
           created_at?: string
           expires_at?: string
           id?: string
+          revoked_at?: string | null
+          used_at?: string | null
+          used_by?: string | null
         }
         Relationships: [
           {
@@ -942,6 +951,13 @@ export type Database = {
             columns: ["baby_id"]
             isOneToOne: false
             referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
