@@ -2,9 +2,10 @@ import { resolveSharedPhoto } from '@utils/album-share'
 import { logger } from '@/utils/logger'
 import { withTiming } from '@/utils/timing'
 import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
-import { MAX_IMAGE_UPLOAD_BYTES, stripImageMetadata, tryAcquireStripSlot } from '@/utils/image-metadata'
+import { MAX_IMAGE_UPLOAD_BYTES, acquireStripSlotWithTimeout, stripImageMetadata } from '@/utils/image-metadata'
 
 const BUSY_RETRY_AFTER_SECONDS = '5'
+const STRIP_WAIT_TIMEOUT_MS = 10_000
 
 function fetchUpstream(upstreamPath: string, range: string | null) {
   return fetch(`${process.env.SUPABASE_URL}/storage/v1/object/${upstreamPath}`, {
@@ -71,13 +72,13 @@ export async function GET(
   // TODO(security-hardening Step 3b): remove after the EXIF backfill. Originals
   // uploaded before upload-time stripping may still carry GPS/EXIF, and a share
   // link is public, so full-size images are re-encoded here, at most two at a
-  // time. Thumbnails and videos keep streaming.
+  // time (others queue briefly). Thumbnails and videos keep streaming.
   const upstreamType = (upstreamResponse.headers.get('content-type') ?? '').split(';')[0].trim()
   if (!resolved.isThumbnail && ALLOWED_IMAGE_CONTENT_TYPES.has(upstreamType) && upstreamType !== 'image/gif') {
-    const release = tryAcquireStripSlot()
+    const release = await acquireStripSlotWithTimeout(STRIP_WAIT_TIMEOUT_MS)
     if (!release) {
       await upstreamResponse.body?.cancel()
-      contextLogger.warn('Share image strip busy; asking client to retry')
+      contextLogger.warn('Share image strip queue full or timed out; asking client to retry')
       return new Response(null, { status: 503, headers: { 'Retry-After': BUSY_RETRY_AFTER_SECONDS } })
     }
 

@@ -83,3 +83,26 @@ export function acquireStripSlot(): Promise<() => void> {
     waiters.push(() => resolve(makeRelease()))
   })
 }
+
+export const STRIP_QUEUE_MAX_WAITERS = 8
+
+// Bounded wait for a slot: null when the queue is already full or the wait
+// exceeds timeoutMs, so a burst queues briefly instead of failing fast but
+// can't pile up unbounded work on a public route.
+export function acquireStripSlotWithTimeout(timeoutMs: number): Promise<(() => void) | null> {
+  const release = tryAcquireStripSlot()
+  if (release) return Promise.resolve(release)
+  if (waiters.length >= STRIP_QUEUE_MAX_WAITERS) return Promise.resolve(null)
+  return new Promise((resolve) => {
+    const waiter = () => {
+      clearTimeout(timer)
+      resolve(makeRelease())
+    }
+    const timer = setTimeout(() => {
+      const index = waiters.indexOf(waiter)
+      if (index !== -1) waiters.splice(index, 1)
+      resolve(null)
+    }, timeoutMs)
+    waiters.push(waiter)
+  })
+}
