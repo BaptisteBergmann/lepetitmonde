@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-24
 
+- `3127338` docs(plans): record security auth and sharing fixes
 - `b29fcfa` fix(auth): require the current password to change it from settings
 - `f940f96` feat(admin): show invitation status and allow revoking
 - `aab2d95` fix(invite): make invitation links single-use and clamp their lifetime
