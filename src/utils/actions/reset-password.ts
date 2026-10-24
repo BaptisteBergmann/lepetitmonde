@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { logger } from '../logger'
 import { headers } from 'next/headers'
 import { createRateLimiter } from '@/utils/rate-limit'
+import { hitLoginLimiters, resetStrictLoginLimiter } from '@/utils/login-limiters'
 import { getClientIp } from '@/utils/client-ip'
 import { isValidPasswordLength, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/utils/password-policy'
 
@@ -81,6 +82,72 @@ export async function updatePassword(formData: FormData) {
   if (error) {
     contextLogger.error(error, "Password update failed")
     redirect(`/reset-password?message=${encodeURIComponent(t('updatePasswordError'))}`)
+  }
+
+  await supabase.auth.signOut()
+  redirect(`/login?message=${encodeURIComponent(t('passwordUpdatedMessage'))}`)
+}
+
+export type ChangePasswordError =
+  | 'currentPasswordWrong'
+  | 'passwordTooShort'
+  | 'passwordMismatch'
+  | 'tooManyAttempts'
+  | 'generic'
+
+// Settings flow: unlike the reset flow, the caller already has a session, so
+// a stolen session alone must not be enough to take the account over. Failures
+// are returned as codes (the settings page has no ?message= banner); success
+// signs out and redirects.
+export async function changePassword(formData: FormData): Promise<{ error: ChangePasswordError }> {
+  const contextLogger = logger.child({ function: changePassword.name })
+  const supabase = await createClient()
+  const t = await getTranslations('auth')
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect(`/login?message=${encodeURIComponent(t('sessionExpiredMessage'))}`)
+  }
+
+  const currentPassword = formData.get('currentPassword')
+  const password = formData.get('password')
+  const confirmPassword = formData.get('confirmPassword')
+
+  if (typeof currentPassword !== 'string' || typeof password !== 'string' || typeof confirmPassword !== 'string') {
+    return { error: 'generic' }
+  }
+  // Length cap only: accounts created before the 10-character rule may have shorter passwords.
+  if (currentPassword.length === 0 || currentPassword.length > PASSWORD_MAX_LENGTH) {
+    return { error: 'currentPasswordWrong' }
+  }
+  if (password !== confirmPassword) return { error: 'passwordMismatch' }
+  if (!isValidPasswordLength(password)) return { error: 'passwordTooShort' }
+
+  const email = user.email
+  if (!email) return { error: 'generic' }
+
+  const normalizedEmail = email.trim().toLowerCase()
+  const ip = getClientIp(await headers()) ?? 'unknown'
+  const blocked = hitLoginLimiters(normalizedEmail, ip)
+  if (blocked) {
+    // No email and no IP in the log on purpose.
+    contextLogger.warn({ userId: user.id, reason: blocked }, 'Password change throttled')
+    return { error: 'tooManyAttempts' }
+  }
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({ email, password: currentPassword })
+  if (verifyError) {
+    // Bad credentials come back as 400; anything else is not the user's fault.
+    if (verifyError.status === 400) return { error: 'currentPasswordWrong' }
+    contextLogger.error(verifyError, 'Current password check failed')
+    return { error: 'generic' }
+  }
+  resetStrictLoginLimiter(normalizedEmail, ip)
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) {
+    contextLogger.error(error, 'Password change failed')
+    return { error: 'generic' }
   }
 
   await supabase.auth.signOut()

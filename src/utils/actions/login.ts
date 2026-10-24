@@ -6,19 +6,9 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { safeRedirectPath } from '@/utils/safe-redirect'
-import { createRateLimiter } from '@/utils/rate-limit'
+import { hitLoginLimiters, resetStrictLoginLimiter } from '@/utils/login-limiters'
 import { getClientIp } from '@/utils/client-ip'
 import { logger } from '@/utils/logger'
-
-const WINDOW_MS = 15 * 60 * 1000
-// Strict on email+ip, looser per email so a stranger can't lock a family
-// member out from one IP, and a per-IP cap. NOTE: the per-IP limit and the IP
-// half of the strict key are bypassable until the L9 port bind ships (a
-// request reaching the app port directly can forge cf-connecting-ip); the
-// per-email limit is the guarantee until then.
-const strictLimiter = createRateLimiter({ windowMs: WINDOW_MS, max: 5 })
-const emailLimiter = createRateLimiter({ windowMs: WINDOW_MS, max: 20 })
-const ipLimiter = createRateLimiter({ windowMs: WINDOW_MS, max: 30 })
 
 export async function login(formData: FormData) {
   const contextLogger = logger.child({ function: login.name })
@@ -31,17 +21,10 @@ export async function login(formData: FormData) {
 
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
   const ip = getClientIp(await headers()) ?? 'unknown'
-  const strictKey = `${normalizedEmail}|${ip}`
-  // Evaluate all three so every limiter counts the attempt.
-  const allowed = [
-    ['email_ip', strictLimiter.hit(strictKey)],
-    ['email', emailLimiter.hit(normalizedEmail)],
-    ['ip', ipLimiter.hit(ip)],
-  ] as const
-  const blocked = allowed.find(([, ok]) => !ok)
+  const blocked = hitLoginLimiters(normalizedEmail, ip)
   if (blocked) {
     // No email and no IP in the log on purpose.
-    contextLogger.warn({ reason: blocked[0] }, 'Login throttled')
+    contextLogger.warn({ reason: blocked }, 'Login throttled')
     const t = await getTranslations('auth')
     const params = new URLSearchParams({ message: t('tooManyAttempts') })
     if (redirectTo !== '/') params.set('redirectTo', redirectTo)
@@ -62,7 +45,7 @@ export async function login(formData: FormData) {
     return redirect(`/login?${params.toString()}`)
   }
 
-  strictLimiter.reset(strictKey)
+  resetStrictLoginLimiter(normalizedEmail, ip)
 
   // Si ça marche, on rafraîchit le cache Next.js et on redirige vers la page d'origine (ou l'accueil)
   revalidatePath('/', 'layout')

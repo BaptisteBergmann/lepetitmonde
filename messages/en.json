@@ -119,6 +119,7 @@
     "passwordUpdatedMessage": "Password updated, you can now log in",
     "passwordMismatch": "Passwords don't match",
     "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
+    "currentPasswordWrong": "Your current password is incorrect.",
     "passwordTooShort": "Password must be between {min} and {max} characters."
   },
   "nav": {
@@ -1029,6 +1030,9 @@
       "newPasswordLabel": "New password",
       "confirmPasswordLabel": "Confirm password",
       "changePassword": "Change password",
+      "currentPasswordLabel": "Current password",
+      "passwordHint": "At least {min} characters",
+      "changePasswordError": "Something went wrong while changing the password.",
       "logout": "Log out"
     },
     "babyCard": {
