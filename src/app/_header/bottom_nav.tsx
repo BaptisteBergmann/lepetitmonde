@@ -95,7 +95,7 @@ export default function BottomNav({ accesses }: { accesses: AccessWithPages[] })
   }
   const overflowActive = overflow.some((page) => isPageActive(page.id))
 
-  const tabClass = 'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 transition-colors touch-target focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset outline-none'
+  const tabClass = 'relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 transition-colors touch-target focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset outline-none'
   const labelClass = 'max-w-full truncate px-0.5 text-[11px] leading-[14px]'
 
   return (
@@ -142,7 +142,7 @@ export default function BottomNav({ accesses }: { accesses: AccessWithPages[] })
                 <DropdownMenuItem
                   key={page.id}
                   render={<Link href={`/baby/${currentBabyId}/${page.id}`} aria-current={isActive ? 'page' : undefined} />}
-                  className={`min-h-12 cursor-pointer gap-3 px-3 text-base ${isActive ? 'bg-accent/60 text-primary' : ''}`}
+                  className={`min-h-12 cursor-pointer gap-3 px-3 text-base ${isActive ? 'bg-accent/60 text-primary focus:text-primary not-data-[variant=destructive]:focus:**:text-primary' : ''}`}
                 >
                   <Icon className="size-5" aria-hidden="true" />
                   <span>{page.name}</span>
