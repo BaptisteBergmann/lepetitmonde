@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-24
 
+- `441f73a` docs(plans): record bottom nav overflow as implemented
+- `7294ed3` fix(nav): restore relative on nav tabs and keep active menu item highlighted
 - `2dfe33c` feat(nav): cap mobile bottom bar at 4 tabs plus a More menu
 - `bb9a4d3` docs(nav): point NavPage icon note at bottom_nav
 - `5eaf9eb` feat(nav): add splitNavPages helper for bottom bar overflow
