@@ -4,6 +4,9 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-24
 
+- `2dfe33c` feat(nav): cap mobile bottom bar at 4 tabs plus a More menu
+- `bb9a4d3` docs(nav): point NavPage icon note at bottom_nav
+- `5eaf9eb` feat(nav): add splitNavPages helper for bottom bar overflow
 - `a80964a` docs(plans): record security hardening fixes
 - `3127338` docs(plans): record security auth and sharing fixes
 - `b29fcfa` fix(auth): require the current password to change it from settings
