@@ -128,7 +128,8 @@
     "unknownUser": "User",
     "settings": "Settings",
     "logout": "Log out",
-    "navigation": "Navigation"
+    "navigation": "Navigation",
+    "more": "More"
   },
   "home": {
     "greeting": "Hello, {firstName}.",

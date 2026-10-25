@@ -128,7 +128,8 @@
     "unknownUser": "Utilisateur",
     "settings": "Paramètres",
     "logout": "Se déconnecter",
-    "navigation": "Navigation"
+    "navigation": "Navigation",
+    "more": "Plus"
   },
   "home": {
     "greeting": "Bonjour, {firstName}.",

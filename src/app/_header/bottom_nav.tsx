@@ -3,10 +3,17 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
-import { Menu } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { Ellipsis, Menu } from 'lucide-react'
 import { AccessWithPages } from './types'
 import { PAGE_REGISTRY } from '@utils/page_registry'
-import { getOrderedPages } from './page_order'
+import { splitNavPages } from './page_order'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 // Icons resolved from PAGE_REGISTRY rather than through the `accesses` prop —
 // see the note on NavPage in ./types for why icons can't cross the Server →
@@ -30,6 +37,7 @@ const ICONS_BY_PAGE_ID = new Map<string, typeof PAGE_REGISTRY[number]['icon']>(
 )
 
 export default function BottomNav({ accesses }: { accesses: AccessWithPages[] }) {
+  const t = useTranslations('nav')
   const params = useParams()
   const pathname = usePathname()
   const currentBabyId = params?.babyId as string
@@ -77,32 +85,73 @@ export default function BottomNav({ accesses }: { accesses: AccessWithPages[] })
   const isHubPage = pathname === `/baby/${currentBabyId}`
   if (isHubPage) return null
 
-  const orderedPages = getOrderedPages(allowedPages)
+  const { visible, overflow } = splitNavPages(allowedPages)
+
+  const isPageActive = (id: string) => {
+    const href = `/baby/${currentBabyId}/${id}`
+    // startsWith (not exact match): several pages have nested routes
+    // (e.g. albums/[albumId]) that should still highlight the tab.
+    return pathname === href || (pathname?.startsWith(`${href}/`) ?? false)
+  }
+  const overflowActive = overflow.some((page) => isPageActive(page.id))
+
+  const tabClass = 'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 transition-colors touch-target focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset outline-none'
+  const labelClass = 'max-w-full truncate px-0.5 text-[11px] leading-[14px]'
 
   return (
     <nav
-      className="fixed bottom-0 left-0 z-40 flex w-full items-stretch justify-around gap-0.5 overflow-x-auto border-t border-border bg-background/95 backdrop-blur-md md:hidden"
+      aria-label={t('navigation')}
+      className="fixed bottom-0 left-0 z-40 flex w-full items-stretch justify-around gap-0.5 border-t border-border bg-background/95 backdrop-blur-md md:hidden"
       style={{ paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))' }}
     >
-      {orderedPages.map((page) => {
+      {visible.map((page) => {
         const Icon = ICONS_BY_PAGE_ID.get(page.id) ?? Menu
-        const href = `/baby/${currentBabyId}/${page.id}`
-        // startsWith (not exact match): several pages have nested routes
-        // (e.g. albums/[albumId]) that should still highlight the tab.
-        const isActive = pathname === href || (pathname?.startsWith(`${href}/`) ?? false)
+        const isActive = isPageActive(page.id)
 
         return (
           <Link
             key={page.id}
-            href={href}
-            aria-label={page.name}
-            className={`relative flex min-w-14 flex-1 items-center justify-center py-3 transition-colors touch-target ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}
+            href={`/baby/${currentBabyId}/${page.id}`}
+            aria-current={isActive ? 'page' : undefined}
+            className={`${tabClass} ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
           >
-            <Icon className="h-6 w-6 shrink-0" />
+            <Icon className="h-6 w-6 shrink-0" aria-hidden="true" />
+            <span className={`${labelClass} ${isActive ? 'font-semibold' : 'font-medium'}`}>{page.name}</span>
           </Link>
         )
       })}
+      {overflow.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={`${tabClass} cursor-pointer ${overflowActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground data-popup-open:text-foreground'}`}
+          >
+            <Ellipsis className="h-6 w-6 shrink-0" aria-hidden="true" />
+            <span className={`${labelClass} ${overflowActive ? 'font-semibold' : 'font-medium'}`}>{t('more')}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="top"
+            align="end"
+            sideOffset={8}
+            className="w-56 motion-reduce:animate-none motion-reduce:duration-0"
+          >
+            {overflow.map((page) => {
+              const Icon = ICONS_BY_PAGE_ID.get(page.id) ?? Menu
+              const isActive = isPageActive(page.id)
+
+              return (
+                <DropdownMenuItem
+                  key={page.id}
+                  render={<Link href={`/baby/${currentBabyId}/${page.id}`} aria-current={isActive ? 'page' : undefined} />}
+                  className={`min-h-12 cursor-pointer gap-3 px-3 text-base ${isActive ? 'bg-accent/60 text-primary' : ''}`}
+                >
+                  <Icon className="size-5" aria-hidden="true" />
+                  <span>{page.name}</span>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </nav>
   )
 }
