@@ -4,24 +4,32 @@
 // publicly callable endpoint. Only import from server code that has already
 // verified the caller.
 import 'server-only'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { actionError } from './errors'
 
-export async function assertIsAdmin(supabase: Awaited<ReturnType<typeof createClient>>, babyId: string) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw await actionError('unauthorized')
-
+// Accepts any Supabase client: the cookie client for server actions, the
+// service-role client for the MCP endpoint (where the user id comes from a
+// verified API token rather than a session).
+export async function assertIsAdminForUser(supabase: SupabaseClient, userId: string, babyId: string) {
   const { data: access, error } = await supabase
     .from('baby_access')
     .select('access_level')
     .eq('baby_id', babyId)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .single()
 
   if (error || !access || access.access_level !== 'admin') {
     throw await actionError('unauthorized')
   }
+}
+
+export async function assertIsAdmin(supabase: SupabaseClient, babyId: string) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw await actionError('unauthorized')
+
+  await assertIsAdminForUser(supabase, user.id, babyId)
 }
 
 // Mirrors the "no circle assigned = hidden, admin-only" visibility rule
