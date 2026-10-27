@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `601e400` feat(mcp): block todo tools when the todo page is disabled
 - `9c91480` refactor(mcp): split tools into per-area modules with shared helpers
 - `96cfc94` feat(care-time): add strict time zone validation and zoned date-time parsing
 - `dd37b23` refactor(access): add client-agnostic member-access helpers
