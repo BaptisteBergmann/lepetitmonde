@@ -1256,9 +1256,7 @@
     "careInvalidAmount": "The amount must be between 1 and 1000 ml",
     "apiTokenLimitReached": "You have reached the limit of 10 tokens. Revoke one to create another.",
     "apiTokenNotFound": "Couldn't revoke the token.",
-    "oauthGrantNotFound": "Connection not found.",
-    "oauthGrantLimitReached": "You already have 10 connected apps. Disconnect one first.",
-    "oauthNotEligible": "Only baby admins can connect apps."
+    "oauthGrantNotFound": "Connection not found."
   },
   "uploadApi": {
     "unauthenticated": "Not authenticated",

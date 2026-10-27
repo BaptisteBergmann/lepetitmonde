@@ -1256,9 +1256,7 @@
     "careInvalidAmount": "La quantité doit être comprise entre 1 et 1000 ml",
     "apiTokenLimitReached": "Vous avez atteint la limite de 10 jetons. Révoquez-en un pour en créer un autre.",
     "apiTokenNotFound": "Impossible de révoquer le jeton.",
-    "oauthGrantNotFound": "Connexion introuvable.",
-    "oauthGrantLimitReached": "Vous avez déjà 10 applications connectées. Déconnectez-en une d'abord.",
-    "oauthNotEligible": "Seuls les administrateurs d'un bébé peuvent connecter des applications."
+    "oauthGrantNotFound": "Connexion introuvable."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",
