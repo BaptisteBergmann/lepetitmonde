@@ -1,7 +1,16 @@
 # Todo list as a remote MCP server
 
-Status: draft
-Approved by:
+## Status: implemented
+
+Shipped 2026-10-27 (phase 1: bearer tokens; OAuth for Claude.ai/mobile remains phase 2).
+- `/api/mcp` via `mcp-handler` 2.3.0 (stateless, `maxSubscriptions: 0`; no `basePath`/`disableSse` options exist in 2.3.0).
+- Tools: `list_babies`, `list_todos`, `add_todo`, `set_todo_done`, `delete_todo`, `move_todo`.
+- `api_tokens` with optional 30/90-day expiry; triggers on `baby_access.access_level` (not `role`) revoke all of a user's tokens when they lose admin.
+- Token lookup errors answer 503 and don't count against the failed-auth limiter.
+- Card shown to admins or holders of active tokens; the create form only for admins. The reveal dialog shows the server URL and the `claude mcp add` command.
+- Expiry picker uses the shared `ChoiceGroup` (moved to `src/components/`).
+
+Approved by: user (2026-10-27)
 
 ## Goal
 Let a baby's admins read and edit the baby todo list from an MCP client (Claude Code first, then
