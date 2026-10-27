@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `09858ae` refactor(ui): move ChoiceGroup to shared components
 - `d1998f8` fix(settings): accessible expiry radio group and reliable focus return
 - `61ebb36` fix(mcp): answer 503 on token lookup errors without counting them
 - `1a60baa` fix(api-tokens): require baby admin to create and validate revoke id
