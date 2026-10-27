@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `903c9f7` fix(oauth): stop auto-redirecting on authorize errors
 - `fa6e92e` docs(mcp): document oauth connection for claude.ai and gemini cli
 - `972d76b` feat(settings): list and disconnect oauth connections
 - `5f978da` feat(oauth): token and revocation endpoints
