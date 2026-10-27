@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `78d2dd9` docs(oauth): note refresh reuse detection covers one rotation
 - `cc9cd8e` fix(oauth): advertise revocation endpoint auth methods
 - `16ee9de` fix(oauth): cap request body reads at 8 KB
 - `639805a` fix(rate-limit): block at max failures instead of max plus one
