@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `7e708d8` feat(mcp): add get_digest tool
+
 - `f484905` feat(digest): add read-only digest core
 
 - `ee5fb4b` refactor(anecdotes): share CURSOR_RE between core and MCP tool
