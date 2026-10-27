@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `9b47c99` docs(plans): mark mcp-expansion implemented and move to done
 - `219a65f` docs: tidy digest README list and changelog spacing
 - `0e21588` docs(readme): add digest tool to the MCP tool list
 - `7e708d8` feat(mcp): add get_digest tool
