@@ -19,6 +19,8 @@ async function requireUserId() {
   return user.id
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export type ApiTokenSummary = Pick<Tables<'api_tokens'>, 'id' | 'name' | 'created_at' | 'last_used_at' | 'expires_at'>
 
 // Active = not revoked and not expired.
@@ -51,6 +53,15 @@ export async function createApiToken(name: string, expiresInDays: number | null)
 
   const admin = createAdminClient()
 
+  // Tokens only unlock admin-level tools, so a user who administers no baby has no use for one.
+  const { count: adminCount, error: adminError } = await admin
+    .from('baby_access')
+    .select('baby_id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('access_level', 'admin')
+  if (adminError) { contextLogger.error(adminError, 'Error checking admin access'); throw adminError }
+  if (!adminCount) throw await actionError('unauthorized')
+
   const { count, error: countError } = await admin
     .from('api_tokens')
     .select('id', { count: 'exact', head: true })
@@ -81,9 +92,10 @@ export async function createApiToken(name: string, expiresInDays: number | null)
 
 export async function revokeApiToken(id: string) {
   const userId = await requireUserId()
-  const contextLogger = logger.child({ function: revokeApiToken.name, userId, tokenId: id })
 
-  if (typeof id !== 'string') throw await actionError('invalidInput')
+  if (typeof id !== 'string' || !UUID_RE.test(id)) throw await actionError('invalidInput')
+
+  const contextLogger = logger.child({ function: revokeApiToken.name, userId, tokenId: id })
 
   // id and user_id together: one user can never revoke another's token.
   const { data, error } = await createAdminClient()
