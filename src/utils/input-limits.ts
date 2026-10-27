@@ -14,6 +14,8 @@ export const INPUT_LIMITS = {
   eventDescription: 2000,
   anecdoteContent: 5000,
   circleName: 50,
+  apiTokenName: 50,
+  apiTokenMaxActive: 10,
   pronosticTitle: 200,
   pronosticDescription: 1000,
   pronosticChoice: 100,
@@ -25,3 +27,6 @@ export const INPUT_LIMITS = {
   bugReportDescription: 5000,
   userAgent: 512,
 } as const
+
+// Allowed lifetimes for an API token, in days; null (never) is the third option.
+export const API_TOKEN_EXPIRY_DAYS = [30, 90] as const
