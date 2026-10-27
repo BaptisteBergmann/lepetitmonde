@@ -128,6 +128,77 @@ export async function listBuyListCore(supabase: SupabaseClient, userId: string, 
   return stillNeeded
 }
 
+// Full inventory (admin view), strict like listBuyListCore so MCP can tell a
+// failed query from an empty inventory. kind narrows to one category.
+export async function listInventoryCore(
+  supabase: SupabaseClient,
+  userId: string,
+  babyId: string,
+  options: ListOptions & { kind?: string } = {},
+): Promise<Tables<'inventory_items'>[]> {
+  await assertIds(babyId)
+  await assertInventoryAdminAccess(supabase, userId, babyId, options)
+
+  const contextLogger = logger.child({ function: listInventoryCore.name, babyId })
+
+  let query = supabase
+    .from('inventory_items')
+    .select('*')
+    .eq('baby_id', babyId)
+    .order('position', { ascending: true })
+  if (options.kind) query = query.eq('kind', options.kind)
+
+  const { data, error } = await query
+
+  if (error) {
+    contextLogger.error(error, "Error fetching inventory items")
+    if (options.strict) throw error
+    return []
+  }
+  contextLogger.debug({ count: data.length }, "Inventory items received")
+
+  return data
+}
+
+// Partial update of the two counters (absolute values, last write wins like the
+// web form). Unlike updateInventoryItem it leaves every other field untouched.
+export async function setInventoryQuantitiesCore(
+  supabase: SupabaseClient,
+  userId: string,
+  babyId: string,
+  itemId: string,
+  raw: { owned?: unknown; target?: unknown },
+  options: AccessOptions = {},
+): Promise<Tables<'inventory_items'>> {
+  await assertIds(babyId, itemId)
+  await assertInventoryAdminAccess(supabase, userId, babyId, options)
+  if (typeof raw !== 'object' || raw === null || (raw.owned === undefined && raw.target === undefined)) throw await actionError('invalidInput')
+
+  const contextLogger = logger.child({ function: setInventoryQuantitiesCore.name, babyId, itemId })
+
+  const changes: { quantity_owned?: number; quantity_target?: number | null } = {}
+  if (raw.owned !== undefined) {
+    changes.quantity_owned = await normalizeInteger(raw.owned, { min: 0, max: INPUT_LIMITS.inventoryQuantityMax })
+  }
+  if (raw.target !== undefined) {
+    changes.quantity_target = await normalizeInteger(raw.target, { min: 0, max: INPUT_LIMITS.inventoryQuantityMax, nullable: true })
+  }
+
+  const { data, error } = await supabase
+    .from('inventory_items')
+    .update({ ...changes, updated_by: userId, updated_at: new Date().toISOString() })
+    .eq('id', itemId)
+    .eq('baby_id', babyId)
+    .select('*')
+
+  if (error) { contextLogger.error(error, "Error updating inventory quantities"); throw error }
+  if (!data || data.length === 0) throw await actionError('inventoryItemNotFound')
+  contextLogger.info("Inventory quantities updated")
+
+  revalidateInventory(babyId)
+  return data[0]
+}
+
 // Any member can mark items bought while shopping, not just admins. The RPC
 // clamps quantity_owned into [0, target] atomically and filters by baby_id, so
 // an item of another baby updates nothing (-> not found). Returns the new row.

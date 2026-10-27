@@ -5,12 +5,13 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { logger } from '../logger'
 import { assertIsAdmin } from './access'
-import { actionError } from './errors'
+import { ActionError, actionError } from './errors'
 import {
   adjustOwnedCore,
   createInventoryItemCore,
   deleteInventoryItemCore,
   listBuyListCore,
+  listInventoryCore,
   pickInventoryFields,
   type InventoryItemFields,
 } from '../inventory-core'
@@ -27,21 +28,16 @@ async function requireUserId() {
 }
 
 export async function getInventoryItems(babyId: string) {
-  const supabase = await createClient()
-  await assertIsAdmin(supabase, babyId)
+  const { data: { user } } = await getAuthUser()
+  if (!user) throw await actionError('unauthorized')
 
-  const contextLogger = logger.child({ function: getInventoryItems.name, babyId })
-
-  const { data, error } = await supabase
-    .from('inventory_items')
-    .select('*')
-    .eq('baby_id', babyId)
-    .order('position', { ascending: true })
-
-  if (error) { contextLogger.error(error, "Error fetching inventory items"); return [] }
-  contextLogger.debug({ count: data.length }, "Inventory items received")
-
-  return data
+  try {
+    return await listInventoryCore(await createClient(), user.id, babyId, { enforcePage: false })
+  } catch (err) {
+    // Same as before: a non-admin got an exception, a query failure got [].
+    if (err instanceof ActionError) throw err
+    return []
+  }
 }
 
 export async function createInventoryItem(payload: InventoryItemFields & { baby_id: string }) {
