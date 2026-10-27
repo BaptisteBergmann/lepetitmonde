@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `16ee9de` fix(oauth): cap request body reads at 8 KB
 - `639805a` fix(rate-limit): block at max failures instead of max plus one
 - `903c9f7` fix(oauth): stop auto-redirecting on authorize errors
 - `fa6e92e` docs(mcp): document oauth connection for claude.ai and gemini cli
