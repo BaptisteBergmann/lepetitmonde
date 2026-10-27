@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `8855b7b` chore(mcp): mark non-destructive write tools with destructiveHint false
 - `c65cb2f` fix(buy-list): refresh after failed adjust, surface list errors over MCP, reject owned >= target
 - `b2cdc36` docs(readme): add buy list tools to the MCP tool list
 - `016d91e` feat(mcp): add buy list tools
