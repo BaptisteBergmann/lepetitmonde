@@ -21,7 +21,9 @@ const EXPIRY_OPTIONS: Expiry[] = [90, 30, null]
 const expiryToValue = (e: Expiry) => (e === null ? 'never' : String(e))
 const valueToExpiry = (v: string): Expiry => (v === 'never' ? null : (Number(v) as Expiry))
 
-export default function ApiTokensCard({ tokens }: { tokens: ApiTokenSummary[] }) {
+// canCreate is false for someone no longer admin of any baby: they keep the card
+// to revoke leftover tokens, but createApiToken would refuse them.
+export default function ApiTokensCard({ tokens, canCreate }: { tokens: ApiTokenSummary[]; canCreate: boolean }) {
   const t = useTranslations('settingsPage.apiTokens')
   const locale = useLocale()
   const dateFnsLocale = getDateFnsLocale(locale)
@@ -80,49 +82,51 @@ export default function ApiTokensCard({ tokens }: { tokens: ApiTokenSummary[] })
         <CardDescription className="text-xs text-landing-muted">{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <form onSubmit={handleCreate} className="space-y-3">
-          <h3 className="text-xs font-semibold text-landing-muted">{t('nameSection')}</h3>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor={nameInputId}>{t('nameLabel')}</FieldLabel>
-              <Input
-                id={nameInputId}
-                ref={nameInputRef}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={INPUT_LIMITS.apiTokenName}
-                placeholder={t('namePlaceholder')}
-                autoComplete="off"
-                required
-                className="h-11"
-              />
-            </Field>
-            <div className="flex flex-col gap-1.5">
-              <p className="text-sm font-medium" aria-hidden="true">{t('expiryLabel')}</p>
-              <ChoiceGroup
-                value={expiryToValue(expiry)}
-                onValueChange={(v) => setExpiry(valueToExpiry(v))}
-                options={EXPIRY_OPTIONS.map((value) => ({ value: expiryToValue(value), label: expiryLabel(value) }))}
-                label={t('expiryLabel')}
-                disabled={isCreating}
-              />
-            </div>
-          </FieldGroup>
-          {limitReached && (
-            <p role="status" className="text-xs text-destructive">{t('limitReached')}</p>
-          )}
-          <Button
-            type="submit"
-            className="h-11 w-full gap-2 rounded-2xl cursor-pointer sm:w-auto"
-            disabled={isCreating || limitReached}
-            aria-busy={isCreating}
-          >
-            {isCreating && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
-            {t('create')}
-          </Button>
-        </form>
+        {canCreate && (
+          <form onSubmit={handleCreate} className="space-y-3">
+            <h3 className="text-xs font-semibold text-landing-muted">{t('nameSection')}</h3>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor={nameInputId}>{t('nameLabel')}</FieldLabel>
+                <Input
+                  id={nameInputId}
+                  ref={nameInputRef}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={INPUT_LIMITS.apiTokenName}
+                  placeholder={t('namePlaceholder')}
+                  autoComplete="off"
+                  required
+                  className="h-11"
+                />
+              </Field>
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm font-medium" aria-hidden="true">{t('expiryLabel')}</p>
+                <ChoiceGroup
+                  value={expiryToValue(expiry)}
+                  onValueChange={(v) => setExpiry(valueToExpiry(v))}
+                  options={EXPIRY_OPTIONS.map((value) => ({ value: expiryToValue(value), label: expiryLabel(value) }))}
+                  label={t('expiryLabel')}
+                  disabled={isCreating}
+                />
+              </div>
+            </FieldGroup>
+            {limitReached && (
+              <p role="status" className="text-xs text-destructive">{t('limitReached')}</p>
+            )}
+            <Button
+              type="submit"
+              className="h-11 w-full gap-2 rounded-2xl cursor-pointer sm:w-auto"
+              disabled={isCreating || limitReached}
+              aria-busy={isCreating}
+            >
+              {isCreating && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+              {t('create')}
+            </Button>
+          </form>
+        )}
 
-        <div className="border-t border-landing-border pt-4 space-y-3">
+        <div className={canCreate ? 'border-t border-landing-border pt-4 space-y-3' : 'space-y-3'}>
           {tokens.length > 0 ? (
             <>
               <h3 className="text-xs font-semibold text-landing-muted">{t('listTitle', { count: tokens.length })}</h3>

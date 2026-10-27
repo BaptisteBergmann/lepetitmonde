@@ -86,7 +86,7 @@ export default async function SettingsPage() {
 
           <ThemeCard />
           <NotificationsCard />
-          {showApiTokens && <ApiTokensCard tokens={apiTokens} />}
+          {showApiTokens && <ApiTokensCard tokens={apiTokens} canCreate={isAdminOfAny} />}
           <InstallCard />
         </div>
       </div>
