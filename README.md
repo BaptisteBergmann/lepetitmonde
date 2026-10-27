@@ -112,14 +112,18 @@ For local-only testing, `docker compose build && docker compose up` (root `docke
 
 ## 🔗 Connect an MCP client
 
-Baby admins can read and edit a baby's to-do list from an MCP client through the remote endpoint `https://<your-host>/api/mcp` (Streamable HTTP, stateless).
+Baby admins can drive a baby's data from an MCP client through the remote endpoint `https://<your-host>/api/mcp` (Streamable HTTP, stateless).
 
 1. In **Settings > Connected apps**, name a token, pick an expiry (30 days, 90 days or never) and create it. The token (`lpm_...`) is shown once; only its hash is stored. You can hold 10 active tokens.
 2. Add the server to Claude Code (the reveal dialog shows this command ready to paste):
    ```bash
    claude mcp add --transport http lepetitmonde https://<your-host>/api/mcp --header "Authorization: Bearer lpm_..."
    ```
-3. Tools: `list_babies`, `list_todos`, `add_todo`, `set_todo_done`, `delete_todo`, `move_todo`.
+3. Tools:
+   - `list_babies`: every baby you belong to, with your `accessLevel` and the `areas` you can use.
+   - To-do: `list_todos`, `add_todo`, `set_todo_done`, `delete_todo`, `move_todo`. Admin only, and the baby's to-do page must be enabled.
+
+   Each tool allows what the web app allows you: a disabled page blocks its tools.
 
 Revoking a token in Settings takes effect on the next call. A token is also revoked automatically when its owner stops being an admin of any baby. Claude Desktop and other clients that let you set a request header work the same way. **Claude.ai custom connectors and the Claude mobile app are not supported yet**: they need OAuth, which isn't implemented.
 
