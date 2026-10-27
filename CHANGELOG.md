@@ -4,13 +4,13 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `7bfdeaf` docs(digest): clarify omitted vs failed and that tracker now-state ignores date
 - `9b47c99` docs(plans): mark mcp-expansion implemented and move to done
 - `219a65f` docs: tidy digest README list and changelog spacing
 - `0e21588` docs(readme): add digest tool to the MCP tool list
 - `7e708d8` feat(mcp): add get_digest tool
 - `f484905` feat(digest): add read-only digest core
 - `ee5fb4b` refactor(anecdotes): share CURSOR_RE between core and MCP tool
-
 - `4fbf7bf` fix(mcp): page list_anecdotes with a real cursor
 - `af24ff3` feat(mcp): add anecdote tools
 - `da5eb32` feat(anecdotes): add client-agnostic anecdotes core
