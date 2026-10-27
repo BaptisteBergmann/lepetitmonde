@@ -1206,6 +1206,7 @@
     "pollOptionsCount": "Un sondage doit avoir entre 2 et 6 options",
     "pronosticNotFound": "Pronostic introuvable",
     "todoNotFound": "Tâche introuvable",
+    "inventoryItemNotFound": "Article introuvable",
     "describeIssue": "Merci de décrire le problème.",
     "cannotDeleteAnsweredPronostic": "Impossible de supprimer un pronostic ayant déjà des réponses",
     "cannotRemoveLastAdmin": "Impossible de retirer le dernier administrateur de ce journal.",

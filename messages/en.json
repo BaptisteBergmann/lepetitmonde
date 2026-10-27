@@ -1206,6 +1206,7 @@
     "pollOptionsCount": "A poll must have between 2 and 6 options",
     "pronosticNotFound": "Pronostic not found",
     "todoNotFound": "Task not found",
+    "inventoryItemNotFound": "Item not found",
     "describeIssue": "Please describe the issue.",
     "cannotDeleteAnsweredPronostic": "Can't delete a pronostic that already has answers",
     "cannotRemoveLastAdmin": "Can't remove the last admin of this journal.",
