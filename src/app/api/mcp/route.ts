@@ -23,9 +23,14 @@ async function handle(request: Request) {
   const contextLogger = logger.child({ function: 'mcpRoute', route: '/api/mcp' })
 
   const match = /^Bearer (\S+)$/i.exec(request.headers.get('authorization') ?? '')
-  const auth = match ? await resolveApiToken(match[1]) : null
+  const resolved = match ? await resolveApiToken(match[1]) : null
 
-  if (!auth) {
+  // A failed lookup is our fault, not the caller's: don't count it against their IP.
+  if (resolved?.status === 'error') {
+    return Response.json({ error: 'service_unavailable' }, { status: 503, headers: { 'Retry-After': '5' } })
+  }
+
+  if (resolved?.status !== 'ok') {
     const ip = getClientIp(request.headers) ?? 'unknown'
     if (!failedAuthLimiter.hit(ip)) {
       contextLogger.warn({ ip }, 'Too many failed MCP auth attempts')
@@ -33,6 +38,8 @@ async function handle(request: Request) {
     }
     return unauthorized()
   }
+
+  const auth = resolved
 
   if (!tokenCallLimiter.hit(auth.tokenId)) {
     contextLogger.warn({ tokenId: auth.tokenId, userId: auth.userId }, 'MCP token rate limited')

@@ -25,9 +25,13 @@ export function isPlausibleApiToken(token: string) {
   return /^lpm_[A-Za-z0-9_-]{43}$/.test(token)
 }
 
-/** Returns the token's owner, or null when it is unknown, revoked or expired. */
-export async function resolveApiToken(token: string): Promise<{ tokenId: string; userId: string } | null> {
-  if (!isPlausibleApiToken(token)) return null
+export type ResolvedApiToken =
+  | { status: 'ok'; tokenId: string; userId: string }
+  | { status: 'invalid' } // unknown, revoked or expired
+  | { status: 'error' } // lookup failed; says nothing about the token
+
+export async function resolveApiToken(token: string): Promise<ResolvedApiToken> {
+  if (!isPlausibleApiToken(token)) return { status: 'invalid' }
 
   const contextLogger = logger.child({ function: resolveApiToken.name })
   const admin = createAdminClient()
@@ -39,9 +43,9 @@ export async function resolveApiToken(token: string): Promise<{ tokenId: string;
     .is('revoked_at', null)
     .maybeSingle()
 
-  if (error) { contextLogger.error(error, 'Error looking up API token'); return null }
-  if (!data) return null
-  if (data.expires_at && new Date(data.expires_at).getTime() <= Date.now()) return null
+  if (error) { contextLogger.error(error, 'Error looking up API token'); return { status: 'error' } }
+  if (!data) return { status: 'invalid' }
+  if (data.expires_at && new Date(data.expires_at).getTime() <= Date.now()) return { status: 'invalid' }
 
   const lastUsed = data.last_used_at ? new Date(data.last_used_at).getTime() : 0
   if (Date.now() - lastUsed > LAST_USED_REFRESH_MS) {
@@ -52,5 +56,5 @@ export async function resolveApiToken(token: string): Promise<{ tokenId: string;
     if (touchError) contextLogger.warn({ tokenId: data.id, err: touchError }, 'Could not update last_used_at')
   }
 
-  return { tokenId: data.id as string, userId: data.user_id as string }
+  return { status: 'ok', tokenId: data.id as string, userId: data.user_id as string }
 }
