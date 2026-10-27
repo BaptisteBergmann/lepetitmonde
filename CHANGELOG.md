@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `da5eb32` feat(anecdotes): add client-agnostic anecdotes core
 - `85f7077` docs(readme): add anecdote tools to the MCP tool list
 - `c6058d5` fix(inventory): log unexpected errors in getInventoryItems
 - `e159464` docs(readme): add inventory tools to the MCP tool list
