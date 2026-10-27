@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `bacfd8e` docs(plans): record todo MCP server as implemented
 - `9dbd65b` feat(settings): show MCP server URL when a token is created
 - `97ca1dd` fix(settings): hide token create form for users who admin no baby
 - `09858ae` refactor(ui): move ChoiceGroup to shared components
