@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `219a65f` docs: tidy digest README list and changelog spacing
 - `0e21588` docs(readme): add digest tool to the MCP tool list
 - `7e708d8` feat(mcp): add get_digest tool
 - `f484905` feat(digest): add read-only digest core
