@@ -16,8 +16,8 @@ function ok(value: unknown): ToolResult {
 
 // Core errors come back as tool errors, not HTTP 500s. Only ActionError text
 // (translated, written for users) is shown; raw database errors stay in the logs.
-async function run(tool: string, ctx: { userId: string; tokenId: string }, fn: () => Promise<unknown>): Promise<ToolResult> {
-  const contextLogger = logger.child({ function: 'mcpTool', route: '/api/mcp', tool, tokenId: ctx.tokenId, userId: ctx.userId })
+async function run(tool: string, ctx: { userId: string; tokenId: string; babyId?: string }, fn: () => Promise<unknown>): Promise<ToolResult> {
+  const contextLogger = logger.child({ function: 'mcpTool', route: '/api/mcp', tool, tokenId: ctx.tokenId, userId: ctx.userId, babyId: ctx.babyId })
   try {
     const result = await fn()
     contextLogger.info('MCP tool call')
@@ -70,7 +70,7 @@ export function registerTodoTools(server: McpServer, ctx: { userId: string; toke
       inputSchema: z.object({ babyId }),
       annotations: { readOnlyHint: true },
     },
-    ({ babyId }) => run('list_todos', ctx, async () => {
+    ({ babyId }) => run('list_todos', { ...ctx, babyId }, async () => {
       const items = await listTodos(admin, userId, babyId)
       return items.map(({ id, title, done, position }) => ({ id, title, done, position }))
     }),
@@ -83,7 +83,7 @@ export function registerTodoTools(server: McpServer, ctx: { userId: string; toke
       description: "Adds an item at the end of a baby's to-do list. The title is at most 200 characters.",
       inputSchema: z.object({ babyId, title: z.string() }),
     },
-    ({ babyId, title }) => run('add_todo', ctx, () => addTodo(admin, userId, babyId, title)),
+    ({ babyId, title }) => run('add_todo', { ...ctx, babyId }, () => addTodo(admin, userId, babyId, title)),
   )
 
   server.registerTool(
@@ -94,7 +94,7 @@ export function registerTodoTools(server: McpServer, ctx: { userId: string; toke
       inputSchema: z.object({ babyId, itemId, done: z.boolean() }),
       annotations: { idempotentHint: true },
     },
-    ({ babyId, itemId, done }) => run('set_todo_done', ctx, () => setTodoDone(admin, userId, babyId, itemId, done)),
+    ({ babyId, itemId, done }) => run('set_todo_done', { ...ctx, babyId }, () => setTodoDone(admin, userId, babyId, itemId, done)),
   )
 
   server.registerTool(
@@ -105,7 +105,7 @@ export function registerTodoTools(server: McpServer, ctx: { userId: string; toke
       inputSchema: z.object({ babyId, itemId }),
       annotations: { destructiveHint: true },
     },
-    ({ babyId, itemId }) => run('delete_todo', ctx, () => deleteTodo(admin, userId, babyId, itemId)),
+    ({ babyId, itemId }) => run('delete_todo', { ...ctx, babyId }, () => deleteTodo(admin, userId, babyId, itemId)),
   )
 
   server.registerTool(
@@ -115,6 +115,6 @@ export function registerTodoTools(server: McpServer, ctx: { userId: string; toke
       description: 'Moves a to-do item one position up or down in the list.',
       inputSchema: z.object({ babyId, itemId, direction: z.enum(['up', 'down']) }),
     },
-    ({ babyId, itemId, direction }) => run('move_todo', ctx, () => moveTodo(admin, userId, babyId, itemId, direction)),
+    ({ babyId, itemId, direction }) => run('move_todo', { ...ctx, babyId }, () => moveTodo(admin, userId, babyId, itemId, direction)),
   )
 }
