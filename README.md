@@ -131,7 +131,20 @@ Baby admins can drive a baby's data from an MCP client through the remote endpoi
 
    Each tool allows what the web app allows you: a disabled page blocks its tools.
 
-Revoking a token in Settings takes effect on the next call. A token is also revoked automatically when its owner stops being an admin of any baby. Claude Desktop and other clients that let you set a request header work the same way. **Claude.ai custom connectors and the Claude mobile app are not supported yet**: they need OAuth, which isn't implemented.
+Revoking a token in Settings takes effect on the next call. A token is also revoked automatically when its owner stops being an admin of any baby. Claude Desktop and other clients that let you set a request header work the same way.
+
+### OAuth clients
+
+Clients that can't send a header sign in through OAuth 2.1 instead (the app is its own authorization server: discovery, dynamic client registration, PKCE S256). Only admins of at least one baby can approve a connection. No token to create:
+
+- **Claude.ai and the Claude mobile app**: Settings > Connectors > Add custom connector > `https://<your-host>/api/mcp`, then sign in to Lepetitmonde and allow access. The mobile app uses the connector added on the web.
+- **Gemini CLI**: add the server to `~/.gemini/settings.json`, then run `/mcp auth lepetitmonde`. The browser must be on the same machine, because the callback is `http://localhost:7777/oauth/callback`.
+  ```json
+  { "mcpServers": { "lepetitmonde": { "httpUrl": "https://<your-host>/api/mcp" } } }
+  ```
+- **Claude Code without a header**: `claude mcp add --transport http lepetitmonde https://<your-host>/api/mcp`, then `/mcp` > Authenticate.
+
+OAuth connections show in **Settings > Connected apps**, where you can disconnect them. An access token lasts 1 hour; a connection stays alive while it is used at least every 30 days (refresh tokens rotate, and reusing an old one disconnects the app) and is cut off after 90 days, when the client must reconnect. Connections are revoked automatically when the owner stops being an admin of any baby. `SITE_URL` must be the public origin of the app: every advertised URL and the token audience come from it. `/api/mcp`, `/api/oauth/*` and `/.well-known/*` must be reachable without a Cloudflare challenge.
 
 ## 🤝 Contributing
 
