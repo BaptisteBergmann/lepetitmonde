@@ -4,19 +4,16 @@ import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
 import { Tables } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
-import { getTranslations } from 'next-intl/server'
-import { assertIsAdmin, getVisibleUserIds } from './access'
-import { getUserCircleIds } from './circles'
-import { getUserAccess } from './users'
-import { ensureBabyBucket, removeStorageObjects } from './storage'
-import { notifyUsers } from './notify'
+import { assertIsAdmin } from './access'
+import { removeStorageObjects } from './storage'
 import { logger } from '../logger'
-import { actionError } from './errors'
+import { ActionError, actionError } from './errors'
 import { ALLOWED_IMAGE_CONTENT_TYPES } from '@utils/upload-content-types'
 import { normalizeText } from '@utils/feed-validation'
 import { INPUT_LIMITS } from '@utils/input-limits'
 import { hasUnsafePathSegment } from '@utils/storage-path'
 import { assertCirclesInBaby } from '@utils/feed-access'
+import { createAnecdoteCore, listAnecdotesCore } from '@utils/anecdotes-core'
 
 export type AnecdoteWithDetails = Tables<'anecdotes'> & {
   circleIds: string[]
@@ -35,58 +32,18 @@ function toAnecdoteUrl(babyId: string, path: string) {
   return `/api/storage/${babyId}/${path.split('/').map(encodeURIComponent).join('/')}`
 }
 
+// Thin session wrapper: the logic lives in anecdotes-core.ts so the MCP
+// endpoint applies the same rules. enforcePage: false keeps the web action's
+// access rules exactly as they were (the page does the page check).
 export async function createAnecdote(anecdote: NewAnecdote, circleIds: string[]) {
-  const supabase = await createClient()
-  const contextLogger = logger.child({ function: createAnecdote.name, babyId: anecdote.baby_id })
+  const { data: { user } } = await getAuthUser()
+  if (!user) throw await actionError('unauthorized')
 
-  await assertIsAdmin(supabase, anecdote.baby_id)
-
-  // Shape first: new Set("abc") would split a string into characters.
-  if (!Array.isArray(circleIds) || !circleIds.every((id) => typeof id === 'string')) {
-    contextLogger.warn("Rejected malformed circleIds")
-    throw await actionError('unauthorized')
-  }
-  await assertCirclesInBaby(circleIds, anecdote.baby_id)
-
-  const content = await normalizeText(anecdote.content, INPUT_LIMITS.anecdoteContent, { requiredKey: 'textRequired' })
-
-  await ensureBabyBucket(anecdote.baby_id)
-
-  const { data, error } = await supabase
-    .from('anecdotes')
-    .insert([{
-      id: anecdote.id,
-      baby_id: anecdote.baby_id,
-      content,
-      happened_at: anecdote.happened_at,
-    }])
-    .select('id')
-    .single()
-
-  if (error) { contextLogger.error(error, "Error creating anecdote"); throw error }
-
-  if (circleIds.length > 0) {
-    const { error: circlesError } = await supabase
-      .from('anecdotes_circles')
-      .insert(circleIds.map((circleId) => ({ anecdote_id: data.id, circle_id: circleId })))
-
-    if (circlesError) { contextLogger.error(circlesError, "Error linking anecdote circles"); throw circlesError }
-  }
-
-  contextLogger.info({ anecdoteId: data.id }, "Anecdote created")
-
-  const { data: { user } } = await supabase.auth.getUser()
-  const recipients = await getVisibleUserIds(anecdote.baby_id, circleIds, user?.id)
-  const t = await getTranslations('pushNotifications')
-  await notifyUsers(anecdote.baby_id, 'new_anecdote', {
-    title: t('newAnecdote.title'),
-    body: anecdote.content.slice(0, 120),
-    url: `/baby/${anecdote.baby_id}/anecdotes`,
-  }, recipients)
-
-  revalidatePath(`/baby/${anecdote.baby_id}/anecdotes`)
-
-  return data.id
+  return createAnecdoteCore(await createClient(), user.id, anecdote.baby_id, {
+    id: anecdote.id,
+    content: anecdote.content,
+    happenedAt: anecdote.happened_at,
+  }, circleIds, { enforcePage: false })
 }
 
 export async function attachAnecdotePhoto(
@@ -182,17 +139,6 @@ export async function updateAnecdote(
   revalidatePath(`/baby/${babyId}/anecdotes`)
 }
 
-async function withVisibility(babyId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await getAuthUser()
-
-  const access = await getUserAccess(babyId)
-  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
-  const userCircleIds = new Set(user ? await getUserCircleIds(babyId, user.id) : [])
-
-  return { supabase, isAdmin, userCircleIds }
-}
-
 function toAnecdoteWithDetails(row: {
   baby_id: string
   anecdotes_circles: { circle_id: string }[]
@@ -214,35 +160,21 @@ export async function getAnecdotes(
   babyId: string,
   { limit, before }: { limit: number; before?: { happenedAt: string; createdAt: string } }
 ): Promise<AnecdoteWithDetails[]> {
-  const contextLogger = logger.child({ function: getAnecdotes.name, babyId, limit, before })
-  const { supabase, isAdmin, userCircleIds } = await withVisibility(babyId)
+  const { data: { user } } = await getAuthUser()
+  if (!user) return []
 
-  let query = supabase
-    .from('anecdotes')
-    .select('*, anecdotes_circles (circle_id)')
-    .eq('baby_id', babyId)
-    .order('happened_at', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(limit)
-
-  if (before) {
-    query = query.or(
-      `happened_at.lt.${before.happenedAt},and(happened_at.eq.${before.happenedAt},created_at.lt.${before.createdAt})`
-    )
+  try {
+    const rows = await listAnecdotesCore(await createClient(), user.id, babyId, { limit, before }, { enforcePage: false })
+    return rows.map(({ circleIds, ...row }) => toAnecdoteWithDetails({
+      ...row,
+      anecdotes_circles: circleIds.map((circle_id) => ({ circle_id })),
+    }))
+  } catch (err) {
+    // Same as before: a query failure gave an empty list.
+    if (err instanceof ActionError) throw err
+    logger.child({ function: getAnecdotes.name, babyId }).error(err, "Error fetching anecdotes")
+    return []
   }
-
-  const { data, error } = await query
-
-  if (error) { contextLogger.error(error, "Error fetching anecdotes"); return [] }
-
-  const visibleRows = data.filter(
-    (row) => isAdmin || row.anecdotes_circles.some((ac: { circle_id: string }) => userCircleIds.has(ac.circle_id))
-  )
-  const visible = visibleRows.map(toAnecdoteWithDetails)
-
-  contextLogger.debug({ count: visible.length }, "Anecdotes received")
-
-  return visible
 }
 
 export async function deleteAnecdote(anecdoteId: string, babyId: string) {
