@@ -5,6 +5,7 @@ import { registerBabyTools } from './babies'
 import { registerAnecdoteTools } from './anecdotes'
 import { registerBuyListTools } from './buy_list'
 import { registerCalendarTools } from './calendar'
+import { registerDigestTools } from './digest'
 import { registerInventoryTools } from './inventory'
 import { registerTodoTools } from './todo'
 import { registerTrackerTools } from './tracker'
@@ -20,4 +21,5 @@ export function registerTools(server: McpServer, ctx: { userId: string; tokenId:
   registerCalendarTools(server, toolCtx)
   registerInventoryTools(server, toolCtx)
   registerAnecdoteTools(server, toolCtx)
+  registerDigestTools(server, toolCtx)
 }
