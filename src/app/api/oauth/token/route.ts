@@ -3,7 +3,7 @@ import { logger } from '@utils/logger'
 import { tokenFailureLimiter, tokenIpLimiter } from '@utils/oauth-limiters'
 import { authenticateClient } from '@utils/oauth/clients'
 import { getOAuthUrls } from '@utils/oauth/config'
-import { corsPreflight, oauthError, oauthJson, tooManyRequests } from '@utils/oauth/http'
+import { corsPreflight, oauthError, oauthJson, readCappedText, tooManyRequests } from '@utils/oauth/http'
 import { issueTokensForCode, rotateRefreshToken, type TokenGrantResult } from '@utils/oauth/tokens'
 
 export const runtime = 'nodejs'
@@ -11,8 +11,6 @@ export const dynamic = 'force-dynamic'
 
 // OAuth token endpoint (RFC 6749 section 3.2). Authenticates the client itself and
 // never reads cookies. Never log codes, verifiers, secrets or tokens.
-const MAX_BODY_BYTES = 8 * 1024
-
 const unavailable = () => oauthError('temporarily_unavailable', undefined, 503, { 'Retry-After': '5' })
 
 export async function POST(request: Request) {
@@ -32,8 +30,8 @@ export async function POST(request: Request) {
   if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/x-www-form-urlencoded')) {
     return oauthError('invalid_request', 'Content-Type must be application/x-www-form-urlencoded')
   }
-  const raw = await request.text()
-  if (Buffer.byteLength(raw, 'utf8') > MAX_BODY_BYTES) return oauthError('invalid_request', 'Request body too large', 413)
+  const raw = await readCappedText(request)
+  if (raw === null) return oauthError('invalid_request', 'Request body too large', 413)
   const body = new URLSearchParams(raw)
 
   const auth = await authenticateClient(request.headers, body)

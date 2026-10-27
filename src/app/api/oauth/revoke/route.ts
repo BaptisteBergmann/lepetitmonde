@@ -1,7 +1,7 @@
 import { getClientIp } from '@utils/client-ip'
 import { revokeIpLimiter } from '@utils/oauth-limiters'
 import { authenticateClient } from '@utils/oauth/clients'
-import { corsPreflight, oauthError, oauthJson, tooManyRequests } from '@utils/oauth/http'
+import { corsPreflight, oauthError, oauthJson, readCappedText, tooManyRequests } from '@utils/oauth/http'
 import { revokeGrantByToken } from '@utils/oauth/tokens'
 
 export const runtime = 'nodejs'
@@ -9,7 +9,6 @@ export const dynamic = 'force-dynamic'
 
 // RFC 7009. Authenticated as the client; revokes the whole grant when the token
 // belongs to it. Always 200 for unknown tokens so it can't be used as an oracle.
-const MAX_BODY_BYTES = 8 * 1024
 
 export async function POST(request: Request) {
   const ip = getClientIp(request.headers) ?? 'unknown'
@@ -18,8 +17,8 @@ export async function POST(request: Request) {
   if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/x-www-form-urlencoded')) {
     return oauthError('invalid_request', 'Content-Type must be application/x-www-form-urlencoded')
   }
-  const raw = await request.text()
-  if (Buffer.byteLength(raw, 'utf8') > MAX_BODY_BYTES) return oauthError('invalid_request', 'Request body too large', 413)
+  const raw = await readCappedText(request)
+  if (raw === null) return oauthError('invalid_request', 'Request body too large', 413)
   const body = new URLSearchParams(raw)
 
   const auth = await authenticateClient(request.headers, body)

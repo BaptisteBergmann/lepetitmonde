@@ -4,7 +4,7 @@ import { logger } from '@utils/logger'
 import { registerGlobalLimiter, registerIpLimiter } from '@utils/oauth-limiters'
 import { OAUTH_SCOPE } from '@utils/oauth/config'
 import { generateClientSecret, sha256Hex } from '@utils/oauth/clients'
-import { corsPreflight, oauthError, oauthJson, tooManyRequests } from '@utils/oauth/http'
+import { corsPreflight, oauthError, oauthJson, readCappedText, tooManyRequests } from '@utils/oauth/http'
 import { isAllowedRedirectUri } from '@utils/oauth/redirect-uri'
 
 export const runtime = 'nodejs'
@@ -14,7 +14,6 @@ export const dynamic = 'force-dynamic'
 // themselves), so it is rate limited and writes nothing but an oauth_clients row, which
 // grants nothing until a logged-in admin approves it on the consent page.
 
-const MAX_BODY_BYTES = 8 * 1024
 const MAX_CLIENT_NAME = 100
 const MAX_REDIRECT_URIS = 5
 const AUTH_METHODS = ['none', 'client_secret_post', 'client_secret_basic'] as const
@@ -54,12 +53,8 @@ export async function POST(request: Request) {
     return tooManyRequests(3600)
   }
 
-  const declaredLength = Number(request.headers.get('content-length') ?? 0)
-  if (declaredLength > MAX_BODY_BYTES) return oauthError('invalid_client_metadata', 'Request body too large', 413)
-  const raw = await request.text()
-  if (Buffer.byteLength(raw, 'utf8') > MAX_BODY_BYTES) {
-    return oauthError('invalid_client_metadata', 'Request body too large', 413)
-  }
+  const raw = await readCappedText(request)
+  if (raw === null) return oauthError('invalid_client_metadata', 'Request body too large', 413)
 
   let body: unknown
   try {
