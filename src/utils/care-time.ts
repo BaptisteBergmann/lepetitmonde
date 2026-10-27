@@ -1,5 +1,5 @@
 import { FAMILY_TIME_ZONE } from '@utils/formatting'
-import type { BreastSide, CareKind } from '@utils/care-events'
+import { FEED_KINDS, type BreastSide, type CareKind } from '@utils/care-events'
 
 // Pure, client-safe helpers for the tracker. Timestamps are stored as UTC
 // timestamptz; "a day" is the calendar day in the viewing device's zone, so
@@ -173,6 +173,25 @@ export function totalSleepMs(events: TimedEvent[], bounds: { start: Date; end: D
   return events
     .filter((e) => e.kind === 'sleep')
     .reduce((sum, e) => sum + overlapMs(e, bounds, now), 0)
+}
+
+export type DayTotals = { feedCount: number; bottleMl: number; sleepMs: number }
+
+// Feeds and bottles count by the day they started on; sleep is clamped to the day.
+export function computeDayTotals(
+  events: (TimedEvent & { amount_ml: number | null })[],
+  bounds: { start: Date; end: Date },
+  now: Date,
+): DayTotals {
+  const startedToday = events.filter((e) => {
+    const started = new Date(e.started_at)
+    return started >= bounds.start && started < bounds.end
+  })
+  return {
+    feedCount: startedToday.filter((e) => (FEED_KINDS as readonly string[]).includes(e.kind)).length,
+    bottleMl: startedToday.reduce((sum, e) => sum + (e.kind === 'bottle' ? (e.amount_ml ?? 0) : 0), 0),
+    sleepMs: totalSleepMs(events, bounds, now),
+  }
 }
 
 // After "both" (or with no history) there is no sensible suggestion.

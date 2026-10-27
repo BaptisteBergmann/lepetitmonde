@@ -2,9 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getTrackerDay, getTrackerNow } from "@/utils/actions/care_events";
 import { getRequestTimeZone } from "@/utils/care-timezone";
-import { parseDayParam, todayInZone, totalSleepMs, zonedDayBounds } from "@/utils/care-time";
+import { parseDayParam, todayInZone, computeDayTotals, zonedDayBounds } from "@/utils/care-time";
 import { formatDuration } from "@/utils/care-duration";
-import { FEED_KINDS } from "@/utils/care-events";
 import { Reveal } from "@components/reveal";
 import { AddEntryButton } from "./_components/add_entry_button";
 import { CareLog } from "./_components/care_log";
@@ -34,13 +33,7 @@ export default async function TrackerPage({
 
   const [events, nowState] = await Promise.all([getTrackerDay(babyId, day), getTrackerNow(babyId)]);
 
-  // Feeds and bottles count by the day they started on; sleep is clamped to the day.
-  const startedToday = events.filter(
-    (e) => new Date(e.started_at) >= bounds.start && new Date(e.started_at) < bounds.end,
-  );
-  const feedCount = startedToday.filter((e) => (FEED_KINDS as readonly string[]).includes(e.kind)).length;
-  const bottleMl = startedToday.reduce((sum, e) => sum + (e.kind === 'bottle' ? (e.amount_ml ?? 0) : 0), 0);
-  const sleepMs = totalSleepMs(events, bounds, now);
+  const { feedCount, bottleMl, sleepMs } = computeDayTotals(events, bounds, now);
   const durationT = (key: 'hm' | 'h' | 'm', values: { h: number; m: number }) => t(`duration.${key}`, values);
 
   const stats = [
