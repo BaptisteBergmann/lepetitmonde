@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `dd37b23` refactor(access): add client-agnostic member-access helpers
 - `56d79db` docs(plans): approve MCP expansion plan with recorded decisions
 - `bacfd8e` docs(plans): record todo MCP server as implemented
 - `9dbd65b` feat(settings): show MCP server URL when a token is created
