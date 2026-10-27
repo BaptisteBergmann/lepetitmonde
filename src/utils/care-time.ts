@@ -64,7 +64,7 @@ export function todayInZone(tz: string, now: Date = new Date()): string {
   return `${p.year}-${pad(p.month)}-${pad(p.day)}`
 }
 
-function isValidDay(value: string): boolean {
+export function isValidDay(value: string): boolean {
   if (!DAY_RE.test(value)) return false
   const [y, m, d] = value.split('-').map(Number)
   const date = new Date(Date.UTC(y, m - 1, d))
@@ -96,14 +96,28 @@ function localMidnight(day: string, tz: string): Date {
 }
 
 const LOCAL_DATETIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/
-const OFFSET_DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/i
+const OFFSET_DATETIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:Z|[+-](\d{2}):?(\d{2}))$/i
+
+function validWallClock(y: number, mo: number, d: number, h: number, mi: number, sec: number): boolean {
+  const check = new Date(Date.UTC(y, mo - 1, d, h, mi, sec))
+  return (
+    check.getUTCFullYear() === y && check.getUTCMonth() === mo - 1 && check.getUTCDate() === d &&
+    h <= 23 && mi <= 59 && sec <= 59
+  )
+}
 
 // ISO 8601 with Z/offset is used as is; a local `YYYY-MM-DDTHH:mm[:ss]` is read
 // as wall-clock time in `tz`. A nonexistent local time (spring-forward gap)
 // moves forward by the gap; an ambiguous one (fall-back) takes the first
 // occurrence. Throws RangeError on anything else.
 export function parseZonedDateTime(value: string, tz: string): Date {
-  if (OFFSET_DATETIME_RE.test(value)) {
+  const o = OFFSET_DATETIME_RE.exec(value)
+  if (o) {
+    // new Date() rolls impossible dates over (Feb 30 -> Mar 2), so check the parts first.
+    const [y, mo, d, h, mi, sec] = [o[1], o[2], o[3], o[4], o[5], o[6] ?? '0'].map(Number)
+    const offH = o[7] === undefined ? 0 : Number(o[7])
+    const offM = o[8] === undefined ? 0 : Number(o[8])
+    if (!validWallClock(y, mo, d, h, mi, sec) || offH > 14 || offM > 59) throw new RangeError('Invalid date-time')
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) throw new RangeError('Invalid date-time')
     return date
@@ -113,11 +127,7 @@ export function parseZonedDateTime(value: string, tz: string): Date {
   if (!m) throw new RangeError('Invalid date-time')
   const [y, mo, d, h, mi, sec] = [m[1], m[2], m[3], m[4], m[5], m[6] ?? '0'].map(Number)
   const guess = Date.UTC(y, mo - 1, d, h, mi, sec)
-  const check = new Date(guess)
-  if (
-    check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||
-    h > 23 || mi > 59 || sec > 59
-  ) throw new RangeError('Invalid date-time')
+  if (!validWallClock(y, mo, d, h, mi, sec)) throw new RangeError('Invalid date-time')
 
   // Offsets a day either side bracket any single transition.
   const DAY = 86_400_000

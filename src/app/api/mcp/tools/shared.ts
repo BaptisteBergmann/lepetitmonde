@@ -2,7 +2,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { ActionError } from '@utils/actions/errors'
-import { isValidTimeZone, parseZonedDateTime } from '@utils/care-time'
+import { isValidDay, isValidTimeZone, parseZonedDateTime } from '@utils/care-time'
 import { logger } from '@utils/logger'
 
 // Tool descriptions are for the model, so they stay in English and out of next-intl.
@@ -59,9 +59,5 @@ export const zonedDateTime = z
 export const day = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)
-  .refine((value) => {
-    const [y, m, d] = value.split('-').map(Number)
-    const date = new Date(Date.UTC(y, m - 1, d))
-    return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d
-  }, 'Must be a valid YYYY-MM-DD date')
+  .refine(isValidDay, 'Must be a valid YYYY-MM-DD date')
   .describe('Day as YYYY-MM-DD')
