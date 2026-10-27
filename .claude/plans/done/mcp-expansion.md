@@ -1,5 +1,27 @@
 # MCP expansion: tracker, buy list, calendar, inventory, anecdotes, digest
 
+## Status: implemented
+All phases (0-6) shipped on main: shared foundations (`member-access.ts`, tools split under
+`src/app/api/mcp/tools/`, todo page gating), tracker, buy list, calendar, inventory, anecdotes and the
+read-only `get_digest`. Decisions D1-D7 were applied as written (no diapers, disabled page blocks its
+tools, `list_babies` with `accessLevel`/`areas`, `remove_from_buy_list` only, delta +-20, notification
+parity, `Europe/Paris` default).
+
+Deviations and additions:
+- `get_tracker_status` returns today's totals under the key `totalsToday` (the plan said `today`, which
+  clashed with the date).
+- Added `stopCareTimerByKindCore` (stop by kind, no-op when none runs) for `stop_tracker_timer`.
+- Web wrappers of cores whose actions never checked `page_settings` (events, anecdotes, inventory) pass an
+  `enforcePage: false` option to keep their exact rules; MCP always enforces the page.
+- `list_circles` lives in `tools/calendar.ts` (phase 3), so phase 5 did not need to move it.
+- `list_anecdotes` pages with a real cursor (`nextCursor`/`cursor`, built from the raw page before the
+  circle filter) in addition to `before`; `CURSOR_RE` is exported from `anecdotes-core.ts`.
+- A dedicated `inventoryItemNotFound` translation key for missing inventory items.
+- Digest: `listTodos` got a `throwOnError` option so a failed section is reported in `failed` instead of
+  looking empty or being filed under `omitted`. Week averages cover all 7 days (today counts as is).
+- Open: `rls.md` B3 (`adjust_inventory_owned` with `actor_id = auth.uid()`) still has to be amended by its
+  owner, otherwise MCP `mark_bought` updates 0 rows under the service role.
+
 Status: approved
 Approved by: Baptiste (2026-10-27)
 
