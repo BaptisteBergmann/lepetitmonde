@@ -148,6 +148,8 @@ export async function rotateRefreshToken(params: { refreshToken: string; clientI
 
   if (!data) {
     // An already-rotated token coming back means two parties hold it: kill the grant.
+    // Known limitation: only the immediately previous token is remembered, so replaying one
+    // from two or more rotations back is just invalid_grant and doesn't revoke the grant.
     const { data: reused, error: reuseError } = await admin
       .from('oauth_grants')
       .select('id')
