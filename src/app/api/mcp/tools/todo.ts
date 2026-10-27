@@ -29,6 +29,7 @@ export function registerTodoTools(server: McpServer, ctx: ToolContext) {
       title: 'Add a to-do',
       description: "Adds an item at the end of a baby's to-do list. The title is at most 200 characters.",
       inputSchema: z.object({ babyId, title: z.string() }),
+      annotations: { destructiveHint: false },
     },
     ({ babyId, title }) => run('add_todo', { ...ctx, babyId }, () => addTodo(admin, userId, babyId, title)),
   )
@@ -39,7 +40,7 @@ export function registerTodoTools(server: McpServer, ctx: ToolContext) {
       title: 'Check or uncheck a to-do',
       description: 'Marks a to-do item as done (true) or not done (false).',
       inputSchema: z.object({ babyId, itemId, done: z.boolean() }),
-      annotations: { idempotentHint: true },
+      annotations: { destructiveHint: false, idempotentHint: true },
     },
     ({ babyId, itemId, done }) => run('set_todo_done', { ...ctx, babyId }, () => setTodoDone(admin, userId, babyId, itemId, done)),
   )
@@ -61,6 +62,7 @@ export function registerTodoTools(server: McpServer, ctx: ToolContext) {
       title: 'Move a to-do',
       description: 'Moves a to-do item one position up or down in the list.',
       inputSchema: z.object({ babyId, itemId, direction: z.enum(['up', 'down']) }),
+      annotations: { destructiveHint: false },
     },
     ({ babyId, itemId, direction }) => run('move_todo', { ...ctx, babyId }, () => moveTodo(admin, userId, babyId, itemId, direction)),
   )

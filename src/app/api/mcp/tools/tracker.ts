@@ -130,6 +130,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
         note: z.string().max(CARE_LIMITS.noteMax).optional(),
         timeZone,
       }),
+      annotations: { destructiveHint: false },
     },
     ({ babyId, kind, startedAt, endedAt, side, amountMl, note, timeZone }) => run('add_tracker_entry', { ...ctx, babyId }, async () => {
       const tz = timeZone ?? FAMILY_TIME_ZONE
@@ -153,6 +154,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
         'Starts a running sleep or breastfeed timer (side is required for breastfeed). One timer per kind can run at a time; ' +
         'an already running one returns an error. startedAt defaults to now. ' + TIME_HELP,
       inputSchema: z.object({ babyId, kind: timerKind, side: side.optional(), startedAt: zonedDateTime.optional(), timeZone }),
+      annotations: { destructiveHint: false },
     },
     ({ babyId, kind, side, startedAt, timeZone }) => run('start_tracker_timer', { ...ctx, babyId }, async () => {
       const tz = timeZone ?? FAMILY_TIME_ZONE
@@ -172,7 +174,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
         'Stops the running sleep or breastfeed timer and ends it now. For a breastfeed, side optionally sets the final side. ' +
         'Does nothing if no such timer is running.',
       inputSchema: z.object({ babyId, kind: timerKind, side: side.optional() }),
-      annotations: { idempotentHint: true },
+      annotations: { destructiveHint: false, idempotentHint: true },
     },
     ({ babyId, kind, side }) => run('stop_tracker_timer', { ...ctx, babyId }, async () => {
       await stopCareTimerByKindCore(admin, userId, babyId, kind, { side })
