@@ -117,7 +117,8 @@ export function parseZonedDateTime(value: string, tz: string): Date {
     const [y, mo, d, h, mi, sec] = [o[1], o[2], o[3], o[4], o[5], o[6] ?? '0'].map(Number)
     const offH = o[7] === undefined ? 0 : Number(o[7])
     const offM = o[8] === undefined ? 0 : Number(o[8])
-    if (!validWallClock(y, mo, d, h, mi, sec) || offH > 14 || offM > 59) throw new RangeError('Invalid date-time')
+    // Real offsets stop at +14:00, so +14:30 and above are rejected too.
+    if (!validWallClock(y, mo, d, h, mi, sec) || offM > 59 || offH * 60 + offM > 840) throw new RangeError('Invalid date-time')
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) throw new RangeError('Invalid date-time')
     return date
