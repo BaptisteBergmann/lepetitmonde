@@ -3,7 +3,7 @@ import { resolveApiToken } from '@utils/api-token'
 import { getClientIp } from '@utils/client-ip'
 import { failedAuthLimiter, tokenCallLimiter } from '@utils/mcp-limiters'
 import { logger } from '@utils/logger'
-import { registerTodoTools } from './tools'
+import { registerTools } from './tools'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -49,7 +49,7 @@ async function handle(request: Request) {
   // Stateless: one lightweight server per request, so the verified user id is
   // carried by closure instead of any shared state.
   const handler = createMcpHandler(
-    (server) => registerTodoTools(server, auth),
+    (server) => registerTools(server, auth),
     // 0 rejects subscriptions/listen so no long-lived SSE stream is ever opened.
     { serverInfo: { name: 'lepetitmonde', version: '1.0.0' }, maxSubscriptions: 0 },
   )
