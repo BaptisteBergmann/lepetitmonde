@@ -8,6 +8,7 @@ import { cn } from '@utils/utils'
 import { getAuthUser } from '@utils/supabase/auth'
 import { parseAuthorizeRequest } from '@utils/oauth/authorize-request'
 import { isAdminOfAnyBaby } from '@utils/oauth/eligibility'
+import { redirectDisplayHost } from '@utils/oauth/redirect-uri'
 import { ConsentForm } from './_components/consent_form'
 
 // The proxy already sends logged-out visitors to /login?redirectTo=<this URL>, but the
@@ -38,7 +39,7 @@ export default async function AuthorizePage({
   if (parsed.kind === 'redirect_error') {
     let backHost: string | null = null
     try {
-      backHost = new URL(parsed.url).host || null
+      backHost = redirectDisplayHost(parsed.url)
     } catch {
       backHost = null
     }
