@@ -53,6 +53,8 @@ export default function BuyList({
     } catch (err) {
       console.error(err);
       toast.error(t('adjustError'));
+      // The click may have landed server-side before failing; resync the counts.
+      router.refresh();
     } finally {
       setPendingId(null);
     }

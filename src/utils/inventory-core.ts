@@ -22,6 +22,11 @@ import { assertOneOf, normalizeInteger, normalizeNumber } from './input-validati
 // MCP callers always enforce it: a disabled page blocks its tools.
 type AccessOptions = { enforcePage?: boolean }
 
+// strict: throw on database errors instead of returning an empty list. The web
+// page keeps its empty-list fallback; MCP must not report "nothing to buy"
+// when the query actually failed.
+type ListOptions = AccessOptions & { strict?: boolean }
+
 const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export const MAX_BOUGHT_DELTA = 20
@@ -86,13 +91,13 @@ function revalidateInventory(babyId: string) {
 // Family-facing view of inventory_items: everything an admin still wants more
 // of. Supabase can't compare two columns in a filter, so quantity_target >
 // quantity_owned is checked in JS on the (small) set of rows with a target.
-export async function listBuyListCore(supabase: SupabaseClient, userId: string, babyId: string, options: AccessOptions = {}): Promise<BuyListItem[]> {
+export async function listBuyListCore(supabase: SupabaseClient, userId: string, babyId: string, options: ListOptions = {}): Promise<BuyListItem[]> {
   await assertIds(babyId)
   await assertBuyListAccess(supabase, userId, babyId, options)
 
   const contextLogger = logger.child({ function: listBuyListCore.name, babyId })
 
-  const [{ data, error }, { data: members }] = await Promise.all([
+  const [{ data, error }, { data: members, error: membersError }] = await Promise.all([
     supabase
       .from('inventory_items')
       .select('*, updated_by_user:users!inventory_items_updated_by_fkey(first_name, last_name)')
@@ -102,7 +107,12 @@ export async function listBuyListCore(supabase: SupabaseClient, userId: string, 
     supabase.from('baby_access').select('user_id, nickname').eq('baby_id', babyId),
   ])
 
-  if (error) { contextLogger.error(error, "Error fetching buy list items"); return [] }
+  if (membersError) contextLogger.error(membersError, "Error fetching member nicknames")
+  if (error) {
+    contextLogger.error(error, "Error fetching buy list items")
+    if (options.strict) throw error
+    return []
+  }
 
   const nicknames = new Map((members ?? []).map((row) => [row.user_id as string, row.nickname as string | null]))
 

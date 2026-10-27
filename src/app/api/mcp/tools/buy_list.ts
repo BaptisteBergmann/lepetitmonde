@@ -25,7 +25,7 @@ export function registerBuyListTools(server: McpServer, ctx: ToolContext) {
       annotations: { readOnlyHint: true },
     },
     ({ babyId }) => run('list_buy_list', { ...ctx, babyId }, async () => {
-      const items = await listBuyListCore(admin, userId, babyId)
+      const items = await listBuyListCore(admin, userId, babyId, { strict: true })
       return items.map((item) => ({
         id: item.id,
         name: item.name,
@@ -50,6 +50,7 @@ export function registerBuyListTools(server: McpServer, ctx: ToolContext) {
         itemId,
         delta: z.number().int().min(-MAX_BOUGHT_DELTA).max(MAX_BOUGHT_DELTA).refine((n) => n !== 0, 'Must not be 0'),
       }),
+      annotations: { destructiveHint: false },
     },
     ({ babyId, itemId, delta }) => run('mark_bought', { ...ctx, babyId }, async () => {
       const item = await adjustOwnedCore(admin, userId, babyId, itemId, delta)
@@ -77,7 +78,11 @@ export function registerBuyListTools(server: McpServer, ctx: ToolContext) {
         size: z.string().max(INPUT_LIMITS.inventorySize).optional(),
         quantityTarget: z.number().int().min(1).max(INPUT_LIMITS.inventoryQuantityMax),
         quantityOwned: z.number().int().min(0).max(INPUT_LIMITS.inventoryQuantityMax).optional(),
-      }),
+      }).refine(
+        (v) => v.quantityOwned === undefined || v.quantityOwned < v.quantityTarget,
+        { message: 'quantityOwned must be below quantityTarget, otherwise the item would not show on the buy list', path: ['quantityOwned'] },
+      ),
+      annotations: { destructiveHint: false },
     },
     ({ babyId, name, kind, size, quantityTarget, quantityOwned }) => run('add_buy_list_item', { ...ctx, babyId }, async () => {
       await createInventoryItemCore(admin, userId, babyId, {
