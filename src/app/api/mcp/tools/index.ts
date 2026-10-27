@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { registerBabyTools } from './babies'
 import { registerBuyListTools } from './buy_list'
+import { registerCalendarTools } from './calendar'
 import { registerTodoTools } from './todo'
 import { registerTrackerTools } from './tracker'
 
@@ -14,4 +15,5 @@ export function registerTools(server: McpServer, ctx: { userId: string; tokenId:
   registerTodoTools(server, toolCtx)
   registerTrackerTools(server, toolCtx)
   registerBuyListTools(server, toolCtx)
+  registerCalendarTools(server, toolCtx)
 }
