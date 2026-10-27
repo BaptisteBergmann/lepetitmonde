@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `7303872` feat(mcp): add calendar tools
 - `8b5624d` feat(calendar): add client-agnostic events core
 - `8855b7b` chore(mcp): mark non-destructive write tools with destructiveHint false
 - `c65cb2f` fix(buy-list): refresh after failed adjust, surface list errors over MCP, reject owned >= target
