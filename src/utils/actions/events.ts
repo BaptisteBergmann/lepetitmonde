@@ -8,7 +8,7 @@ import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
 import { logger } from '../logger'
-import { actionError } from './errors'
+import { ActionError, actionError } from './errors'
 import { assertCirclesInBaby } from '@utils/feed-access'
 import { normalizeText } from '@utils/feed-validation'
 import { INPUT_LIMITS } from '@utils/input-limits'
@@ -140,7 +140,9 @@ export async function getEvents(babyId: string, { from, to }: { from: string; to
   try {
     return await listEventsCore(await createClient(), user.id, babyId, { from, to }, { enforcePage: false })
   } catch (err) {
-    contextLogger.error(err, "Error fetching events")
+    // Expected denials (not a member, circle rules) aren't errors worth alerting on.
+    if (err instanceof ActionError) contextLogger.warn({ message: err.message }, "Events not available")
+    else contextLogger.error(err, "Error fetching events")
     return []
   }
 }
