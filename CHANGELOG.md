@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `d3852d8` feat(mcp): advertise oauth protected resource metadata
 - `f09ff53` feat(oauth): add oauth helpers for clients, grants and pkce
 - `0dbf531` feat(db): add oauth clients and grants
 - `54afbab` fix(auth): keep query string in login redirect
