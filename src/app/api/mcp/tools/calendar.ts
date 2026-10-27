@@ -26,13 +26,14 @@ export function registerCalendarTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'List calendar events',
       description:
-        `Lists calendar events from a day to a day, inclusive (defaults: today in timeZone to ${DEFAULT_SPAN_DAYS} days later, at most ${MAX_SPAN_DAYS} days apart), oldest first. ` +
+        `Lists calendar events from a day to a day, inclusive (defaults: today in timeZone to ${DEFAULT_SPAN_DAYS} days later; with only to, ${DEFAULT_SPAN_DAYS} days before it, at most ${MAX_SPAN_DAYS} days apart), oldest first. ` +
         'You only get events you may see: admins see all, viewers only events shared with one of their circles. circleIds are the circles an event is shared with (empty means admins only).',
       inputSchema: z.object({ babyId, from: day.optional(), to: day.optional(), timeZone }),
       annotations: { readOnlyHint: true },
     },
     ({ babyId, from, to, timeZone }) => run('list_events', { ...ctx, babyId }, async () => {
-      const start = from ?? todayInZone(timeZone ?? FAMILY_TIME_ZONE)
+      // Only `to` given: look back from it; otherwise start today (or at `from`) and look ahead.
+      const start = from ?? (to ? shiftDay(to, -DEFAULT_SPAN_DAYS) : todayInZone(timeZone ?? FAMILY_TIME_ZONE))
       const end = to ?? shiftDay(start, DEFAULT_SPAN_DAYS)
       const span = daysBetween(start, end)
       if (span < 0 || span > MAX_SPAN_DAYS) throw await actionError('invalidInput')
