@@ -1,5 +1,6 @@
 import { createMcpHandler } from 'mcp-handler'
-import { resolveApiToken } from '@utils/api-token'
+import { resolveBearer } from '@utils/mcp-auth'
+import { getOAuthUrls, OAUTH_SCOPE } from '@utils/oauth/config'
 import { getClientIp } from '@utils/client-ip'
 import { failedAuthLimiter, tokenCallLimiter } from '@utils/mcp-limiters'
 import { logger } from '@utils/logger'
@@ -12,18 +13,21 @@ export const dynamic = 'force-dynamic'
 // only from the Authorization header, never cookies: a browser never attaches it on
 // its own, which also rules out CSRF. Every failure returns the same body, and the
 // token is never logged.
-function unauthorized() {
+// The resource_metadata hint is how OAuth-only clients (Gemini CLI, Claude.ai) discover
+// the authorization server.
+function unauthorized(tokenSent: boolean) {
+  const params = [`resource_metadata="${getOAuthUrls().prmUrl}"`, `scope="${OAUTH_SCOPE}"`]
+  if (tokenSent) params.unshift('error="invalid_token"')
   return Response.json(
     { error: 'unauthorized' },
-    { status: 401, headers: { 'WWW-Authenticate': 'Bearer' } },
+    { status: 401, headers: { 'WWW-Authenticate': `Bearer ${params.join(', ')}` } },
   )
 }
 
 async function handle(request: Request) {
   const contextLogger = logger.child({ function: 'mcpRoute', route: '/api/mcp' })
 
-  const match = /^Bearer (\S+)$/i.exec(request.headers.get('authorization') ?? '')
-  const resolved = match ? await resolveApiToken(match[1]) : null
+  const { sent, resolved } = await resolveBearer(request)
 
   // A failed lookup is our fault, not the caller's: don't count it against their IP.
   if (resolved?.status === 'error') {
@@ -36,7 +40,7 @@ async function handle(request: Request) {
       contextLogger.warn({ ip }, 'Too many failed MCP auth attempts')
       return Response.json({ error: 'too_many_requests' }, { status: 429, headers: { 'Retry-After': '900' } })
     }
-    return unauthorized()
+    return unauthorized(sent)
   }
 
   const auth = resolved
