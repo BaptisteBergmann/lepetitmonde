@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `1ad251e` docs(readme): update MCP tool list
 - `3c01487` feat(mcp): list all memberships with access level and areas in list_babies
 - `601e400` feat(mcp): block todo tools when the todo page is disabled
 - `9c91480` refactor(mcp): split tools into per-area modules with shared helpers
