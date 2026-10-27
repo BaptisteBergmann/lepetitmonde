@@ -2,7 +2,9 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { getBabiesList } from '@/utils/actions/baby'
+import { getApiTokens } from '@/utils/actions/api_tokens'
 import AccountCard from './_components/account_card'
+import ApiTokensCard from './_components/api_tokens_card'
 import BabySettingsCard from './_components/baby_settings_card'
 import NotificationsCard from './_components/notifications_card'
 import ThemeCard from './_components/theme_card'
@@ -32,6 +34,13 @@ export default async function SettingsPage() {
     .join('') || 'U'
 
   const babies = await getBabiesList()
+
+  // Admin of at least one baby, or still holding tokens (e.g. after losing admin
+  // rights the DB trigger revokes them, but a token created moments ago would
+  // otherwise be unreachable): the card must stay available to revoke them.
+  const isAdminOfAny = babies.some((baby) => baby.baby_access[0]?.access_level === 'admin')
+  const apiTokens = user ? await getApiTokens() : []
+  const showApiTokens = isAdminOfAny || apiTokens.length > 0
 
   return (
     <div className="bg-landing-background text-landing-foreground">
@@ -77,6 +86,7 @@ export default async function SettingsPage() {
 
           <ThemeCard />
           <NotificationsCard />
+          {showApiTokens && <ApiTokensCard tokens={apiTokens} />}
           <InstallCard />
         </div>
       </div>
