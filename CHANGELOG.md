@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `016d91e` feat(mcp): add buy list tools
 - `1bf4fe8` refactor(inventory): move buy list and item actions into inventory-core
 - `b1172d9` fix(care-time): cap offset date-times at +14:00 total minutes
 - `44e9c9a` docs(readme): add tracker tools to the MCP tool list
