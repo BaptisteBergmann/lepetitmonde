@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { logger } from '@/utils/logger'
 import { getBabiesList } from '@/utils/actions/baby'
 import { getApiTokens } from '@/utils/actions/api_tokens'
+import { getOAuthGrants } from '@/utils/actions/oauth_grants'
 import AccountCard from './_components/account_card'
 import ApiTokensCard from './_components/api_tokens_card'
 import BabySettingsCard from './_components/baby_settings_card'
@@ -40,7 +41,8 @@ export default async function SettingsPage() {
   // otherwise be unreachable): the card must stay available to revoke them.
   const isAdminOfAny = babies.some((baby) => baby.baby_access[0]?.access_level === 'admin')
   const apiTokens = user ? await getApiTokens() : []
-  const showApiTokens = isAdminOfAny || apiTokens.length > 0
+  const oauthConnections = user ? await getOAuthGrants() : []
+  const showApiTokens = isAdminOfAny || apiTokens.length > 0 || oauthConnections.length > 0
 
   return (
     <div className="bg-landing-background text-landing-foreground">
@@ -86,7 +88,7 @@ export default async function SettingsPage() {
 
           <ThemeCard />
           <NotificationsCard />
-          {showApiTokens && <ApiTokensCard tokens={apiTokens} canCreate={isAdminOfAny} />}
+          {showApiTokens && <ApiTokensCard tokens={apiTokens} connections={oauthConnections} canCreate={isAdminOfAny} />}
           <InstallCard />
         </div>
       </div>

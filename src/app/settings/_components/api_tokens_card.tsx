@@ -7,6 +7,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { Check, Copy, KeyRound, Loader2, TriangleAlert } from 'lucide-react'
 import { getDateFnsLocale } from '@utils/formatting'
 import { createApiToken, revokeApiToken, type ApiTokenSummary } from '@utils/actions/api_tokens'
+import { revokeOAuthGrant, type OAuthConnectionSummary } from '@utils/actions/oauth_grants'
 import { API_TOKEN_EXPIRY_DAYS, INPUT_LIMITS } from '@/utils/input-limits'
 import { ChoiceGroup } from '@/components/choice_group'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,15 @@ const valueToExpiry = (v: string): Expiry => (v === 'never' ? null : (Number(v) 
 
 // canCreate is false for someone no longer admin of any baby: they keep the card
 // to revoke leftover tokens, but createApiToken would refuse them.
-export default function ApiTokensCard({ tokens, canCreate }: { tokens: ApiTokenSummary[]; canCreate: boolean }) {
+export default function ApiTokensCard({
+  tokens,
+  connections,
+  canCreate,
+}: {
+  tokens: ApiTokenSummary[]
+  connections: OAuthConnectionSummary[]
+  canCreate: boolean
+}) {
   const t = useTranslations('settingsPage.apiTokens')
   const locale = useLocale()
   const dateFnsLocale = getDateFnsLocale(locale)
@@ -33,6 +42,7 @@ export default function ApiTokensCard({ tokens, canCreate }: { tokens: ApiTokenS
   // The token only ever lives here, and is dropped when the reveal dialog closes.
   const [revealedToken, setRevealedToken] = useState<string | null>(null)
   const [tokenToRevoke, setTokenToRevoke] = useState<ApiTokenSummary | null>(null)
+  const [connectionToRevoke, setConnectionToRevoke] = useState<OAuthConnectionSummary | null>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
   const nameInputId = useId()
 
@@ -82,8 +92,52 @@ export default function ApiTokensCard({ tokens, canCreate }: { tokens: ApiTokenS
         <CardDescription className="text-xs text-landing-muted">{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
+        {connections.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold text-landing-muted">{t('connectionsTitle', { count: connections.length })}</h3>
+            <ul className="space-y-2">
+              {connections.map((connection) => (
+                <li key={connection.id} className="flex items-start justify-between gap-3 rounded-2xl border border-landing-border p-3">
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="truncate text-sm font-semibold" title={connection.client_name}>{connection.client_name}</p>
+                    <p className="truncate text-xs text-landing-muted" title={connection.host ?? undefined}>
+                      {connection.host ?? t('connectionLocal')}
+                    </p>
+                    <p className="text-xs text-landing-muted">
+                      {t('connectionConnectedAt', { date: format(new Date(connection.created_at), 'PP', { locale: dateFnsLocale }) })}
+                    </p>
+                    <p className="text-xs text-landing-muted">
+                      {connection.last_used_at ? (
+                        <span
+                          title={format(new Date(connection.last_used_at), 'PPp', { locale: dateFnsLocale })}
+                          suppressHydrationWarning
+                        >
+                          {t('lastUsed', { when: formatDistanceToNow(new Date(connection.last_used_at), { addSuffix: true, locale: dateFnsLocale }) })}
+                        </span>
+                      ) : t('neverUsed')}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 cursor-pointer text-destructive pointer-coarse:min-h-11"
+                    aria-label={t('connectionRevokeAria', { name: connection.client_name })}
+                    onClick={() => setConnectionToRevoke(connection)}
+                  >
+                    {t('connectionRevoke')}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {canCreate && (
-          <form onSubmit={handleCreate} className="space-y-3">
+          <form
+            onSubmit={handleCreate}
+            className={connections.length > 0 ? 'space-y-3 border-t border-landing-border pt-4' : 'space-y-3'}
+          >
             <h3 className="text-xs font-semibold text-landing-muted">{t('nameSection')}</h3>
             <FieldGroup>
               <Field>
@@ -126,7 +180,7 @@ export default function ApiTokensCard({ tokens, canCreate }: { tokens: ApiTokenS
           </form>
         )}
 
-        <div className={canCreate ? 'border-t border-landing-border pt-4 space-y-3' : 'space-y-3'}>
+        <div className={canCreate || connections.length > 0 ? 'border-t border-landing-border pt-4 space-y-3' : 'space-y-3'}>
           {tokens.length > 0 ? (
             <>
               <h3 className="text-xs font-semibold text-landing-muted">{t('listTitle', { count: tokens.length })}</h3>
@@ -178,7 +232,28 @@ export default function ApiTokensCard({ tokens, canCreate }: { tokens: ApiTokenS
       </CardContent>
 
       {revealedToken !== null && <TokenRevealDialog token={revealedToken} onClose={closeReveal} />}
-      {tokenToRevoke !== null && <RevokeDialog token={tokenToRevoke} onClose={() => setTokenToRevoke(null)} />}
+      {tokenToRevoke !== null && (
+        <RevokeDialog
+          title={t('revokeTitle', { name: tokenToRevoke.name })}
+          description={t('revokeConfirm')}
+          actionLabel={t('revokeAction')}
+          successMessage={t('revoked')}
+          errorMessage={t('revokeError')}
+          onConfirm={() => revokeApiToken(tokenToRevoke.id)}
+          onClose={() => setTokenToRevoke(null)}
+        />
+      )}
+      {connectionToRevoke !== null && (
+        <RevokeDialog
+          title={t('connectionRevokeTitle', { name: connectionToRevoke.client_name })}
+          description={t('connectionRevokeConfirm')}
+          actionLabel={t('connectionRevokeAction')}
+          successMessage={t('connectionRevoked')}
+          errorMessage={t('connectionRevokeError')}
+          onConfirm={() => revokeOAuthGrant(connectionToRevoke.id)}
+          onClose={() => setConnectionToRevoke(null)}
+        />
+      )}
     </Card>
   )
 }
@@ -289,7 +364,24 @@ function TokenRevealDialog({ token, onClose }: { token: string; onClose: () => v
   )
 }
 
-function RevokeDialog({ token, onClose }: { token: ApiTokenSummary; onClose: () => void }) {
+// Shared by API tokens and OAuth connections.
+function RevokeDialog({
+  title,
+  description,
+  actionLabel,
+  successMessage,
+  errorMessage,
+  onConfirm,
+  onClose,
+}: {
+  title: string
+  description: string
+  actionLabel: string
+  successMessage: string
+  errorMessage: string
+  onConfirm: () => Promise<unknown>
+  onClose: () => void
+}) {
   const t = useTranslations('settingsPage.apiTokens')
   const [isRevoking, startTransition] = useTransition()
   const cancelRef = useRef<HTMLButtonElement>(null)
@@ -298,11 +390,11 @@ function RevokeDialog({ token, onClose }: { token: ApiTokenSummary; onClose: () 
     startTransition(async () => {
       try {
         // Wait for the server: revocation is security-relevant, so no optimistic update.
-        await revokeApiToken(token.id)
-        toast.success(t('revoked'))
+        await onConfirm()
+        toast.success(successMessage)
         onClose()
       } catch (err) {
-        toast.error(err instanceof Error && err.message ? err.message : t('revokeError'))
+        toast.error(err instanceof Error && err.message ? err.message : errorMessage)
       }
     })
   }
@@ -311,8 +403,8 @@ function RevokeDialog({ token, onClose }: { token: ApiTokenSummary; onClose: () 
     <Dialog open onOpenChange={(open) => { if (!open && !isRevoking) onClose() }}>
       <DialogContent initialFocus={cancelRef}>
         <DialogHeader>
-          <DialogTitle className="font-display">{t('revokeTitle', { name: token.name })}</DialogTitle>
-          <DialogDescription className="text-sm text-landing-muted">{t('revokeConfirm')}</DialogDescription>
+          <DialogTitle className="font-display">{title}</DialogTitle>
+          <DialogDescription className="text-sm text-landing-muted">{description}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
@@ -334,7 +426,7 @@ function RevokeDialog({ token, onClose }: { token: ApiTokenSummary; onClose: () 
             onClick={handleRevoke}
           >
             {isRevoking && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
-            {t('revokeAction')}
+            {actionLabel}
           </Button>
         </div>
       </DialogContent>

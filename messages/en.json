@@ -1066,7 +1066,7 @@
     },
     "apiTokens": {
       "title": "Connected apps",
-      "description": "Let an AI assistant such as Claude Code read and edit your baby to-do lists.",
+      "description": "Let an AI assistant such as Claude or Gemini read and edit your baby's lists.",
       "nameSection": "New token",
       "nameLabel": "Token name",
       "namePlaceholder": "e.g. My laptop",
@@ -1078,7 +1078,7 @@
       "limitReached": "You have reached the limit of 10 tokens. Revoke one to create another.",
       "createError": "Couldn't create the token. Check your connection and try again.",
       "listTitle": "Active tokens ({count})",
-      "empty": "No tokens yet. Create one above to connect an app.",
+      "empty": "No tokens yet. Create one above, or connect an app with sign-in.",
       "createdAt": "Created {date}",
       "lastUsed": "Last used {when}",
       "neverUsed": "Never used",
@@ -1086,7 +1086,7 @@
       "neverExpires": "Never expires",
       "revoke": "Revoke",
       "revokeAria": "Revoke token {name}",
-      "setupHint": "Works with Claude Code and other apps that accept an authorization header. The Claude mobile app isn't supported yet.",
+      "setupHint": "In Claude.ai, the Claude mobile app or Gemini CLI, add Lepetitmonde as a connector with the server address and sign in when asked. Claude Code and other apps can use a token instead.",
       "revealTitle": "Copy your token now",
       "copyOnceWarning": "You won't see this token again. Keep it somewhere safe and never share it.",
       "tokenLabel": "Your new token",
@@ -1103,7 +1103,17 @@
       "revokeCancel": "Cancel",
       "revokeAction": "Revoke token",
       "revoked": "Token revoked",
-      "revokeError": "Couldn't revoke the token. Check your connection and try again."
+      "revokeError": "Couldn't revoke the token. Check your connection and try again.",
+      "connectionsTitle": "Connected with sign-in ({count})",
+      "connectionLocal": "An app on this computer",
+      "connectionConnectedAt": "Connected {date}",
+      "connectionRevoke": "Disconnect",
+      "connectionRevokeAria": "Disconnect {name}",
+      "connectionRevokeTitle": "Disconnect \"{name}\"?",
+      "connectionRevokeConfirm": "This app will lose access to Lepetitmonde right away. You can connect it again later.",
+      "connectionRevokeAction": "Disconnect",
+      "connectionRevoked": "App disconnected",
+      "connectionRevokeError": "Couldn't disconnect the app. Check your connection and try again."
     }
   },
   "installCard": {

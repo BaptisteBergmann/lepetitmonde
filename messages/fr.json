@@ -1066,7 +1066,7 @@
     },
     "apiTokens": {
       "title": "Applications connectées",
-      "description": "Permettez à un assistant IA comme Claude Code de lire et modifier les listes de tâches de votre bébé.",
+      "description": "Permettez à un assistant IA comme Claude ou Gemini de lire et modifier les listes de votre bébé.",
       "nameSection": "Nouveau jeton",
       "nameLabel": "Nom du jeton",
       "namePlaceholder": "ex. Mon ordinateur",
@@ -1078,7 +1078,7 @@
       "limitReached": "Vous avez atteint la limite de 10 jetons. Révoquez-en un pour en créer un autre.",
       "createError": "Impossible de créer le jeton. Vérifiez votre connexion et réessayez.",
       "listTitle": "Jetons actifs ({count})",
-      "empty": "Aucun jeton pour l'instant. Créez-en un ci-dessus pour connecter une application.",
+      "empty": "Aucun jeton pour l'instant. Créez-en un ci-dessus, ou connectez une application avec votre compte.",
       "createdAt": "Créé le {date}",
       "lastUsed": "Dernière utilisation {when}",
       "neverUsed": "Jamais utilisé",
@@ -1086,7 +1086,7 @@
       "neverExpires": "N'expire jamais",
       "revoke": "Révoquer",
       "revokeAria": "Révoquer le jeton {name}",
-      "setupHint": "Fonctionne avec Claude Code et les autres applications qui acceptent un en-tête d'autorisation. L'application mobile Claude n'est pas encore prise en charge.",
+      "setupHint": "Dans Claude.ai, l'application mobile Claude ou Gemini CLI, ajoutez Lepetitmonde comme connecteur avec l'adresse du serveur et connectez-vous quand on vous le demande. Claude Code et les autres applications peuvent utiliser un jeton à la place.",
       "revealTitle": "Copiez votre jeton maintenant",
       "copyOnceWarning": "Vous ne reverrez plus ce jeton. Conservez-le en lieu sûr et ne le partagez jamais.",
       "tokenLabel": "Votre nouveau jeton",
@@ -1103,7 +1103,17 @@
       "revokeCancel": "Annuler",
       "revokeAction": "Révoquer le jeton",
       "revoked": "Jeton révoqué",
-      "revokeError": "Impossible de révoquer le jeton. Vérifiez votre connexion et réessayez."
+      "revokeError": "Impossible de révoquer le jeton. Vérifiez votre connexion et réessayez.",
+      "connectionsTitle": "Connectées avec votre compte ({count})",
+      "connectionLocal": "Une application sur cet ordinateur",
+      "connectionConnectedAt": "Connectée le {date}",
+      "connectionRevoke": "Déconnecter",
+      "connectionRevokeAria": "Déconnecter {name}",
+      "connectionRevokeTitle": "Déconnecter « {name} » ?",
+      "connectionRevokeConfirm": "Cette application perdra immédiatement l'accès à Lepetitmonde. Vous pourrez la reconnecter plus tard.",
+      "connectionRevokeAction": "Déconnecter",
+      "connectionRevoked": "Application déconnectée",
+      "connectionRevokeError": "Impossible de déconnecter l'application. Vérifiez votre connexion et réessayez."
     }
   },
   "installCard": {
