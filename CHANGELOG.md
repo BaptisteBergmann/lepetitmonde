@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `9d4deb2` fix(oauth): hide loopback host on authorize error link
 - `85231a9` chore(i18n): remove unused oauth server error keys
 - `78d2dd9` docs(oauth): note refresh reuse detection covers one rotation
 - `cc9cd8e` fix(oauth): advertise revocation endpoint auth methods
