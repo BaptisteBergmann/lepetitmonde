@@ -63,7 +63,10 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('redirectTo', pathname)
+    // The clone carries the original query; drop it so only redirectTo remains, and
+    // keep it inside redirectTo so /oauth/authorize?... survives the login round trip.
+    url.search = ''
+    url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
     return NextResponse.redirect(url)
   }
 
