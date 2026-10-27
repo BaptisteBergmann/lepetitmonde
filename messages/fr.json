@@ -1245,7 +1245,10 @@
     "careInFuture": "L'heure ne peut pas être dans le futur",
     "careInvalidAmount": "La quantité doit être comprise entre 1 et 1000 ml",
     "apiTokenLimitReached": "Vous avez atteint la limite de 10 jetons. Révoquez-en un pour en créer un autre.",
-    "apiTokenNotFound": "Impossible de révoquer le jeton."
+    "apiTokenNotFound": "Impossible de révoquer le jeton.",
+    "oauthGrantNotFound": "Connexion introuvable.",
+    "oauthGrantLimitReached": "Vous avez déjà 10 applications connectées. Déconnectez-en une d'abord.",
+    "oauthNotEligible": "Seuls les administrateurs d'un bébé peuvent connecter des applications."
   },
   "uploadApi": {
     "unauthenticated": "Non authentifié",
@@ -1448,5 +1451,34 @@
         "invalidTime": "Saisissez une date et une heure valides."
       }
     }
+  },
+  "oauthConsent": {
+    "title": "Connecter « {name} » ?",
+    "untrustedLabel": "Vous redirigera vers",
+    "hostLocal": "Une application sur cet ordinateur",
+    "hostCheck": "Vérifiez qu'il s'agit bien de l'application que vous venez d'ouvrir. N'importe qui peut choisir n'importe quel nom.",
+    "canTitle": "Cette application pourra",
+    "canDo": "Lire et modifier ce que vous gérez sur Lepetitmonde : les listes, le calendrier de vos bébés et plus encore",
+    "cannotDo": "Elle ne verra pas votre mot de passe et ne pourra pas modifier votre compte",
+    "signedInAs": "Connecté en tant que {email}",
+    "allow": "Autoriser l'accès",
+    "allowBusy": "Connexion…",
+    "deny": "Refuser",
+    "denyBusy": "Retour…",
+    "disconnectHint": "Vous pouvez vous déconnecter à tout moment dans Réglages > Applications connectées.",
+    "fallbackLink": "Rien ne se passe ? Continuer",
+    "notEligible": "Seuls les administrateurs d'un bébé peuvent connecter des applications. Demandez à un administrateur de votre bébé, ou revenez en arrière.",
+    "backToApp": "Retour à l'application",
+    "backToHost": "Retour à {host}",
+    "errorTitle": "Ce lien de connexion ne fonctionne pas",
+    "errorBody": "La demande de l'application est invalide ou a expiré. Retournez dans l'application et relancez la connexion.",
+    "errorMalformedBody": "L'application a envoyé une demande incomplète. Retournez dans l'application et réessayez. Si cela continue, l'application n'est peut-être pas compatible.",
+    "openApp": "Ouvrir Lepetitmonde",
+    "actionError": "Impossible de finaliser la connexion. Vérifiez votre connexion et réessayez.",
+    "sessionExpired": "Votre session a expiré. Rechargez la page pour vous reconnecter.",
+    "limitReached": "Vous avez déjà 10 applications connectées. Déconnectez-en une dans les réglages, puis réessayez.",
+    "limitReachedLink": "Ouvrir les réglages",
+    "rateLimited": "Trop de tentatives. Patientez quelques minutes et réessayez.",
+    "loading": "Chargement"
   }
 }
