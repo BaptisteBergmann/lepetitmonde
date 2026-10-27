@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `ec42a89` feat(mcp): add inventory tools
 - `73abc60` feat(inventory): add list and partial quantity update cores
 - `80ce626` fix(mcp): default life_stage milestoneType to other like the web
 - `e38d545` fix(mcp): default list_events from to 30 days before when only to is given
