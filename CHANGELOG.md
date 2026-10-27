@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `fa6e92e` docs(mcp): document oauth connection for claude.ai and gemini cli
 - `972d76b` feat(settings): list and disconnect oauth connections
 - `5f978da` feat(oauth): token and revocation endpoints
 - `931b67e` feat(oauth): add authorize consent page and approve/deny actions
