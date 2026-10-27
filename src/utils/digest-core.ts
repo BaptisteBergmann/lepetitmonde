@@ -38,8 +38,9 @@ function entry(event: CareEvent, tz: string) {
 }
 
 // A page that is off or not allowed for the user is "not accessible" (the
-// section is omitted); anything else (database failure) is rethrown so it can
-// never pass for a denial.
+// section is omitted); anything else is rethrown and reported as failed. A
+// database error inside the page check itself surfaces as unauthorized, so it
+// is reported as omitted.
 async function canUse(supabase: SupabaseClient, userId: string, babyId: string, page: PageId, adminOnly = false) {
   try {
     const level = await assertPageAccessForUser(supabase, userId, babyId, page)
