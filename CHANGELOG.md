@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `cc9cd8e` fix(oauth): advertise revocation endpoint auth methods
 - `16ee9de` fix(oauth): cap request body reads at 8 KB
 - `639805a` fix(rate-limit): block at max failures instead of max plus one
 - `903c9f7` fix(oauth): stop auto-redirecting on authorize errors
