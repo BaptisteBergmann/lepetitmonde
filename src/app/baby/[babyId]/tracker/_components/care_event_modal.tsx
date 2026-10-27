@@ -22,7 +22,7 @@ import {
 } from '@utils/care-events'
 import { formatDuration } from '@utils/care-duration'
 import { cn } from '@utils/utils'
-import { ChoiceGroup } from './choice_group'
+import { ChoiceGroup } from '@/components/choice_group'
 
 const labelClass = 'text-xs font-semibold uppercase tracking-wider text-muted-foreground'
 
