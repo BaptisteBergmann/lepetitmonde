@@ -1,6 +1,9 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { getTranslations } from 'next-intl/server'
+import { resolveLocale } from '@/i18n/config'
+import { CareValidationError } from '@utils/care-validation'
 import { ActionError } from '@utils/actions/errors'
 import { isValidDay, isValidTimeZone, parseZonedDateTime } from '@utils/care-time'
 import { logger } from '@utils/logger'
@@ -27,7 +30,13 @@ export async function run(tool: string, ctx: { userId: string; tokenId: string; 
     return ok(result ?? 'Done')
   } catch (err) {
     contextLogger.warn({ err }, 'MCP tool call failed')
-    const message = err instanceof ActionError ? err.message : 'The request failed.'
+    let message = 'The request failed.'
+    if (err instanceof ActionError) message = err.message
+    else if (err instanceof CareValidationError) {
+      // Expected tracker failures; the same texts the web tracker shows.
+      const t = await getTranslations({ locale: resolveLocale(), namespace: 'tracker.errors.codes' })
+      message = t(err.key)
+    }
     return { content: [{ type: 'text', text: message }], isError: true }
   }
 }
