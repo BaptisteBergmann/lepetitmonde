@@ -1108,6 +1108,104 @@ export type Database = {
           },
         ]
       }
+      oauth_clients: {
+        Row: {
+          client_name: string
+          client_secret_hash: string | null
+          created_at: string
+          id: string
+          redirect_uris: string[]
+          token_endpoint_auth_method: string
+        }
+        Insert: {
+          client_name: string
+          client_secret_hash?: string | null
+          created_at?: string
+          id?: string
+          redirect_uris: string[]
+          token_endpoint_auth_method: string
+        }
+        Update: {
+          client_name?: string
+          client_secret_hash?: string | null
+          created_at?: string
+          id?: string
+          redirect_uris?: string[]
+          token_endpoint_auth_method?: string
+        }
+        Relationships: []
+      }
+      oauth_grants: {
+        Row: {
+          access_expires_at: string | null
+          access_token_hash: string | null
+          client_id: string
+          code_challenge: string
+          code_expires_at: string
+          code_hash: string
+          code_used_at: string | null
+          created_at: string
+          id: string
+          last_used_at: string | null
+          previous_refresh_token_hash: string | null
+          redirect_uri: string
+          refresh_expires_at: string | null
+          refresh_token_hash: string | null
+          resource: string
+          revoked_at: string | null
+          scope: string
+          user_id: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          access_token_hash?: string | null
+          client_id: string
+          code_challenge: string
+          code_expires_at: string
+          code_hash: string
+          code_used_at?: string | null
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          previous_refresh_token_hash?: string | null
+          redirect_uri: string
+          refresh_expires_at?: string | null
+          refresh_token_hash?: string | null
+          resource: string
+          revoked_at?: string | null
+          scope: string
+          user_id: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          access_token_hash?: string | null
+          client_id?: string
+          code_challenge?: string
+          code_expires_at?: string
+          code_hash?: string
+          code_used_at?: string | null
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          previous_refresh_token_hash?: string | null
+          redirect_uri?: string
+          refresh_expires_at?: string | null
+          refresh_token_hash?: string | null
+          resource?: string
+          revoked_at?: string | null
+          scope?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_grants_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "oauth_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_settings: {
         Row: {
           baby_id: string
