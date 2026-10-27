@@ -1,6 +1,6 @@
 // Deliberately NOT a 'use server' module: every function takes a userId and
 // trusts it, so exporting them from an action file would make each one a
-// publicly callable endpoint. They re-check admin access themselves, so no
+// publicly callable endpoint. They re-check admin and todo-page access themselves, so no
 // caller (server action with the cookie client, MCP tool with the service-role
 // client) can skip it. Only import from server code that has already
 // authenticated the user.
@@ -11,11 +11,19 @@ import type { Tables } from '@utils/supabase/database.types'
 import { logger } from './logger'
 import { assertIsAdminForUser } from './actions/access'
 import { actionError } from './actions/errors'
+import { assertPageAccessForUser } from './member-access'
 import { normalizeText } from './feed-validation'
 import { INPUT_LIMITS } from './input-limits'
 
-export async function listTodos(supabase: SupabaseClient, userId: string, babyId: string): Promise<Tables<'todo_items'>[]> {
+// Admin AND the todo page enabled for this baby, like the page itself: a
+// disabled page blocks its actions and MCP tools too.
+async function assertTodoAccess(supabase: SupabaseClient, userId: string, babyId: string) {
   await assertIsAdminForUser(supabase, userId, babyId)
+  await assertPageAccessForUser(supabase, userId, babyId, 'todo')
+}
+
+export async function listTodos(supabase: SupabaseClient, userId: string, babyId: string): Promise<Tables<'todo_items'>[]> {
+  await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: listTodos.name, babyId })
 
@@ -32,7 +40,7 @@ export async function listTodos(supabase: SupabaseClient, userId: string, babyId
 }
 
 export async function addTodo(supabase: SupabaseClient, userId: string, babyId: string, rawTitle: unknown) {
-  await assertIsAdminForUser(supabase, userId, babyId)
+  await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: addTodo.name, babyId })
 
@@ -62,7 +70,7 @@ export async function addTodo(supabase: SupabaseClient, userId: string, babyId: 
 }
 
 export async function renameTodo(supabase: SupabaseClient, userId: string, babyId: string, itemId: string, rawTitle: unknown) {
-  await assertIsAdminForUser(supabase, userId, babyId)
+  await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: renameTodo.name, babyId, itemId })
 
@@ -83,7 +91,7 @@ export async function renameTodo(supabase: SupabaseClient, userId: string, babyI
 // Sets rather than flips the flag, so concurrent taps from two admins can't
 // race into a lost update the way an increment would (cf. adjustInventoryOwned).
 export async function setTodoDone(supabase: SupabaseClient, userId: string, babyId: string, itemId: string, done: boolean) {
-  await assertIsAdminForUser(supabase, userId, babyId)
+  await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: setTodoDone.name, babyId, itemId, done })
 
@@ -100,7 +108,7 @@ export async function setTodoDone(supabase: SupabaseClient, userId: string, baby
 }
 
 export async function deleteTodo(supabase: SupabaseClient, userId: string, babyId: string, itemId: string) {
-  await assertIsAdminForUser(supabase, userId, babyId)
+  await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: deleteTodo.name, babyId, itemId })
 
@@ -119,7 +127,7 @@ export async function deleteTodo(supabase: SupabaseClient, userId: string, babyI
 // Same two-update swap as moveQuestion, over the whole list since todo items
 // aren't grouped.
 export async function moveTodo(supabase: SupabaseClient, userId: string, babyId: string, itemId: string, direction: 'up' | 'down') {
-  await assertIsAdminForUser(supabase, userId, babyId)
+  await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: moveTodo.name, babyId, itemId, direction })
 
