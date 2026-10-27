@@ -47,17 +47,37 @@ export async function listAnecdotesCore(
   supabase: SupabaseClient,
   userId: string,
   babyId: string,
-  { limit, before }: { limit: number; before?: { happenedAt: string; createdAt: string } },
-  { enforcePage = true }: AccessOptions = {},
+  page: AnecdotePage,
+  options: AccessOptions = {},
 ): Promise<AnecdoteRow[]> {
+  return (await listAnecdotesPageCore(supabase, userId, babyId, page, options)).items
+}
+
+export type AnecdoteCursor = { happenedAt: string; createdAt: string }
+type AnecdotePage = { limit: number; before?: AnecdoteCursor }
+
+// The cursor goes into a PostgREST filter string, so only timestamp characters.
+const CURSOR_RE = /^[0-9T:.+\-Z ]{1,40}$/
+
+// Same as listAnecdotesCore, plus a cursor built from the last raw
+// (pre-circle-filter) row: the filter runs after the limit, so a viewer's page
+// can be short while more rows exist. null only when the raw page was short.
+export async function listAnecdotesPageCore(
+  supabase: SupabaseClient,
+  userId: string,
+  babyId: string,
+  { limit, before }: AnecdotePage,
+  { enforcePage = true }: AccessOptions = {},
+): Promise<{ items: AnecdoteRow[]; nextCursor: AnecdoteCursor | null }> {
   await assertBabyId(babyId)
+  if (before && (!CURSOR_RE.test(before.happenedAt) || !CURSOR_RE.test(before.createdAt))) throw await actionError('invalidInput')
 
   let level
   if (enforcePage) level = await assertPageAccessForUser(supabase, userId, babyId, 'anecdotes')
   else level = await getMemberAccess(supabase, userId, babyId)
-  if (!level) return []
+  if (!level) return { items: [], nextCursor: null }
 
-  const contextLogger = logger.child({ function: listAnecdotesCore.name, babyId, limit, before })
+  const contextLogger = logger.child({ function: listAnecdotesPageCore.name, babyId, limit, before })
 
   const isAdmin = level === 'admin'
   const userCircleIds = new Set(isAdmin ? [] : await getViewerCircleIds(supabase, userId, babyId))
@@ -80,6 +100,9 @@ export async function listAnecdotesCore(
 
   if (error) { contextLogger.error(error, "Error fetching anecdotes"); throw error }
 
+  const last = data.length >= limit ? data[data.length - 1] : null
+  const nextCursor = last ? { happenedAt: last.happened_at as string, createdAt: last.created_at as string } : null
+
   const visible = data
     .map(({ anecdotes_circles, ...anecdote }) => ({
       ...(anecdote as Tables<'anecdotes'>),
@@ -89,7 +112,7 @@ export async function listAnecdotesCore(
 
   contextLogger.debug({ count: visible.length }, "Anecdotes received")
 
-  return visible
+  return { items: visible, nextCursor }
 }
 
 // Admin only. Sets created_by explicitly (no session on the MCP path, and the

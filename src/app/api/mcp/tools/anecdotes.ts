@@ -2,14 +2,16 @@ import 'server-only'
 import type { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 import { resolveLocale } from '@/i18n/config'
-import { createAnecdoteCore, listAnecdotesCore } from '@utils/anecdotes-core'
+import { createAnecdoteCore, listAnecdotesPageCore } from '@utils/anecdotes-core'
 import { todayInZone } from '@utils/care-time'
 import { FAMILY_TIME_ZONE } from '@utils/formatting'
 import { INPUT_LIMITS } from '@utils/input-limits'
+import { actionError } from '@utils/actions/errors'
 import { babyId, day, run, timeZone, type ToolContext } from './shared'
 
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 50
+const CURSOR_RE = /^[0-9T:.+\-Z ]{1,40}$/
 
 export function registerAnecdoteTools(server: McpServer, ctx: ToolContext) {
   const { userId, admin } = ctx
@@ -19,29 +21,43 @@ export function registerAnecdoteTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'List anecdotes',
       description:
-        `Lists anecdotes (short family stories), newest first, at most ${MAX_LIMIT} per call (default ${DEFAULT_LIMIT}). Pass before (a day) to get the ones from earlier days. ` +
+        `Lists anecdotes (short family stories), newest first, at most ${MAX_LIMIT} per call (default ${DEFAULT_LIMIT}). Returns { items, nextCursor }. ` +
+        'To get the next page pass nextCursor back as cursor; nextCursor is null when there are no more. A page can hold fewer than limit items (viewers only get what is shared with them) while nextCursor is still set, so keep paging until it is null. ' +
+        'Alternatively pass before (a day) to jump to anecdotes from earlier days; do not combine it with cursor. ' +
         'You only get anecdotes you may see: admins see all, viewers only those shared with one of their circles. circleIds are the circles an anecdote is shared with (empty means admins only). hasPhoto tells whether it has a photo; photos are not returned.',
       inputSchema: z.object({
         babyId,
         limit: z.number().int().min(1).max(MAX_LIMIT).optional(),
         before: day.optional().describe('Only anecdotes from days before this one'),
+        cursor: z
+          .object({
+            happenedAt: z.string().regex(CURSOR_RE),
+            createdAt: z.string().regex(CURSOR_RE),
+          })
+          .optional()
+          .describe('nextCursor from the previous call'),
       }),
       annotations: { readOnlyHint: true },
     },
-    ({ babyId, limit, before }) => run('list_anecdotes', { ...ctx, babyId }, async () => {
-      const rows = await listAnecdotesCore(admin, userId, babyId, {
+    ({ babyId, limit, before, cursor }) => run('list_anecdotes', { ...ctx, babyId }, async () => {
+      if (before && cursor) throw await actionError('invalidInput')
+      // A day boundary: createdAt this early never matches the same-day branch.
+      const start = cursor ?? (before ? { happenedAt: `${before}T00:00:00Z`, createdAt: '0001-01-01T00:00:00Z' } : undefined)
+      const { items, nextCursor } = await listAnecdotesPageCore(admin, userId, babyId, {
         limit: limit ?? DEFAULT_LIMIT,
-        // No anecdote is older than the row has a createdAt this early, so the day boundary alone decides.
-        before: before ? { happenedAt: `${before}T00:00:00Z`, createdAt: '0001-01-01T00:00:00Z' } : undefined,
+        before: start,
       })
-      return rows.map((row) => ({
-        id: row.id,
-        date: row.happened_at.slice(0, 10),
-        content: row.content,
-        circleIds: row.circleIds,
-        hasPhoto: Boolean(row.photo_path),
-        createdAt: row.created_at,
-      }))
+      return {
+        items: items.map((row) => ({
+          id: row.id,
+          date: row.happened_at.slice(0, 10),
+          content: row.content,
+          circleIds: row.circleIds,
+          hasPhoto: Boolean(row.photo_path),
+          createdAt: row.created_at,
+        })),
+        nextCursor,
+      }
     }),
   )
 
