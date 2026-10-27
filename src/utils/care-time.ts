@@ -21,6 +21,18 @@ export function resolveTimeZone(value: string | null | undefined): string {
   }
 }
 
+// Strict variant of resolveTimeZone for API callers: a typo'd zone must be
+// reported, not silently replaced by the family zone.
+export function isValidTimeZone(value: string): boolean {
+  if (!value || value.length > 64 || !TZ_CHARSET_RE.test(value)) return false
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value })
+    return true
+  } catch {
+    return false
+  }
+}
+
 function zoneParts(date: Date, tz: string) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: tz,
@@ -81,6 +93,47 @@ function localMidnight(day: string, tz: string): Date {
   const first = guess - zoneOffsetMs(new Date(guess), tz)
   const second = guess - zoneOffsetMs(new Date(first), tz)
   return new Date(second)
+}
+
+const LOCAL_DATETIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/
+const OFFSET_DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/i
+
+// ISO 8601 with Z/offset is used as is; a local `YYYY-MM-DDTHH:mm[:ss]` is read
+// as wall-clock time in `tz`. A nonexistent local time (spring-forward gap)
+// moves forward by the gap; an ambiguous one (fall-back) takes the first
+// occurrence. Throws RangeError on anything else.
+export function parseZonedDateTime(value: string, tz: string): Date {
+  if (OFFSET_DATETIME_RE.test(value)) {
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) throw new RangeError('Invalid date-time')
+    return date
+  }
+
+  const m = LOCAL_DATETIME_RE.exec(value)
+  if (!m) throw new RangeError('Invalid date-time')
+  const [y, mo, d, h, mi, sec] = [m[1], m[2], m[3], m[4], m[5], m[6] ?? '0'].map(Number)
+  const guess = Date.UTC(y, mo - 1, d, h, mi, sec)
+  const check = new Date(guess)
+  if (
+    check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||
+    h > 23 || mi > 59 || sec > 59
+  ) throw new RangeError('Invalid date-time')
+
+  // Offsets a day either side bracket any single transition.
+  const DAY = 86_400_000
+  const before = zoneOffsetMs(new Date(guess - DAY), tz)
+  const after = zoneOffsetMs(new Date(guess + DAY), tz)
+  const candidates = [before, after]
+    .map((offset) => guess - offset)
+    .filter((t) => zoneOffsetMs(new Date(t), tz) === guess - t)
+  if (candidates.length > 0) return new Date(Math.min(...candidates))
+  return new Date(guess - before)
+}
+
+// `yyyy-MM-dd HH:mm` wall-clock rendering in `tz`, for tool output.
+export function formatInZone(date: Date, tz: string): string {
+  const p = zoneParts(date, tz)
+  return `${p.year}-${pad(p.month)}-${pad(p.day)} ${pad(p.hour)}:${pad(p.minute)}`
 }
 
 // Half-open [start, end): handles the 23h and 25h DST days.
