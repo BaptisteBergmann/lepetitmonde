@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `61ebb36` fix(mcp): answer 503 on token lookup errors without counting them
 - `1a60baa` fix(api-tokens): require baby admin to create and validate revoke id
 - `38e4ea6` fix(mcp): log babyId in tool calls
 - `ba5fbf4` fix(mcp): disable subscriptions stream
