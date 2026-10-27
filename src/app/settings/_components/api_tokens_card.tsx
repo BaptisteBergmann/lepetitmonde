@@ -1,14 +1,14 @@
 'use client'
 
-import { useId, useRef, useState, useTransition } from 'react'
+import { useEffect, useId, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useLocale, useTranslations } from 'next-intl'
 import { format, formatDistanceToNow } from 'date-fns'
 import { Check, Copy, KeyRound, Loader2, TriangleAlert } from 'lucide-react'
 import { getDateFnsLocale } from '@utils/formatting'
-import { cn } from '@utils/utils'
 import { createApiToken, revokeApiToken, type ApiTokenSummary } from '@utils/actions/api_tokens'
 import { API_TOKEN_EXPIRY_DAYS, INPUT_LIMITS } from '@/utils/input-limits'
+import { ChoiceGroup } from '@/app/baby/[babyId]/tracker/_components/choice_group'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 type Expiry = (typeof API_TOKEN_EXPIRY_DAYS)[number] | null
 // 90 days first: the safer default, offered before "never".
 const EXPIRY_OPTIONS: Expiry[] = [90, 30, null]
+const expiryToValue = (e: Expiry) => (e === null ? 'never' : String(e))
+const valueToExpiry = (v: string): Expiry => (v === 'never' ? null : (Number(v) as Expiry))
 
 export default function ApiTokensCard({ tokens }: { tokens: ApiTokenSummary[] }) {
   const t = useTranslations('settingsPage.apiTokens')
@@ -31,7 +33,6 @@ export default function ApiTokensCard({ tokens }: { tokens: ApiTokenSummary[] })
   const [tokenToRevoke, setTokenToRevoke] = useState<ApiTokenSummary | null>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
   const nameInputId = useId()
-  const expiryLabelId = useId()
 
   const limitReached = tokens.length >= INPUT_LIMITS.apiTokenMaxActive
 
@@ -54,9 +55,19 @@ export default function ApiTokensCard({ tokens }: { tokens: ApiTokenSummary[] })
     })
   }
 
+  // Focus after the dialog has unmounted: focusing in the close handler loses to
+  // the dialog's own focus restoration.
+  const wasRevealedRef = useRef(false)
+  useEffect(() => {
+    if (revealedToken !== null) { wasRevealedRef.current = true; return }
+    if (!wasRevealedRef.current) return
+    wasRevealedRef.current = false
+    const frame = requestAnimationFrame(() => nameInputRef.current?.focus())
+    return () => cancelAnimationFrame(frame)
+  }, [revealedToken])
+
   function closeReveal() {
     setRevealedToken(null)
-    nameInputRef.current?.focus()
   }
 
   return (
@@ -87,29 +98,14 @@ export default function ApiTokensCard({ tokens }: { tokens: ApiTokenSummary[] })
               />
             </Field>
             <div className="flex flex-col gap-1.5">
-              <p id={expiryLabelId} className="text-sm font-medium">{t('expiryLabel')}</p>
-              <div role="radiogroup" aria-labelledby={expiryLabelId} className="grid grid-cols-3 gap-2">
-                {EXPIRY_OPTIONS.map((value) => {
-                  const selected = expiry === value
-                  return (
-                    <button
-                      key={String(value)}
-                      type="button"
-                      role="radio"
-                      aria-checked={selected}
-                      onClick={() => setExpiry(value)}
-                      className={cn(
-                        'min-h-11 rounded-2xl border px-2 text-sm cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                        selected
-                          ? 'border-primary bg-primary/10 text-foreground font-medium'
-                          : 'border-landing-border text-landing-muted',
-                      )}
-                    >
-                      {expiryLabel(value)}
-                    </button>
-                  )
-                })}
-              </div>
+              <p className="text-sm font-medium" aria-hidden="true">{t('expiryLabel')}</p>
+              <ChoiceGroup
+                value={expiryToValue(expiry)}
+                onValueChange={(v) => setExpiry(valueToExpiry(v))}
+                options={EXPIRY_OPTIONS.map((value) => ({ value: expiryToValue(value), label: expiryLabel(value) }))}
+                label={t('expiryLabel')}
+                disabled={isCreating}
+              />
             </div>
           </FieldGroup>
           {limitReached && (
