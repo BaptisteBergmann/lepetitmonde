@@ -88,7 +88,8 @@ export function registerCalendarTools(server: McpServer, ctx: ToolContext) {
         eventDate: date,
         eventTime: time ?? null,
         kind,
-        milestoneType: milestoneType ?? null,
+        // Same default as the web modal: a life_stage without a type is 'other'.
+        milestoneType: milestoneType ?? (kind === 'life_stage' ? 'other' : null),
         title,
         description: description ?? null,
       }, circleIds ?? [], { locale: resolveLocale() })
