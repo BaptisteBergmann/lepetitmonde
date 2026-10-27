@@ -33,8 +33,27 @@ export default async function AuthorizePage({
 
   const parsed = await parseAuthorizeRequest(query)
 
-  // Redirect URI already validated: report back to the client (GET-initiated redirect).
-  if (parsed.kind === 'redirect_error') redirect(parsed.url)
+  // The redirect URI is registered, but a GET must not bounce the user to it on its own
+  // (open redirect via crafted links): show the error and let them choose to go back.
+  if (parsed.kind === 'redirect_error') {
+    let backHost: string | null = null
+    try {
+      backHost = new URL(parsed.url).host || null
+    } catch {
+      backHost = null
+    }
+    return (
+      <Card className="max-w-md mx-auto border-landing-border bg-landing-surface">
+        <CardContent className="space-y-4 p-6 text-center">
+          <h1 className="font-display text-2xl font-semibold text-destructive">{t('errorTitle')}</h1>
+          <p className="text-sm text-muted-foreground">{t('errorBody')}</p>
+          <a href={parsed.url} className={cn(buttonVariants(), 'w-full break-all')}>
+            {backHost ? t('backToHost', { host: backHost }) : t('backToApp')}
+          </a>
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (parsed.kind === 'error_page') {
     return (
