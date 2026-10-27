@@ -22,7 +22,14 @@ async function assertTodoAccess(supabase: SupabaseClient, userId: string, babyId
   await assertPageAccessForUser(supabase, userId, babyId, 'todo')
 }
 
-export async function listTodos(supabase: SupabaseClient, userId: string, babyId: string): Promise<Tables<'todo_items'>[]> {
+// The web list falls back to empty on a database error; callers that must not
+// mistake a failure for "no todos" (the digest) pass throwOnError.
+export async function listTodos(
+  supabase: SupabaseClient,
+  userId: string,
+  babyId: string,
+  { throwOnError = false }: { throwOnError?: boolean } = {},
+): Promise<Tables<'todo_items'>[]> {
   await assertTodoAccess(supabase, userId, babyId)
 
   const contextLogger = logger.child({ function: listTodos.name, babyId })
@@ -33,7 +40,11 @@ export async function listTodos(supabase: SupabaseClient, userId: string, babyId
     .eq('baby_id', babyId)
     .order('position', { ascending: true })
 
-  if (error) { contextLogger.error(error, "Error fetching todo items"); return [] }
+  if (error) {
+    contextLogger.error(error, "Error fetching todo items")
+    if (throwOnError) throw error
+    return []
+  }
   contextLogger.debug({ count: data.length }, "Todo items received")
 
   return data
