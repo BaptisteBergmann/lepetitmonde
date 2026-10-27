@@ -57,7 +57,7 @@ export type AnecdoteCursor = { happenedAt: string; createdAt: string }
 type AnecdotePage = { limit: number; before?: AnecdoteCursor }
 
 // The cursor goes into a PostgREST filter string, so only timestamp characters.
-const CURSOR_RE = /^[0-9T:.+\-Z ]{1,40}$/
+export const CURSOR_RE = /^[0-9T:.+\-Z ]{1,40}$/
 
 // Same as listAnecdotesCore, plus a cursor built from the last raw
 // (pre-circle-filter) row: the filter runs after the limit, so a viewer's page

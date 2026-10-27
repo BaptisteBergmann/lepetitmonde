@@ -2,7 +2,7 @@ import 'server-only'
 import type { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 import { resolveLocale } from '@/i18n/config'
-import { createAnecdoteCore, listAnecdotesPageCore } from '@utils/anecdotes-core'
+import { createAnecdoteCore, CURSOR_RE, listAnecdotesPageCore } from '@utils/anecdotes-core'
 import { todayInZone } from '@utils/care-time'
 import { FAMILY_TIME_ZONE } from '@utils/formatting'
 import { INPUT_LIMITS } from '@utils/input-limits'
@@ -11,7 +11,6 @@ import { babyId, day, run, timeZone, type ToolContext } from './shared'
 
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 50
-const CURSOR_RE = /^[0-9T:.+\-Z ]{1,40}$/
 
 export function registerAnecdoteTools(server: McpServer, ctx: ToolContext) {
   const { userId, admin } = ctx
