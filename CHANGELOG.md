@@ -4,6 +4,13 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `44e9c9a` docs(readme): add tracker tools to the MCP tool list
+- `4c2f128` feat(mcp): surface tracker validation errors as translated tool errors
+- `4065ecc` feat(mcp): add tracker tools
+- `9c2fc5b` refactor(tracker): turn care event actions into wrappers over care-core
+- `0f7c0d2` refactor(tracker): share day totals computation via computeDayTotals
+- `0ae9b90` feat(care): add client-agnostic tracker core
+- `fdef641` fix(care-time): reject impossible offset date-times and reuse isValidDay
 - `1ad251e` docs(readme): update MCP tool list
 - `3c01487` feat(mcp): list all memberships with access level and areas in list_babies
 - `601e400` feat(mcp): block todo tools when the todo page is disabled
