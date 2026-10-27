@@ -1094,6 +1094,8 @@
       "copied": "Copié",
       "commandLabel": "Commande pour Claude Code",
       "copyCommand": "Copier la commande",
+      "serverUrlLabel": "URL du serveur MCP",
+      "copyUrl": "Copier l'URL",
       "copyFailed": "Copie automatique impossible. Sélectionnez le texte et copiez-le manuellement.",
       "savedIt": "Je l'ai enregistré",
       "revokeTitle": "Révoquer « {name} » ?",

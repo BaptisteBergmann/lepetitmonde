@@ -189,11 +189,12 @@ function TokenRevealDialog({ token, onClose }: { token: string; onClose: () => v
   const copyTokenRef = useRef<HTMLButtonElement>(null)
   // Safe during render: this dialog only mounts after a click, never during SSR.
   const [origin] = useState(() => window.location.origin)
-  const [copied, setCopied] = useState<'token' | 'command' | null>(null)
+  const [copied, setCopied] = useState<'token' | 'url' | 'command' | null>(null)
 
-  const command = `claude mcp add --transport http lepetitmonde ${origin}/api/mcp --header "Authorization: Bearer ${token}"`
+  const serverUrl = `${origin}/api/mcp`
+  const command = `claude mcp add --transport http lepetitmonde ${serverUrl} --header "Authorization: Bearer ${token}"`
 
-  async function copy(kind: 'token' | 'command', text: string) {
+  async function copy(kind: 'token' | 'url' | 'command', text: string) {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(kind)
@@ -234,6 +235,26 @@ function TokenRevealDialog({ token, onClose }: { token: string; onClose: () => v
             >
               {copied === 'token' ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
               {copied === 'token' ? t('copied') : t('copy')}
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-landing-muted">{t('serverUrlLabel')}</p>
+            <Input
+              readOnly
+              value={serverUrl}
+              aria-label={t('serverUrlLabel')}
+              onFocus={(e) => e.currentTarget.select()}
+              className="h-11 font-mono text-xs"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 w-full gap-2 rounded-2xl cursor-pointer"
+              onClick={() => copy('url', serverUrl)}
+            >
+              {copied === 'url' ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
+              {copied === 'url' ? t('copied') : t('copyUrl')}
             </Button>
           </div>
 
