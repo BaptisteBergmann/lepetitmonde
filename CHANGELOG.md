@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `97ca1dd` fix(settings): hide token create form for users who admin no baby
 - `09858ae` refactor(ui): move ChoiceGroup to shared components
 - `d1998f8` fix(settings): accessible expiry radio group and reliable focus return
 - `61ebb36` fix(mcp): answer 503 on token lookup errors without counting them
