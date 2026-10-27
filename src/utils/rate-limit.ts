@@ -41,10 +41,10 @@ export function createRateLimiter({
       entry.count += 1
       return entry.count <= max
     },
-    /** True when the key already went over its limit in the current window. Doesn't count. */
+    /** True when the key already used up its max in the current window. Doesn't count. */
     isLimited(key: string): boolean {
       const entry = entries.get(key)
-      return !!entry && entry.resetAt > Date.now() && entry.count > max
+      return !!entry && entry.resetAt > Date.now() && entry.count >= max
     },
     reset(key: string) {
       entries.delete(key)
