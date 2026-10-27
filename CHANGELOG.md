@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `5f978da` feat(oauth): token and revocation endpoints
 - `931b67e` feat(oauth): add authorize consent page and approve/deny actions
 - `ab87fe1` feat(oauth): add dynamic client registration endpoint
 - `d3852d8` feat(mcp): advertise oauth protected resource metadata
