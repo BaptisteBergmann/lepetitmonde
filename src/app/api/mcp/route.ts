@@ -43,7 +43,8 @@ async function handle(request: Request) {
   // carried by closure instead of any shared state.
   const handler = createMcpHandler(
     (server) => registerTodoTools(server, auth),
-    { serverInfo: { name: 'lepetitmonde', version: '1.0.0' } },
+    // 0 rejects subscriptions/listen so no long-lived SSE stream is ever opened.
+    { serverInfo: { name: 'lepetitmonde', version: '1.0.0' }, maxSubscriptions: 0 },
   )
   return handler(request)
 }
