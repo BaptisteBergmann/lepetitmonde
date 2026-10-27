@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `b1172d9` fix(care-time): cap offset date-times at +14:00 total minutes
 - `44e9c9a` docs(readme): add tracker tools to the MCP tool list
 - `4c2f128` feat(mcp): surface tracker validation errors as translated tool errors
 - `4065ecc` feat(mcp): add tracker tools
