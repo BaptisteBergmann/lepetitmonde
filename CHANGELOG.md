@@ -4,6 +4,8 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `ee5fb4b` refactor(anecdotes): share CURSOR_RE between core and MCP tool
+
 - `4fbf7bf` fix(mcp): page list_anecdotes with a real cursor
 - `af24ff3` feat(mcp): add anecdote tools
 - `da5eb32` feat(anecdotes): add client-agnostic anecdotes core
