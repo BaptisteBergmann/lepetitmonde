@@ -122,6 +122,7 @@ Baby admins can drive a baby's data from an MCP client through the remote endpoi
 3. Tools:
    - `list_babies`: every baby you belong to, with your `accessLevel` and the `areas` you can use.
    - To-do: `list_todos`, `add_todo`, `set_todo_done`, `delete_todo`, `move_todo`. Admin only, and the baby's to-do page must be enabled.
+   - Tracker: `get_tracker_status`, `list_tracker_entries`, `add_tracker_entry`, `start_tracker_timer`, `stop_tracker_timer`, `delete_tracker_entry`. The baby's tracker page must be enabled, and viewers can use them when the page role is viewer. Times accept ISO 8601 with `Z`/offset or local `YYYY-MM-DDTHH:mm` in an optional `timeZone` (default `Europe/Paris`).
 
    Each tool allows what the web app allows you: a disabled page blocks its tools.
 
