@@ -17,6 +17,7 @@ import { getUserAccess } from '@utils/actions/users'
 import { getUserCircleIds } from '@utils/actions/circles'
 import { actionError } from '@utils/actions/errors'
 import { logger } from '@utils/logger'
+import { assertCirclesInBabyWith } from '@utils/member-access'
 
 export type FeedViewer = {
   userId: string
@@ -294,18 +295,5 @@ export async function assertHighlightInBaby(highlightId: string, babyId: string)
 }
 
 export async function assertCirclesInBaby(circleIds: string[], babyId: string) {
-  const unique = Array.from(new Set(circleIds))
-  if (unique.length === 0) return
-
-  const contextLogger = logger.child({ function: 'assertCirclesInBaby', babyId, circleCount: unique.length })
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('circles')
-    .select('id')
-    .in('id', unique)
-    .eq('baby_id', babyId)
-
-  if (error) contextLogger.error(error, "Error checking circles")
-  if (error || data.length !== unique.length) throw await actionError('unauthorized')
+  await assertCirclesInBabyWith(await createClient(), circleIds, babyId)
 }

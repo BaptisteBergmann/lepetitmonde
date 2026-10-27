@@ -11,6 +11,7 @@ import { assertIsAdmin } from './access'
 import { getUserAccess } from './users'
 import { createTtlCache } from '../cache/ttl-cache'
 import { PAGE_REGISTRY, PageId } from '../page_registry'
+import { canAccessPage } from '../member-access'
 
 export type ResolvedPage = {
   id: PageId
@@ -120,7 +121,10 @@ export async function hasPageAccess(babyId: string, pageId: PageId): Promise<boo
   const access = await getUserAccess(babyId)
   const accessLevel = !Array.isArray(access) ? access.access_level : undefined
 
-  const allowed = !!page?.enabled && !!accessLevel && (accessLevel === 'admin' || accessLevel === page.role)
+  // `page` is already resolved (override or default), so feed it back as the
+  // override: one pure rule shared with the MCP endpoint.
+  const entry = PAGE_REGISTRY.find((p) => p.id === pageId)
+  const allowed = !!entry && !!page && canAccessPage(entry, { enabled: page.enabled, required_role: page.role }, accessLevel)
   if (!allowed) {
     contextLogger.warn({ accessLevel, pageEnabled: page?.enabled, requiredRole: page?.role }, "Blocked page access")
   }

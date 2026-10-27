@@ -8,6 +8,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@utils/supabase/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { actionError } from './errors'
+import { getVisibleUserIdsWith } from '../member-access'
 
 // Accepts any Supabase client: the cookie client for server actions, the
 // service-role client for the MCP endpoint (where the user id comes from a
@@ -39,32 +40,7 @@ export async function assertIsAdmin(supabase: SupabaseClient, babyId: string) {
 // notified about baby-scoped content without over-notifying people who
 // couldn't see it in the first place.
 export async function getVisibleUserIds(babyId: string, circleIds: string[], excludeUserId?: string): Promise<string[]> {
-  const supabase = await createClient()
-
-  const { data: access } = await supabase
-    .from('baby_access')
-    .select('user_id, access_level')
-    .eq('baby_id', babyId)
-
-  const adminIds = (access ?? [])
-    .filter((row) => row.access_level === 'admin')
-    .map((row) => row.user_id)
-
-  const recipientIds = new Set(adminIds)
-
-  if (circleIds.length > 0) {
-    const { data: circleMembers } = await supabase
-      .from('circles_access')
-      .select('user_id')
-      .eq('baby_id', babyId)
-      .in('circle_id', circleIds)
-
-    for (const row of circleMembers ?? []) recipientIds.add(row.user_id)
-  }
-
-  if (excludeUserId) recipientIds.delete(excludeUserId)
-
-  return Array.from(recipientIds)
+  return getVisibleUserIdsWith(await createClient(), babyId, circleIds, excludeUserId)
 }
 
 // Every member of a baby (viewer + admin), for content that isn't
