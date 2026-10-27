@@ -98,10 +98,16 @@ export async function getVisibleUserIdsWith(
   circleIds: string[],
   excludeUserId?: string,
 ): Promise<string[]> {
-  const { data: access } = await supabase
+  const contextLogger = logger.child({ function: getVisibleUserIdsWith.name, babyId })
+
+  const { data: access, error: accessError } = await supabase
     .from('baby_access')
     .select('user_id, access_level')
     .eq('baby_id', babyId)
+
+  // Best effort like the notifications it feeds, but a silent empty list would
+  // hide that nobody got notified.
+  if (accessError) contextLogger.error(accessError, "Error fetching baby admins")
 
   const recipientIds = new Set(
     (access ?? [])
@@ -110,12 +116,13 @@ export async function getVisibleUserIdsWith(
   )
 
   if (circleIds.length > 0) {
-    const { data: circleMembers } = await supabase
+    const { data: circleMembers, error: circleError } = await supabase
       .from('circles_access')
       .select('user_id')
       .eq('baby_id', babyId)
       .in('circle_id', circleIds)
 
+    if (circleError) contextLogger.error(circleError, "Error fetching circle members")
     for (const row of circleMembers ?? []) recipientIds.add(row.user_id as string)
   }
 

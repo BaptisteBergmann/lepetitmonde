@@ -2,81 +2,36 @@
 
 import { createClient } from '@utils/supabase/server'
 import { getAuthUser } from '@utils/supabase/auth'
-import { Constants, Enums, Tables, TablesInsert } from '@utils/supabase/database.types'
+import { Constants, Enums, TablesInsert } from '@utils/supabase/database.types'
 import { revalidatePath } from 'next/cache'
-import { getTranslations } from 'next-intl/server'
-import { assertIsAdmin, getVisibleUserIds } from './access'
+import { assertIsAdmin } from './access'
 import { getUserCircleIds } from './circles'
 import { getUserAccess } from './users'
-import { notifyUsers } from './notify'
 import { logger } from '../logger'
 import { actionError } from './errors'
 import { assertCirclesInBaby } from '@utils/feed-access'
 import { normalizeText } from '@utils/feed-validation'
 import { INPUT_LIMITS } from '@utils/input-limits'
 import { assertOneOf } from '@utils/input-validation'
+import { createEventCore, listEventsCore, type EventWithCircles } from '@utils/events-core'
 
 type NewEvent = TablesInsert<'events'>;
-export type EventWithCircles = Tables<'events'> & { circle_ids: string[] };
+export type { EventWithCircles }
 
 export async function createEvent(event: NewEvent, circleIds: string[]) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: createEvent.name, babyId: event.baby_id })
 
-  await assertIsAdmin(supabase, event.baby_id)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw await actionError('unauthorized')
 
-  // Shape first: new Set("abc") would split a string into characters.
-  if (!Array.isArray(circleIds) || !circleIds.every((id) => typeof id === 'string')) {
-    contextLogger.warn("Rejected malformed circleIds")
-    throw await actionError('unauthorized')
-  }
-  await assertCirclesInBaby(circleIds, event.baby_id)
-
-  const kind = await assertOneOf(event.kind ?? 'occasion', Constants.public.Enums.event_kind)
-  const milestoneType = kind === 'life_stage'
-    ? await assertOneOf(event.milestone_type, Constants.public.Enums.milestone_type, { nullable: true })
-    : null
-  const title = await normalizeText(event.title, INPUT_LIMITS.eventTitle, { requiredKey: 'textRequired' })
-  const description = await normalizeText(event.description, INPUT_LIMITS.eventDescription)
-
-  const { data, error } = await supabase
-    .from('events')
-    .insert([{
-      baby_id: event.baby_id,
-      event_date: event.event_date,
-      event_time: event.event_time ?? null,
-      kind,
-      milestone_type: milestoneType,
-      title,
-      description,
-    }])
-    .select('id')
-    .single()
-
-  if (error) { contextLogger.error(error, "Error creating event"); throw error }
-
-  if (circleIds.length > 0) {
-    const { error: circlesError } = await supabase
-      .from('events_circles')
-      .insert(circleIds.map((circleId) => ({ event_id: data.id, circle_id: circleId })))
-
-    if (circlesError) { contextLogger.error(circlesError, "Error linking event circles"); throw circlesError }
-  }
-
-  contextLogger.info("Event created")
-
-  revalidatePath(`/baby/${event.baby_id}/calendar`)
-
-  if (kind === 'life_stage') {
-    const { data: { user } } = await supabase.auth.getUser()
-    const recipients = await getVisibleUserIds(event.baby_id, circleIds, user?.id)
-    const t = await getTranslations('pushNotifications')
-    await notifyUsers(event.baby_id, 'new_life_stage', {
-      title: t('newLifeStage.title'),
-      body: title,
-      url: `/baby/${event.baby_id}/calendar`,
-    }, recipients)
-  }
+  await createEventCore(supabase, user.id, event.baby_id, {
+    eventDate: event.event_date,
+    eventTime: event.event_time,
+    kind: event.kind,
+    milestoneType: event.milestone_type,
+    title: event.title,
+    description: event.description,
+  }, circleIds, { enforcePage: false })
 }
 
 export async function updateEvent(eventId: string, babyId: string, patch: {
@@ -177,39 +132,17 @@ export async function deleteEvent(eventId: string, babyId: string) {
 }
 
 export async function getEvents(babyId: string, { from, to }: { from: string; to: string }): Promise<EventWithCircles[]> {
-  const supabase = await createClient()
   const contextLogger = logger.child({ function: getEvents.name, babyId, from, to })
 
   const { data: { user } } = await getAuthUser()
   if (!user) return []
 
-  const access = await getUserAccess(babyId)
-  const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
-
-  const userCircleIds = new Set(await getUserCircleIds(babyId, user.id))
-
-  const { data, error } = await supabase
-    .from('events')
-    .select('*, events_circles (circle_id)')
-    .eq('baby_id', babyId)
-    .gte('event_date', from)
-    .lte('event_date', to)
-    .order('event_date', { ascending: true })
-
-  if (error) { contextLogger.error(error, "Error fetching events"); return [] }
-
-  // An event with no circle assigned is hidden by default — only admins see it
-  // until it's explicitly shared with at least one circle.
-  const visible = data
-    .map(({ events_circles, ...event }) => ({
-      ...event,
-      circle_ids: events_circles.map((ec: { circle_id: string }) => ec.circle_id),
-    }))
-    .filter((event) => isAdmin || event.circle_ids.some((id: string) => userCircleIds.has(id)))
-
-  contextLogger.debug({ count: visible.length }, "Events received")
-
-  return visible
+  try {
+    return await listEventsCore(await createClient(), user.id, babyId, { from, to }, { enforcePage: false })
+  } catch (err) {
+    contextLogger.error(err, "Error fetching events")
+    return []
+  }
 }
 
 export async function getEventActivityBeyond(babyId: string, from: string, to: string): Promise<{ hasBefore: boolean; hasAfter: boolean }> {
