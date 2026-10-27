@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `cce4e9a` docs(readme): list_circles needs no calendar page
 - `5b959ac` docs(readme): add calendar tools to the MCP tool list
 - `7303872` feat(mcp): add calendar tools
 - `8b5624d` feat(calendar): add client-agnostic events core
