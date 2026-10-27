@@ -10,7 +10,11 @@ import { resolveLocale } from '@/i18n/config'
 // function that throws one of these. The locale is passed explicitly (same
 // source as request.ts) so this also works in Route Handlers, where
 // next-intl's request-scoped locale lookup isn't available (the MCP endpoint).
+// A dedicated class so callers outside the UI (the MCP endpoint) can tell these
+// already-translated, safe-to-show messages from raw database errors.
+export class ActionError extends Error {}
+
 export async function actionError(key: string) {
   const t = await getTranslations({ locale: resolveLocale(), namespace: 'serverErrors' })
-  return new Error(t(key))
+  return new ActionError(t(key))
 }
