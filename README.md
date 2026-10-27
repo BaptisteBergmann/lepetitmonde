@@ -128,6 +128,8 @@ Baby admins can drive a baby's data from an MCP client through the remote endpoi
    - Inventory: `list_inventory`, `update_inventory_quantities`. Admin only, and the inventory page must be enabled. Quantities are absolute values; `target: null` takes the item off the buy list.
    - Anecdotes: `list_anecdotes` (paged: pass `nextCursor` back as `cursor`), `add_anecdote`. The anecdotes page must be enabled. Viewers only see anecdotes shared with their circles; `add_anecdote` needs an admin, has no photo support, and always notifies the family like the web app. With no `circleIds` it is visible to admins only.
 
+   - Digest: `get_digest` (`period` `day` or `week`, optional `date` and `timeZone`) summarises tracker totals, open to-dos and upcoming events. Sections you can't use (page disabled, or to-dos for a non-admin) are listed in `omitted`.
+
    Each tool allows what the web app allows you: a disabled page blocks its tools.
 
 Revoking a token in Settings takes effect on the next call. A token is also revoked automatically when its owner stops being an admin of any baby. Claude Desktop and other clients that let you set a request header work the same way. **Claude.ai custom connectors and the Claude mobile app are not supported yet**: they need OAuth, which isn't implemented.
