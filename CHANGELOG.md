@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `c6058d5` fix(inventory): log unexpected errors in getInventoryItems
 - `e159464` docs(readme): add inventory tools to the MCP tool list
 - `ec42a89` feat(mcp): add inventory tools
 - `73abc60` feat(inventory): add list and partial quantity update cores
