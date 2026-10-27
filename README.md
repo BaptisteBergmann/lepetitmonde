@@ -127,7 +127,6 @@ Baby admins can drive a baby's data from an MCP client through the remote endpoi
    - Calendar: `list_events`, `list_circles`, `add_event`. `list_events` and `add_event` need the calendar page enabled. Viewers only see events shared with their circles; `list_circles` (no page needed) and `add_event` need an admin. `add_event` with no `circleIds` is visible to admins only, and a `life_stage` event notifies the family like the web app.
    - Inventory: `list_inventory`, `update_inventory_quantities`. Admin only, and the inventory page must be enabled. Quantities are absolute values; `target: null` takes the item off the buy list.
    - Anecdotes: `list_anecdotes` (paged: pass `nextCursor` back as `cursor`), `add_anecdote`. The anecdotes page must be enabled. Viewers only see anecdotes shared with their circles; `add_anecdote` needs an admin, has no photo support, and always notifies the family like the web app. With no `circleIds` it is visible to admins only.
-
    - Digest: `get_digest` (`period` `day` or `week`, optional `date` and `timeZone`) summarises tracker totals, open to-dos and upcoming events. Sections you can't use (page disabled, or to-dos for a non-admin) are listed in `omitted`.
 
    Each tool allows what the web app allows you: a disabled page blocks its tools.
