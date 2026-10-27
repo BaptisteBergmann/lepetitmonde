@@ -1,0 +1,74 @@
+import 'server-only'
+import type { McpServer } from '@modelcontextprotocol/server'
+import { z } from 'zod'
+import { resolveLocale } from '@/i18n/config'
+import { createAnecdoteCore, listAnecdotesCore } from '@utils/anecdotes-core'
+import { todayInZone } from '@utils/care-time'
+import { FAMILY_TIME_ZONE } from '@utils/formatting'
+import { INPUT_LIMITS } from '@utils/input-limits'
+import { babyId, day, run, timeZone, type ToolContext } from './shared'
+
+const DEFAULT_LIMIT = 20
+const MAX_LIMIT = 50
+
+export function registerAnecdoteTools(server: McpServer, ctx: ToolContext) {
+  const { userId, admin } = ctx
+
+  server.registerTool(
+    'list_anecdotes',
+    {
+      title: 'List anecdotes',
+      description:
+        `Lists anecdotes (short family stories), newest first, at most ${MAX_LIMIT} per call (default ${DEFAULT_LIMIT}). Pass before (a day) to get the ones from earlier days. ` +
+        'You only get anecdotes you may see: admins see all, viewers only those shared with one of their circles. circleIds are the circles an anecdote is shared with (empty means admins only). hasPhoto tells whether it has a photo; photos are not returned.',
+      inputSchema: z.object({
+        babyId,
+        limit: z.number().int().min(1).max(MAX_LIMIT).optional(),
+        before: day.optional().describe('Only anecdotes from days before this one'),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    ({ babyId, limit, before }) => run('list_anecdotes', { ...ctx, babyId }, async () => {
+      const rows = await listAnecdotesCore(admin, userId, babyId, {
+        limit: limit ?? DEFAULT_LIMIT,
+        // No anecdote is older than the row has a createdAt this early, so the day boundary alone decides.
+        before: before ? { happenedAt: `${before}T00:00:00Z`, createdAt: '0001-01-01T00:00:00Z' } : undefined,
+      })
+      return rows.map((row) => ({
+        id: row.id,
+        date: row.happened_at.slice(0, 10),
+        content: row.content,
+        circleIds: row.circleIds,
+        hasPhoto: Boolean(row.photo_path),
+        createdAt: row.created_at,
+      }))
+    }),
+  )
+
+  server.registerTool(
+    'add_anecdote',
+    {
+      title: 'Add an anecdote',
+      description:
+        'Adds an anecdote (a short family story) for a day. Admins only. date defaults to today in timeZone. ' +
+        'circleIds are the circles that can see it (ids from list_circles). The default [] means ONLY ADMINS see it, so pass circles to share it with the family. ' +
+        'It NOTIFIES the family: everyone who can see it gets an inbox entry and a push, except you. No photo can be added over MCP. Not idempotent: calling twice creates two anecdotes.',
+      inputSchema: z.object({
+        babyId,
+        content: z.string().max(INPUT_LIMITS.anecdoteContent),
+        date: day.optional(),
+        circleIds: z.array(z.uuid()).max(50).optional(),
+        timeZone,
+      }),
+      annotations: { destructiveHint: false },
+    },
+    ({ babyId, content, date, circleIds, timeZone }) => run('add_anecdote', { ...ctx, babyId }, async () => {
+      // Stored as a plain day like the web modal does; the UI shows only the date.
+      await createAnecdoteCore(admin, userId, babyId, {
+        content,
+        happenedAt: date ?? todayInZone(timeZone ?? FAMILY_TIME_ZONE),
+      }, circleIds ?? [], { locale: resolveLocale() })
+      return 'Anecdote added.'
+    }),
+  )
+}

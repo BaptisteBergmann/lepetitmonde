@@ -2,6 +2,7 @@ import 'server-only'
 import type { McpServer } from '@modelcontextprotocol/server'
 import { createAdminClient } from '@utils/supabase/admin'
 import { registerBabyTools } from './babies'
+import { registerAnecdoteTools } from './anecdotes'
 import { registerBuyListTools } from './buy_list'
 import { registerCalendarTools } from './calendar'
 import { registerInventoryTools } from './inventory'
@@ -18,4 +19,5 @@ export function registerTools(server: McpServer, ctx: { userId: string; tokenId:
   registerBuyListTools(server, toolCtx)
   registerCalendarTools(server, toolCtx)
   registerInventoryTools(server, toolCtx)
+  registerAnecdoteTools(server, toolCtx)
 }
