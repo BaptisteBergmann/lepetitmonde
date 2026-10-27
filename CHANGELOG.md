@@ -2,6 +2,15 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-27
+
+- `0f8e989` docs(mcp): document connecting an MCP client
+- `27f1342` feat(settings): add connected apps card to manage API tokens
+- `b3a7dc0` feat(mcp): add bearer-authenticated /api/mcp endpoint with todo tools
+- `209867f` feat(mcp): add API token helpers and server actions
+- `576f9d4` feat(db): add api_tokens table with revoke-on-admin-loss triggers
+- `53aa05f` refactor(todo): extract shared todo core with explicit user id
+
 ## 2026-10-24
 
 - `441f73a` docs(plans): record bottom nav overflow as implemented
