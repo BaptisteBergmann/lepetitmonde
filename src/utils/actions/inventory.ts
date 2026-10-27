@@ -36,6 +36,7 @@ export async function getInventoryItems(babyId: string) {
   } catch (err) {
     // Same as before: a non-admin got an exception, a query failure got [].
     if (err instanceof ActionError) throw err
+    logger.child({ function: getInventoryItems.name, babyId }).error(err, "Error fetching inventory items")
     return []
   }
 }
