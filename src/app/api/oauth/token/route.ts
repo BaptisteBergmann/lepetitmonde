@@ -22,49 +22,64 @@ export async function POST(request: Request) {
     return tooManyRequests(900)
   }
 
-  const fail = (response: Response) => {
-    tokenFailureLimiter.hit(ip)
+  const contentType = request.headers.get('content-type')
+  const hasBasicAuth = (request.headers.get('authorization') ?? '').toLowerCase().startsWith('basic ')
+  let paramKeys: string[] = []
+  let grantType: string | null = null
+  // Third-party clients only ever see the error code, so log why. Param names only: the
+  // body carries codes, verifiers and secrets.
+  const reject = (reason: string, response: Response, countsAsFailure = false) => {
+    contextLogger.warn({ reason, status: response.status, grantType, contentType, hasBasicAuth, paramKeys }, 'OAuth token request rejected')
+    if (countsAsFailure) tokenFailureLimiter.hit(ip)
     return response
   }
 
-  if (!(request.headers.get('content-type') ?? '').toLowerCase().startsWith('application/x-www-form-urlencoded')) {
-    return oauthError('invalid_request', 'Content-Type must be application/x-www-form-urlencoded')
+  if (!(contentType ?? '').toLowerCase().startsWith('application/x-www-form-urlencoded')) {
+    return reject('content_type', oauthError('invalid_request', 'Content-Type must be application/x-www-form-urlencoded'))
   }
   const raw = await readCappedText(request)
-  if (raw === null) return oauthError('invalid_request', 'Request body too large', 413)
+  if (raw === null) return reject('body_too_large', oauthError('invalid_request', 'Request body too large', 413))
   const body = new URLSearchParams(raw)
+  paramKeys = [...new Set(body.keys())].slice(0, 30)
+  grantType = body.get('grant_type')
 
   const auth = await authenticateClient(request.headers, body)
   if (auth.status === 'error') return unavailable()
   if (auth.status === 'invalid_client') {
-    return fail(oauthError('invalid_client', undefined, 401, request.headers.get('authorization') ? { 'WWW-Authenticate': 'Basic' } : {}))
+    return reject('invalid_client', oauthError('invalid_client', undefined, 401, request.headers.get('authorization') ? { 'WWW-Authenticate': 'Basic' } : {}), true)
   }
   const clientId = auth.client.id
 
-  const grantType = body.get('grant_type')
   let result: TokenGrantResult
 
   if (grantType === 'authorization_code') {
     const code = body.get('code')
     const redirectUri = body.get('redirect_uri')
     const codeVerifier = body.get('code_verifier')
-    if (!code || !redirectUri || !codeVerifier) return oauthError('invalid_request', 'code, redirect_uri and code_verifier are required')
+    if (!code || !redirectUri || !codeVerifier) return reject('missing_params', oauthError('invalid_request', 'code, redirect_uri and code_verifier are required'))
     const resource = body.get('resource')
-    if (resource && resource !== getOAuthUrls().mcpResource) return oauthError('invalid_target')
+    if (resource && resource !== getOAuthUrls().mcpResource) {
+      contextLogger.warn({ resource }, 'OAuth token request resource mismatch')
+      return reject('invalid_target', oauthError('invalid_target'))
+    }
     result = await issueTokensForCode({ code, clientId, redirectUri, codeVerifier, resource })
   } else if (grantType === 'refresh_token') {
     const refreshToken = body.get('refresh_token')
-    if (!refreshToken) return oauthError('invalid_request', 'refresh_token is required')
+    if (!refreshToken) return reject('missing_params', oauthError('invalid_request', 'refresh_token is required'))
     const resource = body.get('resource')
-    if (resource && resource !== getOAuthUrls().mcpResource) return oauthError('invalid_target')
+    if (resource && resource !== getOAuthUrls().mcpResource) {
+      contextLogger.warn({ resource }, 'OAuth token request resource mismatch')
+      return reject('invalid_target', oauthError('invalid_target'))
+    }
     result = await rotateRefreshToken({ refreshToken, clientId })
   } else {
-    return oauthError('unsupported_grant_type')
+    return reject('unsupported_grant_type', oauthError('unsupported_grant_type'))
   }
 
   if (result.status === 'error') return unavailable()
-  if (result.status === 'invalid_grant') return fail(oauthError('invalid_grant'))
+  if (result.status === 'invalid_grant') return reject('invalid_grant', oauthError('invalid_grant'), true)
 
+  contextLogger.info({ grantType, clientId }, 'OAuth tokens issued')
   return oauthJson(
     {
       access_token: result.accessToken,
