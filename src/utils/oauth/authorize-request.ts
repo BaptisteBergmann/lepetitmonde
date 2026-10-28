@@ -70,8 +70,9 @@ export async function parseAuthorizeRequest(params: URLSearchParams): Promise<Au
     return fail('invalid_request')
   }
 
-  const scope = params.get('scope')
-  if (scope && scope.split(' ').filter(Boolean).some((s) => s !== OAUTH_SCOPE)) return fail('invalid_scope')
+  // The requested scope is ignored: every grant gets OAUTH_SCOPE, and the token response
+  // says so (RFC 6749 section 3.3). Clients ask for extras like offline_access or openid,
+  // and refusing them would break the connection.
 
   const { mcpResource } = getOAuthUrls()
   const resource = params.get('resource')
