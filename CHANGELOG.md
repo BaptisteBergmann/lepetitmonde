@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `7a80378` fix(oauth): log why authorize requests are rejected
 - `9621461` fix(oauth): log which redirect uris were dropped
 - `4453fe2` fix(oauth): ignore extra requested scopes on authorize
 - `9ca5c0d` fix(oauth): accept up to 10 redirect uris and drop disallowed ones
