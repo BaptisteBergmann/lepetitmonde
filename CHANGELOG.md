@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-28
+
+- `5ba74dd` fix(oauth): log token endpoint rejections and issuance
+
 ## 2026-10-27
 
 - `760b539` fix(oauth): raise consent action query cap to fit long state
