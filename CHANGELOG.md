@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `9ca5c0d` fix(oauth): accept up to 10 redirect uris and drop disallowed ones
 - `a7904a8` fix(oauth): log rejected client registrations
 - `9d4deb2` fix(oauth): hide loopback host on authorize error link
 - `85231a9` chore(i18n): remove unused oauth server error keys
