@@ -67,21 +67,29 @@ export async function POST(request: Request) {
   }
   const meta = body as Record<string, unknown>
 
+  // Client metadata holds no secrets, so log what was rejected: it's the only way to see
+  // what a third-party client (Gemini, Claude.ai...) actually sends.
+  const rejected = { ip, clientName: sanitizeClientName(meta.client_name), redirectUris: meta.redirect_uris, grantTypes: meta.grant_types, responseTypes: meta.response_types, authMethod: meta.token_endpoint_auth_method }
+
   const uris = meta.redirect_uris
   if (!Array.isArray(uris) || uris.length < 1 || uris.length > MAX_REDIRECT_URIS || !uris.every(isAllowedRedirectUri)) {
+    contextLogger.warn(rejected, 'OAuth registration rejected: redirect_uris')
     return oauthError('invalid_redirect_uri', 'redirect_uris must hold 1 to 5 https or loopback http URIs without fragment')
   }
   const redirectUris = Array.from(new Set(uris as string[]))
 
   if (meta.grant_types !== undefined && !isSubsetOf(meta.grant_types, ['authorization_code', 'refresh_token'])) {
+    contextLogger.warn(rejected, 'OAuth registration rejected: grant_types')
     return oauthError('invalid_client_metadata', 'Unsupported grant_types')
   }
   if (meta.response_types !== undefined && !isSubsetOf(meta.response_types, ['code'])) {
+    contextLogger.warn(rejected, 'OAuth registration rejected: response_types')
     return oauthError('invalid_client_metadata', 'Unsupported response_types')
   }
 
   const method = (meta.token_endpoint_auth_method ?? 'none') as string
   if (!(AUTH_METHODS as readonly string[]).includes(method)) {
+    contextLogger.warn(rejected, 'OAuth registration rejected: token_endpoint_auth_method')
     return oauthError('invalid_client_metadata', 'Unsupported token_endpoint_auth_method')
   }
   const authMethod = method as AuthMethod
