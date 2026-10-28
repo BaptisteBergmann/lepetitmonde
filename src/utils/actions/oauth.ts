@@ -15,7 +15,8 @@ export type ConsentResult =
   | { redirectUrl: string }
   | { error: 'unauthorized' | 'invalid' | 'not_eligible' | 'limit_reached' | 'rate_limited' }
 
-const MAX_RAW_QUERY = 4000
+// Room for a 4096-char state (MAX_STATE_LENGTH) plus the other params.
+const MAX_RAW_QUERY = 8000
 const STALE_CODE_MS = 24 * 60 * 60 * 1000
 
 // Both actions re-validate the raw authorize query themselves: nothing the client
