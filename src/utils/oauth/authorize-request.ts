@@ -5,7 +5,9 @@ import { logger } from '../logger'
 import { CODE_CHALLENGE_RE } from './pkce'
 import { redirectDisplayHost, redirectUriMatches } from './redirect-uri'
 
-const MAX_STATE_LENGTH = 500
+// Only echoed back to the client, never stored. Google sends long opaque values (well
+// over 500 chars), so the cap only guards against absurd URLs.
+const MAX_STATE_LENGTH = 4096
 
 export type AuthorizeRequest = {
   clientId: string
