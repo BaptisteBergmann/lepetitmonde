@@ -1,6 +1,7 @@
 import 'server-only'
 import { OAUTH_SCOPE, getOAuthUrls } from './config'
 import { findClient } from './clients'
+import { logger } from '../logger'
 import { CODE_CHALLENGE_RE } from './pkce'
 import { redirectDisplayHost, redirectUriMatches } from './redirect-uri'
 
@@ -38,6 +39,30 @@ export function buildClientRedirect(redirectUri: string, params: Record<string, 
 // Shared by the consent page and the approve/deny actions, so the actions never trust
 // anything but the raw query.
 export async function parseAuthorizeRequest(params: URLSearchParams): Promise<AuthorizeParse> {
+  const result = await parse(params)
+  if (result.kind !== 'ok') {
+    // Third-party clients only ever see a generic error, so log why. No state or
+    // challenge values: only their lengths.
+    logger.child({ function: parseAuthorizeRequest.name }).warn(
+      {
+        reason: result.kind === 'error_page' ? result.reason : new URL(result.url).searchParams.get('error'),
+        paramKeys: [...params.keys()],
+        clientId: params.get('client_id'),
+        redirectUri: params.get('redirect_uri'),
+        responseType: params.get('response_type'),
+        resource: params.get('resource'),
+        scope: params.get('scope'),
+        codeChallengeMethod: params.get('code_challenge_method'),
+        codeChallengeLength: params.get('code_challenge')?.length ?? null,
+        stateLength: params.get('state')?.length ?? null,
+      },
+      'OAuth authorize request rejected',
+    )
+  }
+  return result
+}
+
+async function parse(params: URLSearchParams): Promise<AuthorizeParse> {
   // A repeated parameter is ambiguous: refuse rather than pick one.
   for (const key of new Set(params.keys())) {
     if (params.getAll(key).length > 1) return { kind: 'error_page', reason: 'invalid_request' }
