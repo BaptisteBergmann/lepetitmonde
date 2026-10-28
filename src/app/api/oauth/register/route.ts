@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 // grants nothing until a logged-in admin approves it on the consent page.
 
 const MAX_CLIENT_NAME = 100
-const MAX_REDIRECT_URIS = 5
+const MAX_REDIRECT_URIS = 10
 const AUTH_METHODS = ['none', 'client_secret_post', 'client_secret_basic'] as const
 const STALE_CLIENT_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -71,12 +71,18 @@ export async function POST(request: Request) {
   // what a third-party client (Gemini, Claude.ai...) actually sends.
   const rejected = { ip, clientName: sanitizeClientName(meta.client_name), redirectUris: meta.redirect_uris, grantTypes: meta.grant_types, responseTypes: meta.response_types, authMethod: meta.token_endpoint_auth_method }
 
+  // Keep the URIs that pass and drop the rest: some clients (Gemini) send a batch where
+  // only some would be accepted, and rejecting the whole request breaks them. A dropped
+  // URI can never be used, since /authorize matches against the stored list.
   const uris = meta.redirect_uris
-  if (!Array.isArray(uris) || uris.length < 1 || uris.length > MAX_REDIRECT_URIS || !uris.every(isAllowedRedirectUri)) {
+  const redirectUris = Array.isArray(uris) ? Array.from(new Set(uris.filter(isAllowedRedirectUri))) : []
+  if (redirectUris.length < 1 || redirectUris.length > MAX_REDIRECT_URIS) {
     contextLogger.warn(rejected, 'OAuth registration rejected: redirect_uris')
-    return oauthError('invalid_redirect_uri', 'redirect_uris must hold 1 to 5 https or loopback http URIs without fragment')
+    return oauthError('invalid_redirect_uri', `redirect_uris must hold 1 to ${MAX_REDIRECT_URIS} https or loopback http URIs without fragment`)
   }
-  const redirectUris = Array.from(new Set(uris as string[]))
+  if (Array.isArray(uris) && redirectUris.length < uris.length) {
+    contextLogger.warn(rejected, 'OAuth registration: dropped disallowed redirect_uris')
+  }
 
   if (meta.grant_types !== undefined && !isSubsetOf(meta.grant_types, ['authorization_code', 'refresh_token'])) {
     contextLogger.warn(rejected, 'OAuth registration rejected: grant_types')
