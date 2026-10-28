@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-27
 
+- `760b539` fix(oauth): raise consent action query cap to fit long state
 - `9c73b94` fix(oauth): allow long state values on authorize
 - `7a80378` fix(oauth): log why authorize requests are rejected
 - `9621461` fix(oauth): log which redirect uris were dropped
