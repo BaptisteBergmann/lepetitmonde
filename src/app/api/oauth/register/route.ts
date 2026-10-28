@@ -81,7 +81,8 @@ export async function POST(request: Request) {
     return oauthError('invalid_redirect_uri', `redirect_uris must hold 1 to ${MAX_REDIRECT_URIS} https or loopback http URIs without fragment`)
   }
   if (Array.isArray(uris) && redirectUris.length < uris.length) {
-    contextLogger.warn(rejected, 'OAuth registration: dropped disallowed redirect_uris')
+    const dropped = uris.filter((u) => !redirectUris.includes(u as string))
+    contextLogger.warn({ ...rejected, dropped }, 'OAuth registration: dropped disallowed redirect_uris')
   }
 
   if (meta.grant_types !== undefined && !isSubsetOf(meta.grant_types, ['authorization_code', 'refresh_token'])) {
