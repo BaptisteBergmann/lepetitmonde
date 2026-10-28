@@ -38,7 +38,8 @@ export async function findClient(clientId: unknown): Promise<ClientLookup> {
 
 export type ClientAuth =
   | { status: 'ok'; client: OAuthClient }
-  | { status: 'invalid_client' }
+  // `why` is for logs only (an enum, never a value); clients only ever see invalid_client.
+  | { status: 'invalid_client'; why: string }
   | { status: 'error' }
 
 function parseBasic(header: string | null): { id: string; secret: string } | null {
@@ -62,21 +63,21 @@ export async function authenticateClient(headers: Headers, body: URLSearchParams
   const basic = parseBasic(headers.get('authorization'))
   const bodyId = body.get('client_id')
   const clientId = basic?.id ?? bodyId
-  if (basic && bodyId && bodyId !== basic.id) return { status: 'invalid_client' }
+  if (basic && bodyId && bodyId !== basic.id) return { status: 'invalid_client', why: 'basic_body_id_conflict' }
   const secret = basic?.secret ?? body.get('client_secret')
 
   const lookup = await findClient(clientId)
   if (lookup.status === 'error') return { status: 'error' }
-  if (lookup.status === 'not_found') return { status: 'invalid_client' }
+  if (lookup.status === 'not_found') return { status: 'invalid_client', why: clientId ? 'client_not_found' : 'no_client_id' }
   const { client } = lookup
 
   if (client.token_endpoint_auth_method === 'none') {
-    return secret ? { status: 'invalid_client' } : { status: 'ok', client }
+    return secret ? { status: 'invalid_client', why: 'secret_sent_by_public_client' } : { status: 'ok', client }
   }
 
-  if (!secret || !client.client_secret_hash) return { status: 'invalid_client' }
+  if (!secret || !client.client_secret_hash) return { status: 'invalid_client', why: 'no_secret' }
   const given = Buffer.from(sha256Hex(secret))
   const stored = Buffer.from(client.client_secret_hash)
-  if (given.length !== stored.length || !timingSafeEqual(given, stored)) return { status: 'invalid_client' }
+  if (given.length !== stored.length || !timingSafeEqual(given, stored)) return { status: 'invalid_client', why: 'secret_mismatch' }
   return { status: 'ok', client }
 }

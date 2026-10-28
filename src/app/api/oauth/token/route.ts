@@ -25,11 +25,15 @@ export async function POST(request: Request) {
   const contentType = request.headers.get('content-type')
   const hasBasicAuth = (request.headers.get('authorization') ?? '').toLowerCase().startsWith('basic ')
   let paramKeys: string[] = []
+  let clientIdForLog: string | null = null
   let grantType: string | null = null
   // Third-party clients only ever see the error code, so log why. Param names only: the
   // body carries codes, verifiers and secrets.
-  const reject = (reason: string, response: Response, countsAsFailure = false) => {
-    contextLogger.warn({ reason, status: response.status, grantType, contentType, hasBasicAuth, paramKeys }, 'OAuth token request rejected')
+  const reject = (reason: string, response: Response, countsAsFailure = false, why?: string) => {
+    contextLogger.warn(
+      { ip, reason, why, status: response.status, grantType, contentType, hasBasicAuth, clientId: clientIdForLog, paramKeys },
+      'OAuth token request rejected',
+    )
     if (countsAsFailure) tokenFailureLimiter.hit(ip)
     return response
   }
@@ -40,15 +44,20 @@ export async function POST(request: Request) {
   const raw = await readCappedText(request)
   if (raw === null) return reject('body_too_large', oauthError('invalid_request', 'Request body too large', 413))
   const body = new URLSearchParams(raw)
-  paramKeys = [...new Set(body.keys())].slice(0, 30)
+  // A non-form body under a form Content-Type parses into one huge "key" holding the
+  // whole payload, secrets included: only log keys that look like parameter names.
+  paramKeys = [...new Set(body.keys())].slice(0, 30).map((k) => (/^[a-z_]{1,40}$/i.test(k) ? k : '<invalid>'))
+  const rawClientId = body.get('client_id')
+  clientIdForLog = rawClientId && /^[0-9a-f-]{36}$/i.test(rawClientId) ? rawClientId : null
   grantType = body.get('grant_type')
 
   const auth = await authenticateClient(request.headers, body)
   if (auth.status === 'error') return unavailable()
   if (auth.status === 'invalid_client') {
-    return reject('invalid_client', oauthError('invalid_client', undefined, 401, request.headers.get('authorization') ? { 'WWW-Authenticate': 'Basic' } : {}), true)
+    return reject('invalid_client', oauthError('invalid_client', undefined, 401, request.headers.get('authorization') ? { 'WWW-Authenticate': 'Basic' } : {}), true, auth.why)
   }
   const clientId = auth.client.id
+  clientIdForLog = clientId
 
   let result: TokenGrantResult
 
@@ -59,7 +68,7 @@ export async function POST(request: Request) {
     if (!code || !redirectUri || !codeVerifier) return reject('missing_params', oauthError('invalid_request', 'code, redirect_uri and code_verifier are required'))
     const resource = body.get('resource')
     if (resource && resource !== getOAuthUrls().mcpResource) {
-      contextLogger.warn({ resource }, 'OAuth token request resource mismatch')
+      contextLogger.warn({ resource: resource.slice(0, 200) }, 'OAuth token request resource mismatch')
       return reject('invalid_target', oauthError('invalid_target'))
     }
     result = await issueTokensForCode({ code, clientId, redirectUri, codeVerifier, resource })
@@ -68,7 +77,7 @@ export async function POST(request: Request) {
     if (!refreshToken) return reject('missing_params', oauthError('invalid_request', 'refresh_token is required'))
     const resource = body.get('resource')
     if (resource && resource !== getOAuthUrls().mcpResource) {
-      contextLogger.warn({ resource }, 'OAuth token request resource mismatch')
+      contextLogger.warn({ resource: resource.slice(0, 200) }, 'OAuth token request resource mismatch')
       return reject('invalid_target', oauthError('invalid_target'))
     }
     result = await rotateRefreshToken({ refreshToken, clientId })
@@ -77,7 +86,7 @@ export async function POST(request: Request) {
   }
 
   if (result.status === 'error') return unavailable()
-  if (result.status === 'invalid_grant') return reject('invalid_grant', oauthError('invalid_grant'), true)
+  if (result.status === 'invalid_grant') return reject('invalid_grant', oauthError('invalid_grant'), true, result.why)
 
   contextLogger.info({ grantType, clientId }, 'OAuth tokens issued')
   return oauthJson(

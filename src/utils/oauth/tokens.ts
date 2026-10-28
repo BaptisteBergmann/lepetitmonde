@@ -39,7 +39,8 @@ export type TokenGrantResult =
       expiresIn: number
       scope: string
     }
-  | { status: 'invalid_grant' }
+  // `why` is for logs only (an enum, never a value); clients only ever see invalid_grant.
+  | { status: 'invalid_grant'; why?: string }
   | { status: 'error' }
 
 // Fresh pair for a grant. The refresh window slides but never passes the absolute
@@ -83,7 +84,7 @@ export async function issueTokensForCode(params: {
   codeVerifier: string
   resource: string | null
 }): Promise<TokenGrantResult> {
-  if (!isPlausibleCode(params.code)) return { status: 'invalid_grant' }
+  if (!isPlausibleCode(params.code)) return { status: 'invalid_grant', why: 'code_implausible' }
   const contextLogger = logger.child({ function: issueTokensForCode.name, clientId: params.clientId })
   const admin = createAdminClient()
 
@@ -93,24 +94,21 @@ export async function issueTokensForCode(params: {
     .eq('code_hash', hashToken(params.code))
     .maybeSingle()
   if (error) { contextLogger.error(error, 'Error looking up authorization code'); return { status: 'error' } }
-  if (!data) return { status: 'invalid_grant' }
+  if (!data) return { status: 'invalid_grant', why: 'code_not_found' }
   const grant = data as Grant
 
   // Replay of a code that was already exchanged: whatever it issued is suspect.
   if (grant.code_used_at) {
     await revokeGrantById(grant.id, 'authorization code reused')
-    return { status: 'invalid_grant' }
+    return { status: 'invalid_grant', why: 'code_reused' }
   }
-  if (grant.revoked_at || new Date(grant.code_expires_at).getTime() <= Date.now()) return { status: 'invalid_grant' }
+  if (grant.revoked_at) return { status: 'invalid_grant', why: 'grant_revoked' }
+  if (new Date(grant.code_expires_at).getTime() <= Date.now()) return { status: 'invalid_grant', why: 'code_expired' }
 
-  if (
-    grant.client_id !== params.clientId ||
-    grant.redirect_uri !== params.redirectUri ||
-    (params.resource !== null && params.resource !== grant.resource) ||
-    !verifyS256(params.codeVerifier, grant.code_challenge)
-  ) {
-    return { status: 'invalid_grant' }
-  }
+  if (grant.client_id !== params.clientId) return { status: 'invalid_grant', why: 'client_mismatch' }
+  if (grant.redirect_uri !== params.redirectUri) return { status: 'invalid_grant', why: 'redirect_uri_mismatch' }
+  if (params.resource !== null && params.resource !== grant.resource) return { status: 'invalid_grant', why: 'resource_mismatch' }
+  if (!verifyS256(params.codeVerifier, grant.code_challenge)) return { status: 'invalid_grant', why: 'pkce_mismatch' }
 
   const pair = newTokenPair(grant.created_at)
   const nowIso = new Date().toISOString()
