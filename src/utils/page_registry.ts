@@ -29,6 +29,13 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
     manageable: true,
   },
   {
+    id: 'tracker',
+    icon: Baby,
+    defaultRole: 'admin',
+    defaultEnabled: false,
+    manageable: true,
+  },
+  {
     id: 'calendar',
     icon: CalendarDays,
     defaultRole: 'viewer',
@@ -73,13 +80,6 @@ export const PAGE_REGISTRY: PageRegistryEntry[] = [
   {
     id: 'todo',
     icon: ListChecks,
-    defaultRole: 'admin',
-    defaultEnabled: false,
-    manageable: true,
-  },
-  {
-    id: 'tracker',
-    icon: Baby,
     defaultRole: 'admin',
     defaultEnabled: false,
     manageable: true,
