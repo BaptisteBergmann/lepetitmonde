@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-30
+
+- `e44e56f` feat(home): move tracker to second place on baby home page
+
 ## 2026-10-28
 
 - `5dcc5fd` fix(oauth): log why token requests fail without logging values
