@@ -289,7 +289,7 @@ export function registerHealthTools(server: McpServer, ctx: ToolContext) {
       if (!upcoming.birthDate) throw new HealthValidationError('missingBirthDate')
       const horizon = addMonthsToDay(upcoming.today, withinMonths ?? 6)
       const slots = upcoming.status.slots
-        .filter((s) => !s.shot && s.status !== null && (s.status !== 'upcoming' || (s.dueFrom ?? '') <= horizon))
+        .filter((s) => !s.shot && s.status !== null && s.status !== 'missed' && (s.status !== 'upcoming' || (s.dueFrom ?? '') <= horizon))
         .map((s) => ({
           slotId: s.slot.id,
           vaccineCode: s.slot.vaccineCode,

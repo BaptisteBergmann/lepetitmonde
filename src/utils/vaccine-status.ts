@@ -6,7 +6,7 @@ import {
   type VaccineScheduleKey,
 } from '@/utils/vaccine-schedule';
 
-export type VaccineSlotStatus = 'given' | 'overdue' | 'due' | 'soon' | 'upcoming';
+export type VaccineSlotStatus = 'given' | 'overdue' | 'due' | 'soon' | 'upcoming' | 'missed';
 
 /** Minimal shape of a recorded shot (matches the `vaccinations` row). */
 export type ShotLike = {
@@ -68,7 +68,10 @@ export function computeVaccineStatus<T extends ShotLike>(
     if (shot) status = 'given';
     else if (dueFrom && dueBy) {
       // yyyy-MM-dd strings compare correctly as text.
-      if (today > dueBy) status = slot.optional ? 'due' : 'overdue';
+      const expiresOn = slot.expiresMonths !== undefined ? addMonthsToDay(birthDate!, slot.expiresMonths) : null;
+      if (expiresOn && today > expiresOn) status = 'missed';
+      // Only mandatory doses become overdue; recommended ones stay due until they expire.
+      else if (today > dueBy) status = slot.mandatory ? 'overdue' : 'due';
       else if (today >= dueFrom) status = 'due';
       else if (today >= fmt(addDays(parseDay(dueFrom), -SOON_DAYS))) status = 'soon';
       else status = 'upcoming';

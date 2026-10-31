@@ -19,6 +19,8 @@
 //   - The RSV preventive treatment (nirsevimab) is seasonal at birth, so it is recordable
 //     only, not a slot.
 //   Quebec has no mandatory childhood vaccine, so every ca_qc slot is `mandatory: false`.
+// `expiresMonths` (rotavirus: dose 1 by about 6 months, last dose by about 8) is the age after
+// which the dose is no longer given; other vaccines can be caught up, so they have none.
 // `untilMonths` is our own grace limit (when a dose shows as overdue), not an official one.
 //
 // Bump a schedule's `id` whenever its rows change.
@@ -73,6 +75,11 @@ export type ScheduleSlot = {
   /** The dose becomes overdue after this age (calendar months). */
   untilMonths: number;
   mandatory: boolean;
+  /**
+   * Hard age limit: past it the dose can no longer be given (rotavirus), so an unrecorded
+   * slot becomes `missed` instead of staying due or overdue forever.
+   */
+  expiresMonths?: number
   /** Only for some products (e.g. 3-dose rotavirus): never shown as overdue. */
   optional?: boolean;
 };
@@ -90,7 +97,7 @@ const slot = (
   fromMonths: number,
   untilMonths: number,
   mandatory: boolean,
-  extra: Pick<ScheduleSlot, 'optional' | 'alsoCodes'> = {},
+  extra: Pick<ScheduleSlot, 'optional' | 'alsoCodes' | 'expiresMonths'> = {},
 ): ScheduleSlot => ({ id, vaccineCode, dose, fromMonths, untilMonths, mandatory, ...extra });
 
 const FR: VaccineScheduleDef = {
@@ -98,12 +105,12 @@ const FR: VaccineScheduleDef = {
   slots: [
     slot('hexa-1', 'dtcap_hib_hepb', 1, 2, 3, true),
     slot('pcv-1', 'pcv', 1, 2, 3, true),
-    slot('rota-1', 'rotavirus', 1, 2, 3, false),
+    slot('rota-1', 'rotavirus', 1, 2, 3, false, { expiresMonths: 6 }),
     slot('menb-1', 'menb', 1, 3, 4, true),
-    slot('rota-2', 'rotavirus', 2, 3, 4, false),
+    slot('rota-2', 'rotavirus', 2, 3, 4, false, { expiresMonths: 8 }),
     slot('hexa-2', 'dtcap_hib_hepb', 2, 4, 5, true),
     slot('pcv-2', 'pcv', 2, 4, 5, true),
-    slot('rota-3', 'rotavirus', 3, 4, 5, false, { optional: true }),
+    slot('rota-3', 'rotavirus', 3, 4, 5, false, { optional: true, expiresMonths: 8 }),
     slot('menb-2', 'menb', 2, 5, 6, true),
     slot('menacwy-1', 'menacwy', 1, 6, 7, true),
     slot('hexa-3', 'dtcap_hib_hepb', 3, 11, 12, true),
@@ -123,10 +130,10 @@ const CA_QC: VaccineScheduleDef = {
   slots: [
     slot('qc-hexa-1', 'dtcap_hib_hepb', 1, 2, 3, false, QC_DTCAP_HIB),
     slot('qc-pcv-1', 'pcv', 1, 2, 3, false),
-    slot('qc-rota-1', 'rotavirus', 1, 2, 3, false),
+    slot('qc-rota-1', 'rotavirus', 1, 2, 3, false, { expiresMonths: 6 }),
     slot('qc-hexa-2', 'dtcap_hib_hepb', 2, 4, 5, false, QC_DTCAP_HIB),
     slot('qc-pcv-2', 'pcv', 2, 4, 5, false),
-    slot('qc-rota-2', 'rotavirus', 2, 4, 5, false),
+    slot('qc-rota-2', 'rotavirus', 2, 4, 5, false, { expiresMonths: 8 }),
     slot('qc-mmrv-1', 'mmrv', 1, 12, 13, false),
     slot('qc-pcv-3', 'pcv', 3, 12, 13, false),
     slot('qc-mmrv-2', 'mmrv', 2, 18, 19, false),

@@ -1646,7 +1646,8 @@
         "overdue": "Overdue",
         "due": "Due now",
         "soon": "Soon",
-        "upcoming": "Upcoming"
+        "upcoming": "Upcoming",
+        "missed": "Window passed"
       },
       "vaccine": "Vaccine",
       "label": "Vaccine name",
@@ -1687,7 +1688,9 @@
         "covid": "COVID-19",
         "nirsevimab": "Beyfortus (nirsevimab)",
         "other": "Other"
-      }
+      },
+      "missed": "Window passed",
+      "missedHint": "These doses can no longer be given at this age. You can still record one if it was given."
     }
   }
 }

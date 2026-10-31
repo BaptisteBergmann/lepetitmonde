@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { AlertCircle, CalendarClock, Check, ChevronRight, Circle, Plus, Syringe, type LucideIcon } from 'lucide-react'
+import { AlertCircle, CalendarClock, Check, ChevronRight, Circle, CircleSlash, Plus, Syringe, type LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useOnline } from '@/components/use_online'
@@ -21,6 +21,7 @@ const STATUS_UI: Record<VaccineSlotStatus, { icon: LucideIcon; badge: 'default' 
   due: { icon: Syringe, badge: 'default', tint: 'bg-primary/15 text-primary' },
   soon: { icon: CalendarClock, badge: 'secondary', tint: 'bg-chart-4/15 text-chart-4' },
   upcoming: { icon: Circle, badge: 'outline', tint: 'bg-muted text-muted-foreground' },
+  missed: { icon: CircleSlash, badge: 'outline', tint: 'bg-muted text-muted-foreground' },
   given: { icon: Check, badge: 'secondary', tint: 'bg-sage/15 text-sage' },
 }
 
@@ -54,7 +55,9 @@ export function VaccinesView({
   const todo = slots
     .filter((s) => (s.status === 'overdue' || s.status === 'due' || s.status === 'soon') && !s.slot.optional)
     .sort((a, b) => (a.dueBy ?? '').localeCompare(b.dueBy ?? ''))
-  const upcoming = slots.filter((s) => !s.shot && !todo.includes(s))
+  // Missed doses (past their hard age limit) are shown muted, apart from the to-do list.
+  const missed = slots.filter((s) => s.status === 'missed')
+  const upcoming = slots.filter((s) => !s.shot && s.status !== 'missed' && !todo.includes(s))
   const given = slots.filter((s) => s.shot).sort((a, b) => b.shot!.given_on.localeCompare(a.shot!.given_on))
 
   const groups = new Map<number, Slot[]>()
@@ -212,6 +215,14 @@ export function VaccinesView({
               <div className="space-y-3">{groupList.slice(2).map(renderGroup)}</div>
             </details>
           )}
+        </section>
+      )}
+
+      {missed.length > 0 && (
+        <section className="space-y-3 opacity-80">
+          {heading(t('vaccines.missed'))}
+          <p className="text-sm text-muted-foreground">{t('vaccines.missedHint')}</p>
+          <ul className="space-y-2">{missed.map(slotCard)}</ul>
         </section>
       )}
 

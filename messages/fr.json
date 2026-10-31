@@ -1646,7 +1646,8 @@
         "overdue": "En retard",
         "due": "À faire maintenant",
         "soon": "Bientôt",
-        "upcoming": "À venir"
+        "upcoming": "À venir",
+        "missed": "Délai dépassé"
       },
       "vaccine": "Vaccin",
       "label": "Nom du vaccin",
@@ -1687,7 +1688,9 @@
         "covid": "COVID-19",
         "nirsevimab": "Beyfortus (nirsévimab)",
         "other": "Autre"
-      }
+      },
+      "missed": "Délai dépassé",
+      "missedHint": "Ces doses ne peuvent plus être données à cet âge. Vous pouvez quand même en enregistrer une si elle a été faite."
     }
   }
 }
