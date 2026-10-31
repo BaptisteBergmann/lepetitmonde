@@ -49,6 +49,12 @@ export type HealthData = {
   vaccinations: Vaccination[]
 }
 
+// Database errors can carry row data in `details` (e.g. the duplicate key's values); log
+// only the code and message.
+function dbError(error: { code?: string; message: string }) {
+  return { code: error.code, message: error.message }
+}
+
 const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DEFAULT_LIST_LIMIT = 500
 
@@ -87,7 +93,7 @@ async function withCreatorNames<T extends { created_by: string | null }>(
     .select('user_id, nickname, users (*)')
     .eq('baby_id', babyId)
 
-  if (error) contextLogger.error(error, 'Error fetching creator names')
+  if (error) contextLogger.error(dbError(error), 'Error fetching creator names')
 
   type Member = { user_id: string; nickname: string | null; users: Tables<'users'> | Tables<'users'>[] | null }
   const names = new Map<string, string>()
@@ -106,7 +112,7 @@ async function loadProfile(supabase: SupabaseClient, babyId: string): Promise<He
     .eq('baby_id', babyId)
     .maybeSingle()
 
-  if (error) { contextLogger.error(error, 'Error fetching health profile'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error fetching health profile'); throw error }
   return {
     birth_date: data?.birth_date ?? null,
     sex: data?.sex ?? null,
@@ -128,7 +134,7 @@ async function loadMeasurements(
     .order('created_at', { ascending: false })
     .limit(opts.limit ?? DEFAULT_LIST_LIMIT)
 
-  if (error) { contextLogger.error(error, 'Error fetching growth measurements'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error fetching growth measurements'); throw error }
   contextLogger.debug({ count: data.length }, 'Growth measurements received')
   return withCreatorNames(supabase, babyId, data)
 }
@@ -143,7 +149,7 @@ async function loadVaccinations(supabase: SupabaseClient, babyId: string): Promi
     .order('created_at', { ascending: false })
     .limit(DEFAULT_LIST_LIMIT)
 
-  if (error) { contextLogger.error(error, 'Error fetching vaccinations'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error fetching vaccinations'); throw error }
   contextLogger.debug({ count: data.length }, 'Vaccinations received')
   return withCreatorNames(supabase, babyId, data)
 }
@@ -227,13 +233,13 @@ export async function upsertHealthProfileCore(
   const { error: insertError } = await supabase
     .from('baby_health_profiles')
     .upsert({ baby_id: babyId, updated_by: userId }, { onConflict: 'baby_id', ignoreDuplicates: true })
-  if (insertError) { contextLogger.error(insertError, 'Error creating health profile'); throw insertError }
+  if (insertError) { contextLogger.error(dbError(insertError), 'Error creating health profile'); throw insertError }
 
   const { error } = await supabase
     .from('baby_health_profiles')
     .update({ ...patch, updated_at: new Date().toISOString(), updated_by: userId })
     .eq('baby_id', babyId)
-  if (error) { contextLogger.error(error, 'Error updating health profile'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error updating health profile'); throw error }
 
   contextLogger.info({ fields: Object.keys(patch) }, 'Health profile saved')
   revalidateHealth(babyId)
@@ -258,7 +264,7 @@ export async function createGrowthMeasurementCore(
   const { error } = await supabase
     .from('growth_measurements')
     .insert({ ...fields, baby_id: babyId, created_by: userId })
-  if (error) { contextLogger.error(error, 'Error creating growth measurement'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error creating growth measurement'); throw error }
 
   contextLogger.info('Growth measurement created')
   revalidateHealth(babyId)
@@ -287,7 +293,7 @@ export async function updateGrowthMeasurementCore(
     .eq('baby_id', babyId)
     .select('id')
     .maybeSingle()
-  if (error) { contextLogger.error(error, 'Error updating growth measurement'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error updating growth measurement'); throw error }
   if (!data) { revalidateHealth(babyId); throw new HealthValidationError('notFound') }
 
   contextLogger.info('Growth measurement updated')
@@ -306,7 +312,7 @@ export async function deleteGrowthMeasurementCore(supabase: SupabaseClient, user
     .eq('baby_id', babyId)
     .select('id')
     .maybeSingle()
-  if (error) { contextLogger.error(error, 'Error deleting growth measurement'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error deleting growth measurement'); throw error }
   if (!data) { revalidateHealth(babyId); throw new HealthValidationError('notFound') }
 
   contextLogger.info('Growth measurement deleted')
@@ -342,7 +348,7 @@ export async function createVaccinationCore(
       .order('dose_number', { ascending: false })
       .limit(1)
       .maybeSingle()
-    if (lastError) { contextLogger.error({ code: lastError.code, message: lastError.message }, 'Error finding last dose'); throw lastError }
+    if (lastError) { contextLogger.error(dbError(lastError), 'Error finding last dose'); throw lastError }
     const next = ((last?.dose_number as number | null | undefined) ?? 0) + 1
     if (next > HEALTH_LIMITS.doseMax) throw new HealthValidationError('invalidDose')
     dose = next
@@ -358,7 +364,7 @@ export async function createVaccinationCore(
       revalidateHealth(babyId)
       throw new HealthValidationError('duplicateDose')
     }
-    contextLogger.error(error, 'Error creating vaccination')
+    contextLogger.error(dbError(error), 'Error creating vaccination')
     throw error
   }
 
@@ -389,7 +395,7 @@ export async function updateVaccinationCore(
     .maybeSingle()
   if (error) {
     if (error.code === '23505') { revalidateHealth(babyId); throw new HealthValidationError('duplicateDose') }
-    contextLogger.error(error, 'Error updating vaccination')
+    contextLogger.error(dbError(error), 'Error updating vaccination')
     throw error
   }
   if (!data) { revalidateHealth(babyId); throw new HealthValidationError('notFound') }
@@ -410,7 +416,7 @@ export async function deleteVaccinationCore(supabase: SupabaseClient, userId: st
     .eq('baby_id', babyId)
     .select('id')
     .maybeSingle()
-  if (error) { contextLogger.error(error, 'Error deleting vaccination'); throw error }
+  if (error) { contextLogger.error(dbError(error), 'Error deleting vaccination'); throw error }
   if (!data) { revalidateHealth(babyId); throw new HealthValidationError('notFound') }
 
   contextLogger.info('Vaccination deleted')
