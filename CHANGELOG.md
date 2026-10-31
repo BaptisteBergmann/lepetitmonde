@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `58575fe` refactor(tracker): share use_online and tz_cookie for the health page
 - `4e3d972` feat(health): register health page
 - `5c27915` feat(health): add health server actions
 - `4160fbf` feat(health): add health validation and server cores
