@@ -106,7 +106,7 @@ function VaccineForm({
   const [code, setCode] = useState<VaccineCode>(initialCode)
   const [label, setLabel] = useState(vaccination?.vaccine_label ?? '')
   const nextDose = (vaccine: VaccineCode) =>
-    vaccinations.filter((v) => v.vaccine_code === vaccine && v.id !== vaccination?.id).length + 1
+    Math.max(0, ...vaccinations.filter((v) => v.vaccine_code === vaccine && v.id !== vaccination?.id).map((v) => v.dose_number ?? 0)) + 1
   const [dose, setDose] = useState(() => {
     if (vaccination) return vaccination.dose_number != null ? String(vaccination.dose_number) : ''
     if (prefill?.dose != null) return String(prefill.dose)

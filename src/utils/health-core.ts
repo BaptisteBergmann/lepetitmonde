@@ -15,6 +15,7 @@ import { assertPageAccessForUser } from './member-access'
 import { getDisplayName } from './users'
 import { todayInZone } from './care-time'
 import {
+  HEALTH_LIMITS,
   HealthValidationError,
   validateGrowthFields,
   validateProfileFields,
@@ -328,17 +329,22 @@ export async function createVaccinationCore(
   const profile = await loadProfile(supabase, babyId)
   const fields = validateVaccinationFields(input, { today: todayInZone(tz), birthDate: profile.birth_date })
 
-  // Omitted dose = the next one: shots already recorded for this vaccine, plus one.
+  // Omitted dose = the next one: the highest dose recorded for this vaccine, plus one (a
+  // count would reuse a number when an earlier dose was never recorded).
   let dose = fields.dose_number
   if (dose === null && fields.vaccine_code !== 'other' && (input.doseNumber === undefined || input.doseNumber === null)) {
-    const { count, error: countError } = await supabase
+    const { data: last, error: lastError } = await supabase
       .from('vaccinations')
-      .select('id', { count: 'exact', head: true })
+      .select('dose_number')
       .eq('baby_id', babyId)
       .eq('vaccine_code', fields.vaccine_code)
-    if (countError) { contextLogger.error(countError, 'Error counting doses'); throw countError }
-    dose = (count ?? 0) + 1
-    if (dose > 10) throw new HealthValidationError('invalidDose')
+      .not('dose_number', 'is', null)
+      .order('dose_number', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (lastError) { contextLogger.error({ code: lastError.code, message: lastError.message }, 'Error finding last dose'); throw lastError }
+    dose = (last?.dose_number ?? 0) + 1
+    if (dose > HEALTH_LIMITS.doseMax) throw new HealthValidationError('invalidDose')
   }
 
   const { error } = await supabase
