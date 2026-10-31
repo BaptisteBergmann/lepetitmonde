@@ -1,6 +1,10 @@
 // Pure due/overdue computation for the vaccine schedule. Client-safe, no I/O.
 import { addDays, addMonths, format } from 'date-fns';
-import { SCHEDULE, type ScheduleSlot } from '@/utils/vaccine-schedule';
+import {
+  getVaccineSchedule,
+  type ScheduleSlot,
+  type VaccineScheduleKey,
+} from '@/utils/vaccine-schedule';
 
 export type VaccineSlotStatus = 'given' | 'overdue' | 'due' | 'soon' | 'upcoming';
 
@@ -41,15 +45,19 @@ export function addMonthsToDay(day: string, months: number): string {
 }
 
 export function computeVaccineStatus<T extends ShotLike>(
+  scheduleKey: VaccineScheduleKey,
   birthDate: string | null,
   today: string,
   shots: readonly T[],
 ): VaccineSchedule<T> {
   const matched = new Set<T>();
-  const slots = SCHEDULE.map((slot): SlotState<T> => {
+  const slots = getVaccineSchedule(scheduleKey).slots.map((slot): SlotState<T> => {
     const shot =
       shots.find(
-        (s) => s.vaccine_code === slot.vaccineCode && s.dose_number === slot.dose,
+        (s) =>
+          (s.vaccine_code === slot.vaccineCode ||
+            (slot.alsoCodes as readonly string[] | undefined)?.includes(s.vaccine_code)) &&
+          s.dose_number === slot.dose,
       ) ?? null;
     if (shot) matched.add(shot);
 
