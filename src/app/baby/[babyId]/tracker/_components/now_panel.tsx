@@ -29,7 +29,7 @@ import { cn } from '@utils/utils'
 import { ChoiceGroup } from '@/components/choice_group'
 import { CareEventModal } from './care_event_modal'
 import { Elapsed } from './elapsed'
-import { useOnline } from './use_online'
+import { useOnline } from '@/components/use_online'
 
 type OpenAction = 'breastfeed' | 'bottle' | null
 

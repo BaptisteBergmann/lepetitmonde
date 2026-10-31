@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import type { CareEvent } from '@utils/actions/care_events'
 import { CareEventModal } from './care_event_modal'
-import { useOnline } from './use_online'
+import { useOnline } from '@/components/use_online'
 
 // The row content is rendered on the server and passed as children; this
 // wrapper only owns the button and the edit dialog.

@@ -10,7 +10,7 @@ import { CareLog } from "./_components/care_log";
 import { NowPanel } from "./_components/now_panel";
 import { DayNav } from "./_components/day_nav";
 import { TrackerLive } from "./_components/tracker_live";
-import { TzCookie } from "./_components/tz_cookie";
+import { TzCookie } from "@components/tz_cookie";
 
 export default async function TrackerPage({
   params,
