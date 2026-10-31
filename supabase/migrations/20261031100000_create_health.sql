@@ -18,12 +18,15 @@ CREATE TABLE "public"."baby_health_profiles" (
   "baby_id" uuid NOT NULL,
   "birth_date" date,
   "sex" "public"."baby_sex",
+  -- Which national vaccine schedule the page shows. Text + CHECK, not an enum: the list grows.
+  "vaccine_schedule" text DEFAULT 'fr' NOT NULL,
   "updated_at" timestamptz DEFAULT now() NOT NULL,
   "updated_by" uuid,
   CONSTRAINT "baby_health_profiles_pkey" PRIMARY KEY ("baby_id"),
   CONSTRAINT "baby_health_profiles_baby_id_fkey" FOREIGN KEY ("baby_id") REFERENCES "public"."babies"("id") ON DELETE CASCADE,
   CONSTRAINT "baby_health_profiles_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "public"."users"("id") ON DELETE SET NULL,
-  CONSTRAINT "baby_health_profiles_birth_date_range" CHECK ("birth_date" IS NULL OR "birth_date" >= DATE '2000-01-01')
+  CONSTRAINT "baby_health_profiles_birth_date_range" CHECK ("birth_date" IS NULL OR "birth_date" >= DATE '2000-01-01'),
+  CONSTRAINT "baby_health_profiles_vaccine_schedule_check" CHECK ("vaccine_schedule" IN ('fr', 'ca_qc'))
 );
 
 ALTER TABLE "public"."baby_health_profiles" OWNER TO "postgres";
@@ -34,7 +37,7 @@ REVOKE ALL ON TABLE "public"."baby_health_profiles" FROM "anon", "authenticated"
 GRANT SELECT, INSERT ON TABLE "public"."baby_health_profiles" TO "authenticated";
 -- Column-level UPDATE: policies can't see OLD values, so this is what stops an admin
 -- moving a profile to another baby.
-GRANT UPDATE ("birth_date", "sex", "updated_at", "updated_by")
+GRANT UPDATE ("birth_date", "sex", "vaccine_schedule", "updated_at", "updated_by")
     ON TABLE "public"."baby_health_profiles" TO "authenticated";
 GRANT ALL ON TABLE "public"."baby_health_profiles" TO "service_role";
 
