@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `5368584` docs(plans): mark health implemented
 - `f7a305d` feat(mcp): add health tools
 - `11c6c5c` feat(health): vaccinations log and upcoming schedule
 - `7651d46` feat(health): WHO growth chart
