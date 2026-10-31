@@ -1553,13 +1553,15 @@
       "missingBirthDate": "Add the birth date to see the curves",
       "missingSex": "Choose girl or boy to show the WHO curves",
       "setBirthDate": "Set birth date",
-      "setSex": "Choose girl or boy"
+      "setSex": "Choose girl or boy",
+      "missingBirthDateVaccines": "Add the birth date to see which vaccines are due"
     },
     "growth": {
       "indicators": {
         "weight": "Weight",
         "length": "Length",
-        "head": "Head"
+        "head": "Head",
+        "lengthHeight": "Length / height"
       },
       "listHeading": "Measurements",
       "add": "Add a measurement",
@@ -1609,6 +1611,83 @@
       "legend": "Shaded area: between P3 and P97, where 94% of babies are.",
       "disclaimer": "For information only, and the WHO curves can differ from the ones in the carnet de santé. Talk to your paediatrician about any concern.",
       "source": "WHO Child Growth Standards"
+    },
+    "views": {
+      "label": "Health sections",
+      "growth": "Growth",
+      "vaccines": "Vaccines",
+      "overdueCount": "{count, plural, one {# vaccine overdue} other {# vaccines overdue}}"
+    },
+    "vaccines": {
+      "add": "Record a vaccine",
+      "addTitle": "Record a vaccine",
+      "editTitle": "Edit vaccine record",
+      "editEntry": "Edit {summary}",
+      "todo": "To do",
+      "upcoming": "Coming up",
+      "given": "Already given",
+      "unscheduled": "Other vaccines",
+      "showAll": "Show the full schedule",
+      "hideAll": "Hide the full schedule",
+      "markGiven": "Mark as given",
+      "markGivenFor": "Mark {vaccine}, dose {dose}, as given",
+      "doseLabel": "Dose {dose}",
+      "mandatory": "Mandatory",
+      "recommended": "Recommended",
+      "optionalDose": "Only with the 3-dose product",
+      "atAge": "At {months, plural, one {# month} other {# months}}",
+      "window": "From {from} to {to}",
+      "windowOverdue": "Was due before {to}",
+      "windowSoon": "From {from}",
+      "givenOn": "Given {date}",
+      "by": "By {name}",
+      "status": {
+        "given": "Given",
+        "overdue": "Overdue",
+        "due": "Due now",
+        "soon": "Soon",
+        "upcoming": "Upcoming"
+      },
+      "vaccine": "Vaccine",
+      "label": "Vaccine name",
+      "dose": "Dose",
+      "doseHint": "Next dose: {dose}",
+      "date": "Date given",
+      "note": "Note",
+      "notePlaceholder": "E.g. mild fever the next day",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleteConfirm": "Delete the record of {vaccine}, dose {dose}?",
+      "saved": "Vaccine recorded",
+      "deleted": "Vaccine record deleted",
+      "scheduleSource": {
+        "fr": "Source: French vaccination calendar 2026",
+        "ca_qc": "Source: Québec immunisation program 2026"
+      },
+      "disclaimer": "Always check the carnet de santé and your doctor's advice.",
+      "names": {
+        "dtcap_hib_hepb": "DTaP-Hib-HepB (hexavalent)",
+        "dtcap_hib": "DTaP-IPV-Hib (without hepatitis B)",
+        "pcv": "Pneumococcal",
+        "rotavirus": "Rotavirus",
+        "menb": "Meningococcal B",
+        "menacwy": "Meningococcal ACWY",
+        "mmr": "MMR",
+        "mmrv": "MMRV (measles, mumps, rubella, varicella)",
+        "dtcap": "DTaP (booster)",
+        "hepa_hepb": "Hepatitis A + B",
+        "menc": "Meningococcal C",
+        "bcg": "BCG",
+        "hepa": "Hepatitis A",
+        "hepb": "Hepatitis B",
+        "varicella": "Varicella",
+        "influenza": "Flu",
+        "covid": "COVID-19",
+        "nirsevimab": "Beyfortus (nirsevimab)",
+        "other": "Other"
+      }
     }
   }
 }

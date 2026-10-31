@@ -1553,13 +1553,15 @@
       "missingBirthDate": "Ajoutez la date de naissance pour voir les courbes",
       "missingSex": "Choisissez fille ou garçon pour afficher les courbes de l'OMS",
       "setBirthDate": "Renseigner la naissance",
-      "setSex": "Choisir fille ou garçon"
+      "setSex": "Choisir fille ou garçon",
+      "missingBirthDateVaccines": "Ajoutez la date de naissance pour voir les vaccins à faire"
     },
     "growth": {
       "indicators": {
         "weight": "Poids",
         "length": "Taille",
-        "head": "Tour de tête"
+        "head": "Tour de tête",
+        "lengthHeight": "Taille"
       },
       "listHeading": "Mesures",
       "add": "Ajouter une mesure",
@@ -1609,6 +1611,83 @@
       "legend": "Zone grisée : entre P3 et P97, où se situent 94 % des bébés.",
       "disclaimer": "À titre indicatif : les courbes de l'OMS peuvent différer de celles du carnet de santé. Parlez-en à votre pédiatre en cas de doute.",
       "source": "Normes de croissance de l'OMS"
+    },
+    "views": {
+      "label": "Rubriques santé",
+      "growth": "Croissance",
+      "vaccines": "Vaccins",
+      "overdueCount": "{count, plural, one {# vaccin en retard} other {# vaccins en retard}}"
+    },
+    "vaccines": {
+      "add": "Enregistrer un vaccin",
+      "addTitle": "Enregistrer un vaccin",
+      "editTitle": "Modifier le vaccin",
+      "editEntry": "Modifier {summary}",
+      "todo": "À faire",
+      "upcoming": "À venir",
+      "given": "Déjà faits",
+      "unscheduled": "Autres vaccins",
+      "showAll": "Voir tout le calendrier",
+      "hideAll": "Masquer le calendrier",
+      "markGiven": "Marquer comme fait",
+      "markGivenFor": "Marquer {vaccine}, dose {dose}, comme fait",
+      "doseLabel": "Dose {dose}",
+      "mandatory": "Obligatoire",
+      "recommended": "Recommandé",
+      "optionalDose": "Uniquement avec le vaccin à 3 doses",
+      "atAge": "À {months, plural, one {# mois} other {# mois}}",
+      "window": "Du {from} au {to}",
+      "windowOverdue": "À faire avant le {to}",
+      "windowSoon": "À partir du {from}",
+      "givenOn": "Fait le {date}",
+      "by": "Par {name}",
+      "status": {
+        "given": "Fait",
+        "overdue": "En retard",
+        "due": "À faire maintenant",
+        "soon": "Bientôt",
+        "upcoming": "À venir"
+      },
+      "vaccine": "Vaccin",
+      "label": "Nom du vaccin",
+      "dose": "Dose",
+      "doseHint": "Prochaine dose : {dose}",
+      "date": "Date de la vaccination",
+      "note": "Note",
+      "notePlaceholder": "Ex. petite fièvre le lendemain",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer l'enregistrement de {vaccine}, dose {dose} ?",
+      "saved": "Vaccin enregistré",
+      "deleted": "Enregistrement supprimé",
+      "scheduleSource": {
+        "fr": "Source : calendrier vaccinal français 2026",
+        "ca_qc": "Source : Programme québécois d'immunisation 2026"
+      },
+      "disclaimer": "Vérifiez toujours avec le carnet de santé et l'avis de votre médecin.",
+      "names": {
+        "dtcap_hib_hepb": "DTCaP-Hib-HepB (hexavalent)",
+        "dtcap_hib": "DCaT-VPI-Hib (sans hépatite B)",
+        "pcv": "Pneumocoque",
+        "rotavirus": "Rotavirus",
+        "menb": "Méningocoque B",
+        "menacwy": "Méningocoque ACWY",
+        "mmr": "ROR",
+        "mmrv": "RRO-Var (rougeole, rubéole, oreillons, varicelle)",
+        "dtcap": "DTCaP (rappel)",
+        "hepa_hepb": "Hépatite A + B",
+        "menc": "Méningocoque C",
+        "bcg": "BCG",
+        "hepa": "Hépatite A",
+        "hepb": "Hépatite B",
+        "varicella": "Varicelle",
+        "influenza": "Grippe",
+        "covid": "COVID-19",
+        "nirsevimab": "Beyfortus (nirsévimab)",
+        "other": "Autre"
+      }
     }
   }
 }
