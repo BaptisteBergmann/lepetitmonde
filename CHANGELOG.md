@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `4160fbf` feat(health): add health validation and server cores
 - `fc2fc0d` chore(db): regenerate types for health tables
 - `52146a1` feat(health): key vaccine schedules by id and add the Quebec schedule
 - `02f4625` feat(db): add vaccine schedule choice to health profiles
