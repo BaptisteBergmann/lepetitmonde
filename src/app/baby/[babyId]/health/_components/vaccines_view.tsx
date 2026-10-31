@@ -13,7 +13,7 @@ import { isVaccineCode } from '@utils/vaccine-schedule'
 import { computeVaccineStatus, type SlotState, type VaccineSlotStatus } from '@utils/vaccine-status'
 import { cn } from '@utils/utils'
 import type { Locale } from '@/i18n/config'
-import { PROFILE_BIRTHDATE_ID } from './profile_card'
+import { focusProfileField } from './profile_card'
 import { VaccineModal, type VaccinePrefill } from './vaccine_modal'
 
 const STATUS_UI: Record<VaccineSlotStatus, { icon: LucideIcon; badge: 'default' | 'secondary' | 'outline' | 'destructive'; tint: string }> = {
@@ -69,11 +69,7 @@ export function VaccinesView({
 
   const open = (next: { vaccination?: Vaccination; prefill?: VaccinePrefill }) => { if (online) setModal(next) }
 
-  const focusProfile = () => {
-    const input = document.getElementById(PROFILE_BIRTHDATE_ID)
-    input?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    input?.focus({ preventScroll: true })
-  }
+  const focusProfile = () => focusProfileField('birthDate')
 
   const slotCard = (s: Slot) => {
     const status = s.status

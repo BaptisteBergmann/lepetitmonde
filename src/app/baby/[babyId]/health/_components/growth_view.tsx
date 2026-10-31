@@ -13,7 +13,7 @@ import { formatAge, formatCm, formatDay, formatKg } from '@utils/health-format'
 import type { Locale } from '@/i18n/config'
 import { GrowthChartPanel } from './growth_chart_panel'
 import { GrowthModal } from './growth_modal'
-import { PROFILE_BIRTHDATE_ID } from './profile_card'
+import { focusProfileField } from './profile_card'
 
 type Row = { indicator: GrowthIndicator; text: string; percentile: string | null }
 
@@ -86,11 +86,7 @@ export function GrowthView({
     ? { ...profile, birth_date: profile.birth_date, sex: profile.sex }
     : null
 
-  const focusProfile = () => {
-    const input = document.getElementById(PROFILE_BIRTHDATE_ID)
-    input?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    input?.focus({ preventScroll: true })
-  }
+  const focusProfile = () => focusProfileField(birthDate ? 'sex' : 'birthDate')
 
   const chartArea = chartProfile ? (
     <GrowthChartPanel profile={chartProfile} today={today} measurements={measurements} />

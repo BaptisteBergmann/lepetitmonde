@@ -20,6 +20,16 @@ import type { Locale } from '@/i18n/config'
 
 const labelClass = 'text-xs font-semibold uppercase tracking-wider text-muted-foreground'
 export const PROFILE_BIRTHDATE_ID = 'health-birth-date'
+export const PROFILE_SEX_ID = 'health-sex'
+
+// Scrolls to the profile form and focuses the field that is missing.
+export function focusProfileField(field: 'birthDate' | 'sex') {
+  const target = field === 'sex'
+    ? document.querySelector<HTMLElement>(`#${PROFILE_SEX_ID} [role="radio"]`)
+    : document.getElementById(PROFILE_BIRTHDATE_ID)
+  target?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  target?.focus({ preventScroll: true })
+}
 
 type Sex = 'female' | 'male'
 
@@ -137,7 +147,8 @@ function ProfileForm({
   const [touched, setTouched] = useState(false)
 
   let dateError: string | null = null
-  if (!birthDate) dateError = t('errors.codes.invalidDate')
+  // The birth date is optional: an empty field saves as "not set".
+  if (!birthDate) dateError = null
   else if (birthDate > today) dateError = t('errors.codes.future')
   else if (birthDate < '2000-01-01') dateError = t('errors.codes.invalidDate')
   const valid = !dateError
@@ -147,7 +158,7 @@ function ProfileForm({
     setSaving(true)
     try {
       const result = await saveHealthProfile(babyId, {
-        birthDate,
+        birthDate: birthDate || null,
         sex,
         vaccineSchedule: schedule,
       })
@@ -189,7 +200,7 @@ function ProfileForm({
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div id={PROFILE_SEX_ID} className="flex flex-col gap-1.5">
         <span className={labelClass}>{t('profile.sex')}</span>
         <ChoiceGroup
           value={sex}
