@@ -343,8 +343,9 @@ export async function createVaccinationCore(
       .limit(1)
       .maybeSingle()
     if (lastError) { contextLogger.error({ code: lastError.code, message: lastError.message }, 'Error finding last dose'); throw lastError }
-    dose = (last?.dose_number ?? 0) + 1
-    if (dose > HEALTH_LIMITS.doseMax) throw new HealthValidationError('invalidDose')
+    const next = ((last?.dose_number as number | null | undefined) ?? 0) + 1
+    if (next > HEALTH_LIMITS.doseMax) throw new HealthValidationError('invalidDose')
+    dose = next
   }
 
   const { error } = await supabase
