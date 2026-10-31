@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `1b98c5e` refactor(health): use the generated baby_sex enum type
 - `25c022e` fix(health): log only the code and message of database errors
 - `fed8942` fix(health): allow saving the profile without a birth date and focus the missing sex field
 - `924bfbb` fix(health): keep row content in the accessible name of edit buttons
