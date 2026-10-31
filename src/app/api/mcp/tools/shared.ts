@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getTranslations } from 'next-intl/server'
 import { resolveLocale } from '@/i18n/config'
 import { CareValidationError } from '@utils/care-validation'
+import { HealthValidationError } from '@utils/health-validation'
 import { ActionError } from '@utils/actions/errors'
 import { isValidDay, isValidTimeZone, parseZonedDateTime } from '@utils/care-time'
 import { logger } from '@utils/logger'
@@ -35,6 +36,9 @@ export async function run(tool: string, ctx: { userId: string; tokenId: string; 
     else if (err instanceof CareValidationError) {
       // Expected tracker failures; the same texts the web tracker shows.
       const t = await getTranslations({ locale: resolveLocale(), namespace: 'tracker.errors.codes' })
+      message = t(err.key)
+    } else if (err instanceof HealthValidationError) {
+      const t = await getTranslations({ locale: resolveLocale(), namespace: 'health.errors.codes' })
       message = t(err.key)
     }
     return { content: [{ type: 'text', text: message }], isError: true }

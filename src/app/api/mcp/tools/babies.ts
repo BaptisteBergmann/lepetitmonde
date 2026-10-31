@@ -8,7 +8,7 @@ import { run, type ToolContext } from './shared'
 
 // Pages that have MCP tools (now or planned): `areas` tells the model which
 // tool families it may call for a given baby.
-const MCP_AREAS = ['todo', 'tracker', 'buy-list', 'calendar', 'inventory', 'anecdotes'] as const
+const MCP_AREAS = ['todo', 'tracker', 'health', 'buy-list', 'calendar', 'inventory', 'anecdotes'] as const
 
 export function registerBabyTools(server: McpServer, ctx: ToolContext) {
   const { userId, admin } = ctx
@@ -17,7 +17,7 @@ export function registerBabyTools(server: McpServer, ctx: ToolContext) {
     'list_babies',
     {
       title: 'List babies',
-      description: 'Lists every baby you are a member of, with your accessLevel (admin or viewer) and the areas (todo, tracker, buy-list, calendar, inventory, anecdotes) you can use for it. Call this first to get a babyId.',
+      description: 'Lists every baby you are a member of, with your accessLevel (admin or viewer) and the areas (todo, tracker, health, buy-list, calendar, inventory, anecdotes) you can use for it. Call this first to get a babyId.',
       inputSchema: z.object({}),
       annotations: { readOnlyHint: true },
     },
