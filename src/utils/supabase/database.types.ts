@@ -455,6 +455,48 @@ export type Database = {
           },
         ]
       }
+      baby_health_profiles: {
+        Row: {
+          baby_id: string
+          birth_date: string | null
+          sex: Database["public"]["Enums"]["baby_sex"] | null
+          updated_at: string
+          updated_by: string | null
+          vaccine_schedule: string
+        }
+        Insert: {
+          baby_id: string
+          birth_date?: string | null
+          sex?: Database["public"]["Enums"]["baby_sex"] | null
+          updated_at?: string
+          updated_by?: string | null
+          vaccine_schedule?: string
+        }
+        Update: {
+          baby_id?: string
+          birth_date?: string | null
+          sex?: Database["public"]["Enums"]["baby_sex"] | null
+          updated_at?: string
+          updated_by?: string | null
+          vaccine_schedule?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "baby_health_profiles_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: true
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "baby_health_profiles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bug_reports: {
         Row: {
           created_at: string
@@ -763,6 +805,70 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      growth_measurements: {
+        Row: {
+          baby_id: string
+          created_at: string
+          created_by: string | null
+          head_circumference_mm: number | null
+          id: string
+          length_mm: number | null
+          measured_on: string
+          note: string | null
+          updated_at: string
+          updated_by: string | null
+          weight_g: number | null
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          created_by?: string | null
+          head_circumference_mm?: number | null
+          id?: string
+          length_mm?: number | null
+          measured_on: string
+          note?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          weight_g?: number | null
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          created_by?: string | null
+          head_circumference_mm?: number | null
+          id?: string
+          length_mm?: number | null
+          measured_on?: string
+          note?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          weight_g?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_measurements_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_measurements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_measurements_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1927,6 +2033,70 @@ export type Database = {
         }
         Relationships: []
       }
+      vaccinations: {
+        Row: {
+          baby_id: string
+          created_at: string
+          created_by: string | null
+          dose_number: number | null
+          given_on: string
+          id: string
+          note: string | null
+          updated_at: string
+          updated_by: string | null
+          vaccine_code: string
+          vaccine_label: string | null
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          created_by?: string | null
+          dose_number?: number | null
+          given_on: string
+          id?: string
+          note?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vaccine_code: string
+          vaccine_label?: string | null
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          created_by?: string | null
+          dose_number?: number | null
+          given_on?: string
+          id?: string
+          note?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vaccine_code?: string
+          vaccine_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccinations_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccinations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccinations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1975,6 +2145,7 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      baby_sex: "female" | "male"
       breast_side: "left" | "right" | "both"
       bug_report_status: "new" | "reviewed" | "fixed"
       care_event_kind: "sleep" | "breastfeed" | "bottle"
@@ -2128,6 +2299,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      baby_sex: ["female", "male"],
       breast_side: ["left", "right", "both"],
       bug_report_status: ["new", "reviewed", "fixed"],
       care_event_kind: ["sleep", "breastfeed", "bottle"],
