@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getHealthData } from "@/utils/actions/health";
 import { Reveal } from "@components/reveal";
+import { TzCookie } from "@components/tz_cookie";
+import { ProfileCard } from "./_components/profile_card";
 
 export default async function HealthPage({
   params,
@@ -11,11 +13,13 @@ export default async function HealthPage({
   const { babyId } = await params;
   const t = await getTranslations("health");
 
-  await assertPageAccess(babyId, "health");
-  await getHealthData(babyId);
+  const level = await assertPageAccess(babyId, "health");
+  const data = await getHealthData(babyId);
+  const canWrite = level === "admin";
 
   return (
     <div className="text-landing-foreground">
+      <TzCookie />
       <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-16">
         <Reveal className="border-b border-landing-border pb-4 mb-6">
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">
@@ -25,6 +29,10 @@ export default async function HealthPage({
             {t("subtitle")}
           </p>
         </Reveal>
+
+        <div className="space-y-6">
+          <ProfileCard babyId={babyId} profile={data.profile} today={data.today} canWrite={canWrite} />
+        </div>
       </div>
     </div>
   );

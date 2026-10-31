@@ -1520,6 +1520,36 @@
         "invalidSex": "Choose girl or boy.",
         "invalidSchedule": "Choose a vaccination schedule from the list."
       }
+    },
+    "offline": "You're offline. You can read the records but not change them.",
+    "age": {
+      "days": "{count, plural, one {# day} other {# days}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "monthsDays": "{months} and {days}",
+      "years": "{count, plural, one {# year} other {# years}}",
+      "yearsMonths": "{years} and {months}"
+    },
+    "profile": {
+      "heading": "Profile",
+      "prompt": "Add the birth date and sex to see growth curves and due vaccines.",
+      "summary": "Born {date} · {age}",
+      "birthDate": "Birth date",
+      "sex": "Sex at birth",
+      "sexHint": "Only used to pick the right WHO curve.",
+      "female": "Girl",
+      "male": "Boy",
+      "vaccineSchedule": "Vaccination schedule",
+      "schedules": {
+        "fr": "France",
+        "ca_qc": "Québec"
+      },
+      "edit": "Edit profile",
+      "editTitle": "Edit profile",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "saved": "Profile saved",
+      "askAdmin": "An administrator needs to add this."
     }
   }
 }

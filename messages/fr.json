@@ -1520,6 +1520,36 @@
         "invalidSex": "Choisissez fille ou garçon.",
         "invalidSchedule": "Choisissez un calendrier vaccinal dans la liste."
       }
+    },
+    "offline": "Vous êtes hors connexion. Vous pouvez consulter les données mais pas les modifier.",
+    "age": {
+      "days": "{count, plural, one {# jour} other {# jours}}",
+      "months": "{count, plural, one {# mois} other {# mois}}",
+      "monthsDays": "{months} et {days}",
+      "years": "{count, plural, one {# an} other {# ans}}",
+      "yearsMonths": "{years} et {months}"
+    },
+    "profile": {
+      "heading": "Profil",
+      "prompt": "Ajoutez la date de naissance et le sexe pour afficher les courbes et les vaccins à faire.",
+      "summary": "Naissance le {date} · {age}",
+      "birthDate": "Date de naissance",
+      "sex": "Sexe à la naissance",
+      "sexHint": "Sert uniquement à choisir la bonne courbe de l'OMS.",
+      "female": "Fille",
+      "male": "Garçon",
+      "vaccineSchedule": "Calendrier vaccinal",
+      "schedules": {
+        "fr": "France",
+        "ca_qc": "Québec"
+      },
+      "edit": "Modifier le profil",
+      "editTitle": "Modifier le profil",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "saved": "Profil enregistré",
+      "askAdmin": "Un administrateur doit renseigner cette information."
     }
   }
 }
