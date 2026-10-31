@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `c7716b8` fix(health): type the next dose after the highest-dose lookup
 - `a3cd0d2` fix(health): assign the next vaccine dose from the highest recorded dose
 - `ddf2e24` fix(health): add a non-alerting missed state for expired vaccine doses
 - `5368584` docs(plans): mark health implemented
