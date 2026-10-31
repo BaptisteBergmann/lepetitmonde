@@ -10,6 +10,8 @@ export type { GrowthIndicator, GrowthSex } from '@/utils/growth-who-data';
 export type Lms = { l: number; m: number; s: number };
 
 export const MAX_MONTHS = 60;
+/** Length/height switches from lying to standing at this age. */
+export const LENGTH_STEP_MONTH = 24;
 const DAYS_PER_MONTH = 30.4375;
 const MS_PER_DAY = 86_400_000;
 
@@ -43,9 +45,16 @@ export function lmsAt(
   if (!Number.isFinite(months) || months < 0 || months > MAX_MONTHS) return null;
   const rows = WHO_LMS[indicator][sex];
   const lo = Math.min(Math.floor(months), MAX_MONTHS - 1);
-  const a = rows[lo];
-  const b = rows[lo + 1];
-  const t = months - lo;
+  let a = rows[lo];
+  let b = rows[lo + 1];
+  let t = months - lo;
+  // Month 24 of the length table is standing height (a ~0.7 cm step), so between 23 and 24
+  // continue the recumbent-length trend instead of blending the two measurement methods.
+  if (indicator === 'length' && lo === LENGTH_STEP_MONTH - 1) {
+    a = rows[lo - 1];
+    b = rows[lo];
+    t += 1;
+  }
   return {
     l: a[1] + (b[1] - a[1]) * t,
     m: a[2] + (b[2] - a[2]) * t,

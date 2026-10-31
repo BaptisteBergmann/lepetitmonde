@@ -1549,7 +1549,11 @@
       "saving": "Saving…",
       "cancel": "Cancel",
       "saved": "Profile saved",
-      "askAdmin": "An administrator needs to add this."
+      "askAdmin": "An administrator needs to add this.",
+      "missingBirthDate": "Add the birth date to see the curves",
+      "missingSex": "Choose girl or boy to show the WHO curves",
+      "setBirthDate": "Set birth date",
+      "setSex": "Choose girl or boy"
     },
     "growth": {
       "indicators": {
@@ -1583,7 +1587,28 @@
       "empty": "No measurements yet",
       "emptyHint": "Add the first weight, length or head size from the carnet de santé.",
       "by": "By {name}",
-      "beforeBirth": "Before the birth date"
+      "beforeBirth": "Before the birth date",
+      "indicatorLabel": "Measurement shown",
+      "emptyIndicator": "No {indicator} measurement yet",
+      "outsideWindow": "{count, plural, one {# measurement is outside this period} other {# measurements are outside this period}}",
+      "lengthHeightNote": "At 24 months the curve steps: length lying down becomes height standing."
+    },
+    "chart": {
+      "label": "{indicator} chart, {sex} WHO curves, {from} to {to} months",
+      "summary": "Latest: {value} at {age}, around {percentile}. The shaded area is the range between P3 and P97.",
+      "summaryEmpty": "No measurements plotted yet. The shaded area is the WHO range between P3 and P97.",
+      "windowLabel": "Period shown",
+      "window6m": "6 months",
+      "window1y": "1 year",
+      "window2y": "2 years",
+      "window5y": "5 years",
+      "ageAxis": "Age (months)",
+      "stepLabel": "24 m",
+      "pointLabel": "{date}, {age}, {value}, {percentile}",
+      "median": "Median for this age: {value}",
+      "legend": "Shaded area: between P3 and P97, where 94% of babies are.",
+      "disclaimer": "For information only, and the WHO curves can differ from the ones in the carnet de santé. Talk to your paediatrician about any concern.",
+      "source": "WHO Child Growth Standards"
     }
   }
 }

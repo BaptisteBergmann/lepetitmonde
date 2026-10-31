@@ -11,7 +11,9 @@ import { getLocaleTag } from '@utils/formatting'
 import { evaluateMeasurement, type GrowthIndicator } from '@utils/growth-who'
 import { formatAge, formatCm, formatDay, formatKg } from '@utils/health-format'
 import type { Locale } from '@/i18n/config'
+import { GrowthChartPanel } from './growth_chart_panel'
 import { GrowthModal } from './growth_modal'
+import { PROFILE_BIRTHDATE_ID } from './profile_card'
 
 type Row = { indicator: GrowthIndicator; text: string; percentile: string | null }
 
@@ -80,7 +82,32 @@ export function GrowthView({
 
   const rowClass = 'flex min-h-16 w-full items-center gap-3 rounded-2xl border border-landing-border bg-landing-surface p-3 text-left'
 
-  return (
+  const chartProfile = profile.birth_date && profile.sex
+    ? { ...profile, birth_date: profile.birth_date, sex: profile.sex }
+    : null
+
+  const focusProfile = () => {
+    const input = document.getElementById(PROFILE_BIRTHDATE_ID)
+    input?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    input?.focus({ preventScroll: true })
+  }
+
+  const chartArea = chartProfile ? (
+    <GrowthChartPanel profile={chartProfile} today={today} measurements={measurements} />
+  ) : (
+    <div className="space-y-3 rounded-2xl border border-dashed border-landing-border bg-landing-surface p-4 text-center">
+      <p className="font-semibold">{t(birthDate ? 'profile.missingSex' : 'profile.missingBirthDate')}</p>
+      {canWrite ? (
+        <Button type="button" variant="outline" size="lg" onClick={focusProfile} className="rounded-2xl">
+          {t(birthDate ? 'profile.setSex' : 'profile.setBirthDate')}
+        </Button>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('profile.askAdmin')}</p>
+      )}
+    </div>
+  )
+
+  const list = (
     <section className="space-y-3" aria-labelledby="health-growth-list">
       <div className="flex items-center justify-between gap-2">
         <h2 id="health-growth-list" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -139,5 +166,12 @@ export function GrowthView({
         />
       )}
     </section>
+  )
+
+  return (
+    <div className="space-y-8 md:grid md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-start md:gap-8 md:space-y-0">
+      <div className="md:sticky md:top-24">{chartArea}</div>
+      {list}
+    </div>
   )
 }

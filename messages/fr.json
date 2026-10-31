@@ -1549,7 +1549,11 @@
       "saving": "Enregistrement…",
       "cancel": "Annuler",
       "saved": "Profil enregistré",
-      "askAdmin": "Un administrateur doit renseigner cette information."
+      "askAdmin": "Un administrateur doit renseigner cette information.",
+      "missingBirthDate": "Ajoutez la date de naissance pour voir les courbes",
+      "missingSex": "Choisissez fille ou garçon pour afficher les courbes de l'OMS",
+      "setBirthDate": "Renseigner la naissance",
+      "setSex": "Choisir fille ou garçon"
     },
     "growth": {
       "indicators": {
@@ -1583,7 +1587,28 @@
       "empty": "Aucune mesure pour l'instant",
       "emptyHint": "Ajoutez le premier poids, la première taille ou le premier tour de tête du carnet de santé.",
       "by": "Par {name}",
-      "beforeBirth": "Avant la naissance"
+      "beforeBirth": "Avant la naissance",
+      "indicatorLabel": "Mesure affichée",
+      "emptyIndicator": "Aucune mesure de {indicator} pour l'instant",
+      "outsideWindow": "{count, plural, one {# mesure est hors de cette période} other {# mesures sont hors de cette période}}",
+      "lengthHeightNote": "À 24 mois la courbe change : la taille couchée devient la taille debout."
+    },
+    "chart": {
+      "label": "Courbe de {indicator}, courbes OMS {sex}, de {from} à {to} mois",
+      "summary": "Dernière mesure : {value} à {age}, environ {percentile}. La zone grisée va de P3 à P97.",
+      "summaryEmpty": "Aucune mesure sur la courbe. La zone grisée correspond à l'intervalle OMS entre P3 et P97.",
+      "windowLabel": "Période affichée",
+      "window6m": "6 mois",
+      "window1y": "1 an",
+      "window2y": "2 ans",
+      "window5y": "5 ans",
+      "ageAxis": "Âge (mois)",
+      "stepLabel": "24 m",
+      "pointLabel": "{date}, {age}, {value}, {percentile}",
+      "median": "Médiane pour cet âge : {value}",
+      "legend": "Zone grisée : entre P3 et P97, où se situent 94 % des bébés.",
+      "disclaimer": "À titre indicatif : les courbes de l'OMS peuvent différer de celles du carnet de santé. Parlez-en à votre pédiatre en cas de doute.",
+      "source": "Normes de croissance de l'OMS"
     }
   }
 }
