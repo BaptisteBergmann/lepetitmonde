@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `fed8942` fix(health): allow saving the profile without a birth date and focus the missing sex field
 - `924bfbb` fix(health): keep row content in the accessible name of edit buttons
 - `c7716b8` fix(health): type the next dose after the highest-dose lookup
 - `a3cd0d2` fix(health): assign the next vaccine dose from the highest recorded dose
