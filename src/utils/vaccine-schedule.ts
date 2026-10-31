@@ -23,6 +23,7 @@
 //
 // Bump a schedule's `id` whenever its rows change.
 
+// Must stay in sync with the CHECK on baby_health_profiles.vaccine_schedule.
 export const VACCINE_SCHEDULE_KEYS = ['fr', 'ca_qc'] as const;
 export type VaccineScheduleKey = (typeof VACCINE_SCHEDULE_KEYS)[number];
 export const DEFAULT_VACCINE_SCHEDULE: VaccineScheduleKey = 'fr';
