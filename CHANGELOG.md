@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-10-31
 
+- `7651d46` feat(health): WHO growth chart
 - `72e5f9e` feat(health): growth measurements log
 - `db78d7d` feat(health): birth date, sex and vaccine schedule profile form
 - `58575fe` refactor(tracker): share use_online and tz_cookie for the health page
