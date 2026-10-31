@@ -135,8 +135,15 @@ export async function hasPageAccess(babyId: string, pageId: PageId): Promise<boo
 // access, not just nav visibility. Redirects to the baby's own landing page,
 // which is safe from a loop perspective: it never redirects further, it only
 // filters which section cards it shows.
-export async function assertPageAccess(babyId: string, pageId: PageId) {
+//
+// Returns the caller's access level so a page can hide write controls. That is a UI
+// affordance only; the actions/cores and RLS enforce writes.
+export async function assertPageAccess(babyId: string, pageId: PageId): Promise<Enums<'role'>> {
   if (!(await hasPageAccess(babyId, pageId))) {
     redirect(`/baby/${babyId}`)
   }
+  const access = await getUserAccess(babyId)
+  // hasPageAccess already proved membership; redirect() throws, so this is a type guard.
+  if (Array.isArray(access)) redirect(`/baby/${babyId}`)
+  return access.access_level
 }

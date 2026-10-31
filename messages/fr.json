@@ -255,6 +255,11 @@
       "name": "Suivi",
       "eyebrow": "Page — Au quotidien",
       "description": "Sommeil et tétées, notés par toute la famille."
+    },
+    "health": {
+      "name": "Santé",
+      "eyebrow": "Page — Santé",
+      "description": "Courbes de croissance et vaccins."
     }
   },
   "roles": {
@@ -1488,5 +1493,33 @@
     "limitReachedLink": "Ouvrir les réglages",
     "rateLimited": "Trop de tentatives. Patientez quelques minutes et réessayez.",
     "loading": "Chargement"
+  },
+  "health": {
+    "title": "Santé",
+    "subtitle": "Croissance et vaccins, au même endroit.",
+    "errors": {
+      "network": "Pas de connexion. Réessayez dans un instant.",
+      "save": "Enregistrement impossible. Réessayez.",
+      "delete": "Suppression impossible. Réessayez.",
+      "codes": {
+        "notFound": "Cet enregistrement n'existe plus.",
+        "invalidDate": "Saisissez une date valide.",
+        "future": "La date ne peut pas être dans le futur.",
+        "beforeBirth": "La date ne peut pas être avant la naissance.",
+        "noMeasurement": "Saisissez au moins une mesure.",
+        "invalidWeight": "Le poids doit être compris entre 0,3 et 40 kg.",
+        "invalidLength": "La taille doit être comprise entre 20 et 140 cm.",
+        "invalidHead": "Le tour de tête doit être compris entre 20 et 65 cm.",
+        "invalidVaccine": "Choisissez un vaccin dans la liste.",
+        "labelRequired": "Saisissez le nom du vaccin.",
+        "invalidDose": "La dose doit être comprise entre 1 et 10.",
+        "duplicateDose": "Cette dose est déjà enregistrée.",
+        "noteTooLong": "La note est trop longue (500 caractères maximum).",
+        "missingBirthDate": "La date de naissance n'est pas encore renseignée.",
+        "missingSex": "Le sexe n'est pas encore renseigné.",
+        "invalidSex": "Choisissez fille ou garçon.",
+        "invalidSchedule": "Choisissez un calendrier vaccinal dans la liste."
+      }
+    }
   }
 }

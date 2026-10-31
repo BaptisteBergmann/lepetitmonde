@@ -255,6 +255,11 @@
       "name": "Tracker",
       "eyebrow": "Page — Day to day",
       "description": "Sleep and feeds, logged by the whole family."
+    },
+    "health": {
+      "name": "Health",
+      "eyebrow": "Page — Health",
+      "description": "Growth curves and vaccines."
     }
   },
   "roles": {
@@ -1488,5 +1493,33 @@
     "limitReachedLink": "Open Settings",
     "rateLimited": "Too many attempts. Wait a few minutes and try again.",
     "loading": "Loading"
+  },
+  "health": {
+    "title": "Health",
+    "subtitle": "Growth and vaccinations, in one place.",
+    "errors": {
+      "network": "No connection. Try again in a moment.",
+      "save": "Couldn't save. Please try again.",
+      "delete": "Couldn't delete. Please try again.",
+      "codes": {
+        "notFound": "This record no longer exists.",
+        "invalidDate": "Enter a valid date.",
+        "future": "The date can't be in the future.",
+        "beforeBirth": "The date can't be before the birth date.",
+        "noMeasurement": "Enter at least one measurement.",
+        "invalidWeight": "Weight must be between 0.3 and 40 kg.",
+        "invalidLength": "Length must be between 20 and 140 cm.",
+        "invalidHead": "Head circumference must be between 20 and 65 cm.",
+        "invalidVaccine": "Choose a vaccine from the list.",
+        "labelRequired": "Enter the vaccine name.",
+        "invalidDose": "The dose must be between 1 and 10.",
+        "duplicateDose": "This dose is already recorded.",
+        "noteTooLong": "The note is too long (500 characters max).",
+        "missingBirthDate": "The birth date is not set yet.",
+        "missingSex": "The sex is not set yet.",
+        "invalidSex": "Choose girl or boy.",
+        "invalidSchedule": "Choose a vaccination schedule from the list."
+      }
+    }
   }
 }
