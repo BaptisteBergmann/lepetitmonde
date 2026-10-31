@@ -77,7 +77,7 @@ export function VaccinesView({
     const Icon = ui?.icon ?? Circle
     const vaccine = name(s.slot.vaccineCode)
     let window: string | null = null
-    if (s.dueFrom && s.dueBy && status && status !== 'given') {
+    if (s.dueFrom && s.dueBy && status && status !== 'given' && status !== 'missed') {
       if (status === 'overdue') window = t('vaccines.windowOverdue', { to: formatDay(s.dueBy, tag, 'medium') })
       else if (status === 'due') window = t('vaccines.window', { from: formatDay(s.dueFrom, tag, 'medium'), to: formatDay(s.dueBy, tag, 'medium') })
       else window = t('vaccines.windowSoon', { from: formatDay(s.dueFrom, tag, 'medium') })
