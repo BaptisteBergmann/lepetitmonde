@@ -1567,7 +1567,6 @@
       "add": "Add a measurement",
       "addTitle": "Add a measurement",
       "editTitle": "Edit measurement",
-      "editEntry": "Edit measurement of {summary}",
       "date": "Date",
       "weight": "Weight (kg)",
       "length": "Length (cm)",
@@ -1593,7 +1592,8 @@
       "indicatorLabel": "Measurement shown",
       "emptyIndicator": "No {indicator} measurement yet",
       "outsideWindow": "{count, plural, one {# measurement is outside this period} other {# measurements are outside this period}}",
-      "lengthHeightNote": "At 24 months the curve steps: length lying down becomes height standing."
+      "lengthHeightNote": "At 24 months the curve steps: length lying down becomes height standing.",
+      "edit": "Edit"
     },
     "chart": {
       "label": "{indicator} chart, {sex} WHO curves, {from} to {to} months",
@@ -1622,7 +1622,6 @@
       "add": "Record a vaccine",
       "addTitle": "Record a vaccine",
       "editTitle": "Edit vaccine record",
-      "editEntry": "Edit {summary}",
       "todo": "To do",
       "upcoming": "Coming up",
       "given": "Already given",
@@ -1690,7 +1689,8 @@
         "other": "Other"
       },
       "missed": "Window passed",
-      "missedHint": "These doses can no longer be given at this age. You can still record one if it was given."
+      "missedHint": "These doses can no longer be given at this age. You can still record one if it was given.",
+      "edit": "Edit"
     }
   }
 }

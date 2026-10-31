@@ -1567,7 +1567,6 @@
       "add": "Ajouter une mesure",
       "addTitle": "Ajouter une mesure",
       "editTitle": "Modifier la mesure",
-      "editEntry": "Modifier la mesure du {summary}",
       "date": "Date",
       "weight": "Poids (kg)",
       "length": "Taille (cm)",
@@ -1593,7 +1592,8 @@
       "indicatorLabel": "Mesure affichée",
       "emptyIndicator": "Aucune mesure de {indicator} pour l'instant",
       "outsideWindow": "{count, plural, one {# mesure est hors de cette période} other {# mesures sont hors de cette période}}",
-      "lengthHeightNote": "À 24 mois la courbe change : la taille couchée devient la taille debout."
+      "lengthHeightNote": "À 24 mois la courbe change : la taille couchée devient la taille debout.",
+      "edit": "Modifier"
     },
     "chart": {
       "label": "Courbe de {indicator}, courbes OMS {sex}, de {from} à {to} mois",
@@ -1622,7 +1622,6 @@
       "add": "Enregistrer un vaccin",
       "addTitle": "Enregistrer un vaccin",
       "editTitle": "Modifier le vaccin",
-      "editEntry": "Modifier {summary}",
       "todo": "À faire",
       "upcoming": "À venir",
       "given": "Déjà faits",
@@ -1690,7 +1689,8 @@
         "other": "Autre"
       },
       "missed": "Délai dépassé",
-      "missedHint": "Ces doses ne peuvent plus être données à cet âge. Vous pouvez quand même en enregistrer une si elle a été faite."
+      "missedHint": "Ces doses ne peuvent plus être données à cet âge. Vous pouvez quand même en enregistrer une si elle a été faite.",
+      "edit": "Modifier"
     }
   }
 }

@@ -142,11 +142,11 @@ export function VaccinesView({
     return canWrite ? (
       <button
         type="button"
-        aria-label={t('vaccines.editEntry', { summary: title })}
         aria-disabled={!online || undefined}
         onClick={() => open({ vaccination: shot })}
         className={`${rowClass} cursor-pointer transition-colors hover:bg-landing-background focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none`}
       >
+        <span className="sr-only">{t('vaccines.edit')}</span>
         {body}
         <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       </button>

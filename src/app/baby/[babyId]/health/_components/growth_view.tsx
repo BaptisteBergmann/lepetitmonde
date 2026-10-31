@@ -140,11 +140,11 @@ export function GrowthView({
               {canWrite ? (
                 <button
                   type="button"
-                  aria-label={t('growth.editEntry', { summary: formatDay(m.measured_on, tag, 'medium') })}
                   aria-disabled={!online || undefined}
                   onClick={() => { if (online) setModal({ measurement: m }) }}
                   className={`${rowClass} cursor-pointer transition-colors hover:bg-landing-background focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none`}
                 >
+                  <span className="sr-only">{t('growth.edit')}</span>
                   {rowBody(m)}
                   <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 </button>
