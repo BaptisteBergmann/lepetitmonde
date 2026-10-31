@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-10-31
+
+- `1f4c5e9` feat(db): create health tables with RLS
+
 ## 2026-10-30
 
 - `e44e56f` feat(home): move tracker to second place on baby home page
