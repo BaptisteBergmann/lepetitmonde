@@ -4,6 +4,7 @@
 // into a `{ ok: false, error }` result and the client translates it (thrown Server Action
 // messages are masked in production).
 import { z } from 'zod'
+import type { Enums } from '@utils/supabase/database.types'
 import { isValidDay } from '@utils/care-time'
 import {
   VACCINE_SCHEDULE_KEYS,
@@ -54,7 +55,7 @@ export const HEALTH_LIMITS = {
   birthDateMin: '2000-01-01',
 } as const
 
-export type HealthSex = 'female' | 'male'
+export type HealthSex = Enums<'baby_sex'>
 
 const scheduleSchema = z.enum(VACCINE_SCHEDULE_KEYS)
 
