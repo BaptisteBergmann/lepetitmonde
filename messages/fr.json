@@ -1550,6 +1550,40 @@
       "cancel": "Annuler",
       "saved": "Profil enregistré",
       "askAdmin": "Un administrateur doit renseigner cette information."
+    },
+    "growth": {
+      "indicators": {
+        "weight": "Poids",
+        "length": "Taille",
+        "head": "Tour de tête"
+      },
+      "listHeading": "Mesures",
+      "add": "Ajouter une mesure",
+      "addTitle": "Ajouter une mesure",
+      "editTitle": "Modifier la mesure",
+      "editEntry": "Modifier la mesure du {summary}",
+      "date": "Date",
+      "weight": "Poids (kg)",
+      "length": "Taille (cm)",
+      "height": "Taille debout (cm)",
+      "head": "Tour de tête (cm)",
+      "note": "Note",
+      "notePlaceholder": "Ex. visite chez le Dr Martin",
+      "hintPercentile": "Environ P{value} pour {age}",
+      "hintUnusual": "Valeur inhabituelle, vérifiez la saisie",
+      "atLeastOne": "Saisissez au moins une mesure.",
+      "invalidNumber": "Saisissez un nombre, par exemple 6,2",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer la mesure du {date} ?",
+      "saved": "Mesure enregistrée",
+      "deleted": "Mesure supprimée",
+      "empty": "Aucune mesure pour l'instant",
+      "emptyHint": "Ajoutez le premier poids, la première taille ou le premier tour de tête du carnet de santé.",
+      "by": "Par {name}",
+      "beforeBirth": "Avant la naissance"
     }
   }
 }

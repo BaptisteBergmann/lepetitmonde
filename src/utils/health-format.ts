@@ -42,9 +42,24 @@ export function formatDay(day: string, localeTag: string, style: 'long' | 'mediu
   )
 }
 
-// Parses user input that may use a decimal comma. Returns NaN for anything else.
-export function parseDecimal(value: string): number {
+// Parses user input that may use a decimal comma. Returns NaN for anything else
+// (including more decimals than `maxDecimals`).
+export function parseDecimal(value: string, maxDecimals: number): number {
   const trimmed = value.trim().replace(',', '.')
-  if (!/^\d{1,3}(\.\d{1,3})?$/.test(trimmed)) return NaN
+  const match = /^(\d{1,3})(?:\.(\d+))?$/.exec(trimmed)
+  if (!match || (match[2]?.length ?? 0) > maxDecimals) return NaN
   return Number(trimmed)
+}
+
+export function formatKg(grams: number, localeTag: string): string {
+  return `${new Intl.NumberFormat(localeTag, { maximumFractionDigits: 3 }).format(grams / 1000)} kg`
+}
+
+export function formatCm(millimetres: number, localeTag: string): string {
+  return `${new Intl.NumberFormat(localeTag, { maximumFractionDigits: 1 }).format(millimetres / 10)} cm`
+}
+
+// Decimal text for an input, in the user's locale ("6,2" in French).
+export function toInputNumber(value: number, localeTag: string): string {
+  return new Intl.NumberFormat(localeTag, { maximumFractionDigits: 3, useGrouping: false }).format(value)
 }

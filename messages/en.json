@@ -1550,6 +1550,40 @@
       "cancel": "Cancel",
       "saved": "Profile saved",
       "askAdmin": "An administrator needs to add this."
+    },
+    "growth": {
+      "indicators": {
+        "weight": "Weight",
+        "length": "Length",
+        "head": "Head"
+      },
+      "listHeading": "Measurements",
+      "add": "Add a measurement",
+      "addTitle": "Add a measurement",
+      "editTitle": "Edit measurement",
+      "editEntry": "Edit measurement of {summary}",
+      "date": "Date",
+      "weight": "Weight (kg)",
+      "length": "Length (cm)",
+      "height": "Height (cm)",
+      "head": "Head circumference (cm)",
+      "note": "Note",
+      "notePlaceholder": "E.g. check-up with Dr. Martin",
+      "hintPercentile": "About P{value} for {age}",
+      "hintUnusual": "Unusual value, please double check",
+      "atLeastOne": "Enter at least one measurement.",
+      "invalidNumber": "Enter a number, for example 6.2",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleteConfirm": "Delete the measurement of {date}?",
+      "saved": "Measurement saved",
+      "deleted": "Measurement deleted",
+      "empty": "No measurements yet",
+      "emptyHint": "Add the first weight, length or head size from the carnet de santé.",
+      "by": "By {name}",
+      "beforeBirth": "Before the birth date"
     }
   }
 }

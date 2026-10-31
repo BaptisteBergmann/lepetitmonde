@@ -3,6 +3,8 @@ import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getHealthData } from "@/utils/actions/health";
 import { Reveal } from "@components/reveal";
 import { TzCookie } from "@components/tz_cookie";
+import { GrowthView } from "./_components/growth_view";
+import { OfflineNotice } from "./_components/offline_notice";
 import { ProfileCard } from "./_components/profile_card";
 
 export default async function HealthPage({
@@ -30,8 +32,11 @@ export default async function HealthPage({
           </p>
         </Reveal>
 
+        <OfflineNotice />
+
         <div className="space-y-6">
           <ProfileCard babyId={babyId} profile={data.profile} today={data.today} canWrite={canWrite} />
+          <GrowthView babyId={babyId} profile={data.profile} today={data.today} measurements={data.measurements} canWrite={canWrite} />
         </div>
       </div>
     </div>
