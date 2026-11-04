@@ -2,6 +2,11 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-04
+
+- `2d7cdb2` docs(plans): add SaaS pre-launch blockers and hardening plan
+- `c894b27` fix(logging): replace console.error with pino logger in server actions
+
 ## 2026-10-31
 
 - `6b918e2` fix(health): hide the due window on missed vaccine doses
