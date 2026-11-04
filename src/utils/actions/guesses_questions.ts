@@ -38,7 +38,7 @@ export async function getQuestions(babyId: string) {
     .eq('status', 'approved')
     .order('position', { ascending: true });
 
-  if (error) { console.error(error); return [] }
+  if (error) { contextLogger.error({ err: error }, "Failed to fetch questions"); return [] }
   contextLogger.debug(data, "Received questions")
   return data
 }
@@ -367,7 +367,7 @@ export async function getQuestionsWithGuess(babyId: string) {
     .eq('guesses.user_id', user.id)
     .order('position', { ascending: true });
 
-  if (error) { console.error(error); return [] }
+  if (error) { contextLogger.error({ err: error }, "Failed to fetch questions with guess"); return [] }
   contextLogger.debug(data, "Received questions with guess")
   return data
 }
@@ -408,7 +408,7 @@ export async function getQuestionsWithoutGuess(babyId: string) {
   const { data, error } = await query;
 
 
-  if (error) { console.error(error); return [] }
+  if (error) { contextLogger.error({ err: error }, "Failed to fetch questions without guess"); return [] }
   contextLogger.debug(data, "Received questions with guess")
   return data
 }

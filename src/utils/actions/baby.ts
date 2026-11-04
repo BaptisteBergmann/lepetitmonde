@@ -16,7 +16,8 @@ export const getBabiesList = cache(async () => {
     .eq('baby_access.user_id', user.id)
 
   if (error) {
-    console.error("Erreur de récupération :", error)
+    const contextLogger = logger.child({ function: 'getBabiesList', userId: user.id })
+    contextLogger.error({ err: error }, "Failed to fetch babies list")
     return []
   }
 
