@@ -98,7 +98,7 @@ export async function notifyUsers(
     if (!devices || devices.length === 0) return
 
     ensureVapidConfigured()
-    const payload = JSON.stringify({ title: content.title, body: content.body, url: content.url, tag: type })
+    const payload = JSON.stringify({ title: content.title, body: content.body, url: content.url, tag: `${type}:${babyId}` })
 
     await Promise.all(devices.map(async (device) => {
       try {
