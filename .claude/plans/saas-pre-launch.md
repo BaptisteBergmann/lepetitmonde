@@ -7,6 +7,11 @@ Status: planning
 Review of `saas-roadmap.md` + full security audit (2026-11-04) identified items
 that must be resolved before opening the app to paying users. Grouped by priority.
 
+**Scope:** this plan owns security and operations blockers. Product work
+(feature flags, signup, social login, billing, onboarding, landing/pricing,
+legal, UX polish) lives in `saas-polish.md`, which references the items here as
+blockers. The RLS rollout itself lives in `rls.md` (owned by someone else).
+
 ---
 
 ## P0 — Critical (block launch)
@@ -18,10 +23,21 @@ Without RLS, anyone with the Supabase anon key has full read/write on ~30
 unprotected tables. The anon key is server-only today (no `NEXT_PUBLIC_*`), but
 Supabase considers it public by design — one leak = full DB.
 
-**Immediate stopgap (before full rollout):**
-- [ ] `ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" REVOKE ALL ON TABLES FROM "anon"`
-- [ ] `REVOKE ALL ON ALL TABLES IN SCHEMA "public" FROM "anon"`
-- [ ] Re-grant only on the 9 tables that already have RLS + policies
+**Immediate stopgap (before full rollout):** use `rls.md` B1 as written,
+agreed with its owner. Corrections to the earlier draft here:
+- Do **not** re-grant anon on the 9 RLS tables: all 9 already revoke anon and
+  their policies are `TO authenticated`; anon needs nothing.
+- Only 6 of the 9 have policies; `api_tokens`, `oauth_clients`, `oauth_grants`
+  are deliberately service-role only.
+- Also revoke default privileges on SEQUENCES and FUNCTIONS — the baseline
+  grants anon EXECUTE on new functions.
+- Verify: `role_table_grants` and `routine_privileges` show 0 anon rows in
+  `public`.
+
+**The stopgap does not make open signup safe.** `authenticated` still has
+`GRANT ALL` on ~30 tables without RLS; any signed-up stranger can read and write
+every family's data via PostgREST. Open signup and social login
+(`saas-polish.md` #4, #5) are blocked by the **full** rollout + test matrix.
 
 **Then:** resume the 12-batch RLS rollout per `rls.md`.
 
@@ -30,11 +46,28 @@ Supabase considers it public by design — one leak = full DB.
 Free tier invites bot signups and storage abuse. Needed before any public-facing
 signup form.
 
-- [ ] Email verification required before any write operations
-- [ ] Rate limit on Server Actions (especially push notifications, email
-      invitations, photo uploads)
-- [ ] Rate limit on auth endpoints (login, signup, password reset)
-- [ ] Account flagging/banning mechanism
+- [ ] Email verification before any write — implemented as "GoTrue
+      confirmations on" plus verified checks in auth helpers and token
+      resolvers; details in `saas-polish.md` #4
+- [ ] Check prod GoTrue `enable_signup`: invite-only is enforced only in the app
+      today, so `POST /auth/v1/signup` with the publishable key may already
+      self-register anyone. Don't expose `/auth/v1/signup` or `/rest/v1` at the
+      reverse proxy
+- [ ] Unpublish host port 3000: `cf-connecting-ip` (used for per-IP keys in
+      `src/utils/client-ip.ts`) is spoofable when the app is reachable
+      directly
+- [ ] All GoTrue calls come from the app container's IP, so GoTrue's per-IP
+      limits are shared by every user (one abuser blocks signup/reset for
+      all). Use GoTrue captcha with the token forwarded, or raise GoTrue
+      limits and enforce per-user/per-IP limits in the app
+- [ ] Rate limit on Server Actions (push notifications, photo uploads) and a
+      per-user daily cap on invite emails (spam relay today — see
+      `saas-polish.md` #6 `invite_email`)
+- [ ] Rate limit on signup and password reset (login is already limited in
+      `src/utils/actions/login.ts`)
+- [ ] Account flagging/banning mechanism — a ban must also be rejected by
+      the API/OAuth token resolvers (`src/utils/api-token.ts`), not just
+      sessions
 - [ ] Honeypot or captcha on signup
 
 ### 3. Backup & disaster recovery
@@ -42,7 +75,8 @@ signup form.
 SaaS = responsible for baby photos. Non-negotiable.
 
 - [ ] Daily automated DB backups (Supabase Pro includes this — verify config)
-- [ ] R2 versioning or cross-region replication for photo storage
+- [ ] R2 versioning or cross-region replication for photo storage — document
+      retention and purge old versions on account deletion (GDPR)
 - [ ] Documented restore procedure (DB + storage)
 - [ ] Test the restore procedure once before launch
 
@@ -58,25 +92,33 @@ Files: `src/utils/actions/baby.ts:19`,
 `console.error` bypasses pino's redaction config (`token`, `email`,
 `subscription`). Supabase error objects could contain sensitive data.
 
-- [ ] Replace with `contextLogger.error(...)` using a child logger from
-      `@/utils/logger`
+- [x] Replace with `contextLogger.error(...)` using a child logger from
+      `@/utils/logger` — done in `c894b27`
 
 ### 5. Revoke anon EXECUTE on SECURITY DEFINER helpers
 
-After RLS is deployed, `is_baby_member`, `is_baby_admin`, `is_circle_visible`,
-`shares_baby_with` become oracles — an attacker could brute-force UUID pairs to
-enumerate user-to-baby membership.
-
-- [ ] Revoke EXECUTE from `"anon"` on all four functions
-- [ ] Grant EXECUTE only to `"authenticated"` and `"service_role"`
+Hygiene, not an oracle: all four helpers answer only about the caller's own
+`auth.uid()`, so anon always gets false. The revoke is already part of `rls.md`
+(helpers migration + grants) — tracked there, nothing separate to do here.
 
 ### 6. CSP: replace `unsafe-inline` with nonce
 
 `next.config.ts` CSP has `'unsafe-inline'` for `script-src`. The theme init
-script in `src/app/layout.tsx:92` is the driver. No current XSS vector, but
+script in `src/app/layout.tsx:92` and Next's own inline bootstrap scripts are
+the drivers (see the comment in `next.config.ts`). No current XSS vector, but
 this removes CSP as defense-in-depth.
 
-- [ ] Generate a per-request nonce in middleware
+**Trade-off:** a nonce-based CSP forces every page to render dynamically (no
+static/ISR output) and the CSP header moves from `next.config.ts` into
+`src/proxy.ts`. Measure the impact before committing.
+
+- [ ] Generate a per-request nonce in `src/proxy.ts` (Next 16's middleware),
+      setting the CSP header **before** the early returns for `/share` and
+      `/auth` in `updateSession`, or the public share page gets no CSP
+- [ ] Keep the `next.config.ts` baseline for `/api` and other paths the proxy
+      matcher excludes
+- [ ] If `form-action 'self'` blocks Stripe/OAuth redirects, add exact hosts,
+      no wildcards
 - [ ] Apply nonce to the theme init script
 - [ ] Remove `'unsafe-inline'` from `script-src`
 
@@ -94,21 +136,13 @@ Parents logging a 3am feed and hitting a 500 is a churn event.
 
 ### 8. Move i18n to Phase 0
 
-French is the native market. Retrofitting i18n after marketing pages exist is
-painful. `next-intl` is already partially set up.
-
-- [ ] Complete `next-intl` integration before marketing/landing pages
-- [ ] Ship bilingual (FR/EN) from day one
+- [x] `next-intl` complete, EN/FR keys in sync — new pages in `saas-polish.md`
+      must ship both locales
 
 ### 9. Split Phase 0 timeline
 
-The original plan scopes RLS + Stripe + onboarding + social auth in 4 weeks.
-Recommended split:
-
-- **Phase 0A (3 weeks):** RLS rollout + plans table + auth improvements
-- **Phase 0B (3 weeks):** Stripe integration + onboarding flow
-
-Stripe webhooks alone can eat a week.
+Superseded: product sequencing (Stripe, onboarding, social auth) now lives in
+`saas-polish.md` → Sequencing.
 
 ### 10. Decide R2 migration timing
 
@@ -123,8 +157,7 @@ Phase 1.2 lists R2 as the storage layer. Decide now:
 Pre-populated fake baby (Phase 0.3) requires careful isolation so test data
 doesn't leak into real data or count against limits. Consider:
 
-- [ ] Defer to Phase 1
-- [ ] Use screenshots/video on landing page instead for launch
+- [x] Deferred post-launch; landing uses screenshots (decided in `saas-polish.md`)
 
 ### 12. Verify `NODE_ENV=production` in production containers
 
@@ -132,7 +165,9 @@ doesn't leak into real data or count against limits. Consider:
 'production'`. If the Docker container runs without this, session cookies will
 be sent over plain HTTP.
 
-- [ ] Verify production Docker Compose / Portainer stack sets `NODE_ENV=production`
+- [x] `Dockerfile:35` sets `ENV NODE_ENV=production` in the runtime stage and
+      no compose file overrides it
+- [ ] Confirm once on the running container (`docker exec … printenv NODE_ENV`), then close
 
 ### 13. Apple IAP budget
 
@@ -149,7 +184,8 @@ The DMA web-checkout loophole is real but Apple's interpretation is narrow.
 
 `zod@4.4.3` via `@modelcontextprotocol/server` has a memory exhaustion CVE.
 Not exploitable with current schemas (simple types only). MCP endpoint is
-authed + rate-limited.
+authed + rate-limited — but under open signup any stranger can create a baby,
+become admin and mint a token, so re-check before enabling open signup.
 
 - [ ] Update `@modelcontextprotocol/server` when a version shipping zod >=4.6.6
       is available
@@ -166,14 +202,14 @@ DoS). All build-time only, no runtime impact.
 ## Sequencing
 
 ```
-Week 1-2:  P0.1 stopgap (revoke anon grants) + P1.4 (console.error fix)
-Week 2-4:  P0.1 full RLS rollout (resume rls.md batches)
-Week 3-4:  P1.5 (revoke anon EXECUTE) + P1.6 (CSP nonce)
+Week 1-2:  P0.1 stopgap (rls.md B1)
+Week 2-4:  P0.1 full RLS rollout (resume rls.md batches, incl. helper revokes)
+Week 3-4:  P1.6 (CSP nonce)
 Week 4-5:  P0.2 (rate limiting) + P1.7 (monitoring)
-Week 5-6:  P0.3 (backup/DR) + P2.8 (i18n)
-Week 6-9:  Stripe integration (Phase 0B)
-Week 9-10: Onboarding flow + auth improvements
+Week 5-6:  P0.3 (backup/DR) + P2.12 (NODE_ENV check)
 ```
 
-This replaces the original 4-week Phase 0 with a more realistic ~10-week
-timeline that front-loads security.
+Product work runs in parallel per `saas-polish.md`. Public signup
+(`ENABLE_OPEN_SIGNUP`), social login (`ENABLE_SOCIAL_LOGIN`) and billing
+(`ENABLE_BILLING`) must not be enabled on a public stack until the **full** RLS
+rollout (P0.1) and P0.2 rate limiting are done.
