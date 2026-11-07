@@ -1150,6 +1150,7 @@
     "newPostSubject": "New post in {babyName}'s journal"
   },
   "pushNotifications": {
+    "babyTitle": "{baby} · {title}",
     "someoneFallback": "Someone",
     "newComment": {
       "title": "New comment",
