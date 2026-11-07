@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-07
 
+- `32ad235` docs(notifications): document baby-name prefix and per-baby tag
 - `9d5f922` feat(notifications): prefix baby name for members of several babies
 - `1ee64e6` fix(notifications): tag pushes per baby so they don't replace each other
 - `e7c3d87` docs: split project docs into linked architecture, feature and guide notes
