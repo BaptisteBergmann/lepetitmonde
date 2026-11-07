@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-06
+
+- `742dcff` docs(plans): rewrite SaaS polish plan and dedupe with pre-launch
+
 ## 2026-11-04
 
 - `2d7cdb2` docs(plans): add SaaS pre-launch blockers and hardening plan
