@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-07
 
+- `1ee64e6` fix(notifications): tag pushes per baby so they don't replace each other
 - `e7c3d87` docs: split project docs into linked architecture, feature and guide notes
 
 ## 2026-11-06
