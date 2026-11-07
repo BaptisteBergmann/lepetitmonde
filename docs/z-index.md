@@ -1,5 +1,7 @@
 # Z-Index Scale
 
+Up: [[Le petit monde]] · See also [[UI system]]
+
 This app had a recurring bug class: a floating/portaled element (a `Popover`,
 `Select`, `DropdownMenu`, or `Dialog`) rendered *underneath* a full-screen
 overlay it was opened from, because both portal to `document.body` and
