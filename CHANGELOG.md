@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-07
+
+- `e7c3d87` docs: split project docs into linked architecture, feature and guide notes
+
 ## 2026-11-06
 
 - `742dcff` docs(plans): rewrite SaaS polish plan and dedupe with pre-launch
