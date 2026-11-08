@@ -9,10 +9,13 @@ import {
   createCareEventCore,
   deleteCareEventCore,
   getTrackerDayCore,
+  getTrackerFirstDayCore,
+  getTrackerRangeCore,
   getTrackerNowCore,
   startCareTimerCore,
   stopCareTimerCore,
   updateCareEventCore,
+  type CareAnalyticsRow,
   type CareEvent,
   type TrackerNow,
 } from '../care-core'
@@ -21,7 +24,7 @@ import { CareValidationError, type CareEventInput, type CareResult } from '../ca
 // Thin session wrappers: the logic and the tracker access check live in
 // care-core.ts so the MCP endpoint applies the same rules. Types are
 // re-exported from there (type-only, allowed in a server action file).
-export type { CareEvent, TrackerNow }
+export type { CareAnalyticsRow, CareEvent, TrackerNow }
 
 async function requireUserId() {
   const { data: { user } } = await getAuthUser()
@@ -45,6 +48,16 @@ async function toResult(fn: () => Promise<void>): Promise<CareResult> {
 export async function getTrackerDay(babyId: string, day: string): Promise<CareEvent[]> {
   const userId = await requireUserId()
   return getTrackerDayCore(await createClient(), userId, babyId, day, await getRequestTimeZone())
+}
+
+export async function getTrackerRange(babyId: string, from: string, to: string): Promise<CareAnalyticsRow[]> {
+  const userId = await requireUserId()
+  return getTrackerRangeCore(await createClient(), userId, babyId, from, to, await getRequestTimeZone())
+}
+
+export async function getTrackerFirstDay(babyId: string): Promise<string | null> {
+  const userId = await requireUserId()
+  return getTrackerFirstDayCore(await createClient(), userId, babyId, await getRequestTimeZone())
 }
 
 export async function getTrackerNow(babyId: string): Promise<TrackerNow> {

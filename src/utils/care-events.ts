@@ -62,6 +62,10 @@ export const CARE_LIMITS = {
   staleTimerMs: 12 * 60 * 60 * 1000,
 } as const
 
+// Widest span a single analytics read may cover, so a crafted call can't scan
+// unbounded history. The "all" range is clamped to this (about 3 years).
+export const CARE_ANALYTICS_MAX_DAYS = 1100
+
 export function isCareKind(value: unknown): value is CareKind {
   return typeof value === 'string' && (CARE_KINDS as readonly string[]).includes(value)
 }

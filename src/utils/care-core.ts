@@ -12,8 +12,8 @@ import { logger } from './logger'
 import { actionError } from './actions/errors'
 import { assertPageAccessForUser } from './member-access'
 import { getDisplayName } from './users'
-import { zonedDayBounds } from './care-time'
-import { CARE_LIMITS, FEED_KINDS, TIMER_KINDS, type TimerKind } from './care-events'
+import { isValidDay, todayInZone, zonedDayBounds } from './care-time'
+import { CARE_ANALYTICS_MAX_DAYS, CARE_LIMITS, FEED_KINDS, TIMER_KINDS, type TimerKind } from './care-events'
 import {
   CareValidationError,
   assertKind,
@@ -32,6 +32,10 @@ export type TrackerNow = {
   lastFeed: CareEvent | null
   lastBreastfeed: CareEvent | null
 }
+
+// Narrow column set for analytics: no note, created_by or updated_by, so
+// stats never expose who logged what.
+export type CareAnalyticsRow = Pick<Tables<'care_events'>, 'kind' | 'started_at' | 'ended_at' | 'ongoing' | 'breast_side' | 'amount_ml'>
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -99,6 +103,69 @@ export async function getTrackerDayCore(supabase: SupabaseClient, userId: string
 
   contextLogger.debug({ count: rows.length }, 'Care events received')
   return withCreatorNames(supabase, babyId, rows)
+}
+
+// PostgREST caps a response at max_rows (1000), so page until a short page.
+const RANGE_PAGE_SIZE = 1000
+
+export async function getTrackerRangeCore(
+  supabase: SupabaseClient,
+  userId: string,
+  babyId: string,
+  from: string,
+  to: string,
+  tz: string,
+): Promise<CareAnalyticsRow[]> {
+  const contextLogger = logger.child({ function: getTrackerRangeCore.name, babyId, from, to })
+  await assertTrackerAccessForUser(supabase, userId, babyId)
+  if (typeof from !== 'string' || typeof to !== 'string' || !isValidDay(from) || !isValidDay(to) || from > to) {
+    throw await actionError('careInvalidTime')
+  }
+  const spanDays = Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS) + 1
+  if (spanDays > CARE_ANALYTICS_MAX_DAYS) throw await actionError('careInvalidTime')
+
+  // Same 24h look-back as the day read: an entry lasts at most 24h, so
+  // anything that began earlier can't reach into the range.
+  const startIso = new Date(zonedDayBounds(from, tz).start.getTime() - DAY_MS).toISOString()
+  const endIso = zonedDayBounds(to, tz).end.toISOString()
+
+  const rows: CareAnalyticsRow[] = []
+  for (let offset = 0; ; offset += RANGE_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('care_events')
+      .select('kind, started_at, ended_at, ongoing, breast_side, amount_ml')
+      .eq('baby_id', babyId)
+      .gte('started_at', startIso)
+      .lt('started_at', endIso)
+      .order('started_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + RANGE_PAGE_SIZE - 1)
+
+    if (error) { contextLogger.error(error, 'Error fetching care events range'); throw error }
+    rows.push(...data)
+    if (data.length < RANGE_PAGE_SIZE) break
+  }
+
+  contextLogger.debug({ count: rows.length }, 'Care events range received')
+  return rows
+}
+
+// Local day of the baby's first entry, or null when nothing is logged (drives "all").
+export async function getTrackerFirstDayCore(supabase: SupabaseClient, userId: string, babyId: string, tz: string): Promise<string | null> {
+  const contextLogger = logger.child({ function: getTrackerFirstDayCore.name, babyId })
+  await assertTrackerAccessForUser(supabase, userId, babyId)
+
+  const { data, error } = await supabase
+    .from('care_events')
+    .select('started_at')
+    .eq('baby_id', babyId)
+    .order('started_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) { contextLogger.error(error, 'Error fetching first care event'); throw error }
+  if (!data) return null
+  return todayInZone(tz, new Date(data.started_at))
 }
 
 export async function getTrackerNowCore(supabase: SupabaseClient, userId: string, babyId: string): Promise<TrackerNow> {
