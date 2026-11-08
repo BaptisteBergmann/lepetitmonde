@@ -6,6 +6,7 @@ import { getTrackerFirstDay, getTrackerRange } from '@/utils/actions/care_events
 import { getRequestTimeZone } from '@/utils/care-timezone'
 import { buttonVariants } from '@/components/ui/button'
 import { computeTrackerAnalytics, parseRangeParam, rangeBounds, type AnalyticsRange } from '@utils/care-analytics'
+import { bucketDays } from '@utils/care-analytics-chart'
 import { todayInZone } from '@utils/care-time'
 import { CARE_TONE_CLASSES } from '@utils/care-events'
 import { getDateFnsLocale, getLocaleTag } from '@utils/formatting'
@@ -16,6 +17,9 @@ import { TrackerLive } from '../_components/tracker_live'
 import { makeFormatters } from './_components/analytics_format'
 import { RangeSwitch } from './_components/range_switch'
 import { StatCards } from './_components/stat_cards'
+import { SleepSection } from './_components/sleep_section'
+import { FeedSection } from './_components/feed_section'
+import { BottleSection } from './_components/bottle_section'
 
 const WIDER_RANGE: Record<AnalyticsRange, AnalyticsRange | null> = { '7d': '30d', '30d': '90d', '90d': 'all', all: null }
 const RANGE_DAYS = { '7d': 7, '30d': 30, '90d': 90 } as const
@@ -47,6 +51,7 @@ export default async function TrackerAnalyticsPage({
   const analytics = computeTrackerAnalytics(rows, { from: bounds.from, to: bounds.to, prevFrom: bounds.prevFrom, tz, now })
   const { summary, previousSummary } = analytics
   const hasRangeData = analytics.days.some((d) => d.logged)
+  const bucketed = bucketDays(analytics.days)
   const wider = WIDER_RANGE[range]
   const prevDays = range === 'all' ? null : RANGE_DAYS[range]
 
@@ -109,12 +114,21 @@ export default async function TrackerAnalyticsPage({
                   : { href: `/baby/${babyId}/tracker`, label: t('analytics.empty.noneCta') },
               )
             ) : (
-              <div className="space-y-2">
-                <StatCards summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
-                {range !== 'all' && !previousSummary && (
-                  <p className="text-xs text-muted-foreground">{t('analytics.noComparison')}</p>
+              <>
+                <div className="space-y-2">
+                  <StatCards summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
+                  {range !== 'all' && !previousSummary && (
+                    <p className="text-xs text-muted-foreground">{t('analytics.noComparison')}</p>
+                  )}
+                </div>
+                {summary.hasSleep && (
+                  <SleepSection data={bucketed} summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
                 )}
-              </div>
+                {summary.feedTotal > 0 && (
+                  <FeedSection data={bucketed} summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
+                )}
+                {summary.hasBottle && <BottleSection data={bucketed} summary={summary} fmt={fmt} />}
+              </>
             )}
           </div>
         )}

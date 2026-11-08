@@ -51,3 +51,10 @@ export function computeTrend(
 }
 
 export const TREND_EPSILON = { duration: 60_000, count: 0.05, ml: 1 } as const
+
+// "up 40 min compared with the previous 7 days", for chart summaries read by screen readers.
+export function trendClause(t: Translate, trend: Trend | null, prevDays: number | null): string | null {
+  if (!trend || prevDays === null) return null
+  const what = trend.direction === 'same' ? t('analytics.trend.same') : t(`analytics.trend.${trend.direction}`, { delta: trend.deltaText })
+  return `${what} ${t('analytics.trend.vsPreviousSr', { days: prevDays })}`
+}
