@@ -26,6 +26,7 @@ export default async function Loading() {
           <div className="space-y-3">
             <div className="h-52 rounded-2xl bg-muted/70" />
             <div className="h-36 rounded-2xl bg-muted/70" />
+            <div className="h-44 rounded-2xl bg-muted/70" />
           </div>
           <div className="space-y-2">
             {[0, 1, 2, 3].map((i) => (

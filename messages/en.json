@@ -1493,13 +1493,15 @@
         "sleep": "Sleep",
         "feeds": "Feeds",
         "bottles": "Bottles",
-        "history": "History"
+        "history": "History",
+        "diapers": "Diapers"
       },
       "tiles": {
         "sleep": "Sleep per day",
         "longest": "Longest stretch",
         "feeds": "Feeds per day",
-        "bottle": "Bottle per day"
+        "bottle": "Bottle per day",
+        "wet": "Wet / day"
       },
       "trend": {
         "up": "up {delta}",
@@ -1529,7 +1531,9 @@
         "avgBottle": "Average per bottle: {amount}",
         "amountCoverage": "{withAmount} of {total} bottles have an amount, so the real volume may be higher.",
         "breastfeeds": "Breastfeeds",
-        "bottles": "Bottles"
+        "bottles": "Bottles",
+        "wet": "Wet",
+        "dirty": "Dirty"
       },
       "readout": {
         "partialToday": "in progress",
@@ -1544,7 +1548,9 @@
         "napCountAvg": "{count} naps per day",
         "feedBreakdownAvg": "{breast} breastfeeds · {bottle} bottles per day",
         "bottleCountAvg": "{count} bottles per day",
-        "missingAmountAvg": "{count} per day without an amount"
+        "missingAmountAvg": "{count} per day without an amount",
+        "diaperCount": "{count, plural, one {# diaper} other {# diapers}}",
+        "diaperCountAvg": "{count} diapers per day"
       },
       "chart": {
         "showTable": "Show as table",
@@ -1563,14 +1569,15 @@
           "feeds": "On average {count} feeds per day, {trend}.",
           "feedsNoTrend": "On average {count} feeds per day.",
           "interval": "The median time between feeds is {duration}.",
-          "bottle": "On average {amount} of bottle per day."
+          "bottle": "On average {amount} of bottle per day.",
+          "diaper": "On average {wet} wet and {dirty} dirty diapers per day."
         }
       },
       "timeline": {
         "label": "Day by day, over 24 hours",
         "empty": "Nothing logged",
         "today": "Today",
-        "summary": "{sleep} of sleep, {feeds, plural, one {# feed} other {# feeds}}",
+        "summary": "{sleep} of sleep, {feeds, plural, one {# feed} other {# feeds}}, {diapers, plural, one {# diaper} other {# diapers}}",
         "openDay": "{date}: {summary}. Open this day",
         "openDayEmpty": "{date}: nothing logged. Open this day",
         "capNote": "Showing the last {count} days."

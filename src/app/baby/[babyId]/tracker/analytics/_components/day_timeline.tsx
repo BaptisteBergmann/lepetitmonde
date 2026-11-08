@@ -7,7 +7,7 @@ import type { Formatters } from './analytics_format'
 
 // 24h rows, newest first. Every row is one link to that day on Suivi, so there are no tiny
 // per-block targets. Shapes carry the kind (bar = sleep, circle = breastfeed, diamond =
-// bottle), color is only a second cue. The track is `isolate`, so its z-0/z-10 tiers stay
+// bottle, triangle = diaper), color is only a second cue. The track is `isolate`, so its z-0/z-10 tiers stay
 // local (docs/z-index.md).
 export async function DayTimeline({
   babyId,
@@ -43,6 +43,10 @@ export async function DayTimeline({
             {t('kinds.bottle')}
           </span>
           <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block size-2.5 bg-chart-1 [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
+            {t('kinds.diaper')}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className="inline-block h-2.5 w-4 rounded-sm bg-foreground/10" />
             {t('analytics.metrics.night')}
           </span>
@@ -74,7 +78,7 @@ export async function DayTimeline({
           const label = day.logged
             ? t('analytics.timeline.openDay', {
                 date,
-                summary: t('analytics.timeline.summary', { sleep: fmt.duration(day.sleepMs), feeds: day.feedCount }),
+                summary: t('analytics.timeline.summary', { sleep: fmt.duration(day.sleepMs), feeds: day.feedCount, diapers: day.diaperCount }),
               })
             : t('analytics.timeline.openDayEmpty', { date })
 
@@ -119,6 +123,14 @@ export async function DayTimeline({
                           />
                         ),
                       )}
+                      {/* Bottom of the track so they don't collide with the centred feed marks. */}
+                      {row.diapers.map((d, i) => (
+                        <span
+                          key={i}
+                          className="absolute bottom-0.5 z-10 size-2 -translate-x-1/2 bg-chart-1 [clip-path:polygon(50%_0,100%_100%,0_100%)]"
+                          style={{ left: `${d.left}%` }}
+                        />
+                      ))}
                     </>
                   ) : (
                     <span className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">

@@ -20,6 +20,7 @@ import { StatCards } from './_components/stat_cards'
 import { SleepSection } from './_components/sleep_section'
 import { FeedSection } from './_components/feed_section'
 import { BottleSection } from './_components/bottle_section'
+import { DiaperSection } from './_components/diaper_section'
 import { DayTimeline } from './_components/day_timeline'
 
 const WIDER_RANGE: Record<AnalyticsRange, AnalyticsRange | null> = { '7d': '30d', '30d': '90d', '90d': 'all', all: null }
@@ -50,8 +51,9 @@ export default async function TrackerAnalyticsPage({
   const bounds = rangeBounds(range, today, firstDay)
   const rows = firstDay ? await getTrackerRange(babyId, bounds.prevFrom ?? bounds.from, bounds.to) : []
   const analytics = computeTrackerAnalytics(rows, { from: bounds.from, to: bounds.to, prevFrom: bounds.prevFrom, tz, now })
-  const { summary, previousSummary } = analytics
-  const hasRangeData = analytics.days.some((d) => d.logged)
+  const { summary, previousSummary, previousDiaperSummary } = analytics
+  // A diaper-only day is data too, even though it leaves sleep and feeds unlogged.
+  const hasRangeData = analytics.days.some((d) => d.logged || d.diaperCount > 0)
   const bucketed = bucketDays(analytics.days)
   const wider = WIDER_RANGE[range]
   const prevDays = range === 'all' ? null : RANGE_DAYS[range]
@@ -100,7 +102,7 @@ export default async function TrackerAnalyticsPage({
                 {hasRangeData && (
                   <>
                     {' · '}
-                    {t('analytics.averagesNote', { logged: summary.loggedDays, total: summary.totalDays })}
+                    {t('analytics.averagesNote', { logged: summary.entryDays, total: summary.totalDays })}
                   </>
                 )}
               </p>
@@ -117,7 +119,7 @@ export default async function TrackerAnalyticsPage({
             ) : (
               <>
                 <div className="space-y-2">
-                  <StatCards summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
+                  <StatCards summary={summary} previous={previousSummary} previousDiaper={previousDiaperSummary} prevDays={prevDays} fmt={fmt} />
                   {range !== 'all' && !previousSummary && (
                     <p className="text-xs text-muted-foreground">{t('analytics.noComparison')}</p>
                   )}
@@ -129,6 +131,7 @@ export default async function TrackerAnalyticsPage({
                   <FeedSection data={bucketed} summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
                 )}
                 {summary.hasBottle && <BottleSection data={bucketed} summary={summary} fmt={fmt} />}
+                {summary.hasDiaper && <DiaperSection data={bucketed} summary={summary} fmt={fmt} />}
                 <DayTimeline babyId={babyId} days={analytics.timeline} totalDays={analytics.days.length} fmt={fmt} />
               </>
             )}

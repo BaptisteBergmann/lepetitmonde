@@ -55,6 +55,9 @@ export function InspectBarChart({
           <pattern id={patternId('hatch')} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1={0} y1={0} x2={0} y2={6} strokeWidth={2} className="stroke-chart-4" />
           </pattern>
+          <pattern id={patternId('hatch-dirty')} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1={0} y1={0} x2={0} y2={6} strokeWidth={2} className="stroke-chart-5" />
+          </pattern>
           <pattern id={patternId('dots')} width={5} height={5} patternUnits="userSpaceOnUse">
             <circle cx={2.5} cy={2.5} r={1.2} className="fill-sage" />
           </pattern>

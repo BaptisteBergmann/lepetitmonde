@@ -3,10 +3,10 @@ import { cn } from '@utils/utils'
 // Shared by the server legends and the client SVG charts. Not a 'use client' file, so
 // both sides can import the values. Color is never the only cue: each series also
 // differs by pattern (solid, hatch, dots) or shape (dot, square).
-export type BarStyle = 'night' | 'day' | 'naps' | 'breast' | 'bottle' | 'ml'
+export type BarStyle = 'night' | 'day' | 'naps' | 'breast' | 'bottle' | 'ml' | 'wet' | 'dirty'
 export type DotStyle = 'stretch' | 'median' | 'gap'
 
-export const BAR_STYLES: Record<BarStyle, { fill: string; pattern?: 'hatch' | 'dots'; patternClass?: string; swatch: string }> = {
+export const BAR_STYLES: Record<BarStyle, { fill: string; pattern?: 'hatch' | 'hatch-dirty' | 'dots'; patternClass?: string; swatch: string }> = {
   night: { fill: 'fill-chart-4', swatch: 'bg-chart-4' },
   day: {
     fill: 'fill-chart-4/25',
@@ -23,6 +23,14 @@ export const BAR_STYLES: Record<BarStyle, { fill: string; pattern?: 'hatch' | 'd
     swatch: 'bg-sage/40 bg-[radial-gradient(var(--color-sage)_1.2px,transparent_1.6px)] bg-[length:5px_5px]',
   },
   ml: { fill: 'fill-sage', swatch: 'bg-sage' },
+  // Wet is solid and dirty is hatched, so the two differ by texture and not only by colour.
+  wet: { fill: 'fill-chart-1', swatch: 'bg-chart-1' },
+  dirty: {
+    fill: 'fill-chart-5/25',
+    pattern: 'hatch-dirty',
+    patternClass: 'stroke-chart-5',
+    swatch: 'bg-chart-5/25 bg-[repeating-linear-gradient(45deg,var(--color-chart-5)_0_2px,transparent_2px_6px)]',
+  },
 }
 
 export function Swatch({ style, className }: { style: BarStyle; className?: string }) {

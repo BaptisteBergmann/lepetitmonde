@@ -1493,13 +1493,15 @@
         "sleep": "Sommeil",
         "feeds": "Repas",
         "bottles": "Biberons",
-        "history": "Historique"
+        "history": "Historique",
+        "diapers": "Couches"
       },
       "tiles": {
         "sleep": "Sommeil par jour",
         "longest": "Plus longue période",
         "feeds": "Repas par jour",
-        "bottle": "Biberon par jour"
+        "bottle": "Biberon par jour",
+        "wet": "Mouillées / jour"
       },
       "trend": {
         "up": "en hausse de {delta}",
@@ -1529,7 +1531,9 @@
         "avgBottle": "Moyenne par biberon : {amount}",
         "amountCoverage": "{withAmount} biberons sur {total} ont une quantité : le volume réel peut être plus élevé.",
         "breastfeeds": "Tétées",
-        "bottles": "Biberons"
+        "bottles": "Biberons",
+        "wet": "Mouillées",
+        "dirty": "Sales"
       },
       "readout": {
         "partialToday": "en cours",
@@ -1544,7 +1548,9 @@
         "napCountAvg": "{count} siestes par jour",
         "feedBreakdownAvg": "{breast} tétées · {bottle} biberons par jour",
         "bottleCountAvg": "{count} biberons par jour",
-        "missingAmountAvg": "{count} par jour sans quantité"
+        "missingAmountAvg": "{count} par jour sans quantité",
+        "diaperCount": "{count, plural, one {# couche} other {# couches}}",
+        "diaperCountAvg": "{count} couches par jour"
       },
       "chart": {
         "showTable": "Afficher en tableau",
@@ -1563,14 +1569,15 @@
           "feeds": "En moyenne {count} repas par jour, {trend}.",
           "feedsNoTrend": "En moyenne {count} repas par jour.",
           "interval": "Le temps médian entre deux repas est de {duration}.",
-          "bottle": "En moyenne {amount} de biberon par jour."
+          "bottle": "En moyenne {amount} de biberon par jour.",
+          "diaper": "En moyenne {wet} couches mouillées et {dirty} sales par jour."
         }
       },
       "timeline": {
         "label": "Jour après jour, sur 24 heures",
         "empty": "Rien noté",
         "today": "Auj.",
-        "summary": "{sleep} de sommeil, {feeds, plural, one {# repas} other {# repas}}",
+        "summary": "{sleep} de sommeil, {feeds, plural, one {# repas} other {# repas}}, {diapers, plural, one {# couche} other {# couches}}",
         "openDay": "{date} : {summary}. Ouvrir ce jour",
         "openDayEmpty": "{date} : rien noté. Ouvrir ce jour",
         "capNote": "Les {count} derniers jours sont affichés."

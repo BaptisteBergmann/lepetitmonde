@@ -18,11 +18,14 @@ type Tile = {
 export async function StatCards({
   summary,
   previous,
+  previousDiaper,
   prevDays,
   fmt,
 }: {
   summary: RangeSummary
   previous: RangeSummary | null
+  // Only set when the previous period has enough days with a diaper.
+  previousDiaper: RangeSummary | null
   // Length of the compared period, null when there is no comparison.
   prevDays: number | null
   fmt: Formatters
@@ -60,6 +63,16 @@ export async function StatCards({
       label: t('analytics.tiles.bottle'),
       value: summary.avgBottleMl !== null ? fmt.ml(summary.avgBottleMl) : none,
       trend: computeTrend(summary.avgBottleMl, previous?.avgBottleMl, TREND_EPSILON.ml, fmt.ml),
+    })
+  }
+
+  if (summary.hasDiaper) {
+    tiles.push({
+      id: 'wet',
+      kind: 'diaper',
+      label: t('analytics.tiles.wet'),
+      value: summary.avgWetCount !== null ? fmt.count(summary.avgWetCount) : none,
+      trend: computeTrend(summary.avgWetCount, previousDiaper?.avgWetCount, TREND_EPSILON.count, fmt.count),
     })
   }
 
