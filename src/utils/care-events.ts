@@ -1,4 +1,4 @@
-import { HandHeart, Milk, Moon, type LucideIcon } from 'lucide-react'
+import { Baby, HandHeart, Milk, Moon, type LucideIcon } from 'lucide-react'
 import type { Enums } from '@utils/supabase/database.types'
 
 // Client-safe constants for the tracker (no server-only imports).
@@ -14,9 +14,13 @@ import type { Enums } from '@utils/supabase/database.types'
 
 export type CareKind = Enums<'care_event_kind'>
 export type BreastSide = Enums<'breast_side'>
+export type PoopColor = Enums<'diaper_poop_color'>
+export type PoopTexture = Enums<'diaper_poop_texture'>
 
-export const CARE_KINDS: readonly CareKind[] = ['sleep', 'breastfeed', 'bottle']
+export const CARE_KINDS: readonly CareKind[] = ['sleep', 'breastfeed', 'bottle', 'diaper']
 export const BREAST_SIDES: readonly BreastSide[] = ['left', 'both', 'right']
+export const POOP_COLORS: readonly PoopColor[] = ['black', 'green', 'yellow', 'brown', 'red', 'white']
+export const POOP_TEXTURES: readonly PoopTexture[] = ['liquid', 'seedy', 'soft', 'formed', 'hard']
 
 // Kinds that can run as a start/stop timer.
 export const TIMER_KINDS = ['sleep', 'breastfeed'] as const satisfies readonly CareKind[]
@@ -24,13 +28,13 @@ export type TimerKind = (typeof TIMER_KINDS)[number]
 
 export const FEED_KINDS: readonly CareKind[] = ['breastfeed', 'bottle']
 
-export type QuickAction = 'timer' | 'side-timer' | 'amount'
-export type FormField = 'side' | 'amount' | 'note'
+export type QuickAction = 'timer' | 'side-timer' | 'amount' | 'diaper'
+export type FormField = 'side' | 'amount' | 'diaper' | 'note'
 
 export interface CareKindConfig {
   icon: LucideIcon
   // Maps to the icon badge classes in the design (existing theme tokens only).
-  tone: 'chart-4' | 'rose' | 'sage'
+  tone: 'chart-4' | 'rose' | 'sage' | 'chart-1'
   // Has a start and an optional end (shows the End field and a duration).
   timed: boolean
   quick: QuickAction
@@ -41,6 +45,7 @@ export const CARE_KIND_CONFIG: Record<CareKind, CareKindConfig> = {
   sleep: { icon: Moon, tone: 'chart-4', timed: true, quick: 'timer', fields: ['note'] },
   breastfeed: { icon: HandHeart, tone: 'rose', timed: true, quick: 'side-timer', fields: ['side', 'note'] },
   bottle: { icon: Milk, tone: 'sage', timed: false, quick: 'amount', fields: ['amount', 'note'] },
+  diaper: { icon: Baby, tone: 'chart-1', timed: false, quick: 'diaper', fields: ['diaper', 'note'] },
 }
 
 // Full class strings so Tailwind can see them.
@@ -48,6 +53,7 @@ export const CARE_TONE_CLASSES: Record<CareKindConfig['tone'], string> = {
   'chart-4': 'bg-chart-4/15 text-chart-4',
   rose: 'bg-rose/15 text-rose',
   sage: 'bg-sage/15 text-sage',
+  'chart-1': 'bg-chart-1/15 text-chart-1',
 }
 
 export const CARE_LIMITS = {
@@ -72,4 +78,12 @@ export function isCareKind(value: unknown): value is CareKind {
 
 export function isBreastSide(value: unknown): value is BreastSide {
   return typeof value === 'string' && (BREAST_SIDES as readonly string[]).includes(value)
+}
+
+export function isPoopColor(value: unknown): value is PoopColor {
+  return typeof value === 'string' && (POOP_COLORS as readonly string[]).includes(value)
+}
+
+export function isPoopTexture(value: unknown): value is PoopTexture {
+  return typeof value === 'string' && (POOP_TEXTURES as readonly string[]).includes(value)
 }

@@ -1331,7 +1331,8 @@
     "kinds": {
       "sleep": "Sleep",
       "breastfeed": "Breastfeed",
-      "bottle": "Bottle"
+      "bottle": "Bottle",
+      "diaper": "Diaper"
     },
     "sides": {
       "left": "Left",
@@ -1432,7 +1433,8 @@
         "invalidAmount": "Enter an amount between 1 and 1000 ml.",
         "invalidSide": "Choose a side.",
         "invalidKind": "Invalid entry type.",
-        "noteTooLong": "The note is too long (500 characters max)."
+        "noteTooLong": "The note is too long (500 characters max).",
+        "invalidDiaper": "A diaper needs pee, poop or both, and details only apply to poop."
       }
     },
     "form": {
@@ -1462,8 +1464,12 @@
         "future": "The time can't be in the future.",
         "tooLong": "An entry can't last more than 24 hours.",
         "amount": "Enter an amount between 1 and 1000 ml.",
-        "invalidTime": "Enter a valid date and time."
-      }
+        "invalidTime": "Enter a valid date and time.",
+        "diaperRequired": "Choose pee, poop or both."
+      },
+      "diaperContents": "Contents",
+      "poopColor": "Poop colour (optional)",
+      "poopTexture": "Texture (optional)"
     },
     "analytics": {
       "link": "Analytics",
@@ -1573,6 +1579,36 @@
         "rangeTitle": "Nothing logged in this period",
         "rangeHint": "Try a longer period.",
         "rangeCta": "Show {range}"
+      }
+    },
+    "diaper": {
+      "title": "Diaper",
+      "pee": "Pee",
+      "poop": "Poop",
+      "both": "Both",
+      "bothLong": "Pee and poop",
+      "logPee": "Log a pee diaper now",
+      "logPoop": "Log a poop diaper now",
+      "logBoth": "Log a pee and poop diaper now",
+      "detailsPrompt": "{type} logged at {time}.",
+      "addDetails": "Add colour and texture",
+      "dismiss": "Dismiss",
+      "clearColor": "Clear colour",
+      "clearTexture": "Clear texture",
+      "colors": {
+        "black": "Black",
+        "green": "Green",
+        "yellow": "Yellow",
+        "brown": "Brown",
+        "red": "Red",
+        "white": "White / pale"
+      },
+      "textures": {
+        "liquid": "Liquid",
+        "seedy": "Seedy",
+        "soft": "Soft",
+        "formed": "Formed",
+        "hard": "Hard"
       }
     }
   },

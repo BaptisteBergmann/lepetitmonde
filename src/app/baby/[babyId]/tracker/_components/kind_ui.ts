@@ -6,7 +6,7 @@ type Translate = (key: string, values?: Record<string, string | number>) => stri
 // One case per kind: the detail line of a log row ("Breastfeed · Left",
 // "Bottle · 120 ml"). `t` is the `tracker` translator. A new kind adds a case.
 export function describeEvent(
-  event: Pick<Tables<'care_events'>, 'kind' | 'breast_side' | 'amount_ml'>,
+  event: Pick<Tables<'care_events'>, 'kind' | 'breast_side' | 'amount_ml' | 'pee' | 'poop' | 'poop_color' | 'poop_texture'>,
   t: Translate,
 ): string {
   const name = t(`kinds.${event.kind}`)
@@ -15,6 +15,15 @@ export function describeEvent(
       return event.breast_side ? `${name} · ${t(`sides.${event.breast_side}`)}` : name
     case 'bottle':
       return `${name} · ${event.amount_ml ? t('summary.amount', { amount: event.amount_ml }) : t('log.noAmount')}`
+    case 'diaper': {
+      const contents = event.pee && event.poop ? t('diaper.bothLong') : event.poop ? t('diaper.poop') : t('diaper.pee')
+      return [
+        name,
+        contents,
+        event.poop_color && t(`diaper.colors.${event.poop_color}`),
+        event.poop_texture && t(`diaper.textures.${event.poop_texture}`),
+      ].filter(Boolean).join(' · ')
+    }
     default:
       return name
   }

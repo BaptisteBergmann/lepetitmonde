@@ -8,8 +8,12 @@ import {
   CARE_LIMITS,
   isBreastSide,
   isCareKind,
+  isPoopColor,
+  isPoopTexture,
   type BreastSide,
   type CareKind,
+  type PoopColor,
+  type PoopTexture,
 } from '@utils/care-events'
 
 export type CareErrorKey =
@@ -23,6 +27,7 @@ export type CareErrorKey =
   | 'invalidAmount'
   | 'invalidSide'
   | 'invalidKind'
+  | 'invalidDiaper'
   | 'noteTooLong'
 
 export class CareValidationError extends Error {
@@ -40,6 +45,10 @@ export type CareEventInput = {
   endedAt?: string | null
   side?: BreastSide | null
   amountMl?: number | null
+  pee?: boolean | null
+  poop?: boolean | null
+  poopColor?: PoopColor | null
+  poopTexture?: PoopTexture | null
   note?: string | null
 }
 
@@ -50,6 +59,10 @@ export type ValidatedCareFields = {
   ended_at: string | null | undefined
   breast_side: BreastSide | null
   amount_ml: number | null
+  pee: boolean | null
+  poop: boolean | null
+  poop_color: PoopColor | null
+  poop_texture: PoopTexture | null
   note: string | null
 }
 
@@ -80,6 +93,26 @@ async function assertAmount(value: unknown): Promise<number | null> {
     throw new CareValidationError('invalidAmount')
   }
   return value
+}
+
+// Mirrors care_events_diaper_fields: at least one of pee/poop, and colour and
+// texture only describe poop. Missing flags count as false.
+async function assertDiaper(input: Partial<CareEventInput>) {
+  const flag = (value: unknown) => {
+    if (value === undefined || value === null) return false
+    if (typeof value !== 'boolean') throw new CareValidationError('invalidDiaper')
+    return value
+  }
+  const pee = flag(input.pee)
+  const poop = flag(input.poop)
+  if (!pee && !poop) throw new CareValidationError('invalidDiaper')
+
+  const color = input.poopColor ?? null
+  const texture = input.poopTexture ?? null
+  if (color !== null && !isPoopColor(color)) throw new CareValidationError('invalidDiaper')
+  if (texture !== null && !isPoopTexture(texture)) throw new CareValidationError('invalidDiaper')
+  if (!poop && (color !== null || texture !== null)) throw new CareValidationError('invalidDiaper')
+  return { pee, poop, poop_color: color, poop_texture: texture }
 }
 
 async function normalizeNote(value: unknown): Promise<string | null> {
@@ -124,7 +157,10 @@ export async function validateCareFields(
 
   const breast_side = config.fields.includes('side') ? await assertSide(input.side) : null
   const amount_ml = config.fields.includes('amount') ? await assertAmount(input.amountMl) : null
+  const diaper = config.fields.includes('diaper')
+    ? await assertDiaper(input)
+    : { pee: null, poop: null, poop_color: null, poop_texture: null }
   const note = await normalizeNote(input.note)
 
-  return { kind, started_at: started.toISOString(), ended_at, breast_side, amount_ml, note }
+  return { kind, started_at: started.toISOString(), ended_at, breast_side, amount_ml, ...diaper, note }
 }

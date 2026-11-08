@@ -1331,7 +1331,8 @@
     "kinds": {
       "sleep": "Sommeil",
       "breastfeed": "Tétée",
-      "bottle": "Biberon"
+      "bottle": "Biberon",
+      "diaper": "Couche"
     },
     "sides": {
       "left": "Gauche",
@@ -1432,7 +1433,8 @@
         "invalidAmount": "Saisissez une quantité entre 1 et 1000 ml.",
         "invalidSide": "Choisissez un côté.",
         "invalidKind": "Type d'entrée invalide.",
-        "noteTooLong": "La note est trop longue (500 caractères maximum)."
+        "noteTooLong": "La note est trop longue (500 caractères maximum).",
+        "invalidDiaper": "Une couche doit contenir du pipi, du caca ou les deux, et les détails ne concernent que le caca."
       }
     },
     "form": {
@@ -1462,8 +1464,12 @@
         "future": "L'heure ne peut pas être dans le futur.",
         "tooLong": "Une entrée ne peut pas durer plus de 24 heures.",
         "amount": "Saisissez une quantité entre 1 et 1000 ml.",
-        "invalidTime": "Saisissez une date et une heure valides."
-      }
+        "invalidTime": "Saisissez une date et une heure valides.",
+        "diaperRequired": "Choisissez pipi, caca ou les deux."
+      },
+      "diaperContents": "Contenu",
+      "poopColor": "Couleur du caca (facultatif)",
+      "poopTexture": "Texture (facultatif)"
     },
     "analytics": {
       "link": "Statistiques",
@@ -1573,6 +1579,36 @@
         "rangeTitle": "Rien de noté sur cette période",
         "rangeHint": "Essayez une période plus longue.",
         "rangeCta": "Voir {range}"
+      }
+    },
+    "diaper": {
+      "title": "Couche",
+      "pee": "Pipi",
+      "poop": "Caca",
+      "both": "Les deux",
+      "bothLong": "Pipi et caca",
+      "logPee": "Enregistrer une couche pipi maintenant",
+      "logPoop": "Enregistrer une couche caca maintenant",
+      "logBoth": "Enregistrer une couche pipi et caca maintenant",
+      "detailsPrompt": "{type} enregistré à {time}.",
+      "addDetails": "Ajouter couleur et texture",
+      "dismiss": "Fermer",
+      "clearColor": "Effacer la couleur",
+      "clearTexture": "Effacer la texture",
+      "colors": {
+        "black": "Noir",
+        "green": "Vert",
+        "yellow": "Jaune",
+        "brown": "Marron",
+        "red": "Rouge",
+        "white": "Blanc / pâle"
+      },
+      "textures": {
+        "liquid": "Liquide",
+        "seedy": "Grumeleux",
+        "soft": "Mou",
+        "formed": "Moulé",
+        "hard": "Dur"
       }
     }
   },

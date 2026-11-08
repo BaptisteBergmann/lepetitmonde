@@ -33,6 +33,9 @@ import { useOnline } from '@/components/use_online'
 
 type OpenAction = 'breastfeed' | 'bottle' | null
 
+// Diaper has its own card of one-tap actions, so it is not one of the timer/feed tiles.
+const TILE_KINDS = CARE_KINDS.filter((kind) => CARE_KIND_CONFIG[kind].quick !== 'diaper')
+
 export function NowPanel({
   babyId,
   tz,
@@ -158,8 +161,8 @@ export function NowPanel({
         />
       ))}
 
-      <div className={cn('grid gap-2', CARE_KINDS.length >= 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3')}>
-        {CARE_KINDS.map((kind) => {
+      <div className="grid grid-cols-3 gap-2">
+        {TILE_KINDS.map((kind) => {
           const config = CARE_KIND_CONFIG[kind]
           const Icon = config.icon
           const isRunning = kind in state.ongoing
@@ -176,7 +179,7 @@ export function NowPanel({
               disabled={isRunning}
               aria-disabled={busy || undefined}
               aria-expanded={expandable ? isOpen : undefined}
-              aria-controls={expandable ? (kind === 'bottle' ? 'bottle-panel' : 'side-chooser') : undefined}
+              aria-controls={expandable ? (config.quick === 'amount' ? 'bottle-panel' : 'side-chooser') : undefined}
               onClick={() => onTile(kind)}
               className={cn(
                 'h-24 flex-col gap-1 whitespace-normal rounded-3xl border-landing-border bg-landing-surface text-center text-landing-foreground',
