@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -15,14 +15,29 @@ import type { CareEvent } from '@utils/actions/care_events'
 import {
   BREAST_SIDES,
   CARE_KINDS,
+  POOP_COLORS,
+  POOP_TEXTURES,
   CARE_KIND_CONFIG,
   CARE_LIMITS,
   type BreastSide,
   type CareKind,
+  type PoopColor,
+  type PoopTexture,
 } from '@utils/care-events'
 import { formatDuration } from '@utils/care-duration'
 import { cn } from '@utils/utils'
 import { ChoiceGroup } from '@/components/choice_group'
+import { ToggleChoice, ToggleChoiceGroup } from '@/components/toggle_choice'
+
+// Dot beside the colour name. Approximates the colour with theme tokens; the word carries the meaning.
+const COLOR_SWATCH: Record<PoopColor, string> = {
+  black: 'bg-foreground',
+  green: 'bg-sage',
+  yellow: 'bg-chart-1/60',
+  brown: 'bg-chart-5',
+  red: 'bg-destructive',
+  white: 'bg-background ring-foreground/40',
+}
 
 const labelClass = 'text-xs font-semibold uppercase tracking-wider text-muted-foreground'
 
@@ -46,10 +61,13 @@ export function CareEventModal({
   babyId,
   event,
   onClose,
+  focusDetails,
 }: {
   babyId: string
   event?: CareEvent
   onClose: () => void
+  // Opened from the "Add colour and texture" strip: scroll the poop details into view.
+  focusDetails?: boolean
 }) {
   const t = useTranslations('tracker')
   const [saving, setSaving] = useState(false)
@@ -65,7 +83,7 @@ export function CareEventModal({
         </>
       }
     >
-      <CareEventForm babyId={babyId} event={event} onClose={onClose} saving={saving} setSaving={setSaving} />
+      <CareEventForm babyId={babyId} event={event} onClose={onClose} saving={saving} setSaving={setSaving} focusDetails={focusDetails} />
     </Modal>
   )
 }
@@ -76,10 +94,12 @@ function CareEventForm({
   onClose,
   saving,
   setSaving,
+  focusDetails,
 }: {
   babyId: string
   event?: CareEvent
   onClose: () => void
+  focusDetails?: boolean
   saving: boolean
   setSaving: (value: boolean) => void
 }) {
@@ -100,9 +120,20 @@ function CareEventForm({
   const [end, setEnd] = useState(() => (event?.ended_at ? toLocalInput(new Date(event.ended_at)) : ''))
   const [side, setSide] = useState<BreastSide | null>(event?.breast_side ?? null)
   const [amount, setAmount] = useState(event?.amount_ml ? String(event.amount_ml) : '')
+  const [pee, setPee] = useState(event?.pee ?? false)
+  const [poop, setPoop] = useState(event?.poop ?? false)
+  const [poopColor, setPoopColor] = useState<PoopColor | null>(event?.poop_color ?? null)
+  const [poopTexture, setPoopTexture] = useState<PoopTexture | null>(event?.poop_texture ?? null)
   const [note, setNote] = useState(event?.note ?? '')
+  const detailsRef = useRef<HTMLDivElement | null>(null)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const touch = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }))
+
+  useEffect(() => {
+    if (!focusDetails) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    detailsRef.current?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
+  }, [focusDetails])
 
   const config = CARE_KIND_CONFIG[kind]
   const showEnd = config.timed && !ongoing
@@ -111,7 +142,7 @@ function CareEventForm({
   const limit = openedAt + CARE_LIMITS.futureToleranceMs
   const amountNumber = amount === '' ? null : /^\d{1,4}$/.test(amount) ? Number(amount) : NaN
 
-  const errors: Partial<Record<'start' | 'end' | 'side' | 'amount', string>> = {}
+  const errors: Partial<Record<'start' | 'end' | 'side' | 'amount' | 'diaper', string>> = {}
   if (!startDate) errors.start = t('form.errors.invalidTime')
   else if (startDate.getTime() > limit) errors.start = t('form.errors.future')
   if (showEnd && end && !endDate) errors.end = t('form.errors.invalidTime')
@@ -124,6 +155,7 @@ function CareEventForm({
   if (config.fields.includes('amount') && amountNumber !== null && (Number.isNaN(amountNumber) || amountNumber < CARE_LIMITS.amountMin || amountNumber > CARE_LIMITS.amountMax)) {
     errors.amount = t('form.errors.amount')
   }
+  if (config.fields.includes('diaper') && !pee && !poop) errors.diaper = t('form.errors.diaperRequired')
   const valid = Object.keys(errors).length === 0
 
   const durationText = startDate && endDate && !errors.end
@@ -135,7 +167,21 @@ function CareEventForm({
     setKind(next)
     setSide(null)
     setAmount('')
+    setPee(false)
+    setPoop(false)
+    setPoopColor(null)
+    setPoopTexture(null)
     setTouched({})
+  }
+
+  const changePoop = (next: boolean) => {
+    setPoop(next)
+    touch('diaper')
+    // Colour and texture only describe poop; clear them rather than send a combination the server rejects.
+    if (!next) {
+      setPoopColor(null)
+      setPoopTexture(null)
+    }
   }
 
   async function save() {
@@ -149,6 +195,10 @@ function CareEventForm({
         endedAt: ongoing ? undefined : endDate ? endDate.toISOString() : null,
         side: config.fields.includes('side') ? side : null,
         amountMl: config.fields.includes('amount') ? amountNumber : null,
+        pee: config.fields.includes('diaper') ? pee : null,
+        poop: config.fields.includes('diaper') ? poop : null,
+        poopColor: config.fields.includes('diaper') && poop ? poopColor : null,
+        poopTexture: config.fields.includes('diaper') && poop ? poopTexture : null,
         note: note.trim() || null,
       }
       const result = event ? await updateCareEvent(babyId, event.id, input) : await createCareEvent(babyId, input)
@@ -211,6 +261,7 @@ function CareEventForm({
               value={kind}
               onValueChange={changeKind}
               label={t('form.kind')}
+              layout="grid-2"
               options={CARE_KINDS.map((k) => ({ value: k, label: t(`kinds.${k}`), icon: CARE_KIND_CONFIG[k].icon }))}
             />
           </div>
@@ -296,6 +347,62 @@ function CareEventForm({
             </div>
             {errorText('amount')}
           </div>
+        )}
+
+        {config.fields.includes('diaper') && (
+          <>
+            <div className="flex flex-col gap-1.5">
+              <span className={labelClass}>{t('form.diaperContents')}</span>
+              <ToggleChoiceGroup label={t('form.diaperContents')}>
+                <ToggleChoice pressed={pee} onPressedChange={(next) => { setPee(next); touch('diaper') }}>{t('diaper.pee')}</ToggleChoice>
+                <ToggleChoice pressed={poop} onPressedChange={changePoop}>{t('diaper.poop')}</ToggleChoice>
+              </ToggleChoiceGroup>
+              {errors.diaper && (
+                touched.diaper
+                  ? <p role="alert" className="text-sm text-destructive">{errors.diaper}</p>
+                  : <p className="text-sm text-muted-foreground">{errors.diaper}</p>
+              )}
+            </div>
+
+            {poop && (
+              <div ref={detailsRef} className="space-y-4">
+                <div className="flex flex-col gap-1.5">
+                  <span className={labelClass}>{t('form.poopColor')}</span>
+                  <ChoiceGroup
+                    value={poopColor}
+                    onValueChange={setPoopColor}
+                    label={t('form.poopColor')}
+                    layout="grid"
+                    options={POOP_COLORS.map((c) => ({
+                      value: c,
+                      label: t(`diaper.colors.${c}`),
+                      swatch: <span className={cn('size-4 shrink-0 rounded-full ring-1 ring-border', COLOR_SWATCH[c])} aria-hidden="true" />,
+                    }))}
+                  />
+                  {poopColor && (
+                    <Button type="button" variant="ghost" className="h-11 self-start" onClick={() => setPoopColor(null)}>
+                      {t('diaper.clearColor')}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className={labelClass}>{t('form.poopTexture')}</span>
+                  <ChoiceGroup
+                    value={poopTexture}
+                    onValueChange={setPoopTexture}
+                    label={t('form.poopTexture')}
+                    layout="grid"
+                    options={POOP_TEXTURES.map((x) => ({ value: x, label: t(`diaper.textures.${x}`) }))}
+                  />
+                  {poopTexture && (
+                    <Button type="button" variant="ghost" className="h-11 self-start" onClick={() => setPoopTexture(null)}>
+                      {t('diaper.clearTexture')}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div className="flex flex-col gap-1.5">

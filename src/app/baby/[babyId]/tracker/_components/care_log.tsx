@@ -65,7 +65,7 @@ export async function CareLog({
                 <Icon className="size-5" aria-hidden="true" />
               </span>
               <span className="block min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">{describeEvent(event, t)}</span>
+                <span className="line-clamp-2 block text-sm font-semibold">{describeEvent(event, t)}</span>
                 <span className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                   {timeLine}
                   {event.ongoing && (
