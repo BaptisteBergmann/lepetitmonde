@@ -28,6 +28,7 @@ import { formatDateAtTimeParts } from '@utils/formatting'
 import { cn } from '@utils/utils'
 import { ChoiceGroup } from '@/components/choice_group'
 import { CareEventModal } from './care_event_modal'
+import { DiaperCard } from './diaper_card'
 import { Elapsed } from './elapsed'
 import { useOnline } from '@/components/use_online'
 
@@ -242,6 +243,8 @@ export function NowPanel({
           onLog={logBottle}
         />
       )}
+
+      <DiaperCard babyId={babyId} tz={tz} state={state} busy={busy} pendingKey={pendingKey} run={run} />
 
       <LastFeedCard state={state} suggested={suggested} />
 
