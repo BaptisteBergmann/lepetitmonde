@@ -4,7 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
-`97c94ee` chore(db): regenerate types after diaper migrations
+- `97c94ee` chore(db): regenerate types after diaper migrations
 - `3db60a7` fix(tracker): comparison note with diaper trend and comma typos
 - `0f6b9e8` fix(tracker): diaper copy, plurals and last-change rich text
 - `a6d0a3a` fix(tracker): snapshot diaper details target and tidy strip focus
