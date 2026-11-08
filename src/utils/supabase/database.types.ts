@@ -553,7 +553,9 @@ export type Database = {
           pee: boolean | null
           poop: boolean | null
           poop_color: Database["public"]["Enums"]["diaper_poop_color"] | null
-          poop_texture: Database["public"]["Enums"]["diaper_poop_texture"] | null
+          poop_texture:
+            | Database["public"]["Enums"]["diaper_poop_texture"]
+            | null
           started_at: string
           updated_at: string
           updated_by: string | null
@@ -572,7 +574,9 @@ export type Database = {
           pee?: boolean | null
           poop?: boolean | null
           poop_color?: Database["public"]["Enums"]["diaper_poop_color"] | null
-          poop_texture?: Database["public"]["Enums"]["diaper_poop_texture"] | null
+          poop_texture?:
+            | Database["public"]["Enums"]["diaper_poop_texture"]
+            | null
           started_at: string
           updated_at?: string
           updated_by?: string | null
@@ -591,7 +595,9 @@ export type Database = {
           pee?: boolean | null
           poop?: boolean | null
           poop_color?: Database["public"]["Enums"]["diaper_poop_color"] | null
-          poop_texture?: Database["public"]["Enums"]["diaper_poop_texture"] | null
+          poop_texture?:
+            | Database["public"]["Enums"]["diaper_poop_texture"]
+            | null
           started_at?: string
           updated_at?: string
           updated_by?: string | null
@@ -2161,7 +2167,13 @@ export type Database = {
       breast_side: "left" | "right" | "both"
       bug_report_status: "new" | "reviewed" | "fixed"
       care_event_kind: "sleep" | "breastfeed" | "bottle" | "diaper"
-      diaper_poop_color: "black" | "green" | "yellow" | "brown" | "red" | "white"
+      diaper_poop_color:
+        | "black"
+        | "green"
+        | "yellow"
+        | "brown"
+        | "red"
+        | "white"
       diaper_poop_texture: "liquid" | "seedy" | "soft" | "formed" | "hard"
       event_kind: "occasion" | "life_stage" | "medical"
       item_condition: "new" | "secondhand"
