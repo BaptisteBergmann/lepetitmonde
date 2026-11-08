@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { CircleDot, Droplet, Droplets, Loader2, X, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { CareResult } from '@utils/care-validation'
 import { createCareEvent } from '@utils/actions/care_events'
-import type { TrackerNow } from '@utils/actions/care_events'
+import type { CareEvent, TrackerNow } from '@utils/actions/care_events'
 import { formatDateAtTimeParts } from '@utils/formatting'
 import { CareEventModal } from './care_event_modal'
 import { Elapsed } from './elapsed'
@@ -52,19 +52,31 @@ export function DiaperCard({
   const last = state.lastDiaper
   const [strip, setStrip] = useState<Strip>(null)
   const [stripFocused, setStripFocused] = useState(false)
-  const [detailsOpen, setDetailsOpen] = useState(false)
+  // Snapshot taken when the button is pressed: a realtime update must not retarget Save/Delete to a newer row.
+  const [detailsEvent, setDetailsEvent] = useState<CareEvent | null>(null)
+  const poopButtonRef = useRef<HTMLButtonElement | null>(null)
+
+  const hideStrip = () => {
+    setStrip(null)
+    setStripFocused(false)
+  }
 
   // The refreshed state brings the new event: adopt it (poop only) as the strip's target.
   if (strip?.phase === 'awaiting' && (last?.id ?? null) !== strip.baselineId) {
     setStrip(last?.poop ? { phase: 'ready', eventId: last.id } : null)
+    setStripFocused(false)
   }
 
-  const showStrip = strip?.phase === 'ready' && last?.id === strip.eventId && last.poop && !detailsOpen
+  const showStrip = strip?.phase === 'ready' && last?.id === strip.eventId && last.poop && !detailsEvent
+
+  // Hidden by a realtime update (a newer diaper): drop the stale focus flag so the next strip still times out.
+  const stripStale = strip?.phase === 'ready' && !showStrip && !detailsEvent
+  if (stripStale) hideStrip()
 
   // Auto-hide, paused while focus is inside the strip so an action never vanishes under a keyboard user.
   useEffect(() => {
     if (!showStrip || stripFocused) return
-    const timer = window.setTimeout(() => setStrip(null), STRIP_TIMEOUT_MS)
+    const timer = window.setTimeout(hideStrip, STRIP_TIMEOUT_MS)
     return () => window.clearTimeout(timer)
   }, [showStrip, stripFocused])
 
@@ -109,6 +121,7 @@ export function DiaperCard({
             return (
               <Button
                 key={action.key}
+                ref={action.key === 'poop' ? poopButtonRef : undefined}
                 type="button"
                 variant="outline"
                 aria-label={t(`diaper.${action.label}`)}
@@ -136,22 +149,27 @@ export function DiaperCard({
                   time: formatDateAtTimeParts(last.started_at, locale, tz).time,
                 })}
               </p>
-              <Button type="button" variant="ghost" className="-ml-3 h-11" onClick={() => setDetailsOpen(true)}>
+              <Button type="button" variant="ghost" className="-ml-3 h-11" aria-disabled={busy || undefined} onClick={() => { if (!busy) setDetailsEvent(last) }}>
                 {t('diaper.addDetails')}
               </Button>
             </div>
-            <Button type="button" variant="ghost" size="icon-lg" className="size-11 shrink-0" aria-label={t('diaper.dismiss')} onClick={() => setStrip(null)}>
+            <Button type="button" variant="ghost" size="icon-lg" className="size-11 shrink-0" aria-label={t('diaper.dismiss')} onClick={hideStrip}>
               <X aria-hidden="true" />
             </Button>
           </div>
         )}
       </CardContent>
-      {detailsOpen && last && (
+      {detailsEvent && (
         <CareEventModal
           babyId={babyId}
-          event={last}
+          event={detailsEvent}
           focusDetails
-          onClose={() => { setDetailsOpen(false); setStrip(null); setStripFocused(false) }}
+          onClose={() => {
+            setDetailsEvent(null)
+            hideStrip()
+            // The strip button that opened the modal is gone; return focus to a stable control.
+            requestAnimationFrame(() => poopButtonRef.current?.focus())
+          }}
         />
       )}
     </Card>
