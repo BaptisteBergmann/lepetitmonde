@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `0f6b9e8` fix(tracker): diaper copy, plurals and last-change rich text
 - `a6d0a3a` fix(tracker): snapshot diaper details target and tidy strip focus
 - `b97791d` docs: document diaper changes in the tracker
 - `8882827` feat(mcp): log and report diaper changes
