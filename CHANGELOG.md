@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `44ae830` docs(plans): mark tracker analytics implemented
 - `39eaf9d` refactor(tracker): share zonedDayBounds between analytics and the day page
 - `1abbb3f` fix(tracker): stop announcing chart selection twice
 - `65ba665` fix(tracker): keep focus on chart prev/next buttons at the ends
