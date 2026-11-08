@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `6b3f098` feat(tracker): diaper section, tile and history marks in analytics
 - `69aede9` feat(tracker): count diapers in analytics without touching sleep and feed days
 - `ce3cb43` feat(tracker): diapers tile in the day summary
 - `ccd09ac` feat(tracker): one-tap diaper logging and time since last change
