@@ -1555,7 +1555,6 @@
       },
       "timeline": {
         "label": "Jour après jour, sur 24 heures",
-        "legend": "Légende : barre de sommeil, rond de tétée, losange de biberon, nuit grisée",
         "empty": "Rien noté",
         "today": "Auj.",
         "summary": "{sleep} de sommeil, {feeds, plural, one {# repas} other {# repas}}",

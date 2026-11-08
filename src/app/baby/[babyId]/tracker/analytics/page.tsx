@@ -20,6 +20,7 @@ import { StatCards } from './_components/stat_cards'
 import { SleepSection } from './_components/sleep_section'
 import { FeedSection } from './_components/feed_section'
 import { BottleSection } from './_components/bottle_section'
+import { DayTimeline } from './_components/day_timeline'
 
 const WIDER_RANGE: Record<AnalyticsRange, AnalyticsRange | null> = { '7d': '30d', '30d': '90d', '90d': 'all', all: null }
 const RANGE_DAYS = { '7d': 7, '30d': 30, '90d': 90 } as const
@@ -128,6 +129,7 @@ export default async function TrackerAnalyticsPage({
                   <FeedSection data={bucketed} summary={summary} previous={previousSummary} prevDays={prevDays} fmt={fmt} />
                 )}
                 {summary.hasBottle && <BottleSection data={bucketed} summary={summary} fmt={fmt} />}
+                <DayTimeline babyId={babyId} days={analytics.timeline} totalDays={analytics.days.length} fmt={fmt} />
               </>
             )}
           </div>

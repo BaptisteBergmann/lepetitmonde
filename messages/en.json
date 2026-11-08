@@ -1555,7 +1555,6 @@
       },
       "timeline": {
         "label": "Day by day, over 24 hours",
-        "legend": "Legend: sleep bar, breastfeed circle, bottle diamond, shaded night",
         "empty": "Nothing logged",
         "today": "Today",
         "summary": "{sleep} of sleep, {feeds, plural, one {# feed} other {# feeds}}",
