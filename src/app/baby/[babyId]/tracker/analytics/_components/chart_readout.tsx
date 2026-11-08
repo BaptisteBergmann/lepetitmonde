@@ -102,6 +102,7 @@ export function SliderSvg({
   )
 }
 
+// No aria-live: the slider's aria-valuetext already announces each change.
 export function ChartReadout({
   item,
   selected,
@@ -116,7 +117,7 @@ export function ChartReadout({
   texts: Pick<InspectTexts, 'previous' | 'next'>
 }) {
   return (
-    <div aria-live="polite" className="space-y-1 rounded-2xl border border-landing-border bg-background/60 p-3">
+    <div className="space-y-1 rounded-2xl border border-landing-border bg-background/60 p-3">
       <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="outline" size="icon-lg" className="rounded-2xl aria-disabled:opacity-50" aria-label={texts.previous} aria-disabled={selected <= 0} onClick={() => { if (selected > 0) onSelect(selected - 1) }}>
           <ChevronLeft aria-hidden="true" />
