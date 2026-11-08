@@ -35,6 +35,11 @@ export type Bucket = {
   bottleCount: number
   bottleMl: number
   bottleWithAmount: number
+  // Diapers have their own "logged": a day with only sleep reads not logged in the diaper chart.
+  diaperLogged: boolean
+  diaperCount: number
+  wetCount: number
+  dirtyCount: number
   medianIntervalMs: number | null
   longestIntervalMs: number | null
 }
@@ -76,6 +81,10 @@ function dayBucket(s: DayStats): Bucket {
     bottleCount: s.bottleCount,
     bottleMl: s.bottleMl,
     bottleWithAmount: s.bottleWithAmount,
+    diaperLogged: s.diaperCount > 0,
+    diaperCount: s.diaperCount,
+    wetCount: s.wetCount,
+    dirtyCount: s.dirtyCount,
     medianIntervalMs: s.medianIntervalMs,
     longestIntervalMs: s.longestIntervalMs,
   }
@@ -88,6 +97,11 @@ function weekBucket(week: string, group: DayStats[]): Bucket {
   const complete = logged.filter((s) => !s.partial)
   const pool = complete.length ? complete : logged
   const avg = (pick: (s: DayStats) => number) => mean(pool.map(pick))
+  // Separate pool: averaging diapers over sleep/feed days would count a diaper-free day as zero.
+  const diaperDays = group.filter((s) => s.diaperCount > 0)
+  const diaperComplete = diaperDays.filter((s) => !s.partial)
+  const diaperPool = diaperComplete.length ? diaperComplete : diaperDays
+  const avgDiaper = (pick: (s: DayStats) => number) => mean(diaperPool.map(pick))
   return {
     key: week,
     endDay: group[group.length - 1].day,
@@ -104,6 +118,10 @@ function weekBucket(week: string, group: DayStats[]): Bucket {
     bottleCount: avg((s) => s.bottleCount),
     bottleMl: avg((s) => s.bottleMl),
     bottleWithAmount: avg((s) => s.bottleWithAmount),
+    diaperLogged: diaperDays.length > 0,
+    diaperCount: avgDiaper((s) => s.diaperCount),
+    wetCount: avgDiaper((s) => s.wetCount),
+    dirtyCount: avgDiaper((s) => s.dirtyCount),
     medianIntervalMs: median(pool.flatMap((s) => s.intervalsMs)),
     longestIntervalMs: pool.reduce<number | null>((max, s) => (s.longestIntervalMs !== null && (max === null || s.longestIntervalMs > max) ? s.longestIntervalMs : max), null),
   }
@@ -340,6 +358,7 @@ export type TimelineRowBuild = {
   nightBlocks: { left: number; width: number }[]
   sleeps: { left: number; width: number; ongoing: boolean; continuesBefore: boolean; continuesAfter: boolean }[]
   feeds: { kind: 'breastfeed' | 'bottle'; left: number; width: number }[]
+  diapers: { left: number }[]
 }
 
 // Minutes -> percent of the day (the day is 1380/1440/1500 minutes on DST days).
@@ -358,5 +377,6 @@ export function buildTimelineRow(day: TimelineDay): TimelineRowBuild {
       continuesAfter: s.continuesAfter,
     })),
     feeds: day.feeds.map((f) => ({ kind: f.kind, ...block(f.startMin, f.endMin ?? f.startMin) })),
+    diapers: day.diapers.map((d) => ({ left: pct(d.startMin) })),
   }
 }

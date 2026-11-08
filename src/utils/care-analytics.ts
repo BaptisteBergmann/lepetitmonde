@@ -18,6 +18,10 @@ import { overlapMs, parseZonedDateTime, zonedDayBounds, shiftDay, todayInZone, t
 // - Feed intervals are start-to-start gaps between consecutive feeds (any
 //   kind) across the whole span, attributed to the day of the later feed.
 //   Gaps over MAX_FEED_GAP_MS are dropped (probably forgotten entries).
+// - Diapers count on the day they started on. A "both" counts once in wet and
+//   once in dirty, and once in the total. A diaper never marks a day as logged
+//   for sleep and feeds (that would make it a zero day in their averages); diaper
+//   averages use their own pool of days with at least one diaper.
 // - A day with no entry started on it is "not logged", not zero: it is left
 //   out of every average. Today is partial and left out of averages too.
 
@@ -59,6 +63,8 @@ export function rangeBounds(range: AnalyticsRange, today: string, firstDay: stri
 export type AnalyticsRow = TimedEvent & {
   breast_side: 'left' | 'right' | 'both' | null
   amount_ml: number | null
+  pee: boolean | null
+  poop: boolean | null
 }
 
 export type DayStats = {
@@ -77,6 +83,10 @@ export type DayStats = {
   bottleCount: number
   bottleMl: number
   bottleWithAmount: number
+  // Diapers started on this day (separate from `logged`, which is about sleep and feeds).
+  diaperCount: number
+  wetCount: number
+  dirtyCount: number
   medianIntervalMs: number | null
   longestIntervalMs: number | null
   // The kept start-to-start gaps behind the two values above, so weekly buckets can take a real median.
@@ -87,6 +97,8 @@ export type RangeSummary = {
   totalDays: number
   // Complete days with entries: the ones the averages are taken over.
   loggedDays: number
+  // Complete days with any entry, diapers included: what the "averages over N days" note counts.
+  entryDays: number
   avgSleepMs: number | null
   avgDaySleepMs: number | null
   avgNightSleepMs: number | null
@@ -100,6 +112,11 @@ export type RangeSummary = {
   hasSleep: boolean
   hasBreastfeed: boolean
   hasBottle: boolean
+  hasDiaper: boolean
+  // Complete days with at least one diaper: the days the diaper averages are taken over.
+  diaperLoggedDays: number
+  avgWetCount: number | null
+  avgDirtyCount: number | null
   feedTotal: number
   sides: { left: number; both: number; right: number }
   avgBreastfeedMs: number | null
@@ -110,6 +127,7 @@ export type RangeSummary = {
 }
 
 export type TimelineSleep = { startMin: number; endMin: number; ongoing: boolean; continuesBefore: boolean; continuesAfter: boolean }
+export type TimelineDiaper = { startMin: number }
 export type TimelineFeed = { kind: 'breastfeed' | 'bottle'; startMin: number; endMin: number | null }
 
 export type TimelineDay = {
@@ -123,9 +141,11 @@ export type TimelineDay = {
   dayWindowEndMin: number
   sleeps: TimelineSleep[]
   feeds: TimelineFeed[]
+  diapers: TimelineDiaper[]
   sleepMs: number
   feedCount: number
   bottleCount: number
+  diaperCount: number
 }
 
 export type TrackerAnalytics = {
@@ -136,6 +156,8 @@ export type TrackerAnalytics = {
   summary: RangeSummary
   // Null when there is no previous period or it has too few logged days.
   previousSummary: RangeSummary | null
+  // Same, for the diaper tile: needs enough previous days with a diaper, whatever else was logged.
+  previousDiaperSummary: RangeSummary | null
   // Newest first, at most TIMELINE_MAX_DAYS.
   timeline: TimelineDay[]
 }
@@ -206,6 +228,9 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     bottleCount: 0,
     bottleMl: 0,
     bottleWithAmount: 0,
+    diaperCount: 0,
+    wetCount: 0,
+    dirtyCount: 0,
     medianIntervalMs: null,
     longestIntervalMs: null,
     intervalsMs: [],
@@ -249,8 +274,14 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     }
 
     if (!startsInSpan) continue
-    // Diapers must not mark a day as logged: sleep and feed averages would count it as a zero day.
-    if (e.kind === 'diaper') continue
+    // Before `s.logged = true`: a diaper-only day must not read as a zero sleep or feed day.
+    if (e.kind === 'diaper') {
+      const d = stats[startIdx]
+      d.diaperCount++
+      if (e.pee) d.wetCount++
+      if (e.poop) d.dirtyCount++
+      continue
+    }
     const s = stats[startIdx]
     s.logged = true
     if (!FEED_SET.has(e.kind)) continue
@@ -279,6 +310,7 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
   const summarize = (fromIdx: number, toIdx: number): RangeSummary => {
     const slice = stats.slice(fromIdx, toIdx + 1)
     const complete = slice.filter((s) => s.logged && !s.partial)
+    const diaperDays = slice.filter((s) => s.diaperCount > 0 && !s.partial)
     const gaps = gapsByDay.slice(fromIdx, toIdx + 1).flat()
     // Totals cover every day shown (today included): they describe what was
     // logged; only the per-day averages skip today.
@@ -293,6 +325,7 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     return {
       totalDays: slice.length,
       loggedDays: complete.length,
+      entryDays: slice.filter((s) => (s.logged || s.diaperCount > 0) && !s.partial).length,
       avgSleepMs: average(complete.map((s) => s.sleepMs)),
       avgDaySleepMs: average(complete.map((s) => s.daySleepMs)),
       avgNightSleepMs: average(complete.map((s) => s.nightSleepMs)),
@@ -306,6 +339,10 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
       hasSleep: slice.some((s) => s.sleepMs > 0),
       hasBreastfeed: slice.some((s) => s.breastfeedCount > 0),
       hasBottle: slice.some((s) => s.bottleCount > 0),
+      hasDiaper: slice.some((s) => s.diaperCount > 0),
+      diaperLoggedDays: diaperDays.length,
+      avgWetCount: average(diaperDays.map((s) => s.wetCount)),
+      avgDirtyCount: average(diaperDays.map((s) => s.dirtyCount)),
       feedTotal: slice.reduce((a, s) => a + s.feedCount, 0),
       sides,
       avgBreastfeedMs: breast.n ? breast.ms / breast.n : null,
@@ -320,9 +357,11 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
   const curEnd = dayKeys.length - 1
   const summary = summarize(curStart, curEnd)
   let previousSummary: RangeSummary | null = null
+  let previousDiaperSummary: RangeSummary | null = null
   if (prevFrom && curStart > 0) {
     const prev = summarize(0, curStart - 1)
     if (prev.loggedDays >= MIN_COMPARISON_DAYS) previousSummary = prev
+    if (prev.diaperLoggedDays >= MIN_COMPARISON_DAYS) previousDiaperSummary = prev
   }
 
   // Timeline: newest first, capped.
@@ -334,6 +373,7 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     const dayMin = toMin(b.end.getTime())
     const sleeps: TimelineSleep[] = []
     const feeds: TimelineFeed[] = []
+    const diapers: TimelineDiaper[] = []
     for (const e of sorted) {
       const startMs = new Date(e.started_at).getTime()
       if (startMs >= b.end.getTime()) break
@@ -347,6 +387,8 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
           continuesBefore: startMs < bStart,
           continuesAfter: end > b.end.getTime(),
         })
+      } else if (startMs >= bStart && e.kind === 'diaper') {
+        diapers.push({ startMin: toMin(startMs) })
       } else if (startMs >= bStart && (e.kind === 'breastfeed' || e.kind === 'bottle')) {
         feeds.push({ kind: e.kind, startMin: toMin(startMs), endMin: e.kind === 'breastfeed' && end !== null ? toMin(Math.min(end, b.end.getTime())) : null })
       }
@@ -354,18 +396,21 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     const s = stats[i]
     timeline.push({
       day: s.day,
-      logged: s.logged,
+      // A diaper-only day still has something to show in the history.
+      logged: s.logged || s.diaperCount > 0,
       partial: s.partial,
       dayMin,
       dayWindowStartMin: toMin(windows[i].start.getTime()),
       dayWindowEndMin: toMin(windows[i].end.getTime()),
       sleeps,
       feeds,
+      diapers,
       sleepMs: s.sleepMs,
       feedCount: s.feedCount,
       bottleCount: s.bottleCount,
+      diaperCount: s.diaperCount,
     })
   }
 
-  return { from, to, today, days: stats.slice(curStart), summary, previousSummary, timeline }
+  return { from, to, today, days: stats.slice(curStart), summary, previousSummary, previousDiaperSummary, timeline }
 }
