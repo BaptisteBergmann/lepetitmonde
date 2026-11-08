@@ -17,4 +17,6 @@ Logs daily care, built for one-handed use at night.
 - The model is one polymorphic table so new kinds (diaper, medication, temperature...) are cheap to add.
 - [[MCP server]] tools: `get_tracker_status`, `list_tracker_entries`, `add_tracker_entry`, `start_tracker_timer`, `stop_tracker_timer`, `delete_tracker_entry`.
 
+Trends over days and weeks live on a sub-route, see [[Tracker analytics]] (`/baby/[babyId]/tracker/analytics`, linked from the page header).
+
 Table: `care_events` (RLS on, column-level update grants; see [[Row Level Security]]).
