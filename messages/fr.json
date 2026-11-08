@@ -1351,7 +1351,9 @@
       "feeds": "{count, plural, one {repas} other {repas}}",
       "bottles": "Biberons",
       "amount": "{amount} ml",
-      "none": "—"
+      "none": "—",
+      "diapers": "Couches",
+      "diapersValue": "{wet} mouillées · {dirty} sales"
     },
     "duration": {
       "hm": "{h} h {m} min",
@@ -1363,7 +1365,7 @@
     "log": {
       "heading": "Journal du jour",
       "emptyToday": "Rien de noté pour l'instant aujourd'hui",
-      "emptyTodayHint": "Touchez Sommeil, Tétée ou Biberon ci-dessus pour noter le premier.",
+      "emptyTodayHint": "Enregistrez un sommeil, une tétée ou un change pour commencer.",
       "emptyDay": "Rien de noté ce jour-là",
       "emptyDayHint": "Utilisez Ajouter une entrée pour noter quelque chose après coup.",
       "by": "par {name}",

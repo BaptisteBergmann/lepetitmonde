@@ -5,6 +5,7 @@ import { getRequestTimeZone } from "@/utils/care-timezone";
 import { parseDayParam, todayInZone, computeDayTotals, zonedDayBounds } from "@/utils/care-time";
 import { formatDuration } from "@/utils/care-duration";
 import Link from "next/link";
+import { cn } from "@/utils/utils";
 import { BarChart3 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@components/reveal";
@@ -36,13 +37,15 @@ export default async function TrackerPage({
 
   const [events, nowState] = await Promise.all([getTrackerDay(babyId, day), getTrackerNow(babyId)]);
 
-  const { feedCount, bottleMl, sleepMs } = computeDayTotals(events, bounds, now);
+  const { feedCount, bottleMl, sleepMs, wetCount, dirtyCount } = computeDayTotals(events, bounds, now);
   const durationT = (key: 'hm' | 'h' | 'm', values: { h: number; m: number }) => t(`duration.${key}`, values);
 
   const stats = [
     { id: 'sleep', label: t('summary.sleep'), value: sleepMs > 0 ? formatDuration(sleepMs, durationT) : t('summary.none') },
     { id: 'feeds', label: t('summary.feeds', { count: feedCount }), value: String(feedCount) },
     { id: 'bottles', label: t('summary.bottles'), value: bottleMl > 0 ? t('summary.amount', { amount: bottleMl }) : t('summary.none') },
+    // Zero is a real count here (no diaper that day), so no em dash.
+    { id: 'diapers', label: t('summary.diapers'), value: t('summary.diapersValue', { wet: wetCount, dirty: dirtyCount }), small: true },
   ];
 
   return (
@@ -77,10 +80,10 @@ export default async function TrackerPage({
           <div className="space-y-8">
             <DayNav babyId={babyId} day={day} today={today} />
 
-            <dl aria-label={t('summary.label')} className="grid grid-cols-3 gap-2">
+            <dl aria-label={t('summary.label')} className="grid grid-cols-2 gap-2">
               {stats.map((stat) => (
                 <div key={stat.id} className="flex flex-col-reverse rounded-2xl border border-landing-border bg-landing-surface p-3 text-center">
-                  <dd className="font-display text-xl font-semibold">{stat.value}</dd>
+                  <dd className={cn("font-display font-semibold", stat.small ? "text-base" : "text-xl")}>{stat.value}</dd>
                   <dt className="text-xs text-muted-foreground">{stat.label}</dt>
                 </div>
               ))}

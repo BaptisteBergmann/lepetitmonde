@@ -1351,7 +1351,9 @@
       "feeds": "{count, plural, one {feed} other {feeds}}",
       "bottles": "Bottles",
       "amount": "{amount} ml",
-      "none": "—"
+      "none": "—",
+      "diapers": "Diapers",
+      "diapersValue": "{wet} wet · {dirty} dirty"
     },
     "duration": {
       "hm": "{h}h {m}m",
@@ -1363,7 +1365,7 @@
     "log": {
       "heading": "Day log",
       "emptyToday": "Nothing logged yet today",
-      "emptyTodayHint": "Tap Sleep, Breastfeed or Bottle above to log the first one.",
+      "emptyTodayHint": "Log a sleep, feed or diaper change to get started.",
       "emptyDay": "Nothing logged on this day",
       "emptyDayHint": "Use Add entry to log something afterwards.",
       "by": "by {name}",
