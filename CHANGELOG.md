@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `61b9b45` feat(tracker): add diaper kind, migrations and validation
 - `44ae830` docs(plans): mark tracker analytics implemented
 - `39eaf9d` refactor(tracker): share zonedDayBounds between analytics and the day page
 - `1abbb3f` fix(tracker): stop announcing chart selection twice
