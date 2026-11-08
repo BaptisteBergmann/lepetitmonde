@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `1abbb3f` fix(tracker): stop announcing chart selection twice
 - `65ba665` fix(tracker): keep focus on chart prev/next buttons at the ends
 - `c72136f` fix(tracker): compute a real median for weekly feed intervals
 - `bf2cbe6` fix(tracker): avoid fractional plurals in weekly analytics readouts
