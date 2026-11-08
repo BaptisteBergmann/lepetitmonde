@@ -20,7 +20,13 @@ const TODO_TITLES = 20
 const LOOKAHEAD_DAYS = 7
 
 function totals(t: DayTotals) {
-  return { feedCount: t.feedCount, bottleMl: t.bottleMl, sleepMinutes: Math.floor(t.sleepMs / 60_000) }
+  return {
+    feedCount: t.feedCount,
+    bottleMl: t.bottleMl,
+    sleepMinutes: Math.floor(t.sleepMs / 60_000),
+    wetCount: t.wetCount,
+    dirtyCount: t.dirtyCount,
+  }
 }
 
 function entry(event: CareEvent, tz: string) {
@@ -34,6 +40,9 @@ function entry(event: CareEvent, tz: string) {
     ongoing: event.ongoing,
     side: event.breast_side,
     amountMl: event.amount_ml,
+    pee: event.pee,
+    poop: event.poop,
+    // Stool colour and texture are health detail: never put in a digest.
   }
 }
 
@@ -64,12 +73,14 @@ async function trackerSection(supabase: SupabaseClient, userId: string, babyId: 
       feedCount: acc.feedCount + d.totals.feedCount,
       bottleMl: acc.bottleMl + d.totals.bottleMl,
       sleepMs: acc.sleepMs + d.totals.sleepMs,
-    }), { feedCount: 0, bottleMl: 0, sleepMs: 0 })
+      wetCount: acc.wetCount + d.totals.wetCount,
+      dirtyCount: acc.dirtyCount + d.totals.dirtyCount,
+    }), { feedCount: 0, bottleMl: 0, sleepMs: 0, wetCount: 0, dirtyCount: 0 })
     const avg = (n: number) => Math.round((n / days.length) * 10) / 10
     return {
       days: perDay.map((d) => ({ day: d.day, ...totals(d.totals) })),
       // Over all 7 days; a day still in progress counts as is.
-      averages: { feedCount: avg(sum.feedCount), bottleMl: avg(sum.bottleMl), sleepMinutes: avg(Math.floor(sum.sleepMs / 60_000)) },
+      averages: { feedCount: avg(sum.feedCount), bottleMl: avg(sum.bottleMl), sleepMinutes: avg(Math.floor(sum.sleepMs / 60_000)), wetCount: avg(sum.wetCount), dirtyCount: avg(sum.dirtyCount) },
     }
   }
 
@@ -77,6 +88,7 @@ async function trackerSection(supabase: SupabaseClient, userId: string, babyId: 
   return {
     totals: totals(perDay[0].totals),
     lastFeed: state.lastFeed ? entry(state.lastFeed, tz) : null,
+    lastDiaper: state.lastDiaper ? entry(state.lastDiaper, tz) : null,
     running: {
       sleep: state.ongoing.sleep ? entry(state.ongoing.sleep, tz) : null,
       breastfeed: state.ongoing.breastfeed ? entry(state.ongoing.breastfeed, tz) : null,

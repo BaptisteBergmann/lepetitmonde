@@ -24,6 +24,8 @@ import { babyId, day, run, timeZone, zonedDateTime, type ToolContext } from './s
 
 const side = z.enum(['left', 'right', 'both'])
 const timerKind = z.enum(['sleep', 'breastfeed'])
+const poopColor = z.enum(['black', 'green', 'yellow', 'brown', 'red', 'white'])
+const poopTexture = z.enum(['liquid', 'seedy', 'soft', 'formed', 'hard'])
 
 const TIME_HELP =
   'Times are ISO 8601 with Z or an offset, or local YYYY-MM-DDTHH:mm in timeZone (default Europe/Paris). ' +
@@ -43,13 +45,23 @@ function formatEntry(event: CareEvent, tz: string) {
     ongoing: event.ongoing,
     side: event.breast_side,
     amountMl: event.amount_ml,
+    pee: event.pee,
+    poop: event.poop,
+    poopColor: event.poop_color,
+    poopTexture: event.poop_texture,
     note: event.note,
     createdBy: event.created_by_name,
   }
 }
 
 function formatTotals(totals: ReturnType<typeof computeDayTotals>) {
-  return { feedCount: totals.feedCount, bottleMl: totals.bottleMl, sleepMinutes: Math.floor(totals.sleepMs / 60_000) }
+  return {
+    feedCount: totals.feedCount,
+    bottleMl: totals.bottleMl,
+    sleepMinutes: Math.floor(totals.sleepMs / 60_000),
+    wetCount: totals.wetCount,
+    dirtyCount: totals.dirtyCount,
+  }
 }
 
 export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
@@ -61,7 +73,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
       title: 'Get tracker status',
       description:
         "Current tracker state for a baby: the current time (now, in ISO UTC), today's date and the time zone used, running sleep/breastfeed timers, " +
-        "the last feed and last breastfeed, the breast side to suggest next, and today's totals. Call it first when a time is given relative to now.",
+        "the last feed and last breastfeed, the last diaper change, the breast side to suggest next, and today's totals (wetCount and dirtyCount count diapers; a pee-and-poop diaper counts in both). Call it first when a time is given relative to now.",
       inputSchema: z.object({ babyId, timeZone }),
       annotations: { readOnlyHint: true },
     },
@@ -82,6 +94,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
         },
         lastFeed: state.lastFeed ? formatEntry(state.lastFeed, tz) : null,
         lastBreastfeed: state.lastBreastfeed ? formatEntry(state.lastBreastfeed, tz) : null,
+        lastDiaper: state.lastDiaper ? formatEntry(state.lastDiaper, tz) : null,
         suggestedNextSide: suggestNextSide(state.lastBreastfeed),
         totalsToday: formatTotals(totals),
       }
@@ -93,8 +106,8 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'List tracker entries',
       description:
-        'Lists sleep, breastfeed and bottle entries that overlap a day (default today in timeZone), newest first, with the day totals ' +
-        '(feeds and bottles count on the day they started, sleep is clamped to the day).',
+        'Lists sleep, breastfeed, bottle and diaper entries that overlap a day (default today in timeZone), newest first, with the day totals ' +
+        '(feeds, bottles and diapers count on the day they started, sleep is clamped to the day).',
       inputSchema: z.object({ babyId, day: day.optional(), timeZone }),
       annotations: { readOnlyHint: true },
     },
@@ -117,22 +130,26 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'Add a tracker entry',
       description:
-        'Logs a completed entry: a sleep (startedAt, endedAt), a breastfeed (side required, startedAt, endedAt) or a bottle (amountMl). ' +
+        'Logs a completed entry: a sleep (startedAt, endedAt), a breastfeed (side required, startedAt, endedAt) a bottle (amountMl) or a diaper change (pee and/or poop, at least one; poopColor and poopTexture are optional and only valid with poop). ' +
         'startedAt defaults to now; without endedAt the entry has no end. A sleep or breastfeed that is still going on should use start_tracker_timer instead. ' +
         TIME_HELP,
       inputSchema: z.object({
         babyId,
-        kind: z.enum(['sleep', 'breastfeed', 'bottle']),
+        kind: z.enum(['sleep', 'breastfeed', 'bottle', 'diaper']),
         startedAt: zonedDateTime.optional(),
         endedAt: zonedDateTime.optional(),
         side: side.optional().describe('Required for breastfeed'),
         amountMl: z.number().int().min(CARE_LIMITS.amountMin).max(CARE_LIMITS.amountMax).optional().describe('Bottle amount in ml'),
+        pee: z.boolean().optional().describe('Diaper: it contained pee'),
+        poop: z.boolean().optional().describe('Diaper: it contained poop'),
+        poopColor: poopColor.optional().describe('Diaper, poop only'),
+        poopTexture: poopTexture.optional().describe('Diaper, poop only'),
         note: z.string().max(CARE_LIMITS.noteMax).optional(),
         timeZone,
       }),
       annotations: { destructiveHint: false },
     },
-    ({ babyId, kind, startedAt, endedAt, side, amountMl, note, timeZone }) => run('add_tracker_entry', { ...ctx, babyId }, async () => {
+    ({ babyId, kind, startedAt, endedAt, side, amountMl, pee, poop, poopColor, poopTexture, note, timeZone }) => run('add_tracker_entry', { ...ctx, babyId }, async () => {
       const tz = timeZone ?? FAMILY_TIME_ZONE
       await createCareEventCore(admin, userId, babyId, {
         kind,
@@ -140,6 +157,10 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
         endedAt: endedAt ? parseZonedDateTime(endedAt, tz).toISOString() : undefined,
         side,
         amountMl,
+        pee,
+        poop,
+        poopColor,
+        poopTexture,
         note,
       })
       return 'Entry added.'
