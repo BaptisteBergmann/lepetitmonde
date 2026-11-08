@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `c72136f` fix(tracker): compute a real median for weekly feed intervals
 - `bf2cbe6` fix(tracker): avoid fractional plurals in weekly analytics readouts
 - `de333c1` docs(tracker): document analytics
 - `f157c8e` feat(tracker): add 24h history timeline
