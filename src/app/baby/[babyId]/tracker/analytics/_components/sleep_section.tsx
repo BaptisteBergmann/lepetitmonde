@@ -65,7 +65,7 @@ export async function SleepSection({
     formatTick: (v) => String(v),
   })
   const napsItems = buildItems(buckets, weekly, fmt, t, 1, (b) => ({
-    value: t('analytics.readout.napCount', { count: b.napCount }),
+    value: weekly ? t('analytics.readout.napCountAvg', { count: fmt.count(b.napCount) }) : t('analytics.readout.napCount', { count: b.napCount }),
     detail: null,
     cells: [fmt.count(b.napCount)],
   }))

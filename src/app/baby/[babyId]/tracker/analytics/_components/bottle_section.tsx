@@ -25,10 +25,10 @@ export async function BottleSection({ data, summary, fmt }: { data: BucketedDays
   const items = buildItems(buckets, weekly, fmt, t, 2, (b) => {
     // Some bottles may have no amount: the volume is a lower bound, never extrapolated.
     const missing = b.bottleCount - b.bottleWithAmount
-    const count = t('analytics.readout.bottleCount', { count: b.bottleCount })
+    const count = weekly ? t('analytics.readout.bottleCountAvg', { count: fmt.count(b.bottleCount) }) : t('analytics.readout.bottleCount', { count: b.bottleCount })
     return {
       value: b.bottleWithAmount > 0 ? fmt.ml(b.bottleMl) : dash,
-      detail: missing > 0.05 ? `${count} · ${t('analytics.readout.missingAmount', { count: missing })}` : count,
+      detail: missing > 0.05 ? `${count} · ${(weekly ? t('analytics.readout.missingAmountAvg', { count: fmt.count(missing) }) : t('analytics.readout.missingAmount', { count: missing }))}` : count,
       cells: [b.bottleWithAmount > 0 ? fmt.ml(b.bottleMl) : dash, fmt.count(b.bottleCount)],
     }
   })

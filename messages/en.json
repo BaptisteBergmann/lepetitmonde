@@ -1531,7 +1531,11 @@
         "napCount": "{count, plural, one {# nap} other {# naps}}",
         "feedBreakdown": "{breast, plural, one {# breastfeed} other {# breastfeeds}} · {bottle, plural, one {# bottle} other {# bottles}}",
         "missingAmount": "{count, plural, one {# without an amount} other {# without an amount}}",
-        "bottleCount": "{count, plural, one {# bottle} other {# bottles}}"
+        "bottleCount": "{count, plural, one {# bottle} other {# bottles}}",
+        "napCountAvg": "{count} naps per day",
+        "feedBreakdownAvg": "{breast} breastfeeds · {bottle} bottles per day",
+        "bottleCountAvg": "{count} bottles per day",
+        "missingAmountAvg": "{count} per day without an amount"
       },
       "chart": {
         "showTable": "Show as table",

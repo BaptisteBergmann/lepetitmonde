@@ -48,7 +48,9 @@ export async function FeedSection({
   })
   const feedsItems = buildItems(buckets, weekly, fmt, t, 3, (b) => ({
     value: `${fmt.count(b.feedCount)} ${t('summary.feeds', { count: b.feedCount })}`,
-    detail: t('analytics.readout.feedBreakdown', { breast: b.breastfeedCount, bottle: b.bottleCount }),
+    detail: weekly
+      ? t('analytics.readout.feedBreakdownAvg', { breast: fmt.count(b.breastfeedCount), bottle: fmt.count(b.bottleCount) })
+      : t('analytics.readout.feedBreakdown', { breast: b.breastfeedCount, bottle: b.bottleCount }),
     cells: [fmt.count(b.breastfeedCount), fmt.count(b.bottleCount), fmt.count(b.feedCount)],
   }))
 

@@ -1531,7 +1531,11 @@
         "napCount": "{count, plural, one {# sieste} other {# siestes}}",
         "feedBreakdown": "{breast, plural, one {# tétée} other {# tétées}} · {bottle, plural, one {# biberon} other {# biberons}}",
         "missingAmount": "{count, plural, one {# sans quantité} other {# sans quantité}}",
-        "bottleCount": "{count, plural, one {# biberon} other {# biberons}}"
+        "bottleCount": "{count, plural, one {# biberon} other {# biberons}}",
+        "napCountAvg": "{count} siestes par jour",
+        "feedBreakdownAvg": "{breast} tétées · {bottle} biberons par jour",
+        "bottleCountAvg": "{count} biberons par jour",
+        "missingAmountAvg": "{count} par jour sans quantité"
       },
       "chart": {
         "showTable": "Afficher en tableau",
