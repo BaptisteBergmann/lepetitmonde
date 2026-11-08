@@ -4,6 +4,9 @@ import { getTrackerDay, getTrackerNow } from "@/utils/actions/care_events";
 import { getRequestTimeZone } from "@/utils/care-timezone";
 import { parseDayParam, todayInZone, computeDayTotals, zonedDayBounds } from "@/utils/care-time";
 import { formatDuration } from "@/utils/care-duration";
+import Link from "next/link";
+import { BarChart3 } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@components/reveal";
 import { AddEntryButton } from "./_components/add_entry_button";
 import { CareLog } from "./_components/care_log";
@@ -48,9 +51,19 @@ export default async function TrackerPage({
       <TrackerLive babyId={babyId} />
       <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-16">
         <Reveal className="border-b border-landing-border pb-4 mb-6">
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-            {t('title')}
-          </h1>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="min-w-0 font-display text-2xl font-semibold sm:text-3xl">
+              {t('title')}
+            </h1>
+            {/* Styled Link rather than <Link><Button>, so there's no button nested in an anchor. */}
+            <Link
+              href={`/baby/${babyId}/tracker/analytics`}
+              className={buttonVariants({ variant: 'outline', className: 'h-11 shrink-0 gap-2 rounded-2xl' })}
+            >
+              <BarChart3 className="size-4" aria-hidden="true" />
+              <span className="text-sm font-medium">{t('analytics.link')}</span>
+            </Link>
+          </div>
           <p className="mt-2 hidden max-w-xl text-sm text-landing-muted sm:block sm:text-base">
             {t('subtitle')}
           </p>

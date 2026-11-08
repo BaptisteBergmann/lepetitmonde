@@ -1464,6 +1464,113 @@
         "amount": "Enter an amount between 1 and 1000 ml.",
         "invalidTime": "Enter a valid date and time."
       }
+    },
+    "analytics": {
+      "link": "Analytics",
+      "back": "Back to tracking",
+      "title": "Analytics",
+      "subtitle": "Trends in sleep and feeds over the days and weeks.",
+      "range": {
+        "label": "Period",
+        "7d": "7 d",
+        "30d": "30 d",
+        "90d": "90 d",
+        "all": "All"
+      },
+      "periodLine": "{from} to {to}",
+      "averagesNote": "Averages over {logged} of {total} days with entries. Today is not counted.",
+      "noComparison": "Not enough days before this period to compare.",
+      "sections": {
+        "sleep": "Sleep",
+        "feeds": "Feeds",
+        "bottles": "Bottles",
+        "history": "History"
+      },
+      "tiles": {
+        "sleep": "Sleep per day",
+        "longest": "Longest stretch",
+        "feeds": "Feeds per day",
+        "bottle": "Bottle per day"
+      },
+      "trend": {
+        "up": "up {delta}",
+        "down": "down {delta}",
+        "same": "unchanged",
+        "vsPrevious": "vs previous {days} days",
+        "vsPreviousSr": "compared with the previous {days} days"
+      },
+      "metrics": {
+        "sleepPerDay": "Sleep per day",
+        "naps": "Naps per day",
+        "longestStretch": "Longest sleep stretch",
+        "daySplit": "Day and night (average)",
+        "day": "Day",
+        "night": "Night",
+        "average": "avg. {value}",
+        "share": "{label} {percent}%",
+        "feedsPerDay": "Feeds per day",
+        "feedInterval": "Time between feeds",
+        "median": "Median",
+        "longestGap": "Longest gap",
+        "gapNote": "Gaps over {hours} h are not counted (feeds probably not logged).",
+        "noIntervals": "Not enough feeds to work out the time between them.",
+        "sides": "Breast sides",
+        "avgFeedDuration": "Average breastfeed: {duration}",
+        "bottleVolume": "Bottle volume per day",
+        "avgBottle": "Average per bottle: {amount}",
+        "amountCoverage": "{withAmount} of {total} bottles have an amount, so the real volume may be higher.",
+        "breastfeeds": "Breastfeeds",
+        "bottles": "Bottles"
+      },
+      "readout": {
+        "partialToday": "in progress",
+        "notLogged": "Nothing logged that day",
+        "weekNotLogged": "Nothing logged that week",
+        "week": "Week of {from} to {to} (daily average)",
+        "sleepBreakdown": "Night {night} · Day {day}",
+        "napCount": "{count, plural, one {# nap} other {# naps}}",
+        "feedBreakdown": "{breast, plural, one {# breastfeed} other {# breastfeeds}} · {bottle, plural, one {# bottle} other {# bottles}}",
+        "missingAmount": "{count, plural, one {# without an amount} other {# without an amount}}",
+        "bottleCount": "{count, plural, one {# bottle} other {# bottles}}"
+      },
+      "chart": {
+        "showTable": "Show as table",
+        "hideTable": "Hide table",
+        "tableLabel": "Data table: {chart}",
+        "day": "Day",
+        "week": "Week",
+        "hint": "Tap a column or use the arrow buttons to see a day.",
+        "previousWeek": "Previous week",
+        "nextWeek": "Next week",
+        "summary": {
+          "sleep": "On average {duration} of sleep per day, {trend}.",
+          "sleepNoTrend": "On average {duration} of sleep per day.",
+          "naps": "On average {count} naps per day.",
+          "longest": "The longest stretch averages {duration}.",
+          "feeds": "On average {count} feeds per day, {trend}.",
+          "feedsNoTrend": "On average {count} feeds per day.",
+          "interval": "The median time between feeds is {duration}.",
+          "bottle": "On average {amount} of bottle per day."
+        }
+      },
+      "timeline": {
+        "label": "Day by day, over 24 hours",
+        "legend": "Legend: sleep bar, breastfeed circle, bottle diamond, shaded night",
+        "empty": "Nothing logged",
+        "today": "Today",
+        "summary": "{sleep} of sleep, {feeds, plural, one {# feed} other {# feeds}}",
+        "openDay": "{date}: {summary}. Open this day",
+        "openDayEmpty": "{date}: nothing logged. Open this day",
+        "capNote": "Showing the last {count} days."
+      },
+      "empty": {
+        "noneTitle": "No data yet",
+        "noneHint": "Analytics appear as soon as the first entries are logged in tracking.",
+        "noneCta": "Go to tracking",
+        "rangeTitle": "Nothing logged in this period",
+        "rangeHint": "Try a longer period.",
+        "rangeCta": "Show {range}"
+      }
     }
   },
   "oauthConsent": {

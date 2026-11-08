@@ -1464,6 +1464,113 @@
         "amount": "Saisissez une quantité entre 1 et 1000 ml.",
         "invalidTime": "Saisissez une date et une heure valides."
       }
+    },
+    "analytics": {
+      "link": "Statistiques",
+      "back": "Retour au suivi",
+      "title": "Statistiques",
+      "subtitle": "Les tendances du sommeil et des repas, jour après jour.",
+      "range": {
+        "label": "Période",
+        "7d": "7 j",
+        "30d": "30 j",
+        "90d": "90 j",
+        "all": "Tout"
+      },
+      "periodLine": "Du {from} au {to}",
+      "averagesNote": "Moyennes sur {logged} jours notés sur {total}. Aujourd'hui n'est pas compté.",
+      "noComparison": "Pas assez de jours avant cette période pour comparer.",
+      "sections": {
+        "sleep": "Sommeil",
+        "feeds": "Repas",
+        "bottles": "Biberons",
+        "history": "Historique"
+      },
+      "tiles": {
+        "sleep": "Sommeil par jour",
+        "longest": "Plus longue période",
+        "feeds": "Repas par jour",
+        "bottle": "Biberon par jour"
+      },
+      "trend": {
+        "up": "en hausse de {delta}",
+        "down": "en baisse de {delta}",
+        "same": "stable",
+        "vsPrevious": "vs {days} jours précédents",
+        "vsPreviousSr": "par rapport aux {days} jours précédents"
+      },
+      "metrics": {
+        "sleepPerDay": "Sommeil par jour",
+        "naps": "Siestes par jour",
+        "longestStretch": "Plus longue période de sommeil",
+        "daySplit": "Jour et nuit (moyenne)",
+        "day": "Jour",
+        "night": "Nuit",
+        "average": "moy. {value}",
+        "share": "{label} {percent} %",
+        "feedsPerDay": "Repas par jour",
+        "feedInterval": "Intervalle entre les repas",
+        "median": "Médiane",
+        "longestGap": "Écart le plus long",
+        "gapNote": "Les écarts de plus de {hours} h ne sont pas comptés (repas probablement non notés).",
+        "noIntervals": "Pas assez de repas pour calculer les intervalles.",
+        "sides": "Côtés de tétée",
+        "avgFeedDuration": "Durée moyenne d'une tétée : {duration}",
+        "bottleVolume": "Volume de biberon par jour",
+        "avgBottle": "Moyenne par biberon : {amount}",
+        "amountCoverage": "{withAmount} biberons sur {total} ont une quantité : le volume réel peut être plus élevé.",
+        "breastfeeds": "Tétées",
+        "bottles": "Biberons"
+      },
+      "readout": {
+        "partialToday": "en cours",
+        "notLogged": "Rien noté ce jour-là",
+        "weekNotLogged": "Rien noté cette semaine-là",
+        "week": "Semaine du {from} au {to} (moyenne par jour)",
+        "sleepBreakdown": "Nuit {night} · Jour {day}",
+        "napCount": "{count, plural, one {# sieste} other {# siestes}}",
+        "feedBreakdown": "{breast, plural, one {# tétée} other {# tétées}} · {bottle, plural, one {# biberon} other {# biberons}}",
+        "missingAmount": "{count, plural, one {# sans quantité} other {# sans quantité}}",
+        "bottleCount": "{count, plural, one {# biberon} other {# biberons}}"
+      },
+      "chart": {
+        "showTable": "Afficher en tableau",
+        "hideTable": "Masquer le tableau",
+        "tableLabel": "Tableau de données : {chart}",
+        "day": "Jour",
+        "week": "Semaine",
+        "hint": "Touchez une colonne ou utilisez les flèches pour voir un jour.",
+        "previousWeek": "Semaine précédente",
+        "nextWeek": "Semaine suivante",
+        "summary": {
+          "sleep": "En moyenne {duration} de sommeil par jour, {trend}.",
+          "sleepNoTrend": "En moyenne {duration} de sommeil par jour.",
+          "naps": "En moyenne {count} siestes par jour.",
+          "longest": "La plus longue période dure en moyenne {duration}.",
+          "feeds": "En moyenne {count} repas par jour, {trend}.",
+          "feedsNoTrend": "En moyenne {count} repas par jour.",
+          "interval": "Le temps médian entre deux repas est de {duration}.",
+          "bottle": "En moyenne {amount} de biberon par jour."
+        }
+      },
+      "timeline": {
+        "label": "Jour après jour, sur 24 heures",
+        "legend": "Légende : barre de sommeil, rond de tétée, losange de biberon, nuit grisée",
+        "empty": "Rien noté",
+        "today": "Auj.",
+        "summary": "{sleep} de sommeil, {feeds, plural, one {# repas} other {# repas}}",
+        "openDay": "{date} : {summary}. Ouvrir ce jour",
+        "openDayEmpty": "{date} : rien noté. Ouvrir ce jour",
+        "capNote": "Les {count} derniers jours sont affichés."
+      },
+      "empty": {
+        "noneTitle": "Pas encore de données",
+        "noneHint": "Les statistiques apparaîtront dès les premières entrées du suivi.",
+        "noneCta": "Aller au suivi",
+        "rangeTitle": "Rien de noté sur cette période",
+        "rangeHint": "Essayez une période plus longue.",
+        "rangeCta": "Voir {range}"
+      }
     }
   },
   "oauthConsent": {
