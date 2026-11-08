@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-08
 
+- `7ffd7ea` feat(tracker): add analytics page with range selector
 - `a91bf3a` feat(tracker): add analytics chart builders
 - `6144dfd` feat(tracker): compute sleep and feed analytics
 - `2e7c2c8` feat(tracker): add range fetch for analytics
