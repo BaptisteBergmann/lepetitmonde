@@ -1,5 +1,5 @@
 import { CARE_ANALYTICS_MAX_DAYS, FEED_KINDS } from '@utils/care-events'
-import { overlapMs, parseZonedDateTime, shiftDay, todayInZone, type TimedEvent } from '@utils/care-time'
+import { overlapMs, parseZonedDateTime, zonedDayBounds, shiftDay, todayInZone, type TimedEvent } from '@utils/care-time'
 
 // Pure, client-safe aggregation of care events into per-day and per-range
 // stats for the Suivi analytics page. No server imports, plain JSON out.
@@ -183,10 +183,11 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
   const today = todayInZone(tz, now)
   const spanFrom = prevFrom ?? from
 
-  // Every day of the span (previous period + current), with half-open bounds.
+  // Every day of the span (previous period + current), with half-open bounds from the
+  // same zonedDayBounds the Suivi day page uses.
   const dayKeys: string[] = []
   for (let d = spanFrom; d <= to; d = shiftDay(d, 1)) dayKeys.push(d)
-  const dayStarts = [...dayKeys, shiftDay(to, 1)].map((day) => parseZonedDateTime(`${day}T00:00`, tz))
+  const dayStarts = [...dayKeys, shiftDay(to, 1)].map((day) => zonedDayBounds(day, tz).start)
   const dayBounds = dayKeys.map((_, i) => ({ start: dayStarts[i], end: dayStarts[i + 1] }))
   const startsMs = dayBounds.map((b) => b.start.getTime())
   const endMs = dayBounds[dayBounds.length - 1].end.getTime()
