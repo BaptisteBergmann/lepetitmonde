@@ -71,7 +71,7 @@ erDiagram
 |---|---|
 | `inventory_items` | [[Inventory]] and [[Buy list]] (`quantity_owned`, `quantity_target`) |
 | `todo_items` | [[To-do list]] |
-| `care_events` | [[Baby tracker]] (one polymorphic table: sleep, breastfeed, bottle) |
+| `care_events` | [[Baby tracker]] (one polymorphic table: sleep, breastfeed, bottle, diaper) |
 | `baby_health_profiles`, `growth_measurements`, `vaccinations` | [[Health]] |
 
 ## Platform
@@ -89,7 +89,9 @@ erDiagram
 | `role` | `admin`, `viewer` |
 | `event_kind` | `occasion`, `life_stage`, `medical` |
 | `milestone_type` | `first_steps`, `first_tooth`, `first_word`, `first_smile`, `first_laugh`, `birthday`, `other` |
-| `care_event_kind` | `sleep`, `breastfeed`, `bottle` |
+| `care_event_kind` | `sleep`, `breastfeed`, `bottle`, `diaper` |
+| `diaper_poop_color` | `black`, `green`, `yellow`, `brown`, `red`, `white` |
+| `diaper_poop_texture` | `liquid`, `seedy`, `soft`, `formed`, `hard` |
 | `breast_side` | `left`, `right`, `both` |
 | `item_condition` | `new`, `secondhand` |
 | `baby_sex` | `female`, `male` |

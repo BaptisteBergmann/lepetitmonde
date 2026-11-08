@@ -27,7 +27,7 @@ Registered from `src/app/api/mcp/tools/` (one file per area, `index.ts` wires th
 |---|---|---|
 | `babies.ts` | `list_babies` (with `accessLevel` and usable `areas`) | — |
 | `todo.ts` | `list_todos`, `add_todo`, `set_todo_done`, `delete_todo`, `move_todo` | [[To-do list]] |
-| `tracker.ts` | `get_tracker_status`, `list_tracker_entries`, `add_tracker_entry`, `start_tracker_timer`, `stop_tracker_timer`, `delete_tracker_entry` | [[Baby tracker]] |
+| `tracker.ts` | `get_tracker_status`, `list_tracker_entries`, `add_tracker_entry`, `start_tracker_timer`, `stop_tracker_timer`, `delete_tracker_entry` | [[Baby tracker]] (`add_tracker_entry` also logs diapers: `pee`, `poop`, `poopColor`, `poopTexture`) |
 | `buy_list.ts` | `list_buy_list`, `mark_bought`, `add_buy_list_item`, `remove_from_buy_list` | [[Buy list]] |
 | `inventory.ts` | `list_inventory`, `update_inventory_quantities` | [[Inventory]] |
 | `calendar.ts` | `list_events`, `list_circles`, `add_event` | [[Calendar]] |
