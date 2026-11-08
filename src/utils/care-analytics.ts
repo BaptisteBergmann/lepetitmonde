@@ -79,6 +79,8 @@ export type DayStats = {
   bottleWithAmount: number
   medianIntervalMs: number | null
   longestIntervalMs: number | null
+  // The kept start-to-start gaps behind the two values above, so weekly buckets can take a real median.
+  intervalsMs: number[]
 }
 
 export type RangeSummary = {
@@ -205,6 +207,7 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     bottleWithAmount: 0,
     medianIntervalMs: null,
     longestIntervalMs: null,
+    intervalsMs: [],
   }))
   const windows = dayKeys.map((day) => ({
     start: parseZonedDateTime(`${day}T${String(DAY_START_HOUR).padStart(2, '0')}:00`, tz),
@@ -265,6 +268,7 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
   }
 
   stats.forEach((s, i) => {
+    s.intervalsMs = gapsByDay[i]
     s.medianIntervalMs = median(gapsByDay[i])
     s.longestIntervalMs = gapsByDay[i].length ? Math.max(...gapsByDay[i]) : null
   })

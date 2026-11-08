@@ -52,9 +52,11 @@ function mean(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0
 }
 
-function meanOrNull(values: (number | null)[]): number | null {
-  const present = values.filter((v): v is number => v !== null)
-  return present.length ? mean(present) : null
+function median(values: number[]): number | null {
+  if (values.length === 0) return null
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
 }
 
 function dayBucket(s: DayStats): Bucket {
@@ -102,8 +104,7 @@ function weekBucket(week: string, group: DayStats[]): Bucket {
     bottleCount: avg((s) => s.bottleCount),
     bottleMl: avg((s) => s.bottleMl),
     bottleWithAmount: avg((s) => s.bottleWithAmount),
-    // Average of the daily medians (an approximation: the exact weekly median needs the gaps).
-    medianIntervalMs: meanOrNull(pool.map((s) => s.medianIntervalMs)),
+    medianIntervalMs: median(pool.flatMap((s) => s.intervalsMs)),
     longestIntervalMs: pool.reduce<number | null>((max, s) => (s.longestIntervalMs !== null && (max === null || s.longestIntervalMs > max) ? s.longestIntervalMs : max), null),
   }
 }
