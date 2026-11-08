@@ -1353,7 +1353,7 @@
       "amount": "{amount} ml",
       "none": "—",
       "diapers": "Couches",
-      "diapersValue": "{wet} mouillées · {dirty} sales"
+      "diapersValue": "{wet, plural, one {# mouillée} other {# mouillées}} · {dirty, plural, one {# sale} other {# sales}}"
     },
     "duration": {
       "hm": "{h} h {m} min",
@@ -1599,7 +1599,7 @@
       "bothLong": "Pipi et caca",
       "logPee": "Enregistrer une couche pipi maintenant",
       "logPoop": "Enregistrer une couche caca maintenant",
-      "logBoth": "Enregistrer une couche pipi et caca maintenant",
+      "logBoth": "Les deux : enregistrer une couche pipi et caca maintenant",
       "detailsPrompt": "{type} enregistré à {time}.",
       "addDetails": "Ajouter couleur et texture",
       "dismiss": "Fermer",
@@ -1623,7 +1623,7 @@
     },
     "lastDiaper": {
       "title": "Dernier change",
-      "ago": "{type} · {ago}",
+      "ago": "{type} · <ago></ago>",
       "none": "Aucune couche enregistrée"
     }
   },

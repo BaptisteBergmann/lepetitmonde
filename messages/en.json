@@ -1599,7 +1599,7 @@
       "bothLong": "Pee and poop",
       "logPee": "Log a pee diaper now",
       "logPoop": "Log a poop diaper now",
-      "logBoth": "Log a pee and poop diaper now",
+      "logBoth": "Both: log a pee and poop diaper now",
       "detailsPrompt": "{type} logged at {time}.",
       "addDetails": "Add colour and texture",
       "dismiss": "Dismiss",
@@ -1623,7 +1623,7 @@
     },
     "lastDiaper": {
       "title": "Last change",
-      "ago": "{type} · {ago}",
+      "ago": "{type} · <ago></ago>",
       "none": "No diaper logged yet"
     }
   },
