@@ -176,11 +176,12 @@ export function totalSleepMs(events: TimedEvent[], bounds: { start: Date; end: D
     .reduce((sum, e) => sum + overlapMs(e, bounds, now), 0)
 }
 
-export type DayTotals = { feedCount: number; bottleMl: number; sleepMs: number }
+export type DayTotals = { feedCount: number; bottleMl: number; sleepMs: number; wetCount: number; dirtyCount: number }
 
-// Feeds and bottles count by the day they started on; sleep is clamped to the day.
+// Feeds, bottles and diapers count by the day they started on; sleep is clamped to the day.
+// A "both" diaper counts once in wet and once in dirty.
 export function computeDayTotals(
-  events: (TimedEvent & { amount_ml: number | null })[],
+  events: (TimedEvent & { amount_ml: number | null; pee: boolean | null; poop: boolean | null })[],
   bounds: { start: Date; end: Date },
   now: Date,
 ): DayTotals {
@@ -192,6 +193,8 @@ export function computeDayTotals(
     feedCount: startedToday.filter((e) => (FEED_KINDS as readonly string[]).includes(e.kind)).length,
     bottleMl: startedToday.reduce((sum, e) => sum + (e.kind === 'bottle' ? (e.amount_ml ?? 0) : 0), 0),
     sleepMs: totalSleepMs(events, bounds, now),
+    wetCount: startedToday.filter((e) => e.kind === 'diaper' && e.pee).length,
+    dirtyCount: startedToday.filter((e) => e.kind === 'diaper' && e.poop).length,
   }
 }
 

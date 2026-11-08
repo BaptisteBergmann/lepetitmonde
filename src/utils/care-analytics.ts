@@ -249,6 +249,8 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     }
 
     if (!startsInSpan) continue
+    // Diapers must not mark a day as logged: sleep and feed averages would count it as a zero day.
+    if (e.kind === 'diaper') continue
     const s = stats[startIdx]
     s.logged = true
     if (!FEED_SET.has(e.kind)) continue

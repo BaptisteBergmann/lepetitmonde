@@ -31,11 +31,13 @@ export type TrackerNow = {
   ongoing: Partial<Record<TimerKind, CareEvent>>
   lastFeed: CareEvent | null
   lastBreastfeed: CareEvent | null
+  // Full event (not just a time): the details strip opens the edit modal on it.
+  lastDiaper: CareEvent | null
 }
 
 // Narrow column set for analytics: no note, created_by or updated_by, so
 // stats never expose who logged what.
-export type CareAnalyticsRow = Pick<Tables<'care_events'>, 'kind' | 'started_at' | 'ended_at' | 'ongoing' | 'breast_side' | 'amount_ml'>
+export type CareAnalyticsRow = Pick<Tables<'care_events'>, 'kind' | 'started_at' | 'ended_at' | 'ongoing' | 'breast_side' | 'amount_ml' | 'pee' | 'poop'>
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -133,7 +135,7 @@ export async function getTrackerRangeCore(
   for (let offset = 0; ; offset += RANGE_PAGE_SIZE) {
     const { data, error } = await supabase
       .from('care_events')
-      .select('kind, started_at, ended_at, ongoing, breast_side, amount_ml')
+      .select('kind, started_at, ended_at, ongoing, breast_side, amount_ml, pee, poop')
       .eq('baby_id', babyId)
       .gte('started_at', startIso)
       .lt('started_at', endIso)
@@ -172,34 +174,44 @@ export async function getTrackerNowCore(supabase: SupabaseClient, userId: string
   const contextLogger = logger.child({ function: getTrackerNowCore.name, babyId })
   await assertTrackerAccessForUser(supabase, userId, babyId)
 
-  const [ongoingRes, lastFeedRes, lastBreastRes] = await Promise.all([
+  const [ongoingRes, lastFeedRes, lastBreastRes, lastDiaperRes] = await Promise.all([
     supabase.from('care_events').select('*').eq('baby_id', babyId).eq('ongoing', true),
     supabase.from('care_events').select('*').eq('baby_id', babyId).in('kind', [...FEED_KINDS])
       .eq('ongoing', false).order('started_at', { ascending: false }).limit(1),
     supabase.from('care_events').select('*').eq('baby_id', babyId).eq('kind', 'breastfeed')
       .eq('ongoing', false).order('started_at', { ascending: false }).limit(1),
+    supabase.from('care_events').select('*').eq('baby_id', babyId).eq('kind', 'diaper')
+      .order('started_at', { ascending: false }).limit(1),
   ])
 
-  for (const res of [ongoingRes, lastFeedRes, lastBreastRes]) {
+  for (const res of [ongoingRes, lastFeedRes, lastBreastRes, lastDiaperRes]) {
     if (res.error) { contextLogger.error(res.error, 'Error fetching tracker state'); throw res.error }
   }
 
+  // Look rows up by id rather than by position in the combined array, so adding a
+  // query can't silently shift which result a field reads.
   const named = await withCreatorNames(supabase, babyId, [
     ...ongoingRes.data!,
     ...lastFeedRes.data!,
     ...lastBreastRes.data!,
+    ...lastDiaperRes.data!,
   ])
-  const ongoingCount = ongoingRes.data!.length
+  const byId = new Map<string, CareEvent>()
+  for (const event of named) byId.set(event.id, event)
+  const first = (rows: Tables<'care_events'>[]) => (rows.length ? (byId.get(rows[0].id) ?? null) : null)
+
   const ongoing: TrackerNow['ongoing'] = {}
-  for (const event of named.slice(0, ongoingCount)) {
-    if ((TIMER_KINDS as readonly string[]).includes(event.kind)) ongoing[event.kind as TimerKind] = event
+  for (const row of ongoingRes.data!) {
+    const event = byId.get(row.id)
+    if (event && (TIMER_KINDS as readonly string[]).includes(event.kind)) ongoing[event.kind as TimerKind] = event
   }
 
   return {
     now: new Date().toISOString(),
     ongoing,
-    lastFeed: lastFeedRes.data!.length ? named[ongoingCount] : null,
-    lastBreastfeed: lastBreastRes.data!.length ? named[named.length - 1] : null,
+    lastFeed: first(lastFeedRes.data!),
+    lastBreastfeed: first(lastBreastRes.data!),
+    lastDiaper: first(lastDiaperRes.data!),
   }
 }
 
@@ -369,6 +381,10 @@ export async function updateCareEventCore(supabase: SupabaseClient, userId: stri
       ...(fields.ended_at !== undefined ? { ended_at: fields.ended_at } : {}),
       breast_side: fields.breast_side,
       amount_ml: fields.amount_ml,
+      pee: fields.pee,
+      poop: fields.poop,
+      poop_color: fields.poop_color,
+      poop_texture: fields.poop_texture,
       note: fields.note,
       updated_at: new Date().toISOString(),
       updated_by: userId,
