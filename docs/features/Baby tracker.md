@@ -8,7 +8,7 @@ Up: [[Le petit monde]] · Route: `/baby/[babyId]/tracker` · Code: `tracker/`, `
 
 Logs daily care, built for one-handed use at night.
 
-- Kinds (`care_event_kind`): **sleep** (start/stop timer or entered afterwards), **breastfeed** (left / right / both, optional timer) **bottle** (ml) and **diaper** (pee and/or poop, see [[Diaper changes]]).
+- Kinds (`care_event_kind`): **sleep** (start/stop timer or entered afterwards), **breastfeed** (left / right / both, optional timer), **bottle** (ml) and **diaper** (pee and/or poop, see [[Diaper changes]]).
 - Every entry records who logged it.
 - A "now" panel shows running timers and the time since the last feed or sleep; a day log with navigation lists entries.
 - At most one running timer per kind per baby (unique index): if two parents tap "start" together, the second gets "already running".

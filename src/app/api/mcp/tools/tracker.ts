@@ -130,7 +130,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'Add a tracker entry',
       description:
-        'Logs a completed entry: a sleep (startedAt, endedAt), a breastfeed (side required, startedAt, endedAt) a bottle (amountMl) or a diaper change (pee and/or poop, at least one; poopColor and poopTexture are optional and only valid with poop). ' +
+        'Logs a completed entry: a sleep (startedAt, endedAt), a breastfeed (side required, startedAt, endedAt), a bottle (amountMl) or a diaper change (pee and/or poop, at least one; poopColor and poopTexture are optional and only valid with poop). ' +
         'startedAt defaults to now; without endedAt the entry has no end. A sleep or breastfeed that is still going on should use start_tracker_timer instead. ' +
         TIME_HELP,
       inputSchema: z.object({

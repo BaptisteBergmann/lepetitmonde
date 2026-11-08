@@ -120,7 +120,7 @@ export default async function TrackerAnalyticsPage({
               <>
                 <div className="space-y-2">
                   <StatCards summary={summary} previous={previousSummary} previousDiaper={previousDiaperSummary} prevDays={prevDays} fmt={fmt} />
-                  {range !== 'all' && !previousSummary && (
+                  {range !== 'all' && !previousSummary && !(summary.hasDiaper && previousDiaperSummary) && (
                     <p className="text-xs text-muted-foreground">{t('analytics.noComparison')}</p>
                   )}
                 </div>
