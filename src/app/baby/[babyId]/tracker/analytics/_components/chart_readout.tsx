@@ -118,11 +118,11 @@ export function ChartReadout({
   return (
     <div aria-live="polite" className="space-y-1 rounded-2xl border border-landing-border bg-background/60 p-3">
       <div className="flex items-center justify-between gap-2">
-        <Button type="button" variant="outline" size="icon-lg" className="rounded-2xl" aria-label={texts.previous} disabled={selected <= 0} onClick={() => onSelect(selected - 1)}>
+        <Button type="button" variant="outline" size="icon-lg" className="rounded-2xl aria-disabled:opacity-50" aria-label={texts.previous} aria-disabled={selected <= 0} onClick={() => { if (selected > 0) onSelect(selected - 1) }}>
           <ChevronLeft aria-hidden="true" />
         </Button>
         <p className="min-w-0 text-center font-display text-lg font-semibold capitalize">{item.title}</p>
-        <Button type="button" variant="outline" size="icon-lg" className="rounded-2xl" aria-label={texts.next} disabled={selected >= count - 1} onClick={() => onSelect(selected + 1)}>
+        <Button type="button" variant="outline" size="icon-lg" className="rounded-2xl aria-disabled:opacity-50" aria-label={texts.next} aria-disabled={selected >= count - 1} onClick={() => { if (selected < count - 1) onSelect(selected + 1) }}>
           <ChevronRight aria-hidden="true" />
         </Button>
       </div>
