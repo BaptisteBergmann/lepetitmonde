@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-08
+
+- `2e7c2c8` feat(tracker): add range fetch for analytics
+
 ## 2026-11-07
 
 - `32ad235` docs(notifications): document baby-name prefix and per-baby tag
