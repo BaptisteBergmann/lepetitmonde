@@ -83,7 +83,7 @@ export function NowPanel({
     try {
       const result = await action()
       if (!result.ok) {
-        if (result.error === 'alreadyRunning') toast.info(t('errors.alreadyRunning'))
+        if (result.error === 'alreadyRunning' || result.error === 'alreadyStopped') toast.info(t(`errors.${result.error}`))
         else toast.error(t(`errors.codes.${result.error}`))
         return
       }

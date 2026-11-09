@@ -279,13 +279,18 @@ async function stopRunningTimer(
   const { data: running, error: fetchError } = await query.maybeSingle()
 
   if (fetchError) { contextLogger.error(fetchError, 'Error fetching running timer'); throw fetchError }
-  // Idempotent: the other parent already stopped it (or it never existed for this baby).
-  if (!running) { revalidateTracker(babyId); return }
+  // The other parent already stopped it (or it never existed for this baby). By id the UI
+  // must say so; by kind (MCP) stays idempotent.
+  if (!running) {
+    revalidateTracker(babyId)
+    if ('eventId' in match) throw new CareValidationError('alreadyStopped')
+    return
+  }
 
   const startedMs = new Date(running.started_at).getTime()
   const endedMs = Math.min(Date.now(), startedMs + CARE_LIMITS.maxDurationMs)
 
-  const { error } = await supabase
+  const { data: stopped, error } = await supabase
     .from('care_events')
     .update({
       ongoing: false,
@@ -297,8 +302,16 @@ async function stopRunningTimer(
     .eq('id', running.id)
     .eq('baby_id', babyId)
     .eq('ongoing', true)
+    .select('id')
+    .maybeSingle()
 
   if (error) { contextLogger.error(error, 'Error stopping care timer'); throw error }
+  // Lost the race between the fetch and the update.
+  if (!stopped) {
+    revalidateTracker(babyId)
+    if ('eventId' in match) throw new CareValidationError('alreadyStopped')
+    return
+  }
 
   contextLogger.info('Care timer stopped')
   revalidateTracker(babyId)

@@ -20,6 +20,7 @@ export type CareErrorKey =
   | 'notFound'
   | 'conflict'
   | 'alreadyRunning'
+  | 'alreadyStopped'
   | 'future'
   | 'invalidTime'
   | 'endBeforeStart'

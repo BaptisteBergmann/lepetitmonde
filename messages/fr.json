@@ -1425,10 +1425,12 @@
       "delete": "Une erreur est survenue lors de la suppression.",
       "network": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
       "alreadyRunning": "Déjà en cours, l'écran a été mis à jour.",
+      "alreadyStopped": "Déjà arrêté, l'écran a été mis à jour.",
       "codes": {
         "notFound": "Cette entrée n'existe plus.",
         "conflict": "Cette entrée a été modifiée par quelqu'un d'autre. L'écran a été mis à jour, veuillez réessayer.",
         "alreadyRunning": "Déjà en cours, l'écran a été mis à jour.",
+        "alreadyStopped": "Déjà arrêté, l'écran a été mis à jour.",
         "future": "L'heure ne peut pas être dans le futur.",
         "invalidTime": "Saisissez une date et une heure valides.",
         "endBeforeStart": "La fin doit être après le début.",
