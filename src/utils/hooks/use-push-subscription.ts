@@ -16,6 +16,20 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
+// `serviceWorker.ready` never settles when the worker failed to install (e.g. a new user's
+// first install cannot precache offline files), which would leave isPending stuck.
+const SERVICE_WORKER_READY_TIMEOUT_MS = 10000
+
+function serviceWorkerReady(): Promise<ServiceWorkerRegistration> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Service worker not ready')), SERVICE_WORKER_READY_TIMEOUT_MS)
+    navigator.serviceWorker.ready.then(
+      (registration) => { clearTimeout(timer); resolve(registration) },
+      (err) => { clearTimeout(timer); reject(err) },
+    )
+  })
+}
+
 function deviceLabel() {
   const ua = navigator.userAgent
   const browser = /Edg\//.test(ua) ? 'Edge'
@@ -56,7 +70,7 @@ export function usePushSubscription() {
   const subscribe = useCallback(async () => {
     setIsPending(true)
     try {
-      const registration = await navigator.serviceWorker.ready
+      const registration = await serviceWorkerReady()
       const vapidPublicKey = await getVapidPublicKey()
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
