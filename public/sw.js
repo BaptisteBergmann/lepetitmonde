@@ -1,4 +1,4 @@
-// Offline fallback. Only navigations and /offline/* are handled; everything else (API,
+// Offline fallback. Only navigations (except /auth/* and /api/*) and /offline/* are handled; everything else (API,
 // RSC, Server Actions, SSE, uploads, chunks) falls through to the network untouched.
 // Authenticated responses are never cached: the cache holds only the static files below.
 // __SW_BUILD__ is replaced with the commit SHA at image build time (see Dockerfile), so
@@ -76,6 +76,11 @@ self.addEventListener('fetch', function (event) {
     );
     return;
   }
+
+  // One-time or side-effecting GETs (the email-link token exchange, API routes) must reach the
+  // server exactly once: never time them out or retry them behind the offline page. Match on
+  // a path segment boundary so /authors or /apis are not caught.
+  if (/^\/(auth|api)(\/|$)/.test(url.pathname)) return;
 
   if (request.mode === 'navigate') event.respondWith(handleNavigation(event));
 });
