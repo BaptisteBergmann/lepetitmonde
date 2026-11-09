@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-09
 
+- `3d6fe97` fix(push): stop the subscribe spinner when the service worker never becomes ready
 - `02ec343` fix(tracker): compare Origin the way Next does in the sync route
 - `3e74959` fix(access): throw a retryable error when an access query fails
 - `e9e83b0` fix(pwa): never wrap /auth and /api navigations in the offline fallback
