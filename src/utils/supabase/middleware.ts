@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { isAuthRetryableFetchError } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { clampCookieMaxAge, SUPABASE_COOKIE_OPTIONS } from './cookie-options'
 
@@ -55,10 +56,23 @@ export async function updateSession(request: NextRequest) {
   // being randomly logged out.
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser()
 
   const isPublicPage = PUBLIC_PAGES.some((path) => pathname.startsWith(path))
   const isAuthOnlyPage = AUTH_ONLY_PAGES.some((path) => pathname.startsWith(path))
+
+  // Auth service unreachable (not "logged out"): redirecting to /login would show a
+  // login form that can't work and look like a logout. Answer 503 so the service
+  // worker can swap in the offline page. Carries the cookies set above.
+  if (!user && !isPublicPage && isAuthRetryableFetchError(userError)) {
+    const unavailable = new NextResponse('Service unavailable', {
+      status: 503,
+      headers: { 'Cache-Control': 'no-store', 'Content-Type': 'text/plain; charset=utf-8' },
+    })
+    supabaseResponse.cookies.getAll().forEach((cookie) => unavailable.cookies.set(cookie))
+    return unavailable
+  }
 
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone()
