@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-09
 
+- `0cfbf07` feat(pwa): serve a static fallback when the server is unreachable
 - `afaed69` fix(auth): answer 503 instead of redirecting to login when auth is unreachable
 - `fdb8bd9` feat(tracker): add the authenticated offline sync route
 - `d6a1e0b` feat(tracker): accept client ids and stop times in the care cores
