@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-09
 
+- `48ef968` fix(tracker): refresh when the app returns to the foreground or reconnects
 - `28d9d8c` fix(realtime): let consumers resync after the stream reconnects
 
 ## 2026-11-08
