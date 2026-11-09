@@ -1,4 +1,4 @@
-// Offline fallback. Only navigations (except /auth/* and /api/*) and /offline/* are handled; everything else (API,
+// Offline fallback. Only navigations (except /auth/*, /api/* and /share/*, which are forwarded as-is) and /offline/* are handled; everything else (API,
 // RSC, Server Actions, SSE, uploads, chunks) falls through to the network untouched.
 // Authenticated responses are never cached: the cache holds only the static files below.
 // __SW_BUILD__ is replaced with the commit SHA at image build time (see Dockerfile), so
@@ -8,6 +8,7 @@ const OFFLINE_PAGE = '/offline/index.html';
 const OFFLINE_FILES = [OFFLINE_PAGE, '/offline/app.js', '/offline/app.css'];
 // Wait this long for the first byte before assuming the server is down.
 const NAVIGATION_TIMEOUT_MS = 6000;
+const SINGLE_SHOT_PATH = /^\/(auth|api|share)(\/|$)/;
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -45,6 +46,13 @@ async function offlinePage() {
   return (await cache.match(OFFLINE_PAGE)) || Response.error();
 }
 
+// Never retry or time out: a second request would consume a one-time token or link.
+function passthrough(event) {
+  return Promise.resolve(event.preloadResponse).then(function (preloaded) {
+    return preloaded || fetch(event.request);
+  });
+}
+
 async function handleNavigation(event) {
   try {
     const request = (async function () {
@@ -77,10 +85,14 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  // One-time or side-effecting GETs (the email-link token exchange, API routes) must reach the
-  // server exactly once: never time them out or retry them behind the offline page. Match on
-  // a path segment boundary so /authors or /apis are not caught.
-  if (/^\/(auth|api)(\/|$)/.test(url.pathname)) return;
+  // One-time or side-effecting GETs (email-link token exchange, API routes, single-use share links)
+  // are forwarded with no timeout and no offline fallback. Navigation preload may already have
+  // sent the request, so its response is used when present; otherwise we fetch once. A failure
+  // surfaces as the browser's normal network error. Matched on a path segment boundary.
+  if (SINGLE_SHOT_PATH.test(url.pathname)) {
+    if (request.mode === 'navigate') event.respondWith(passthrough(event));
+    return;
+  }
 
   if (request.mode === 'navigate') event.respondWith(handleNavigation(event));
 });
