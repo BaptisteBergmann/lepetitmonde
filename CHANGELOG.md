@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-09
 
+- `afaed69` fix(auth): answer 503 instead of redirecting to login when auth is unreachable
 - `fdb8bd9` feat(tracker): add the authenticated offline sync route
 - `d6a1e0b` feat(tracker): accept client ids and stop times in the care cores
 - `a029cd0` docs(realtime): describe reconnect and foreground resync
