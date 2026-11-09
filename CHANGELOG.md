@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-09
+
+- `28d9d8c` fix(realtime): let consumers resync after the stream reconnects
+
 ## 2026-11-08
 
 - `97c94ee` chore(db): regenerate types after diaper migrations
