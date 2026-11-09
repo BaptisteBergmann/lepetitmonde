@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-09
 
+- `3e74959` fix(access): throw a retryable error when an access query fails
 - `e9e83b0` fix(pwa): never wrap /auth and /api navigations in the offline fallback
 - `0cfbf07` feat(pwa): serve a static fallback when the server is unreachable
 - `afaed69` fix(auth): answer 503 instead of redirecting to login when auth is unreachable
