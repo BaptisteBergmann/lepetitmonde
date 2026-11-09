@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-09
 
+- `d6a1e0b` feat(tracker): accept client ids and stop times in the care cores
 - `a029cd0` docs(realtime): describe reconnect and foreground resync
 - `8e0adfa` fix(tracker): tell the user when a timer was already stopped elsewhere
 - `48ef968` fix(tracker): refresh when the app returns to the foreground or reconnects
