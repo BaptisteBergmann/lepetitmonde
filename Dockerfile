@@ -26,6 +26,9 @@ ENV NEXT_PUBLIC_COMMIT_SHA=$NEXT_PUBLIC_COMMIT_SHA
 # Next.js collects completely anonymous telemetry data. Disable it here if you prefer.
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Versions the service worker's offline cache so every deploy refreshes it.
+RUN sed -i "s/__SW_BUILD__/${NEXT_PUBLIC_COMMIT_SHA:-dev}/g" public/sw.js
+
 RUN corepack enable pnpm && pnpm build
 
 # --- Stage 3: Runner ---

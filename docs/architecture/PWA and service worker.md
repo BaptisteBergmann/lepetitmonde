@@ -7,8 +7,8 @@ tags: [lepetitmonde/architecture]
 Up: [[Le petit monde]] · See also [[Notifications pipeline]], [[Onboarding]]
 
 - **Installable** on iOS and Android home screens: `src/app/manifest.ts` (icons and screenshots in `public/`).
-- **Service worker**: source in `src/worker/index.ts`, mirrored byte-for-byte to `public/sw.js` (no build step). It only displays push notifications and opens the right page on click. There is no offline cache.
-- `proxy.ts` lets `manifest.webmanifest` and `sw.js` through without a session, otherwise the browser would receive an HTML login redirect.
+- **Service worker**: `public/sw.js` is the only source (no build step; `src/worker/` was removed). It is registered once, by `PwaRegistry` in the root layout. It displays push notifications, opens the right page on click, and serves a static offline fallback: on a navigation that fails, takes over 6 s to first byte, or returns 502-504 / 520-530, it answers with the precached `/offline/index.html`. Everything else (API, RSC, Server Actions, SSE, chunks) is never intercepted, and authenticated responses are never cached. The cache name carries the commit SHA, stamped into `sw.js` by the Dockerfile before the build.
+- `proxy.ts` lets `manifest.webmanifest`, `sw.js` and `offline/` through without a session, otherwise the browser would receive an HTML login redirect.
 - `src/components/install-card.tsx` gives platform-specific instructions: the native prompt on Chrome/Android, the Share-sheet steps on iOS (where push needs a home-screen install).
 - `use-push-subscription.ts` manages the browser subscription; each device is a `push_subscriptions` row that can be renamed or removed in [[Settings and profile]].
 - `pwa-history-tracker.tsx` and `pwa-navigation.ts` handle back-navigation inside the standalone app.

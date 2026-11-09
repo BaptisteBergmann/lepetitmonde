@@ -20,9 +20,11 @@ export const config = {
      * - manifest.webmanifest et sw.js (doivent rester accessibles sans session :
      *   un redirect HTML vers /login casse le parsing JSON du manifest et
      *   l'enregistrement du service worker, empêchant le prompt d'installation PWA)
+     * - offline/ (pages statiques du repli hors ligne, précachées par le service
+     *   worker : un redirect vers /login serait mis en cache à leur place)
      * - .well-known (métadonnées OAuth, récupérées sans session par des
      *   serveurs tiers ; un redirect vers /login casserait la découverte)
      */
-    '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|api|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|offline/|api|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

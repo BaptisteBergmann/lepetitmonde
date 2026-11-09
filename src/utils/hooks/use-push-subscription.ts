@@ -47,8 +47,8 @@ export function usePushSubscription() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSupported(true)
 
-    navigator.serviceWorker
-      .register('/sw.js', { scope: '/', updateViaCache: 'none' })
+    // The worker is registered once, by PwaRegistry in the root layout.
+    navigator.serviceWorker.ready
       .then((registration) => registration.pushManager.getSubscription())
       .then(setSubscription)
   }, [])
