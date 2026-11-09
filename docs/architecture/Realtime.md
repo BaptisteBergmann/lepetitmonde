@@ -20,7 +20,7 @@ flowchart LR
 - `src/utils/supabase/realtime-relay.ts` keeps one upstream channel per baby and fans events out to every SSE connection for that baby. The channel is closed when the last listener leaves.
 - `GET /api/realtime/[babyId]` authenticates the caller and checks membership before subscribing.
 - Payloads are **stripped** (no row data, just table + event type) for most tables, so the relay can't leak content across circles. Clients refetch through Server Actions, which apply the normal [[Authorization]].
-- `src/utils/hooks/use-baby-realtime.ts` subscribes on the client; consumers debounce refetches.
+- `src/utils/hooks/use-baby-realtime.ts` subscribes on the client; consumers debounce refetches. Its optional `onReconnect` fires on every stream `open` after the first, because events sent while disconnected are lost. [[Baby tracker]] uses it, plus `visibilitychange`, `pageshow` and `online` listeners, to resync when the phone wakes.
 
 ## Bound tables and consumers
 
