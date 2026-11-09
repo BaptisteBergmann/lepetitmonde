@@ -48,8 +48,8 @@ function entry(event: CareEvent, tz: string) {
 
 // A page that is off or not allowed for the user is "not accessible" (the
 // section is omitted); anything else is rethrown and reported as failed. A
-// database error inside the page check itself surfaces as unauthorized, so it
-// is reported as omitted.
+// database error inside the page check is rethrown too, so it is reported as
+// failed rather than silently omitted.
 async function canUse(supabase: SupabaseClient, userId: string, babyId: string, page: PageId, adminOnly = false) {
   try {
     const level = await assertPageAccessForUser(supabase, userId, babyId, page)
