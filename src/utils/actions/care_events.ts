@@ -68,13 +68,13 @@ export async function getTrackerNow(babyId: string): Promise<TrackerNow> {
 export async function startCareTimer(
   babyId: string,
   kind: Enums<'care_event_kind'>,
-  opts: { side?: Enums<'breast_side'>; startedAt?: string } = {},
+  opts: { side?: Enums<'breast_side'>; startedAt?: string; id?: string } = {},
 ): Promise<CareResult> {
   const userId = await requireUserId()
   return toResult(async () => startCareTimerCore(await createClient(), userId, babyId, kind, opts))
 }
 
-export async function stopCareTimer(babyId: string, eventId: string, opts: { side?: Enums<'breast_side'> } = {}): Promise<CareResult> {
+export async function stopCareTimer(babyId: string, eventId: string, opts: { side?: Enums<'breast_side'>; endedAt?: string } = {}): Promise<CareResult> {
   const userId = await requireUserId()
   return toResult(async () => stopCareTimerCore(await createClient(), userId, babyId, eventId, opts))
 }

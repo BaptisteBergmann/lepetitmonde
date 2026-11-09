@@ -40,6 +40,8 @@ export class CareValidationError extends Error {
 export type CareResult = { ok: true } | { ok: false; error: CareErrorKey }
 
 export type CareEventInput = {
+  // Client-generated row id (UUID) so an offline replay is idempotent. Omitted: the DB assigns one.
+  id?: string
   kind: CareKind
   // Optional on create (defaults to the server's now); required on update.
   startedAt?: string

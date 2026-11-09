@@ -54,6 +54,27 @@ function assertEventId(eventId: string) {
   if (typeof eventId !== 'string' || !ID_RE.test(eventId)) throw new CareValidationError('notFound')
 }
 
+// A client-generated row id (offline replay) is optional; when given it must be a UUID.
+function parseClientId(id: unknown): string | undefined {
+  if (id === undefined) return undefined
+  if (typeof id !== 'string' || !ID_RE.test(id)) throw new CareValidationError('notFound')
+  return id.toLowerCase()
+}
+
+// After a unique violation on an insert that carried a client id: true when that
+// row already exists for this baby, meaning an earlier attempt landed and only
+// its response was lost. Constraint names are not parsed on purpose.
+async function clientRowExists(supabase: SupabaseClient, babyId: string, id: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('care_events')
+    .select('id')
+    .eq('id', id)
+    .eq('baby_id', babyId)
+    .maybeSingle()
+  if (error) throw error
+  return !!data
+}
+
 // Creator names come from baby_access + users through the passed client;
 // access was already checked by the caller.
 async function withCreatorNames(supabase: SupabaseClient, babyId: string, rows: Tables<'care_events'>[]): Promise<CareEvent[]> {
@@ -220,7 +241,7 @@ export async function startCareTimerCore(
   userId: string,
   babyId: string,
   kind: Enums<'care_event_kind'>,
-  opts: { side?: Enums<'breast_side'>; startedAt?: string } = {},
+  opts: { side?: Enums<'breast_side'>; startedAt?: string; id?: string } = {},
 ): Promise<void> {
   const contextLogger = logger.child({ function: startCareTimerCore.name, babyId, kind })
   await assertTrackerAccessForUser(supabase, userId, babyId)
@@ -228,6 +249,7 @@ export async function startCareTimerCore(
   const validKind = await assertKind(kind)
   if (!(TIMER_KINDS as readonly string[]).includes(validKind)) throw new CareValidationError('invalidKind')
   const side = validKind === 'breastfeed' ? await assertSide(opts?.side) : null
+  const id = parseClientId(opts?.id)
 
   const now = new Date()
   let startedAt = now
@@ -237,6 +259,7 @@ export async function startCareTimerCore(
   }
 
   const { error } = await supabase.from('care_events').insert({
+    ...(id ? { id } : {}),
     baby_id: babyId,
     kind: validKind,
     started_at: startedAt.toISOString(),
@@ -246,8 +269,14 @@ export async function startCareTimerCore(
   })
 
   if (error) {
-    // Partial unique index: another parent already started this timer.
+    // 23505 is overloaded once clients send ids: the same row replayed (success) or the
+    // partial unique index (another parent already started this timer).
     if (error.code === '23505') {
+      if (id && await clientRowExists(supabase, babyId, id)) {
+        contextLogger.info('Timer start already applied')
+        revalidateTracker(babyId)
+        return
+      }
       contextLogger.info('Timer already running')
       revalidateTracker(babyId)
       throw new CareValidationError('alreadyRunning')
@@ -266,9 +295,16 @@ async function stopRunningTimer(
   babyId: string,
   match: { eventId: string } | { kind: TimerKind },
   sideInput: unknown,
+  endedAtInput?: string,
 ): Promise<void> {
   const contextLogger = logger.child({ function: stopRunningTimer.name, babyId, ...match })
   const side = sideInput !== undefined ? await assertSide(sideInput) : undefined
+  // The tap time of an offline stop; omitted means the server's now (MCP, online UI).
+  let requestedEnd: Date | undefined
+  if (endedAtInput !== undefined) {
+    requestedEnd = await parseTimestamp(endedAtInput)
+    await assertNotInFuture(requestedEnd, new Date())
+  }
 
   let query = supabase
     .from('care_events')
@@ -288,7 +324,7 @@ async function stopRunningTimer(
   }
 
   const startedMs = new Date(running.started_at).getTime()
-  const endedMs = Math.min(Date.now(), startedMs + CARE_LIMITS.maxDurationMs)
+  const endedMs = Math.min(requestedEnd?.getTime() ?? Date.now(), startedMs + CARE_LIMITS.maxDurationMs)
 
   const { data: stopped, error } = await supabase
     .from('care_events')
@@ -322,11 +358,11 @@ export async function stopCareTimerCore(
   userId: string,
   babyId: string,
   eventId: string,
-  opts: { side?: Enums<'breast_side'> } = {},
+  opts: { side?: Enums<'breast_side'>; endedAt?: string } = {},
 ): Promise<void> {
   await assertTrackerAccessForUser(supabase, userId, babyId)
   assertEventId(eventId)
-  await stopRunningTimer(supabase, userId, babyId, { eventId }, opts?.side)
+  await stopRunningTimer(supabase, userId, babyId, { eventId }, opts?.side, opts?.endedAt)
 }
 
 // For callers that don't know the row id (MCP): the unique partial index
@@ -350,8 +386,10 @@ export async function createCareEventCore(supabase: SupabaseClient, userId: stri
 
   const kind = await assertKind(input?.kind)
   const fields = await validateCareFields(input, kind)
+  const id = parseClientId(input?.id)
 
   const { error } = await supabase.from('care_events').insert({
+    ...(id ? { id } : {}),
     ...fields,
     ended_at: fields.ended_at ?? null,
     baby_id: babyId,
@@ -359,7 +397,16 @@ export async function createCareEventCore(supabase: SupabaseClient, userId: stri
     created_by: userId,
   })
 
-  if (error) { contextLogger.error(error, 'Error creating care event'); throw error }
+  if (error) {
+    // Same id already stored for this baby: an earlier attempt landed, so this retry is a no-op.
+    if (error.code === '23505' && id && await clientRowExists(supabase, babyId, id)) {
+      contextLogger.info({ kind }, 'Care event already created')
+      revalidateTracker(babyId)
+      return
+    }
+    contextLogger.error(error, 'Error creating care event')
+    throw error
+  }
 
   contextLogger.info({ kind }, 'Care event created')
   revalidateTracker(babyId)
