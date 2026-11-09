@@ -76,14 +76,16 @@ async function currentUser() {
   }
 }
 
-// Route Handlers lack the Origin check Server Actions get, so do the same comparison
-// Next does: Origin host against x-forwarded-host, falling back to host.
+// Route Handlers lack the Origin check Server Actions get, so mirror Next's comparison: the
+// Origin host must equal the first x-forwarded-host entry or the Host header.
 function isSameOrigin(request: Request) {
   const origin = request.headers.get('origin')
   if (!origin) return false
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host')
+  const forwarded = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
+  const host = request.headers.get('host')
   try {
-    return !!host && new URL(origin).host === host
+    const originHost = new URL(origin).host
+    return (!!forwarded && originHost === forwarded) || (!!host && originHost === host)
   } catch {
     return false
   }
