@@ -13,9 +13,21 @@ import { PAGE_REGISTRY, type PageId } from './page_registry'
 
 type AccessLevel = Enums<'role'>
 
+// A failed access query is not a denial. It is deliberately not an ActionError: the
+// tracker sync route maps ActionError to a permanent "forbidden" (the user discards
+// their queued work) but a query failure must be retried. It still fails closed, since
+// callers never get a level back, and its message is generic so nothing from the
+// database can reach a client.
+export class AccessCheckError extends Error {
+  constructor() {
+    super('Access check unavailable')
+  }
+}
+
 export type PageOverride = { enabled: boolean; required_role: AccessLevel }
 
-// The access level of `userId` on `babyId`, or null when not a member.
+// The access level of `userId` on `babyId`, or null when not a member. Throws
+// AccessCheckError when the lookup itself fails.
 export async function getMemberAccess(supabase: SupabaseClient, userId: string, babyId: string): Promise<AccessLevel | null> {
   const contextLogger = logger.child({ function: getMemberAccess.name, babyId })
   const { data, error } = await supabase
@@ -25,7 +37,7 @@ export async function getMemberAccess(supabase: SupabaseClient, userId: string, 
     .eq('user_id', userId)
     .maybeSingle()
 
-  if (error) { contextLogger.error(error, "Error fetching member access"); return null }
+  if (error) { contextLogger.error(error, "Error fetching member access"); throw new AccessCheckError() }
   return (data?.access_level as AccessLevel | undefined) ?? null
 }
 
@@ -68,7 +80,7 @@ export async function assertPageAccessForUser(
 
   if (error) {
     contextLogger.error(error, "Error fetching page setting")
-    throw await actionError('unauthorized')
+    throw new AccessCheckError()
   }
 
   if (!canAccessPage(entry, override as PageOverride | null, level)) {
@@ -143,6 +155,9 @@ export async function assertCirclesInBabyWith(supabase: SupabaseClient, circleId
     .in('id', unique)
     .eq('baby_id', babyId)
 
-  if (error) contextLogger.error(error, "Error checking circles")
-  if (error || data.length !== unique.length) throw await actionError('unauthorized')
+  if (error) {
+    contextLogger.error(error, "Error checking circles")
+    throw new AccessCheckError()
+  }
+  if (data.length !== unique.length) throw await actionError('unauthorized')
 }
