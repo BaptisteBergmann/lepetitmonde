@@ -57,9 +57,10 @@ export default function CreateStoryModal({
   const [duration, setDuration] = useState<string>('24')
   const [circleIds, setCircleIds] = useState<string[]>([])
   const [isPending, setIsPending] = useState(false)
-  // Once the push has gone out, a retry (e.g. after a failed createStory
-  // response) must not send it again; publishStory isn't idempotent.
-  const [published, setPublished] = useState(false)
+  // Set right before the first createStory call is sent. From then on the
+  // server may hold a story for this id with this media, so swapping the
+  // file would make the retry fail as "not yours" and strand that story.
+  const [createSent, setCreateSent] = useState(false)
   // The thumbnail is uploaded with upsert:false, so a retry would get
   // "already exists" and lose the name; remember it from the first success.
   const uploadedThumbnail = useRef<string | undefined>(undefined)
@@ -113,6 +114,7 @@ export default function CreateStoryModal({
         }
       }
 
+      setCreateSent(true)
       await createStory({
         id: storyId,
         baby_id: babyId,
@@ -124,12 +126,10 @@ export default function CreateStoryModal({
         thumbnailFilename,
       }, circleIds)
 
-      // createStory resumes a story that already exists under this id, so
-      // calling it again after a failure is safe; only the push is guarded.
-      if (!published) {
-        await publishStory(storyId, babyId)
-        setPublished(true)
-      }
+      // createStory resumes a story that already exists under this id, so a
+      // retry after any failure is safe. The modal closes as soon as
+      // publishStory resolves, so the push can't be sent twice from here.
+      await publishStory(storyId, babyId)
 
       onCreated()
       onClose()
@@ -153,7 +153,7 @@ export default function CreateStoryModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('photoVideoLabel')}
           </Label>
-          <Dropzone {...upload} disabled={isPending}>
+          <Dropzone {...upload} disabled={isPending || createSent}>
             <DropzoneEmptyState />
             <DropzoneContent />
           </Dropzone>
