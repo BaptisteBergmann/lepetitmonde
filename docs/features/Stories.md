@@ -14,6 +14,7 @@ Short-lived photo or video stories shown as bubbles above the [[Feed]], in the s
 - The viewer opens on the first unseen story, with tap zones (back / pause / next), hold to pause, and reactions.
 - Admins can edit a story; adding a circle notifies only the newly visible members.
 - The tray updates live through the [[Realtime]] relay.
-- Story photos are copied into the [[Albums]] library.
+- Story photos are copied into the [[Albums]] library. The copy is best-effort (`bestEffort`): if it fails the story still exists and is still announced.
+- **Create / retry / publish flow**: the modal uploads the media, calls `createStory`, then `publishStory`. `createStory` only writes the row, circles and Photos-page copy and never notifies. The client keeps the same story id across retries, so a second `createStory` on a duplicate `stories_pkey` resumes instead of failing: it requires the existing row to be the caller's own, in the same baby, with the same media path (otherwise `unauthorized`), re-upserts the circle links, and mirrors to the library only if no `album_photos` row has that `source_story_id`. `publishStory` (admin only) sends `new_story` to the viewers of the stored circles, excluding the caller; the modal's `published` flag stops a double send.
 
 Tables: `stories`, `stories_circles`, `story_views`, `story_reactions`, `story_highlights`, `story_highlight_items`. Notifications: `new_story`, `new_story_reaction`.

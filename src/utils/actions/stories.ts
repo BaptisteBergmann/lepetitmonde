@@ -77,7 +77,10 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   const mediaPath = `stories/${story.id}/${story.mediaFilename}`
   const thumbnailPath = story.thumbnailFilename ? `stories/${story.id}/thumbnails/${story.thumbnailFilename}` : null
 
-  const { data, error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw await actionError('unauthorized')
+
+  const { error } = await supabase
     .from('stories')
     .insert([{
       id: story.id,
@@ -89,46 +92,97 @@ export async function createStory(story: NewStory, circleIds: string[]) {
       thumbnail_path: thumbnailPath,
       mime_type: story.mimeType,
     }])
-    .select('id')
-    .single()
 
-  if (error) { contextLogger.error(error, "Error creating story"); throw error }
+  // The client reuses its story id when retrying. If the first call landed
+  // but a later step failed or the response was lost, resume it instead of
+  // failing on the duplicate id: only when it's the caller's own story in
+  // this baby with the same media, so nobody can resume someone else's.
+  let resumed = false
+  if (error) {
+    if (error.code !== '23505' || !error.message.includes('stories_pkey')) {
+      contextLogger.error(error, "Error creating story")
+      throw error
+    }
+
+    const { data: existing, error: existingError } = await supabase
+      .from('stories')
+      .select('id, created_by, media_path')
+      .eq('id', story.id)
+      .eq('baby_id', story.baby_id)
+      .maybeSingle()
+
+    if (existingError) contextLogger.error(existingError, "Error checking existing story on retry")
+    if (!existing || existing.created_by !== user.id || existing.media_path !== mediaPath) {
+      contextLogger.warn("Rejected resume of a story that is not the caller's")
+      throw await actionError('unauthorized')
+    }
+    resumed = true
+  }
+  const storyId = story.id
 
   if (circleIds.length > 0) {
+    // Upsert so a resumed call can't trip on links the first attempt wrote.
     const { error: circlesError } = await supabase
       .from('stories_circles')
-      .insert(circleIds.map((circleId) => ({ story_id: data.id, circle_id: circleId })))
+      .upsert(
+        circleIds.map((circleId) => ({ story_id: storyId, circle_id: circleId })),
+        { onConflict: 'story_id,circle_id', ignoreDuplicates: true }
+      )
 
     if (circlesError) { contextLogger.error(circlesError, "Error linking story circles"); throw circlesError }
   }
 
-  contextLogger.info({ storyId: data.id }, "Story created")
+  contextLogger.info({ storyId, resumed }, resumed ? "Story already existed (retry)" : "Story created")
 
   // Mirror onto the Photos page as an independent copy (see
   // .claude/plans/post-story-photos-to-photo-page.md) so it survives the
   // story expiring or being deleted — unlike posts, stories can't just
-  // share their storage object.
-  await bestEffort(contextLogger, "Error mirroring story to Photos page", () =>
-    copyStoryPhotoToLibrary(data.id, story.baby_id, {
+  // share their storage object. Best-effort: the story is already committed,
+  // and publishStory (a separate step) sends the notification.
+  await bestEffort(contextLogger, "Error mirroring story to Photos page", async () => {
+    if (resumed) {
+      const { data: mirrored, error: mirrorError } = await supabase
+        .from('album_photos')
+        .select('id')
+        .eq('baby_id', story.baby_id)
+        .eq('source_story_id', storyId)
+        .limit(1)
+      if (mirrorError) throw mirrorError
+      if (mirrored.length > 0) return
+    }
+    await copyStoryPhotoToLibrary(storyId, story.baby_id, {
       storagePath: mediaPath,
       thumbnailPath,
       mimeType: story.mimeType,
     })
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  const recipients = await getVisibleUserIds(story.baby_id, circleIds, user?.id)
-  const t = await getTranslations('pushNotifications')
-  await notifyUsers(story.baby_id, 'new_story', {
-    title: t('newStory.title'),
-    body: t('newStory.body'),
-    url: `/baby/${story.baby_id}/feed?storyId=${data.id}`,
-  }, recipients)
+  })
 
   revalidatePath(`/baby/${story.baby_id}/feed`)
   revalidatePath(`/baby/${story.baby_id}/albums`)
 
-  return data.id
+  return storyId
+}
+
+// Sends the new-story push once the story exists. Recipients come from the
+// circles stored on the story, never from client input. Not idempotent on the
+// server: the modal's `published` flag and pending lock are what prevent a
+// double send (admin-only action), same as publishPost.
+export async function publishStory(storyId: string, babyId: string) {
+  const contextLogger = logger.child({ function: publishStory.name, storyId, babyId })
+
+  const { viewer, story } = await assertStoryVisible(storyId, babyId, await assertAdmin(babyId))
+
+  const recipients = await getVisibleUserIds(babyId, story.circleIds, viewer.userId)
+  const t = await getTranslations('pushNotifications')
+  await notifyUsers(babyId, 'new_story', {
+    title: t('newStory.title'),
+    body: t('newStory.body'),
+    url: `/baby/${babyId}/feed?storyId=${storyId}`,
+  }, recipients)
+
+  contextLogger.info({ recipientCount: recipients.length }, "Story published")
+
+  revalidatePath(`/baby/${babyId}/feed`)
 }
 
 type StoryUpdate = { caption: string | null; groupLabel: string | null }

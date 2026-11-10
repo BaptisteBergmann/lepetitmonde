@@ -62,7 +62,10 @@ export async function copyStorageObject(babyId: string, fromPath: string, toPath
 
   const { error } = await supabaseAdmin.storage.from(babyId).copy(fromPath, toPath)
 
-  if (error) {
+  // A resumed createStory re-runs the mirror after an earlier attempt may
+  // have already copied the object; the destination is a fresh path owned by
+  // that story, so an existing object is the copy we wanted.
+  if (error && !error.message.toLowerCase().includes('already exists')) {
     contextLogger.error(error, "Error copying storage object")
     throw error
   }

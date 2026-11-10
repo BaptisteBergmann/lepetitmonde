@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import {
   Select,
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select"
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone'
 import { useSupabaseUpload, uploadFile } from '@utils/actions/use-supabase-upload'
-import { createStory } from '@utils/actions/stories'
+import { createStory, publishStory } from '@utils/actions/stories'
 import { captureVideoThumbnail } from '@utils/video-thumbnail'
 import { Tables } from '@utils/supabase/database.types'
 import { Button } from '@/components/ui/button'
@@ -57,6 +57,12 @@ export default function CreateStoryModal({
   const [duration, setDuration] = useState<string>('24')
   const [circleIds, setCircleIds] = useState<string[]>([])
   const [isPending, setIsPending] = useState(false)
+  // Once the push has gone out, a retry (e.g. after a failed createStory
+  // response) must not send it again; publishStory isn't idempotent.
+  const [published, setPublished] = useState(false)
+  // The thumbnail is uploaded with upsert:false, so a retry would get
+  // "already exists" and lose the name; remember it from the first success.
+  const uploadedThumbnail = useRef<string | undefined>(undefined)
 
   const upload = useSupabaseUpload({
     bucketName: babyId,
@@ -89,8 +95,8 @@ export default function CreateStoryModal({
 
       // Images already get a server-generated thumbnail from /api/upload
       // (finalThumbnails); only videos need the client-side capture below.
-      let thumbnailFilename: string | undefined = finalThumbnails[file.name]
-      if (mimeType.startsWith('video/')) {
+      let thumbnailFilename: string | undefined = finalThumbnails[file.name] ?? uploadedThumbnail.current
+      if (mimeType.startsWith('video/') && !thumbnailFilename) {
         const thumbnailBlob = await captureVideoThumbnail(file)
         if (thumbnailBlob) {
           const thumbName = `${filename}.jpg`
@@ -100,7 +106,10 @@ export default function CreateStoryModal({
             thumbnailBlob,
             { cacheControl: '3600', upsert: false }
           )
-          if (!error) thumbnailFilename = thumbName
+          if (!error) {
+            thumbnailFilename = thumbName
+            uploadedThumbnail.current = thumbName
+          }
         }
       }
 
@@ -115,11 +124,18 @@ export default function CreateStoryModal({
         thumbnailFilename,
       }, circleIds)
 
+      // createStory resumes a story that already exists under this id, so
+      // calling it again after a failure is safe; only the push is guarded.
+      if (!published) {
+        await publishStory(storyId, babyId)
+        setPublished(true)
+      }
+
       onCreated()
       onClose()
     } catch {
-      // The story row is only created after the upload succeeds, so a
-      // failure leaves nothing on the server: the form simply unlocks.
+      // Uploads and the story row are kept across attempts (same id), so
+      // pressing publish again picks up where this one stopped.
       toast.error(t('publishError'))
     } finally {
       setIsPending(false)
