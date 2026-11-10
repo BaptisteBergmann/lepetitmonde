@@ -2,6 +2,9 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-10
+
+- `4844fb9` refactor(actions): make Photos-page mirrors best-effort
 ## 2026-11-09
 
 - `fdb17e3` docs(digest): correct canUse comment on page-check errors
