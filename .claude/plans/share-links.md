@@ -439,65 +439,65 @@ Wireframe (mobile 375px, 16px gutter = `px-4`):
 ### Copy
 Namespaces follow existing files: `albums.share.*`, `shareAlbum.*` in `messages/en.json` and `messages/fr.json`. Existing keys unchanged unless noted.
 
-| Key | English | French |
-|-----|---------|--------|
-| albums.share.title | Share album | Partager l'album |
-| albums.share.titlePhoto | Share this photo | Partager cette photo |
-| albums.share.titleSelection | Share {count, plural, one {# photo} other {# photos}} | Partager {count, plural, one {# photo} other {# photos}} |
-| albums.share.description (album, existing) | Anyone with this link can view the photos in this album, even without an account. | Toute personne disposant de ce lien peut voir les photos de cet album, même sans compte. |
-| albums.share.descriptionPhotos | Anyone with this link can view {count, plural, one {this photo} other {these photos}}, even without an account. | Toute personne disposant de ce lien peut voir {count, plural, one {cette photo} other {ces photos}}, même sans compte. |
-| albums.share.labelLabel | Label (optional) | Nom du lien (facultatif) |
-| albums.share.labelPlaceholder | e.g. For Marie's colleagues | ex. Pour les collègues de Marie |
-| albums.share.durationLabel (existing) | Link valid for | Lien valable pendant |
-| albums.share.duration24h / 7d / 30d (existing) | 24 hours / 7 days / 30 days | 24 heures / 7 jours / 30 jours |
-| albums.share.expiresOn | Expires on {date} | Expire le {date} |
-| albums.share.generate | Create link | Créer le lien |
-| albums.share.linkReady | Link ready | Lien prêt |
-| albums.share.linkShownOnce | Copy it now: for security it won't be shown again. | Copiez-le maintenant : pour votre sécurité, il ne sera plus affiché. |
-| albums.share.copy | Copy link | Copier le lien |
-| albums.share.copied | Link copied | Lien copié |
-| albums.share.copyFailed (existing) | Couldn't copy automatically. Copy the link below. | Copie automatique impossible. Copiez le lien ci-dessous. |
-| albums.share.done | Done | Terminé |
-| albums.share.close | Close | Fermer |
-| albums.share.allLinks | See all links | Voir tous les liens |
-| albums.share.linksTitle | Share links | Liens de partage |
-| albums.share.activeLinks | Active | Actifs |
-| albums.share.endedLinks | Ended | Terminés |
-| albums.share.noLinks | No share links yet. Open a photo or an album and choose Share to create one. | Aucun lien de partage pour l'instant. Ouvrez une photo ou un album et choisissez Partager pour en créer un. |
-| albums.share.noActiveLinks | No active links. | Aucun lien actif. |
-| albums.share.fallbackAlbum | Album: {name} | Album : {name} |
-| albums.share.kindPhotos | {count, plural, one {# photo} other {# photos}} | {count, plural, one {# photo} other {# photos}} |
-| albums.share.statusActive | Active | Actif |
-| albums.share.statusExpired | Expired | Expiré |
-| albums.share.statusRevoked | Revoked | Révoqué |
-| albums.share.expiresIn | Expires {relative} | Expire {relative} |
-| albums.share.expiredOn | Expired {relative} | Expiré {relative} |
-| albums.share.accessCount | {count, plural, =0 {Never opened} one {# visit} other {# visits}} | {count, plural, =0 {Jamais ouvert} one {# visite} other {# visites}} |
-| albums.share.lastAccess | last {relative} | dernière {relative} |
-| albums.share.accessLog | Visits ({count}) | Visites ({count}) |
-| albums.share.accessLogEmpty | Nobody has opened this link yet. | Personne n'a encore ouvert ce lien. |
-| albums.share.accessLogLimit | Showing the latest 200 visits. | Affichage des 200 dernières visites. |
-| albums.share.accessLogError | Couldn't load the visits. | Impossible de charger les visites. |
-| albums.share.ipUnknown | IP unknown | IP inconnue |
-| albums.share.revoke (existing) | Revoke | Révoquer |
-| albums.share.revokeConfirm (existing) | Revoke this link? Anyone using it will immediately lose access. | Révoquer ce lien ? Toute personne qui l'utilise perdra immédiatement l'accès. |
-| albums.share.revoked | Link revoked | Lien révoqué |
-| albums.share.revokeError (existing) | Something went wrong while revoking the link. | Une erreur est survenue lors de la révocation du lien. |
-| albums.share.linkError (existing) | Something went wrong while generating the link. | Une erreur est survenue lors de la création du lien. |
-| albums.share.loadError / retry (existing) | Couldn't load the links. / Try again | Impossible de charger les liens. / Réessayer |
-| albums.share.selectMode | Select | Sélectionner |
-| albums.share.cancelSelect | Cancel | Annuler |
-| albums.share.shareSelection | Share ({count}) | Partager ({count}) |
-| albums.share.selectedCount | {count, plural, one {# photo selected} other {# photos selected}} (sr-only live region) | {count, plural, one {# photo sélectionnée} other {# photos sélectionnées}} |
-| albums.share.tooManyPhotos | You can share up to {max} photos at once. | Vous pouvez partager jusqu'à {max} photos à la fois. |
-| shareAlbum.selectionTitle | Shared photos | Photos partagées |
-| shareAlbum.photoTitle | Shared photo | Photo partagée |
-| shareAlbum.visitsRecorded | Visits to this link are recorded (date and IP address) for the sender. | Les visites de ce lien sont enregistrées (date et adresse IP) pour la personne qui l'a envoyé. |
-| shareAlbum.invalidTitle (existing) | Link unavailable | Lien indisponible |
-| shareAlbum.invalidDescription (existing) | This link is invalid, has expired or was revoked. Ask whoever sent it to you for a new one. | Ce lien est invalide, a expiré ou a été révoqué. Demandez-en un nouveau à la personne qui vous l'a envoyé. |
-| shareAlbum.errorTitle | Something went wrong | Une erreur est survenue |
-| shareAlbum.errorDescription | We couldn't load these photos. Please try again. | Impossible de charger ces photos. Réessayez. |
-| shareAlbum.retry | Try again | Réessayer |
+| Key                                            | English                                                                                                         | French                                                                                                                 |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| albums.share.title                             | Share album                                                                                                     | Partager l'album                                                                                                       |
+| albums.share.titlePhoto                        | Share this photo                                                                                                | Partager cette photo                                                                                                   |
+| albums.share.titleSelection                    | Share {count, plural, one {# photo} other {# photos}}                                                           | Partager {count, plural, one {# photo} other {# photos}}                                                               |
+| albums.share.description (album, existing)     | Anyone with this link can view the photos in this album, even without an account.                               | Toute personne disposant de ce lien peut voir les photos de cet album, même sans compte.                               |
+| albums.share.descriptionPhotos                 | Anyone with this link can view {count, plural, one {this photo} other {these photos}}, even without an account. | Toute personne disposant de ce lien peut voir {count, plural, one {cette photo} other {ces photos}}, même sans compte. |
+| albums.share.labelLabel                        | Label (optional)                                                                                                | Nom du lien (facultatif)                                                                                               |
+| albums.share.labelPlaceholder                  | e.g. For Marie's colleagues                                                                                     | ex. Pour les collègues de Marie                                                                                        |
+| albums.share.durationLabel (existing)          | Link valid for                                                                                                  | Lien valable pendant                                                                                                   |
+| albums.share.duration24h / 7d / 30d (existing) | 24 hours / 7 days / 30 days                                                                                     | 24 heures / 7 jours / 30 jours                                                                                         |
+| albums.share.expiresOn                         | Expires on {date}                                                                                               | Expire le {date}                                                                                                       |
+| albums.share.generate                          | Create link                                                                                                     | Créer le lien                                                                                                          |
+| albums.share.linkReady                         | Link ready                                                                                                      | Lien prêt                                                                                                              |
+| albums.share.linkShownOnce                     | Copy it now: for security it won't be shown again.                                                              | Copiez-le maintenant : pour votre sécurité, il ne sera plus affiché.                                                   |
+| albums.share.copy                              | Copy link                                                                                                       | Copier le lien                                                                                                         |
+| albums.share.copied                            | Link copied                                                                                                     | Lien copié                                                                                                             |
+| albums.share.copyFailed (existing)             | Couldn't copy automatically. Copy the link below.                                                               | Copie automatique impossible. Copiez le lien ci-dessous.                                                               |
+| albums.share.done                              | Done                                                                                                            | Terminé                                                                                                                |
+| albums.share.close                             | Close                                                                                                           | Fermer                                                                                                                 |
+| albums.share.allLinks                          | See all links                                                                                                   | Voir tous les liens                                                                                                    |
+| albums.share.linksTitle                        | Share links                                                                                                     | Liens de partage                                                                                                       |
+| albums.share.activeLinks                       | Active                                                                                                          | Actifs                                                                                                                 |
+| albums.share.endedLinks                        | Ended                                                                                                           | Terminés                                                                                                               |
+| albums.share.noLinks                           | No share links yet. Open a photo or an album and choose Share to create one.                                    | Aucun lien de partage pour l'instant. Ouvrez une photo ou un album et choisissez Partager pour en créer un.            |
+| albums.share.noActiveLinks                     | No active links.                                                                                                | Aucun lien actif.                                                                                                      |
+| albums.share.fallbackAlbum                     | Album: {name}                                                                                                   | Album : {name}                                                                                                         |
+| albums.share.kindPhotos                        | {count, plural, one {# photo} other {# photos}}                                                                 | {count, plural, one {# photo} other {# photos}}                                                                        |
+| albums.share.statusActive                      | Active                                                                                                          | Actif                                                                                                                  |
+| albums.share.statusExpired                     | Expired                                                                                                         | Expiré                                                                                                                 |
+| albums.share.statusRevoked                     | Revoked                                                                                                         | Révoqué                                                                                                                |
+| albums.share.expiresIn                         | Expires {relative}                                                                                              | Expire {relative}                                                                                                      |
+| albums.share.expiredOn                         | Expired {relative}                                                                                              | Expiré {relative}                                                                                                      |
+| albums.share.accessCount                       | {count, plural, =0 {Never opened} one {# visit} other {# visits}}                                               | {count, plural, =0 {Jamais ouvert} one {# visite} other {# visites}}                                                   |
+| albums.share.lastAccess                        | last {relative}                                                                                                 | dernière {relative}                                                                                                    |
+| albums.share.accessLog                         | Visits ({count})                                                                                                | Visites ({count})                                                                                                      |
+| albums.share.accessLogEmpty                    | Nobody has opened this link yet.                                                                                | Personne n'a encore ouvert ce lien.                                                                                    |
+| albums.share.accessLogLimit                    | Showing the latest 200 visits.                                                                                  | Affichage des 200 dernières visites.                                                                                   |
+| albums.share.accessLogError                    | Couldn't load the visits.                                                                                       | Impossible de charger les visites.                                                                                     |
+| albums.share.ipUnknown                         | IP unknown                                                                                                      | IP inconnue                                                                                                            |
+| albums.share.revoke (existing)                 | Revoke                                                                                                          | Révoquer                                                                                                               |
+| albums.share.revokeConfirm (existing)          | Revoke this link? Anyone using it will immediately lose access.                                                 | Révoquer ce lien ? Toute personne qui l'utilise perdra immédiatement l'accès.                                          |
+| albums.share.revoked                           | Link revoked                                                                                                    | Lien révoqué                                                                                                           |
+| albums.share.revokeError (existing)            | Something went wrong while revoking the link.                                                                   | Une erreur est survenue lors de la révocation du lien.                                                                 |
+| albums.share.linkError (existing)              | Something went wrong while generating the link.                                                                 | Une erreur est survenue lors de la création du lien.                                                                   |
+| albums.share.loadError / retry (existing)      | Couldn't load the links. / Try again                                                                            | Impossible de charger les liens. / Réessayer                                                                           |
+| albums.share.selectMode                        | Select                                                                                                          | Sélectionner                                                                                                           |
+| albums.share.cancelSelect                      | Cancel                                                                                                          | Annuler                                                                                                                |
+| albums.share.shareSelection                    | Share ({count})                                                                                                 | Partager ({count})                                                                                                     |
+| albums.share.selectedCount                     | {count, plural, one {# photo selected} other {# photos selected}} (sr-only live region)                         | {count, plural, one {# photo sélectionnée} other {# photos sélectionnées}}                                             |
+| albums.share.tooManyPhotos                     | You can share up to {max} photos at once.                                                                       | Vous pouvez partager jusqu'à {max} photos à la fois.                                                                   |
+| shareAlbum.selectionTitle                      | Shared photos                                                                                                   | Photos partagées                                                                                                       |
+| shareAlbum.photoTitle                          | Shared photo                                                                                                    | Photo partagée                                                                                                         |
+| shareAlbum.visitsRecorded                      | Visits to this link are recorded (date and IP address) for the sender.                                          | Les visites de ce lien sont enregistrées (date et adresse IP) pour la personne qui l'a envoyé.                         |
+| shareAlbum.invalidTitle (existing)             | Link unavailable                                                                                                | Lien indisponible                                                                                                      |
+| shareAlbum.invalidDescription (existing)       | This link is invalid, has expired or was revoked. Ask whoever sent it to you for a new one.                     | Ce lien est invalide, a expiré ou a été révoqué. Demandez-en un nouveau à la personne qui vous l'a envoyé.             |
+| shareAlbum.errorTitle                          | Something went wrong                                                                                            | Une erreur est survenue                                                                                                |
+| shareAlbum.errorDescription                    | We couldn't load these photos. Please try again.                                                                | Impossible de charger ces photos. Réessayez.                                                                           |
+| shareAlbum.retry                               | Try again                                                                                                       | Réessayer                                                                                                              |
 
 (Builder: verify the existing keys' current French text in `messages/fr.json` and keep it where it exists; the French above is for new keys.)
 

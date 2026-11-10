@@ -1,6 +1,6 @@
 # Row Level Security (RLS) backstop
 
-Status: approved
+Status: on hold (paused 2026-10-23 by Baptiste; was approved 2026-10-07)
 Approved by: Baptiste (2026-10-07)
 
 ## User decisions (2026-10-07)
