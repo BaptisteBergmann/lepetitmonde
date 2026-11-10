@@ -11,6 +11,7 @@ import { getUserAccess } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { linkPostPhotos } from '@utils/albums-internal'
 import { notifyUsers } from './notify'
+import { bestEffort } from '@utils/side-effects'
 import { sendNewPostEmails } from '@/utils/email'
 import type { Comment } from './comments'
 import type { ReactionsData } from './reactions'
@@ -312,11 +313,13 @@ export async function attachPostPhotos(
 
   // Mirror onto the Photos page (see .claude/plans/post-story-photos-to-photo-page.md)
   // — shares the same storage objects just inserted above, no re-upload.
-  await linkPostPhotos(postId, babyId, photoRows.map(({ storage_path, thumbnail_path, mime_type }) => ({
-    storagePath: storage_path,
-    thumbnailPath: thumbnail_path,
-    mimeType: mime_type,
-  })))
+  await bestEffort(contextLogger, "Error mirroring post photos to Photos page", () =>
+    linkPostPhotos(postId, babyId, photoRows.map(({ storage_path, thumbnail_path, mime_type }) => ({
+      storagePath: storage_path,
+      thumbnailPath: thumbnail_path,
+      mimeType: mime_type,
+    })))
+  )
 
   revalidatePath(`/baby/${babyId}/feed`)
   revalidatePath(`/baby/${babyId}/albums`)

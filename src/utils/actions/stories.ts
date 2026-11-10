@@ -12,6 +12,7 @@ import { getUserAccess, getNicknamesByBaby } from './users'
 import { ensureBabyBucket, removeStorageObjects } from './storage'
 import { copyStoryPhotoToLibrary } from '@utils/albums-internal'
 import { notifyUsers } from './notify'
+import { bestEffort } from '@utils/side-effects'
 import { getStoryReactionsForStories, getViewedStoryIds } from '@utils/feed-loaders'
 import type { ReactionsData } from './reactions'
 import { logger } from '../logger'
@@ -107,11 +108,13 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   // .claude/plans/post-story-photos-to-photo-page.md) so it survives the
   // story expiring or being deleted — unlike posts, stories can't just
   // share their storage object.
-  await copyStoryPhotoToLibrary(data.id, story.baby_id, {
-    storagePath: mediaPath,
-    thumbnailPath,
-    mimeType: story.mimeType,
-  })
+  await bestEffort(contextLogger, "Error mirroring story to Photos page", () =>
+    copyStoryPhotoToLibrary(data.id, story.baby_id, {
+      storagePath: mediaPath,
+      thumbnailPath,
+      mimeType: story.mimeType,
+    })
+  )
 
   const { data: { user } } = await supabase.auth.getUser()
   const recipients = await getVisibleUserIds(story.baby_id, circleIds, user?.id)
