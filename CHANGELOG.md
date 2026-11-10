@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-10
 
+- `4043d74` fix(storage): detect an existing copy target by status code
 - `1349231` feat(stories): resume createStory on retry and split out publishStory
 - `4844fb9` refactor(actions): make Photos-page mirrors best-effort
 
