@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-10
 
+- `0cca8d6` fix(stories): lock the file once createStory was sent and drop the dead published guard
 - `7c1bf0d` fix(stories): sync caption and circles when resuming createStory
 - `4043d74` fix(storage): detect an existing copy target by status code
 - `1349231` feat(stories): resume createStory on retry and split out publishStory
