@@ -99,7 +99,9 @@ export async function createStory(story: NewStory, circleIds: string[]) {
   // this baby with the same media, so nobody can resume someone else's.
   let resumed = false
   if (error) {
-    if (error.code !== '23505' || !error.message.includes('stories_pkey')) {
+    // stories has no unique constraint besides its primary key, so 23505
+    // can only mean the id already exists.
+    if (error.code !== '23505') {
       contextLogger.error(error, "Error creating story")
       throw error
     }
@@ -111,12 +113,30 @@ export async function createStory(story: NewStory, circleIds: string[]) {
       .eq('baby_id', story.baby_id)
       .maybeSingle()
 
-    if (existingError) contextLogger.error(existingError, "Error checking existing story on retry")
+    if (existingError) { contextLogger.error(existingError, "Error checking existing story on retry"); throw existingError }
     if (!existing || existing.created_by !== user.id || existing.media_path !== mediaPath) {
       contextLogger.warn("Rejected resume of a story that is not the caller's")
       throw await actionError('unauthorized')
     }
     resumed = true
+
+    // Bring the row in line with the retried values (the user may have
+    // edited them, and nobody has been notified yet).
+    const { error: updateError } = await supabase
+      .from('stories')
+      .update({ caption, group_label: groupLabel })
+      .eq('id', story.id)
+      .eq('baby_id', story.baby_id)
+
+    if (updateError) { contextLogger.error(updateError, "Error updating retried story"); throw updateError }
+
+    let staleCircles = supabase.from('stories_circles').delete().eq('story_id', story.id)
+    // assertCirclesInBaby already matched every circleId to a uuid row, so
+    // none can hold the commas or parentheses that would break this filter.
+    if (circleIds.length > 0) staleCircles = staleCircles.not('circle_id', 'in', `(${circleIds.join(',')})`)
+    const { error: deleteError } = await staleCircles
+
+    if (deleteError) { contextLogger.error(deleteError, "Error clearing stale circles on retried story"); throw deleteError }
   }
   const storyId = story.id
 
