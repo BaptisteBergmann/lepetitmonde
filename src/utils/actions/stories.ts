@@ -185,8 +185,8 @@ export async function createStory(story: NewStory, circleIds: string[]) {
 
 // Sends the new-story push once the story exists. Recipients come from the
 // circles stored on the story, never from client input. Not idempotent on the
-// server: the modal's `published` flag and pending lock are what prevent a
-// double send (admin-only action), same as publishPost.
+// server: the modal's pending lock prevents concurrent sends and the modal
+// closes as soon as this resolves (admin-only action), same as publishPost.
 export async function publishStory(storyId: string, babyId: string) {
   const contextLogger = logger.child({ function: publishStory.name, storyId, babyId })
 
