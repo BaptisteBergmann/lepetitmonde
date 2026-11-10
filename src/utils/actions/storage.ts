@@ -65,7 +65,9 @@ export async function copyStorageObject(babyId: string, fromPath: string, toPath
   // A resumed createStory re-runs the mirror after an earlier attempt may
   // have already copied the object; the destination is a fresh path owned by
   // that story, so an existing object is the copy we wanted.
-  if (error && !error.message.toLowerCase().includes('already exists')) {
+  // Storage answers 409 (Duplicate) when the destination exists.
+  const alreadyExists = !!error && 'statusCode' in error && error.statusCode === '409'
+  if (error && !alreadyExists) {
     contextLogger.error(error, "Error copying storage object")
     throw error
   }
