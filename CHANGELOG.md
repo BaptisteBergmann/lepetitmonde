@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-10
 
+- `9b4f0ed` fix(ui): make Button touch sizing a min-height floor so custom heights survive
 - `c60fe7e` docs(plans): mark story-create-resilience implemented
 - `a46232a` docs(stories): describe the retry sync and drop the removed published guard
 - `0cca8d6` fix(stories): lock the file once createStory was sent and drop the dead published guard
