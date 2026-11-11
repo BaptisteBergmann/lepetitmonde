@@ -141,7 +141,7 @@ export function TableToggle({ items, headers, texts }: { items: InspectItem[]; h
 
   return (
     <div className="space-y-2">
-      <Button type="button" variant="ghost" className="min-h-11 w-full gap-2" aria-expanded={open} aria-controls={id} onClick={() => setOpen((v) => !v)}>
+      <Button type="button" variant="ghost" className="min-h-11 pointer-coarse:min-h-11 w-full gap-2" aria-expanded={open} aria-controls={id} onClick={() => setOpen((v) => !v)}>
         {open ? <ChevronDown aria-hidden="true" /> : <Table2 aria-hidden="true" />}
         {open ? texts.hideTable : texts.showTable}
       </Button>
