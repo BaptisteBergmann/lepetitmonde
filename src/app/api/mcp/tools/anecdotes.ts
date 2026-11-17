@@ -23,7 +23,7 @@ export function registerAnecdoteTools(server: McpServer, ctx: ToolContext) {
         `Lists anecdotes (short family stories), newest first, at most ${MAX_LIMIT} per call (default ${DEFAULT_LIMIT}). Returns { items, nextCursor }. ` +
         'To get the next page pass nextCursor back as cursor; nextCursor is null when there are no more. A page can hold fewer than limit items (viewers only get what is shared with them) while nextCursor is still set, so keep paging until it is null. ' +
         'Alternatively pass before (a day) to jump to anecdotes from earlier days; do not combine it with cursor. ' +
-        'You only get anecdotes you may see: admins see all, viewers only those shared with one of their circles. circleIds are the circles an anecdote is shared with (empty means admins only). hasPhoto tells whether it has a photo; photos are not returned.',
+        'You only get anecdotes you may see: admins see all, viewers only those shared with one of their circles or a circle above it. circleIds are the circles an anecdote is shared with (empty means admins only). hasPhoto tells whether it has a photo; photos are not returned.',
       inputSchema: z.object({
         babyId,
         limit: z.number().int().min(1).max(MAX_LIMIT).optional(),
@@ -66,7 +66,7 @@ export function registerAnecdoteTools(server: McpServer, ctx: ToolContext) {
       title: 'Add an anecdote',
       description:
         'Adds an anecdote (a short family story) for a day. Admins only. date defaults to today in timeZone. ' +
-        'circleIds are the circles that can see it (ids from list_circles). The default [] means ONLY ADMINS see it, so pass circles to share it with the family. ' +
+        'circleIds are the circles that can see it (ids from list_circles); sharing with a circle also shares with its sub-circles. The default [] means ONLY ADMINS see it, so pass circles to share it with the family. ' +
         'It NOTIFIES the family: everyone who can see it gets an inbox entry and a push, except you. No photo can be added over MCP. Not idempotent: calling twice creates two anecdotes.',
       inputSchema: z.object({
         babyId,

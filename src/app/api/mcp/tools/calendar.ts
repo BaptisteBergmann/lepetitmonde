@@ -27,7 +27,7 @@ export function registerCalendarTools(server: McpServer, ctx: ToolContext) {
       title: 'List calendar events',
       description:
         `Lists calendar events from a day to a day, inclusive (defaults: today in timeZone to ${DEFAULT_SPAN_DAYS} days later; with only to, ${DEFAULT_SPAN_DAYS} days before it, at most ${MAX_SPAN_DAYS} days apart), oldest first. ` +
-        'You only get events you may see: admins see all, viewers only events shared with one of their circles. circleIds are the circles an event is shared with (empty means admins only).',
+        'You only get events you may see: admins see all, viewers only events shared with one of their circles or a circle above it. circleIds are the circles an event is shared with (empty means admins only).',
       inputSchema: z.object({ babyId, from: day.optional(), to: day.optional(), timeZone }),
       annotations: { readOnlyHint: true },
     },
@@ -56,7 +56,7 @@ export function registerCalendarTools(server: McpServer, ctx: ToolContext) {
     'list_circles',
     {
       title: 'List circles',
-      description: 'Lists the circles of a baby (id and name), needed to share an event with add_event. Admins only.',
+      description: 'Lists the circles of a baby (id, name and parentId, null for a top-level circle), needed to share an event with add_event. Circles form a tree: sharing with a circle also shares with all its sub-circles. Admins only.',
       inputSchema: z.object({ babyId }),
       annotations: { readOnlyHint: true },
     },
@@ -69,7 +69,7 @@ export function registerCalendarTools(server: McpServer, ctx: ToolContext) {
       title: 'Add a calendar event',
       description:
         'Adds an event to the calendar. Admins only. kind is occasion (default), life_stage (a milestone; milestoneType optional) or medical (the only kind that keeps the time). ' +
-        'circleIds are the circles that can see it (ids from list_circles). The default [] means ONLY ADMINS see it, so pass circles to share it with the family. ' +
+        'circleIds are the circles that can see it (ids from list_circles); sharing with a circle also shares with its sub-circles. The default [] means ONLY ADMINS see it, so pass circles to share it with the family. ' +
         'A life_stage event NOTIFIES the family: everyone who can see it gets an inbox entry and a push, except you. Not idempotent: calling twice creates two events.',
       inputSchema: z.object({
         babyId,
