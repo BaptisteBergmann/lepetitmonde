@@ -23,10 +23,13 @@ type Circle = Tables<'circles'>
 export default function CreatePostModal({
   babyId,
   circles,
+  circleMemberCounts,
   onClose,
 }: {
   babyId: string
   circles: Circle[]
+  // People who see what is shared with each circle; shown in the audience picker.
+  circleMemberCounts?: Record<string, number>
   onClose: () => void
 }) {
   const router = useRouter()
@@ -247,6 +250,7 @@ export default function CreatePostModal({
           </Label>
           <CirclePicker
             circles={circles}
+            audienceCounts={circleMemberCounts}
             id={visibleId}
             disabled={isPending || postCreated}
             value={circleIds}

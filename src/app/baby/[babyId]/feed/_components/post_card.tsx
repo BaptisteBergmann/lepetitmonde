@@ -196,6 +196,7 @@ export default function PostCard({
           babyId={babyId}
           post={post}
           circles={circles}
+          circleMemberCounts={circleMemberCounts}
           onClose={() => setIsEditing(false)}
         />
       )}

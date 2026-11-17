@@ -256,6 +256,7 @@ export default function CalendarView({
           date={modalState.date}
           event={modalState.event}
           circles={circles}
+          circleMemberCounts={circleMemberCounts}
           onClose={() => setModalState(null)}
         />
       )}

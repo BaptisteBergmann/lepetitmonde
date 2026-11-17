@@ -28,12 +28,15 @@ export default function CreateEventModal({
   date,
   event,
   circles,
+  circleMemberCounts,
   onClose,
 }: {
   babyId: string
   date: string
   event?: EventWithCircles
   circles: Circle[]
+  // People who see what is shared with each circle; shown in the audience picker.
+  circleMemberCounts?: Record<string, number>
   onClose: () => void
 }) {
   const router = useRouter()
@@ -206,6 +209,7 @@ export default function CreateEventModal({
           </Label>
           <CirclePicker
             circles={circles}
+            audienceCounts={circleMemberCounts}
             value={circleIds}
             onChange={setCircleIds}
             placeholder={t('visibleByPlaceholder')}

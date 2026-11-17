@@ -173,6 +173,7 @@ export default function FeedView({
         <CreatePostModal
           babyId={babyId}
           circles={circles}
+          circleMemberCounts={circleMemberCounts}
           onClose={() => setCreateOpen(false)}
         />
       )}

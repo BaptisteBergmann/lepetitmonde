@@ -22,11 +22,14 @@ export default function EditPostModal({
   babyId,
   post,
   circles,
+  circleMemberCounts,
   onClose,
 }: {
   babyId: string
   post: PostWithDetails
   circles: Circle[]
+  // People who see what is shared with each circle; shown in the audience picker.
+  circleMemberCounts?: Record<string, number>
   onClose: () => void
 }) {
   const router = useRouter()
@@ -127,6 +130,7 @@ export default function EditPostModal({
           </Label>
           <CirclePicker
             circles={circles}
+            audienceCounts={circleMemberCounts}
             id={visibleId}
             value={circleIds}
             onChange={setCircleIds}
