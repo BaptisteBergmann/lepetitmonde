@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-17
+
+- `49e3003` feat(circles): add circle tree helpers
+
 ## 2026-11-10
 
 - `9b4f0ed` fix(ui): make Button touch sizing a min-height floor so custom heights survive
