@@ -30,7 +30,7 @@ Registered from `src/app/api/mcp/tools/` (one file per area, `index.ts` wires th
 | `tracker.ts` | `get_tracker_status`, `list_tracker_entries`, `add_tracker_entry`, `start_tracker_timer`, `stop_tracker_timer`, `delete_tracker_entry` | [[Baby tracker]] (`add_tracker_entry` also logs diapers: `pee`, `poop`, `poopColor`, `poopTexture`) |
 | `buy_list.ts` | `list_buy_list`, `mark_bought`, `add_buy_list_item`, `remove_from_buy_list` | [[Buy list]] |
 | `inventory.ts` | `list_inventory`, `update_inventory_quantities` | [[Inventory]] |
-| `calendar.ts` | `list_events`, `list_circles`, `add_event` | [[Calendar]] |
+| `calendar.ts` | `list_events`, `list_circles` (returns `parentId`; circles form a tree, so sharing with a circle also shares with its sub-circles), `add_event` | [[Calendar]], [[Circles]] |
 | `anecdotes.ts` | `list_anecdotes`, `add_anecdote` | [[Anecdotes]] |
 | `health.ts` | `get_health_summary`, `set_health_profile`, growth and vaccination tools, `list_upcoming_vaccines` | [[Health]] |
 | `digest.ts` | `get_digest` (day/week summary across areas) | — |

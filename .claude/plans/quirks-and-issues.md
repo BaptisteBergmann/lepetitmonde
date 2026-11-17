@@ -58,7 +58,9 @@ and `alter publication supabase_realtime add table baby_access, users;` if missi
 ### 9. `src/app/profile/page.tsx` is a near-empty stub
 Contains a literal placeholder ("bonjour") and a link to `/settings`. Either build it out (if it's meant to be distinct from Settings) or remove the route/nav entry if Settings already covers everything it was meant to.
 
-### 10. `circles.parent_circle` is unused dead schema
+### 10. `circles.parent_circle` is unused dead schema — RESOLVED (2026-11-17)
+Resolved by the circle hierarchy feature (`.claude/plans/circle-hierarchy.md`, [[Circles]]): `parent_circle` now holds the circle tree. Original note:
+
 The self-referencing FK for circle hierarchy exists in the baseline migration but is never read or written by any app code (confirmed by grepping outside generated types). Either build the hierarchy feature it implies, or drop the column in a follow-up migration to stop it being a red herring for future readers.
 
 ---

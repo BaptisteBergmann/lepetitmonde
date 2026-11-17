@@ -4,7 +4,7 @@ tags: [lepetitmonde/architecture, security]
 
 # Authorization
 
-Up: [[Le petit monde]] · See also [[Authentication]], [[Row Level Security]], [[Page settings]]
+Up: [[Le petit monde]] · See also [[Authentication]], [[Row Level Security]], [[Page settings]], [[Circles]]
 
 Three layers decide what a user can see or do on a baby.
 
@@ -16,7 +16,7 @@ flowchart TD
   P -- no --> X
   P -- yes --> R{Role}
   R -- admin --> ALL[Sees everything,<br/>can create and manage]
-  R -- viewer --> C{Content shared<br/>with one of my circles?}
+  R -- viewer --> C{Content shared with one of my<br/>circles or a circle above them?}
   C -- yes --> SEE[Visible]
   C -- no --> HIDE[Hidden]
 ```
@@ -38,11 +38,15 @@ Each page (feed, calendar, tracker...) has a default from `PAGE_REGISTRY` that a
 
 Circles (`circles`, `circles_access`) are groups of members inside a baby ("Grandparents", "Close friends"...). Content tables have a join table to circles: `posts_circles`, `stories_circles`, `events_circles`, `anecdotes_circles`, `albums_circles`.
 
+Circles form a tree (`parent_circle`, max depth 3), and a user is a direct member of at most one circle per tree. See [[Circles]].
+
 The rule is the same everywhere:
 - **No circle attached → admin-only.**
-- Otherwise visible to admins plus members of at least one attached circle.
+- Otherwise visible to admins plus members of an attached circle **or of any circle below it**. Technically: the item's circles must intersect the viewer's *effective circles* (direct circles plus their ancestors), computed by `getUserCircleIds` / `getViewerCircleIds` with `circle-tree.ts`.
 
-Comments are the exception: they store a `circle_ids` snapshot of the author's circles at write time.
+Comments are the exception: they store a `circle_ids` snapshot of the author's **direct** circles at write time, and match at read time through the tree (the snapshot plus its ancestors must intersect the viewer's effective circles). This is slightly looser than a strict "same circle" rule: two sibling sub-circles that can both see a post can read each other's comments.
+
+Moving a circle changes access to everything already shared with it, immediately. No notification is sent.
 
 ## Guards for child ids
 
@@ -50,4 +54,4 @@ Comments are the exception: they store a `circle_ids` snapshot of the author's c
 
 ## Notification recipients
 
-`getVisibleUserIds(babyId, circleIds)` and `getBabyAdminIds` compute who may be notified about a piece of content, using the same circle rule. When an edit adds a circle, only the newly visible users are notified. See [[Notifications pipeline]].
+`getVisibleUserIds(babyId, circleIds)` and `getBabyAdminIds` compute who may be notified about a piece of content, using the same circle rule (the tagged circles plus all circles below them). When an edit adds a circle, only the newly visible users are notified. See [[Notifications pipeline]].

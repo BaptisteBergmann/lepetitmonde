@@ -28,9 +28,9 @@ flowchart TD
 - **Preferences**: `notification_preferences` is a sparse per-baby, per-type opt-out; `notification_settings` holds quiet hours (evaluated in `FAMILY_TIME_ZONE`). Both are edited from the bell popover in the header.
 - **Push**: `web-push` with VAPID keys (`webpush.ts`), one row per device in `push_subscriptions` keyed by endpoint. Expired endpoints are deleted.
 - **Never throws**: a failing notification is logged and swallowed so it can't break the action that triggered it.
-- **Recipients respect circles**: only users who can see the content are notified; editing visibility notifies only the newly visible users.
+- **Recipients respect circles**: only users who can see the content are notified (members of the tagged circles and of the circles below them, see [[Circles]]); editing visibility notifies only the newly visible users.
 - Types are listed in the `notification_type` enum and `notification-types.ts` (see [[Data model]]).
 
 ## Email
 
-`src/utils/email.ts` sends through Resend (`RESEND_API_KEY`, `EMAIL_FROM`): welcome email, invitation email, new-post email and the admin **broadcast** email (`actions/broadcast_email.ts`, admin-only, sent to the members who can see the chosen circles). Sends are throttled (`sendThrottled`).
+`src/utils/email.ts` sends through Resend (`RESEND_API_KEY`, `EMAIL_FROM`): welcome email, invitation email, new-post email and the admin **broadcast** email (`actions/broadcast_email.ts`, admin-only, sent to the members of the chosen circles and their sub-circles). Sends are throttled (`sendThrottled`).

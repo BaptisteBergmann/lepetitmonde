@@ -22,6 +22,10 @@ RLS is on from creation for the tables added since October 2026:
 
 New tables must enable RLS **and** revoke the default `anon` grants explicitly (the baseline's default privileges grant `anon` on new tables).
 
+## Circle helpers
+
+`is_circle_visible(baby, circle_ids)` includes sub-circles through `circle_descendants_or_self(uuid[])` (recursive CTE, depth guard 10), so a future circle policy matches the app rule ([[Circles]]). The helper and the three trigger functions (`circles_check_hierarchy`, `circles_reparent_children`, `circles_access_check_tree`) are `SECURITY DEFINER` with a pinned `search_path`, owned by `postgres`, with `EXECUTE` revoked from `anon` and `authenticated` (granted to `service_role` only). `is_circle_visible` keeps its grants and calls the helper through its definer rights.
+
 ## Not yet
 
 The older tables (posts, stories, comments, events, circles, guesses, inventory, invitations...) are protected only by application code. The plan to cover them in batches is `.claude/plans/rls.md` (on hold since 2026-10-23). Until then, keep in mind:

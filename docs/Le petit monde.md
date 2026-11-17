@@ -46,6 +46,7 @@ Each baby has a set of pages that an admin can turn on or off and restrict to ad
 - [[Diaper changes]] (pee and poop in the tracker)
 - [[Tracker analytics]] (trends and history for the tracker)
 - [[Health]] (growth charts, vaccinations)
+- [[Circles]] (nested sharing circles)
 - [[Admin console]] (circles, invitations, members, bug reports)
 - [[Onboarding]], [[Settings and profile]], [[Bug reports]]
 

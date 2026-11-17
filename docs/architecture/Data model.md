@@ -16,6 +16,7 @@ erDiagram
   users ||--o{ baby_access : "belongs to"
   babies ||--o{ circles : has
   circles ||--o{ circles_access : contains
+  circles ||--o{ circles : "parent of"
   users ||--o{ circles_access : "is in"
   babies ||--o{ invitations : issues
   babies ||--o{ page_settings : configures
@@ -26,7 +27,7 @@ erDiagram
 | `babies` | One row per baby / journal. |
 | `users` | App profile, 1:1 with `auth.users`. |
 | `baby_access` | Membership: `access_level` (`admin`/`viewer`), nickname, relation. See [[Authorization]]. |
-| `circles`, `circles_access` | Groups of members used for content visibility. |
+| `circles`, `circles_access` | Groups of members used for content visibility. `circles.parent_circle` makes a tree (max depth 3, same baby); one circle per tree per user. See [[Circles]]. |
 | `invitations` | Single-use, expiring signup links (`used_at`, `used_by`, `revoked_at`). See [[Authentication]]. |
 | `page_settings` | Per-baby page overrides. See [[Page settings]]. |
 
