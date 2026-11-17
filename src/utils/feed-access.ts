@@ -15,6 +15,8 @@ import { getAuthUser } from '@utils/supabase/auth'
 import type { Tables } from '@utils/supabase/database.types'
 import { getUserAccess } from '@utils/actions/users'
 import { getUserCircleIds } from '@utils/actions/circles'
+import { getCircleParents } from '@utils/circle-parents'
+import { sharesCircleThroughTree } from '@utils/circle-tree'
 import { actionError } from '@utils/actions/errors'
 import { logger } from '@utils/logger'
 import { assertCirclesInBabyWith } from '@utils/member-access'
@@ -26,7 +28,8 @@ export type FeedViewer = {
 }
 
 // Same rule as withVisibility/getPosts in posts.ts: admins see everything in
-// their baby; others need at least one shared circle. No circle = admin-only.
+// their baby; others need one of the item's circles among their effective circles
+// (direct circles plus ancestors, see getUserCircleIds). No circle = admin-only.
 function canSee(viewer: FeedViewer, itemCircleIds: string[]) {
   return viewer.isAdmin || itemCircleIds.some((id) => viewer.circleIds.has(id))
 }
@@ -211,7 +214,7 @@ export type VisibleComment = Pick<Tables<'post_comments'>, 'id' | 'post_id' | 'u
 
 // The parent post must be visible AND the comment itself must be visible
 // (admin, its author, or a circle overlap with the commenter's circles at
-// the time — same rule as getComments).
+// the time, matched through the circle tree — same rule as getComments).
 export async function assertCommentVisible(commentId: string, babyId: string, viewerArg?: FeedViewer | null) {
   const contextLogger = logger.child({ function: 'assertCommentVisible', commentId, babyId })
   const viewer = viewerArg === undefined ? await getFeedViewer(babyId) : viewerArg
@@ -234,7 +237,7 @@ export async function assertCommentVisible(commentId: string, babyId: string, vi
   const postVisible = canSee(viewer, post.posts_circles.map((pc) => pc.circle_id))
   const commentVisible = viewer.isAdmin
     || data.user_id === viewer.userId
-    || (data.circle_ids as string[]).some((id) => viewer.circleIds.has(id))
+    || sharesCircleThroughTree(data.circle_ids as string[], viewer.circleIds, await getCircleParents(babyId))
   if (!postVisible || !commentVisible) throw await actionError('unauthorized')
 
   const comment: VisibleComment = { id: data.id, post_id: data.post_id, user_id: data.user_id, circle_ids: data.circle_ids }

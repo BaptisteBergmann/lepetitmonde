@@ -11,6 +11,9 @@ import { getDisplayName } from '@utils/users'
 import { logger } from '../logger'
 import { actionError } from './errors'
 import { FEED_LIMITS, normalizeText, truncateForPush } from '@utils/feed-validation'
+import { getDirectCircleIds } from './circles'
+import { getCircleParents } from '@utils/circle-parents'
+import { sharesCircleThroughTree } from '@utils/circle-tree'
 import { assertCommentVisible, assertMember, assertPostVisible, findVisiblePost } from '@utils/feed-access'
 
 export async function addComment(postId: string, babyId: string, rawBody: string) {
@@ -19,7 +22,7 @@ export async function addComment(postId: string, babyId: string, rawBody: string
 
   const { viewer } = await assertPostVisible(postId, babyId, await assertMember(babyId))
   const user = { id: viewer.userId }
-  const circleIds = Array.from(viewer.circleIds)
+  const circleIds = await getDirectCircleIds(babyId, viewer.userId)
   const body = await normalizeText(rawBody, FEED_LIMITS.comment, { requiredKey: 'commentRequired' })
 
   const { error } = await supabase
@@ -109,6 +112,7 @@ export async function getComments(postId: string, babyId: string) {
   const user = { id: viewer.userId }
   const isAdmin = viewer.isAdmin
   const userCircleIds = viewer.circleIds
+  const nodes = await getCircleParents(babyId)
 
   const [{ data, error }, nicknames] = await Promise.all([
     supabase
@@ -122,7 +126,7 @@ export async function getComments(postId: string, babyId: string) {
   if (error) { contextLogger.error(error, "Error fetching comments"); return [] }
 
   const visible = data
-    .filter((comment) => isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id)))
+    .filter((comment) => isAdmin || comment.user_id === user.id || sharesCircleThroughTree(comment.circle_ids, userCircleIds, nodes))
     .map((comment) => ({ ...comment, nickname: nicknames[comment.user_id] ?? null }))
 
   const reactions = await getCommentReactionsForComments(visible.map((comment) => comment.id), babyId)

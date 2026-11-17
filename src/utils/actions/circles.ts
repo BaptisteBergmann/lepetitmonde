@@ -14,6 +14,8 @@ import { actionError } from './errors'
 import { normalizeText } from '@utils/feed-validation'
 import { INPUT_LIMITS } from '@utils/input-limits'
 import { createTtlCache } from '../cache/ttl-cache'
+import { ancestorsOrSelf, descendantsOrSelf } from '../circle-tree'
+import { getCircleParents } from '../circle-parents'
 
 type NewCircle = TablesInsert<'circles'>;
 
@@ -120,11 +122,25 @@ export const getCirclesAccess = cache(async (babyId: string, userId: string) => 
   return circlesAccessCache.get(`${babyId}:${userId}`, () => fetchCirclesAccess(babyId, userId))
 })
 
+// EFFECTIVE circles: the direct ones plus their ancestors, so an item tagged "Family" is
+// visible to someone who is only in "Grandparents" (a sub-circle of Family). Callers match
+// an item's circle ids against this set.
 export async function getUserCircleIds(babyId: string, userId: string) {
+  const access = await getCirclesAccess(babyId, userId)
+  if (access.length === 0) return []
+  const nodes = await getCircleParents(babyId)
+  return Array.from(ancestorsOrSelf(access.map((a) => a.circle_id), nodes))
+}
+
+// The circles the user is a direct member of. Comments stamp these (not the effective
+// set) so moving circles later still resolves through the tree at read time.
+export async function getDirectCircleIds(babyId: string, userId: string) {
   const access = await getCirclesAccess(babyId, userId)
   return access.map((a) => a.circle_id)
 }
 
+// People who see something shared with each circle: distinct direct members of the
+// circle and everything below it. Admins are not counted (they see everything).
 export async function getCircleMemberCounts(babyId: string): Promise<Record<string, number>> {
   const supabase = await createClient()
 
@@ -132,16 +148,30 @@ export async function getCircleMemberCounts(babyId: string): Promise<Record<stri
   if (!user) throw await actionError('unauthorized')
   await assertBabyMember(babyId)
 
-  const rep = await supabase
-    .from('circles_access')
-    .select('circle_id')
-    .eq('baby_id', babyId)
+  const [rep, nodes] = await Promise.all([
+    supabase
+      .from('circles_access')
+      .select('circle_id, user_id')
+      .eq('baby_id', babyId),
+    getCircleParents(babyId),
+  ])
 
   if (rep.error) throw rep.error
 
+  const membersByCircle = new Map<string, Set<string>>()
+  for (const { circle_id, user_id } of rep.data) {
+    const set = membersByCircle.get(circle_id)
+    if (set) set.add(user_id)
+    else membersByCircle.set(circle_id, new Set([user_id]))
+  }
+
   const counts: Record<string, number> = {}
-  for (const { circle_id } of rep.data) {
-    counts[circle_id] = (counts[circle_id] ?? 0) + 1
+  for (const { id } of nodes) {
+    const audience = new Set<string>()
+    for (const circleId of descendantsOrSelf([id], nodes)) {
+      for (const userId of membersByCircle.get(circleId) ?? []) audience.add(userId)
+    }
+    counts[id] = audience.size
   }
   return counts
 }

@@ -121,3 +121,17 @@ export function rootOf(id: string, nodes: CircleNode[]): string {
   }
   return current
 }
+
+// Rule 4 (comments): a comment stores the author's DIRECT circles at write time. It is
+// visible to a viewer whose effective circles (see ancestorsOrSelf) overlap the
+// comment's circles plus their ancestors. Admin/author checks stay with the caller.
+export function sharesCircleThroughTree(
+  commentCircleIds: string[],
+  viewerEffectiveCircleIds: ReadonlySet<string>,
+  nodes: CircleNode[],
+): boolean {
+  for (const id of ancestorsOrSelf(commentCircleIds, nodes)) {
+    if (viewerEffectiveCircleIds.has(id)) return true
+  }
+  return false
+}

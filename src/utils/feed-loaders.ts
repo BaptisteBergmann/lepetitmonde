@@ -16,6 +16,8 @@ import { REACTIONS } from '@utils/reactions'
 import { getDisplayName } from '@utils/users'
 import { getUserAccess, getNicknamesByBaby } from '@utils/actions/users'
 import { getUserCircleIds } from '@utils/actions/circles'
+import { getCircleParents } from '@utils/circle-parents'
+import { sharesCircleThroughTree } from '@utils/circle-tree'
 import type { Comment } from '@utils/actions/comments'
 import type { ReactionsData } from '@utils/actions/reactions'
 import type { PollWithResults } from '@utils/actions/polls'
@@ -51,6 +53,7 @@ export async function getCommentsForPosts(postIds: string[], babyId: string): Pr
   const access = await getUserAccess(babyId)
   const isAdmin = !Array.isArray(access) && access.access_level === 'admin'
   const userCircleIds = new Set(await getUserCircleIds(babyId, user.id))
+  const nodes = await getCircleParents(babyId)
 
   const [{ data, error }, nicknames] = await Promise.all([
     supabase
@@ -64,7 +67,7 @@ export async function getCommentsForPosts(postIds: string[], babyId: string): Pr
   if (error) { contextLogger.error(error, "Error fetching comments for posts"); return byPost }
 
   const visible = data.filter((comment) =>
-    isAdmin || comment.user_id === user.id || comment.circle_ids.some((id: string) => userCircleIds.has(id))
+    isAdmin || comment.user_id === user.id || sharesCircleThroughTree(comment.circle_ids, userCircleIds, nodes)
   )
   const reactions = await getCommentReactionsForComments(visible.map((comment) => comment.id), babyId)
 

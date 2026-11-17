@@ -10,6 +10,7 @@ import type { Enums } from '@utils/supabase/database.types'
 import { actionError } from './actions/errors'
 import { logger } from './logger'
 import { PAGE_REGISTRY, type PageId } from './page_registry'
+import { ancestorsOrSelf, descendantsOrSelf, type CircleNode } from './circle-tree'
 
 type AccessLevel = Enums<'role'>
 
@@ -90,7 +91,21 @@ export async function assertPageAccessForUser(
   return level
 }
 
-// Circles of `userId` in `babyId`. No caching, unlike getUserCircleIds.
+// The circle tree (id + parent) of one baby, for the in-memory expansion in circle-tree.ts.
+// Only call it once the caller's membership of `babyId` has been checked.
+export async function getCircleParentsWith(supabase: SupabaseClient, babyId: string): Promise<CircleNode[]> {
+  const { data, error } = await supabase
+    .from('circles')
+    .select('id, parent_circle')
+    .eq('baby_id', babyId)
+
+  if (error) throw error
+  return (data ?? []) as CircleNode[]
+}
+
+// Effective circles of `userId` in `babyId`: the direct circles plus all their ancestors
+// (being in Grandparents means being reached by Close family and Family content). No
+// caching, unlike getUserCircleIds.
 export async function getViewerCircleIds(supabase: SupabaseClient, userId: string, babyId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from('circles_access')
@@ -99,11 +114,13 @@ export async function getViewerCircleIds(supabase: SupabaseClient, userId: strin
     .eq('user_id', userId)
 
   if (error) throw error
-  return (data ?? []).map((row) => row.circle_id as string)
+  const direct = (data ?? []).map((row) => row.circle_id as string)
+  if (direct.length === 0) return []
+  return Array.from(ancestorsOrSelf(direct, await getCircleParentsWith(supabase, babyId)))
 }
 
-// Admins plus members of any of the target circles, minus `excludeUserId`.
-// Same rule as the cookie-bound getVisibleUserIds (no circle = admins only).
+// Admins plus members of any of the target circles or the circles below them, minus
+// `excludeUserId`. Same rule as the cookie-bound getVisibleUserIds (no circle = admins only).
 export async function getVisibleUserIdsWith(
   supabase: SupabaseClient,
   babyId: string,
@@ -128,11 +145,19 @@ export async function getVisibleUserIdsWith(
   )
 
   if (circleIds.length > 0) {
+    let audienceCircleIds = circleIds
+    try {
+      audienceCircleIds = Array.from(descendantsOrSelf(circleIds, await getCircleParentsWith(supabase, babyId)))
+    } catch (error) {
+      // Falls back to the tagged circles only rather than notifying nobody.
+      contextLogger.error(error, "Error fetching circle tree")
+    }
+
     const { data: circleMembers, error: circleError } = await supabase
       .from('circles_access')
       .select('user_id')
       .eq('baby_id', babyId)
-      .in('circle_id', circleIds)
+      .in('circle_id', audienceCircleIds)
 
     if (circleError) contextLogger.error(circleError, "Error fetching circle members")
     for (const row of circleMembers ?? []) recipientIds.add(row.user_id as string)
