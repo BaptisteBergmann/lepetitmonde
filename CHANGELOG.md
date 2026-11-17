@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-17
 
+- `3fbe9b3` feat(admin): manage circle hierarchy (tree, move, sub-circles, inherited members)
 - `9adac9a` feat(circles): allow nesting, moving circles and moving members within a tree
 - `26a292f` feat(circles): resolve visibility through ancestor and descendant circles
 - `0b99bc7` feat(db): circle hierarchy constraints, one-circle-per-tree triggers and recursive visibility helper
