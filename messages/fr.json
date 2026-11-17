@@ -1215,6 +1215,10 @@
     "submitError": "Une erreur est survenue lors de l'envoi du signalement."
   },
   "serverErrors": {
+    "circleHierarchyCycle": "Un cercle ne peut pas être placé dans lui-même ou dans l'un de ses sous-cercles.",
+    "circleHierarchyDepth": "Les cercles ne peuvent être imbriqués que sur 3 niveaux.",
+    "circleMembershipSameTree": "Cette personne est déjà dans un autre cercle de ce groupe.",
+    "circleMembershipConflict": "Quelqu'un se retrouverait dans deux cercles du même groupe.",
     "unauthorized": "Non autorisé",
     "unauthenticated": "Non authentifié",
     "pollQuestionRequired": "La question du sondage est requise",

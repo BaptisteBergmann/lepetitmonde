@@ -1215,6 +1215,10 @@
     "submitError": "Something went wrong while sending the report."
   },
   "serverErrors": {
+    "circleHierarchyCycle": "A circle can't be placed inside itself or one of its sub-circles.",
+    "circleHierarchyDepth": "Circles can only be nested 3 levels deep.",
+    "circleMembershipSameTree": "This person is already in another circle of this group.",
+    "circleMembershipConflict": "Someone would end up in two circles of the same group.",
     "unauthorized": "Not authorized",
     "unauthenticated": "Not authenticated",
     "pollQuestionRequired": "The poll question is required",
