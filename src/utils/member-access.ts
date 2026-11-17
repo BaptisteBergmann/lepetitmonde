@@ -145,12 +145,14 @@ export async function getVisibleUserIdsWith(
   )
 
   if (circleIds.length > 0) {
-    let audienceCircleIds = circleIds
+    // No fallback to the tagged circles: a silently narrower audience would make the
+    // "newly visible on edit" diff notify the same people twice. Let the error propagate.
+    let audienceCircleIds: string[]
     try {
       audienceCircleIds = Array.from(descendantsOrSelf(circleIds, await getCircleParentsWith(supabase, babyId)))
     } catch (error) {
-      // Falls back to the tagged circles only rather than notifying nobody.
       contextLogger.error(error, "Error fetching circle tree")
+      throw error
     }
 
     const { data: circleMembers, error: circleError } = await supabase

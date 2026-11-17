@@ -15,7 +15,7 @@ import { actionError } from './errors'
 import { normalizeText } from '@utils/feed-validation'
 import { INPUT_LIMITS } from '@utils/input-limits'
 import { createTtlCache } from '../cache/ttl-cache'
-import { CIRCLE_MAX_DEPTH, ancestorsOrSelf, depthOf, descendantsOrSelf, subtreeHeight } from '../circle-tree'
+import { CIRCLE_MAX_DEPTH, ancestorsOrSelf, depthOf, descendantsOrSelf, rootOf, subtreeHeight } from '../circle-tree'
 import { getCircleParents } from '../circle-parents'
 
 type NewCircle = TablesInsert<'circles'>;
@@ -27,19 +27,52 @@ async function assertUuid(value: unknown): Promise<string> {
   return value
 }
 
+export type CircleErrorKey = 'circleHierarchyCycle' | 'circleHierarchyDepth' | 'circleMembershipSameTree' | 'circleMembershipConflict'
+export type CircleActionResult = { error?: CircleErrorKey }
+
+// Known hierarchy/membership failures travel back as data ({ error: <serverErrors key> }):
+// Next masks the message of a thrown error in production, so the client translates the key.
+class CircleKeyError extends Error {
+  constructor(readonly key: CircleErrorKey) { super(key) }
+}
+
 // The database triggers have the final say on tree shape and "one circle per tree";
-// they raise stable message prefixes that map to translated errors. Anything else is
-// rethrown untouched, as before.
-async function throwMappedCircleError(error: { message?: string }): Promise<never> {
+// they raise stable message prefixes. Anything else is rethrown untouched, as before.
+function throwMappedCircleError(error: { message?: string }): never {
   const message = error.message ?? ''
-  if (message.includes('circle_hierarchy_cycle')) throw await actionError('circleHierarchyCycle')
-  if (message.includes('circle_hierarchy_depth')) throw await actionError('circleHierarchyDepth')
-  if (message.includes('circle_membership_same_tree')) throw await actionError('circleMembershipSameTree')
-  if (message.includes('circle_membership_conflict')) throw await actionError('circleMembershipConflict')
+  if (message.includes('circle_hierarchy_cycle')) throw new CircleKeyError('circleHierarchyCycle')
+  if (message.includes('circle_hierarchy_depth')) throw new CircleKeyError('circleHierarchyDepth')
+  if (message.includes('circle_membership_same_tree')) throw new CircleKeyError('circleMembershipSameTree')
+  if (message.includes('circle_membership_conflict')) throw new CircleKeyError('circleMembershipConflict')
   throw error
 }
 
+async function toResult(run: () => Promise<void>): Promise<CircleActionResult> {
+  try {
+    await run()
+    return {}
+  } catch (error) {
+    if (error instanceof CircleKeyError) return { error: error.key }
+    throw error
+  }
+}
+
+// Form-action path (admin "create circle" card): must return void, so known errors are thrown.
 export async function createCircle(circle: FormData) {
+  try {
+    await insertCircle(circle)
+  } catch (error) {
+    if (error instanceof CircleKeyError) throw await actionError(error.key)
+    throw error
+  }
+}
+
+// Sub-circle dialog path: reports known errors as data.
+export async function createSubCircle(circle: FormData): Promise<CircleActionResult> {
+  return toResult(() => insertCircle(circle))
+}
+
+async function insertCircle(circle: FormData) {
   const supabase = await createClient()
 
   const babyId = await assertUuid(circle.get("babyId"))
@@ -54,23 +87,27 @@ export async function createCircle(circle: FormData) {
   if (parentId) {
     await assertCirclesInBabyWith(supabase, [parentId], babyId)
     const nodes = await getCircleParentsWith(supabase, babyId)
-    if (depthOf(parentId, nodes) + 1 > CIRCLE_MAX_DEPTH) throw await actionError('circleHierarchyDepth')
+    if (depthOf(parentId, nodes) + 1 > CIRCLE_MAX_DEPTH) throw new CircleKeyError('circleHierarchyDepth')
   }
 
   const rep = await supabase
     .from('circles')
     .insert([{ name: validName, baby_id: babyId, parent_circle: parentId }])
 
-  if (rep.error) await throwMappedCircleError(rep.error)
+  if (rep.error) throwMappedCircleError(rep.error)
 
   revalidatePath(`/baby/${babyId}/admin`)
 }
 
 // Moving a circle changes who can see everything already shared with it (and with its
 // new/old ancestors), so the whole baby layout is revalidated, not just the admin page.
-export async function setCircleParent(circleId: string, parentId: string | null, babyId: string) {
+export async function setCircleParent(circleId: string, parentId: string | null, babyId: string): Promise<CircleActionResult> {
+  return toResult(() => applyCircleParent(circleId, parentId, babyId))
+}
+
+async function applyCircleParent(circleId: string, parentId: string | null, babyId: string) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: setCircleParent.name, babyId, circleId, parentId })
+  const contextLogger = logger.child({ function: 'setCircleParent', babyId, circleId, parentId })
 
   await assertUuid(babyId)
   await assertUuid(circleId)
@@ -83,8 +120,8 @@ export async function setCircleParent(circleId: string, parentId: string | null,
     // Friendly pre-check on the live tree (uncached: admins edit in quick succession); the
     // trigger is the real guard against races.
     const nodes = await getCircleParentsWith(supabase, babyId)
-    if (descendantsOrSelf([circleId], nodes).has(parentId)) throw await actionError('circleHierarchyCycle')
-    if (depthOf(parentId, nodes) + subtreeHeight(circleId, nodes) > CIRCLE_MAX_DEPTH) throw await actionError('circleHierarchyDepth')
+    if (descendantsOrSelf([circleId], nodes).has(parentId)) throw new CircleKeyError('circleHierarchyCycle')
+    if (depthOf(parentId, nodes) + subtreeHeight(circleId, nodes) > CIRCLE_MAX_DEPTH) throw new CircleKeyError('circleHierarchyDepth')
   }
 
   const rep = await supabase
@@ -95,7 +132,7 @@ export async function setCircleParent(circleId: string, parentId: string | null,
 
   if (rep.error) {
     contextLogger.warn({ error: rep.error.message }, "Circle move rejected")
-    await throwMappedCircleError(rep.error)
+    throwMappedCircleError(rep.error)
   }
 
   contextLogger.info("Circle moved")
@@ -120,7 +157,8 @@ export async function deleteCircle(circleId: string, babyId: string) {
 
   if (rep.error) throw rep.error
 
-  revalidatePath(`/baby/${babyId}/admin`)
+  // Children move up and members lose access: visibility changes on every page.
+  revalidatePath(`/baby/${babyId}`, 'layout')
 }
 
 type Circle = Tables<'circles'>;
@@ -254,9 +292,13 @@ export async function getAllCirclesAccess(babyId: string) {
   return rep.data
 }
 
-export async function addUserToCircle(circleId: string, userId: string, babyId: string) {
+export async function addUserToCircle(circleId: string, userId: string, babyId: string): Promise<CircleActionResult> {
+  return toResult(() => insertCircleMember(circleId, userId, babyId))
+}
+
+async function insertCircleMember(circleId: string, userId: string, babyId: string) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: addUserToCircle.name, babyId, circleId, userId })
+  const contextLogger = logger.child({ function: 'addUserToCircle', babyId, circleId, userId })
   await assertIsAdmin(supabase, babyId)
 
   // Inline instead of assertCirclesInBaby: feed-access imports this module.
@@ -283,7 +325,7 @@ export async function addUserToCircle(circleId: string, userId: string, babyId: 
     .from('circles_access')
     .insert([{ circle_id: circleId, user_id: userId, baby_id: babyId }])
 
-  if (rep.error) await throwMappedCircleError(rep.error)
+  if (rep.error) throwMappedCircleError(rep.error)
 
   const t = await getTranslations('pushNotifications')
   await notifyUsers(babyId, 'circle_access_granted', {
@@ -319,9 +361,13 @@ export async function removeUserFromCircle(circleId: string, userId: string, bab
 // Moves a member from one circle to another circle of the same tree in a single UPDATE,
 // so the "one circle per tree" trigger sees it as one atomic change (no gap where the
 // person has no access, no window for a duplicate).
-export async function moveCircleMember({ babyId, accessId, toCircleId }: { babyId: string; accessId: number; toCircleId: string }) {
+export async function moveCircleMember(input: { babyId: string; accessId: number; toCircleId: string }): Promise<CircleActionResult> {
+  return toResult(() => applyCircleMemberMove(input))
+}
+
+async function applyCircleMemberMove({ babyId, accessId, toCircleId }: { babyId: string; accessId: number; toCircleId: string }) {
   const supabase = await createClient()
-  const contextLogger = logger.child({ function: moveCircleMember.name, babyId, accessId, toCircleId })
+  const contextLogger = logger.child({ function: 'moveCircleMember', babyId, accessId, toCircleId })
 
   await assertUuid(babyId)
   await assertUuid(toCircleId)
@@ -329,6 +375,20 @@ export async function moveCircleMember({ babyId, accessId, toCircleId }: { babyI
 
   await assertIsAdmin(supabase, babyId)
   await assertCirclesInBabyWith(supabase, [toCircleId], babyId)
+
+  const { data: row, error: rowError } = await supabase
+    .from('circles_access')
+    .select('circle_id')
+    .eq('id', accessId)
+    .eq('baby_id', babyId)
+    .maybeSingle()
+
+  if (rowError) { contextLogger.error(rowError, "Error reading membership"); throw rowError }
+  if (!row) throw await actionError('unauthorized')
+
+  // This action only moves within a tree; the trigger alone would also accept a jump to another tree.
+  const nodes = await getCircleParentsWith(supabase, babyId)
+  if (rootOf(row.circle_id, nodes) !== rootOf(toCircleId, nodes)) throw await actionError('unauthorized')
 
   const rep = await supabase
     .from('circles_access')
@@ -339,7 +399,7 @@ export async function moveCircleMember({ babyId, accessId, toCircleId }: { babyI
 
   if (rep.error) {
     contextLogger.warn({ error: rep.error.message }, "Member move rejected")
-    await throwMappedCircleError(rep.error)
+    throwMappedCircleError(rep.error)
   }
   if (!rep.data || rep.data.length === 0) throw await actionError('unauthorized')
 

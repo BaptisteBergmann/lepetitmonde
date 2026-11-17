@@ -183,7 +183,7 @@ CREATE TRIGGER "circles_reparent_children_trigger"
   BEFORE DELETE ON "public"."circles"
   FOR EACH ROW EXECUTE FUNCTION "public"."circles_reparent_children"();
 
--- "One circle per tree" for membership rows (insert, or a move through UPDATE circle_id).
+-- "One circle per tree" for membership rows (insert, or an UPDATE of circle_id/user_id).
 CREATE OR REPLACE FUNCTION "public"."circles_access_check_tree"()
 RETURNS trigger
 LANGUAGE "plpgsql"
@@ -194,7 +194,9 @@ DECLARE
   "target_baby" uuid;
   "root" uuid;
 BEGIN
-  IF TG_OP = 'UPDATE' AND NEW."circle_id" IS NOT DISTINCT FROM OLD."circle_id" THEN
+  IF TG_OP = 'UPDATE'
+     AND NEW."circle_id" IS NOT DISTINCT FROM OLD."circle_id"
+     AND NEW."user_id" IS NOT DISTINCT FROM OLD."user_id" THEN
     RETURN NEW;
   END IF;
 
@@ -235,7 +237,7 @@ END;
 $$;
 
 CREATE TRIGGER "circles_access_check_tree_trigger"
-  BEFORE INSERT OR UPDATE OF "circle_id" ON "public"."circles_access"
+  BEFORE INSERT OR UPDATE OF "circle_id", "user_id" ON "public"."circles_access"
   FOR EACH ROW EXECUTE FUNCTION "public"."circles_access_check_tree"();
 
 -- Existing data can't conflict (every circle is a root, so a tree is one circle and
