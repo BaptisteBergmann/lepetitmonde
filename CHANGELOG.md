@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-17
 
+- `0b99bc7` feat(db): circle hierarchy constraints, one-circle-per-tree triggers and recursive visibility helper
 - `49e3003` feat(circles): add circle tree helpers
 
 ## 2026-11-10
