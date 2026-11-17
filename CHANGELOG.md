@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-17
 
+- `e362f5f` docs(plans): add circle-hierarchy plan
 - `742689e` docs(circles): note the multi-row delete caveat of the re-parent trigger
 - `33d654d` feat(circles): show audience counts and empty-circle warning in feed and calendar pickers
 - `fe01144` fix(admin): translate circle errors, show names in selects, use plain nested lists instead of tree roles
