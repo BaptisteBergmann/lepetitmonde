@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-17
 
+- `33d654d` feat(circles): show audience counts and empty-circle warning in feed and calendar pickers
 - `fe01144` fix(admin): translate circle errors, show names in selects, use plain nested lists instead of tree roles
 - `765113d` fix(circles): return hierarchy errors as data, restrict member moves to one tree, harden triggers and notifications
 - `6e6b281` docs(circles): document circle hierarchy and one-circle-per-tree rule
