@@ -5,18 +5,11 @@ import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { Megaphone } from 'lucide-react'
+import { CirclePicker } from '@/components/circle_picker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Tables } from '@utils/supabase/database.types'
 import { sendBroadcast } from '@utils/actions/broadcast_email'
 import { descendantsOrSelf } from '@utils/circle-tree'
@@ -36,11 +29,6 @@ export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adm
   const confirmAction = useConfirm()
   const [isSending, startTransition] = useTransition()
   const [circleIds, setCircleIds] = useState<string[]>([])
-
-  const circleItems = useMemo(
-    () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
-    [circles]
-  )
 
   // Mirrors getVisibleUserIds in access.ts: no circle selected = admins
   // only, otherwise admins + members of the selected circles and of every
@@ -116,23 +104,12 @@ export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adm
             <FieldLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t('broadcastCirclesLabel')}
             </FieldLabel>
-            <Select
-              items={circleItems}
-              multiple
+            <CirclePicker
+              circles={circles}
               value={circleIds}
-              onValueChange={(value) => setCircleIds(value as string[])}
-            >
-              <SelectTrigger className="w-full text-foreground bg-input/40">
-                <SelectValue placeholder={t('broadcastCirclesPlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {circles.map((circle) => (
-                    <SelectItem key={circle.id} value={circle.id}>{circle.name}</SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              onChange={setCircleIds}
+              placeholder={t('broadcastCirclesPlaceholder')}
+            />
             <p className="text-xs text-muted-foreground">
               {t('broadcastCirclesHint')}
             </p>

@@ -1909,6 +1909,14 @@
     }
   },
   "circlePicker": {
-    "includedVia": "via {name}"
+    "includedVia": "via {name}",
+    "included": "inclus",
+    "includesSubCircles": "{count, plural, one {+# sous-cercle} other {+# sous-cercles}}",
+    "includesList": "{name} inclut {list}.",
+    "andMore": "et {count} autres",
+    "emptyWarning": "Personne n'est encore dans {name} : seuls les admins verront ceci.",
+    "noCircles": "Aucun cercle pour l'instant.",
+    "optionLabel": "{name}, niveau {level}",
+    "optionLabelIncluded": "{name}, niveau {level}, inclus via {parent}"
   }
 }

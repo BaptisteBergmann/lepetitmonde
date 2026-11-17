@@ -1,9 +1,10 @@
 'use client'
 
+import { CirclePicker } from '@/components/circle_picker'
 import { INPUT_LIMITS } from '@/utils/input-limits'
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -66,11 +67,6 @@ export default function CreateEventModal({
 
   const isLifeStage = kind === "life_stage"
   const isMedical = kind === "medical"
-
-  const circleItems = useMemo(
-    () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
-    [circles]
-  )
 
   const handleConfirm = async () => {
     setIsPending(true)
@@ -208,23 +204,12 @@ export default function CreateEventModal({
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('visibleByLabel')}
           </Label>
-          <Select
-            items={circleItems}
-            multiple
+          <CirclePicker
+            circles={circles}
             value={circleIds}
-            onValueChange={(value) => setCircleIds(value as string[])}
-          >
-            <SelectTrigger className="w-full text-foreground bg-input/50">
-              <SelectValue placeholder={t('visibleByPlaceholder')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {circles.map((circle) => (
-                  <SelectItem key={circle.id} value={circle.id}>{circle.name}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            onChange={setCircleIds}
+            placeholder={t('visibleByPlaceholder')}
+          />
           <p className="text-xs text-muted-foreground">
             {t('visibleByHint')}
           </p>

@@ -1,8 +1,9 @@
 'use client'
 
+import { CirclePicker } from '@/components/circle_picker'
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useId, useMemo, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import {
   Select,
@@ -72,11 +73,6 @@ export default function CreateStoryModal({
     maxFileSize: 500 * 1024 * 1024,
     allowedMimeTypes: ['image/*', 'video/*'],
   })
-
-  const circleItems = useMemo(
-    () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
-    [circles]
-  )
 
   const handleConfirm = async () => {
     if (isPending || upload.files.length !== 1) return
@@ -220,24 +216,14 @@ export default function CreateStoryModal({
           <Label htmlFor={visibleId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {tShared('visibleByLabel')}
           </Label>
-          <Select
-            items={circleItems}
-            multiple
+          <CirclePicker
+            circles={circles}
+            id={visibleId}
             disabled={isPending}
             value={circleIds}
-            onValueChange={(value) => setCircleIds(value as string[])}
-          >
-            <SelectTrigger id={visibleId} className="w-full text-foreground bg-input/50">
-              <SelectValue placeholder={t('visibleByPlaceholder')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {circles.map((circle) => (
-                  <SelectItem key={circle.id} value={circle.id}>{circle.name}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            onChange={setCircleIds}
+            placeholder={t('visibleByPlaceholder')}
+          />
           <p className="text-xs text-muted-foreground">
             {t('visibleByHint')}
           </p>

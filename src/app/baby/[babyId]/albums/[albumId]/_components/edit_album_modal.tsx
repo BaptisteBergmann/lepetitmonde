@@ -1,18 +1,11 @@
 'use client'
 
+import { CirclePicker } from '@/components/circle_picker'
 import { Modal } from '@/components/modal'
 import { toast } from 'sonner'
-import { useMemo, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { updateAlbum, AlbumWithDetails } from '@utils/actions/albums'
 import { Tables } from '@utils/supabase/database.types'
 import { ALBUM_LIMITS } from '@utils/album-limits'
@@ -41,11 +34,6 @@ export default function EditAlbumModal({
   const [name, setName] = useState(album.name)
   const [circleIds, setCircleIds] = useState<string[]>(album.circleIds)
   const [isPending, setIsPending] = useState(false)
-
-  const circleItems = useMemo(
-    () => Object.fromEntries(circles.map((circle) => [circle.id, circle.name])),
-    [circles]
-  )
 
   const handleConfirm = async () => {
     setIsPending(true)
@@ -82,23 +70,13 @@ export default function EditAlbumModal({
           <Label htmlFor={circlesId} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('visibleByLabel')}
           </Label>
-          <Select
-            items={circleItems}
-            multiple
+          <CirclePicker
+            circles={circles}
+            id={circlesId}
             value={circleIds}
-            onValueChange={(value) => setCircleIds(value as string[])}
-          >
-            <SelectTrigger id={circlesId} className="w-full text-foreground bg-input/50">
-              <SelectValue placeholder={t('visibleByPlaceholder')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {circles.map((circle) => (
-                  <SelectItem key={circle.id} value={circle.id}>{circle.name}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            onChange={setCircleIds}
+            placeholder={t('visibleByPlaceholder')}
+          />
           <p className="text-xs text-muted-foreground">
             {t('visibleByHint')}
           </p>
