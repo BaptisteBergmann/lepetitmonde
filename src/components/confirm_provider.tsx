@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import {
   Dialog,
@@ -16,6 +16,8 @@ interface ConfirmOptions {
   description?: string
   confirmLabel?: string
   destructive?: boolean
+  // Extra body under the description, e.g. a list of who is affected. Scrolls when long.
+  content?: ReactNode
 }
 
 type ConfirmFn = (options: string | ConfirmOptions) => Promise<boolean>
@@ -54,6 +56,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <DialogTitle>{options?.title}</DialogTitle>
             {options?.description && <DialogDescription>{options.description}</DialogDescription>}
           </DialogHeader>
+          {options?.content && <div className="max-h-[50vh] overflow-y-auto">{options.content}</div>}
           <div className="flex items-center justify-end gap-2">
             <Button type="button" variant="outline" size="sm" className="rounded-2xl cursor-pointer" onClick={() => settle(false)}>
               {t('cancel')}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Tables } from "@utils/supabase/database.types";
 import { AlbumSummary } from "@utils/actions/albums";
+import { ancestorsOrSelf, orderAsTree } from "@utils/circle-tree";
 import {
   Select,
   SelectContent,
@@ -24,12 +25,23 @@ interface DisplayCircleAccessProps {
 
 export default function DisplayCircleAccess({ babyId, circles, albums }: DisplayCircleAccessProps) {
   const t = useTranslations('admin.groupAccess');
+  const tPicker = useTranslations('circlePicker');
   const tAlbums = useTranslations('albums');
   const [selectedCircleId, setSelectedCircleId] = useState<string>("");
 
+  const orderedCircles = useMemo(() => orderAsTree(circles), [circles]);
+
+  // A group also sees albums shared with any wider circle above it.
+  const reachedCircleIds = selectedCircleId ? ancestorsOrSelf([selectedCircleId], circles) : new Set<string>();
   const visibleAlbums = selectedCircleId
-    ? albums.filter((album) => album.circleIds.includes(selectedCircleId))
+    ? albums.filter((album) => album.circleIds.some((id) => reachedCircleIds.has(id)))
     : [];
+  const circleName = (id: string) => circles.find((c) => c.id === id)?.name ?? '';
+  // Name of the wider circle an album is only visible through, if any.
+  const viaCircle = (album: AlbumSummary) =>
+    album.circleIds.includes(selectedCircleId)
+      ? null
+      : circleName(album.circleIds.find((id) => reachedCircleIds.has(id)) ?? '');
 
   return (
     <div className="px-6 pb-2 space-y-3">
@@ -38,8 +50,8 @@ export default function DisplayCircleAccess({ babyId, circles, albums }: Display
           <SelectValue placeholder={t('selectPlaceholder')} />
         </SelectTrigger>
         <SelectContent>
-          {circles.map((circle) => (
-            <SelectItem key={circle.id} value={circle.id}>
+          {orderedCircles.map((circle) => (
+            <SelectItem key={circle.id} value={circle.id} className={circle.depth === 1 ? "pl-6" : circle.depth >= 2 ? "pl-10" : undefined}>
               {circle.name}
             </SelectItem>
           ))}
@@ -74,7 +86,10 @@ export default function DisplayCircleAccess({ babyId, circles, albums }: Display
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-landing-foreground truncate">{album.name}</p>
-                <p className="text-xs text-landing-muted">{tAlbums('photoCount', { count: album.photoCount })}</p>
+                <p className="text-xs text-landing-muted">
+                  {tAlbums('photoCount', { count: album.photoCount })}
+                  {viaCircle(album) && ` · ${tPicker('includedVia', { name: viaCircle(album) ?? '' })}`}
+                </p>
               </div>
             </Link>
           ))}

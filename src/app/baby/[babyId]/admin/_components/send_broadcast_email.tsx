@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select'
 import { Tables } from '@utils/supabase/database.types'
 import { sendBroadcast } from '@utils/actions/broadcast_email'
+import { descendantsOrSelf } from '@utils/circle-tree'
 
 type Circle = Tables<'circles'>
 type CircleAccess = Tables<'circles_access'>
@@ -42,18 +43,20 @@ export default function SendBroadcastEmail({ babyId, circles, circlesAccess, adm
   )
 
   // Mirrors getVisibleUserIds in access.ts: no circle selected = admins
-  // only, otherwise admins + members of the selected circles. Computed
+  // only, otherwise admins + members of the selected circles and of every
+  // circle below them. Computed
   // client-side from data the admin page already fetched, just to preview
   // the recipient count in the confirm dialog below.
   const recipientCount = useMemo(() => {
     const ids = new Set(adminUserIds)
     if (circleIds.length > 0) {
+      const audience = descendantsOrSelf(circleIds, circles)
       for (const access of circlesAccess) {
-        if (circleIds.includes(access.circle_id)) ids.add(access.user_id)
+        if (audience.has(access.circle_id)) ids.add(access.user_id)
       }
     }
     return ids.size
-  }, [adminUserIds, circlesAccess, circleIds])
+  }, [adminUserIds, circles, circlesAccess, circleIds])
 
   async function handleSubmit(formData: FormData) {
     for (const circleId of circleIds) formData.append('circleIds', circleId)
