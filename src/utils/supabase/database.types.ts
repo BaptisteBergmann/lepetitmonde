@@ -628,21 +628,21 @@ export type Database = {
       }
       circles: {
         Row: {
-          baby_id: string | null
+          baby_id: string
           created_at: string
           id: string
           name: string | null
           parent_circle: string | null
         }
         Insert: {
-          baby_id?: string | null
+          baby_id: string
           created_at?: string
           id?: string
           name?: string | null
           parent_circle?: string | null
         }
         Update: {
-          baby_id?: string | null
+          baby_id?: string
           created_at?: string
           id?: string
           name?: string | null
@@ -657,11 +657,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "circles_parent_circle_fkey"
-            columns: ["parent_circle"]
+            foreignKeyName: "circles_parent_same_baby_fkey"
+            columns: ["parent_circle", "baby_id"]
             isOneToOne: false
             referencedRelation: "circles"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "baby_id"]
           },
         ]
       }
@@ -2151,6 +2151,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      circle_descendants_or_self: {
+        Args: { target_circle_ids: string[] }
+        Returns: string[]
       }
       is_baby_admin: { Args: { target_baby_id: string }; Returns: boolean }
       is_baby_member: { Args: { target_baby_id: string }; Returns: boolean }
