@@ -12,7 +12,7 @@ Circles are groups of members inside one baby. Admins nest them into a **tree** 
 
 - `circles.parent_circle` points to the parent. Each circle has at most one parent, the parent belongs to the same baby (composite foreign key), and the maximum depth is **3**.
 - A trigger (`circles_check_hierarchy`) rejects cycles (`circle_hierarchy_cycle`) and depth overflows (`circle_hierarchy_depth`) and serializes edits per baby with an advisory lock.
-- Deleting a circle **moves its children up one level** (`circles_reparent_children`).
+- Deleting a circle **moves its children up one level** (`circles_reparent_children`, a BEFORE DELETE trigger). Caveat: deleting a parent and its child in the same multi-row statement fails, because the trigger tries to re-parent a row that is being deleted. Delete leaf-first, or null `parent_circle` first. The app deletes one circle at a time, so it is not affected.
 - The pure helpers in `circle-tree.ts` (`ancestorsOrSelf`, `descendantsOrSelf`, `validParentIds`, `orderAsTree`...) are shared by the server and the client. A cookie-bound, cached loader (`circle-parents.ts`, 5 s TTL) feeds them on the server.
 
 ## Who sees what
