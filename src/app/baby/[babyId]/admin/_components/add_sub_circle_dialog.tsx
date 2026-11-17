@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import type { Tables } from '@utils/supabase/database.types'
-import { createCircle } from '@utils/actions/circles'
+import { createSubCircle } from '@utils/actions/circles'
 import { INPUT_LIMITS } from '@utils/input-limits'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -23,6 +23,7 @@ export default function AddSubCircleDialog({ parent, babyId, onClose }: AddSubCi
   const t = useTranslations('admin.circles')
   const tCreate = useTranslations('admin.createCircle')
   const tCommon = useTranslations('common')
+  const tServer = useTranslations('serverErrors')
   const router = useRouter()
   const [pending, setPending] = useState(false)
 
@@ -31,12 +32,16 @@ export default function AddSubCircleDialog({ parent, babyId, onClose }: AddSubCi
     formData.set('parentId', parent.id)
     setPending(true)
     try {
-      await createCircle(formData)
+      const result = await createSubCircle(formData)
+      if (result.error) {
+        toast.error(tServer(result.error))
+        return
+      }
       toast.success(t('created'))
       onClose()
       router.refresh()
-    } catch (err) {
-      toast.error(err instanceof Error && err.message ? err.message : t('createError'))
+    } catch {
+      toast.error(t('createError'))
     } finally {
       setPending(false)
     }

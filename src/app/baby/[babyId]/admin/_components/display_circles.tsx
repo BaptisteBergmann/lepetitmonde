@@ -50,6 +50,7 @@ export default function RealtimeCirclesList({
   isAdmin,
 }: RealtimeCirclesListProps) {
   const t = useTranslations('admin.circles');
+  const tServer = useTranslations('serverErrors');
   const confirmAction = useConfirm()
   const router = useRouter();
   const [circles, setCircles] = useState<Circle[]>(initialCircles);
@@ -123,6 +124,11 @@ export default function RealtimeCirclesList({
     return map;
   }, [circlesAccess]);
 
+  const memberItems = useMemo(
+    () => Object.fromEntries(users.map((u) => [u.id, getMemberLabel(u, t)])),
+    [users, t],
+  );
+
   const hasNesting = circles.some((c) => c.parent_circle);
 
   // Everyone who sees what is shared with `circleId`, and which sub-circles they come from.
@@ -150,21 +156,25 @@ export default function RealtimeCirclesList({
       // One circle per tree: someone already in another circle of this tree is moved.
       const treeIds = descendantsOrSelf([rootOf(circle.id, nodes)], nodes);
       const existing = circlesAccess.find((a) => a.user_id === userId && treeIds.has(a.circle_id));
+      const result = existing
+        ? await moveCircleMember({ babyId, accessId: existing.id, toCircleId: circle.id })
+        : await addUserToCircle(circle.id, userId, babyId);
+      if (result.error) {
+        toast.error(tServer(result.error));
+        return;
+      }
       if (existing) {
-        await moveCircleMember({ babyId, accessId: existing.id, toCircleId: circle.id });
         toast.success(t('memberMoved', {
           name: getMemberLabel(userById.get(userId), t),
           from: circleById.get(existing.circle_id)?.name ?? '',
           to: circle.name ?? '',
         }));
-      } else {
-        await addUserToCircle(circle.id, userId, babyId);
       }
       setSelectedUserByCircle((prev) => ({ ...prev, [circle.id]: "" }));
       router.refresh();
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error && err.message ? err.message : t('addMemberError'));
+      toast.error(t('addMemberError'));
     } finally {
       setPendingCircleId(null);
     }
@@ -232,7 +242,7 @@ export default function RealtimeCirclesList({
     );
   }
 
-  function renderCircle(circle: Circle, depth: number, position: number, setSize: number) {
+  function renderCircle(circle: Circle, depth: number) {
     const { direct, inherited, total } = audienceOf(circle.id);
     const members = users.filter((u) => direct.has(u.id));
     const children = childrenOf.get(circle.id) ?? [];
@@ -260,16 +270,10 @@ export default function RealtimeCirclesList({
     });
 
     return (
-      <div
+      <li
         key={circle.id}
-        role="treeitem"
-        aria-selected={false}
-        aria-level={depth + 1}
-        aria-setsize={setSize}
-        aria-posinset={position}
-        aria-expanded={children.length > 0 ? !isCollapsed : undefined}
         aria-busy={isPending}
-        className={depth > 0 ? "ml-5 border-l-2 border-landing-border pl-3" : ""}
+        className={depth > 0 ? "ml-5 border-l-2 border-landing-border pl-3" : "px-6"}
       >
         <div className="space-y-3 py-3">
           <div className="flex items-center justify-between gap-2">
@@ -280,6 +284,8 @@ export default function RealtimeCirclesList({
                   onClick={() => toggleCollapsed(circle.id)}
                   className="touch-target relative shrink-0 rounded-full p-1 text-landing-muted hover:text-landing-foreground cursor-pointer"
                   aria-label={t(isCollapsed ? 'expandChildren' : 'collapseChildren', { name })}
+                  aria-expanded={!isCollapsed}
+                  aria-controls={`circle-children-${circle.id}`}
                 >
                   {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </button>
@@ -364,6 +370,7 @@ export default function RealtimeCirclesList({
           {isAdmin && (freeUsers.length > 0 || otherCircleUsers.length > 0) && (
             <div className="flex items-center gap-2 pl-1">
               <Select
+                items={memberItems}
                 value={selectedUserByCircle[circle.id] || ""}
                 onValueChange={(value: string | null) =>
                   setSelectedUserByCircle((prev) => ({ ...prev, [circle.id]: value || "" }))
@@ -412,11 +419,11 @@ export default function RealtimeCirclesList({
         </div>
 
         {children.length > 0 && !isCollapsed && (
-          <div role="group">
-            {children.map((child, index) => renderCircle(child, depth + 1, index + 1, children.length))}
-          </div>
+          <ul id={`circle-children-${circle.id}`}>
+            {children.map((child) => renderCircle(child, depth + 1))}
+          </ul>
         )}
-      </div>
+      </li>
     );
   }
 
@@ -430,13 +437,9 @@ export default function RealtimeCirclesList({
           {t('legend')}
         </p>
       )}
-      <div role="tree" aria-label={t('treeLabel')} className="divide-y divide-landing-border">
-        {roots.map((root, index) => (
-          <div key={root.id} className="px-6">
-            {renderCircle(root, 0, index + 1, roots.length)}
-          </div>
-        ))}
-      </div>
+      <ul aria-label={t('treeLabel')} className="divide-y divide-landing-border">
+        {roots.map((root) => renderCircle(root, 0))}
+      </ul>
       {usersWithoutCircle.length > 0 && (
         <UsersWithoutCircle users={usersWithoutCircle} />
       )}

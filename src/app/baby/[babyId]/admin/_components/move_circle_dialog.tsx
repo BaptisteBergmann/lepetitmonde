@@ -37,6 +37,7 @@ export default function MoveCircleDialog({ circle, circles, circlesAccess, users
   const t = useTranslations('admin.circles')
   const tCreate = useTranslations('admin.createCircle')
   const tCommon = useTranslations('common')
+  const tServer = useTranslations('serverErrors')
   const confirmAction = useConfirm()
   const router = useRouter()
   const [selected, setSelected] = useState<string>(circle.parent_circle ?? TOP_LEVEL)
@@ -46,6 +47,11 @@ export default function MoveCircleDialog({ circle, circles, circlesAccess, users
     const allowed = new Set(validParentIds(circle.id, nodes))
     return orderAsTree(circles).filter((c) => allowed.has(c.id))
   }, [circle.id, circles, nodes])
+
+  const parentItems = useMemo(
+    () => ({ [TOP_LEVEL]: tCreate('parentNone'), ...Object.fromEntries(circles.map((c) => [c.id, c.name ?? ''])) }),
+    [circles, tCreate],
+  )
 
   const userName = (id: string) => getMemberLabel(users.find((u) => u.id === id), t)
   const circleName = (id: string) => circles.find((c) => c.id === id)?.name ?? ''
@@ -90,11 +96,15 @@ export default function MoveCircleDialog({ circle, circles, circlesAccess, users
     onClose()
     onPendingChange(circle.id)
     try {
-      await setCircleParent(circle.id, newParentId, babyId)
+      const result = await setCircleParent(circle.id, newParentId, babyId)
+      if (result.error) {
+        toast.error(tServer(result.error))
+        return
+      }
       toast.success(t('moved'))
       router.refresh()
-    } catch (err) {
-      toast.error(err instanceof Error && err.message ? err.message : t('moveError'))
+    } catch {
+      toast.error(t('moveError'))
     } finally {
       onPendingChange(null)
     }
@@ -109,8 +119,8 @@ export default function MoveCircleDialog({ circle, circles, circlesAccess, users
         </DialogHeader>
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('moveParentLabel')}</p>
-          <Select value={selected} onValueChange={(value) => setSelected(value ?? TOP_LEVEL)}>
-            <SelectTrigger className="w-full">
+          <Select items={parentItems} value={selected} onValueChange={(value) => setSelected(value ?? TOP_LEVEL)}>
+            <SelectTrigger className="w-full" aria-label={t('moveParentLabel')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

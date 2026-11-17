@@ -17,12 +17,16 @@ export default function CircleParentSelect({ circles }: { circles: Circle[] }) {
   const t = useTranslations('admin.createCircle')
   const [value, setValue] = useState<string>(TOP_LEVEL)
   const ordered = useMemo(() => orderAsTree(circles), [circles])
+  const items = useMemo(
+    () => ({ [TOP_LEVEL]: t('parentNone'), ...Object.fromEntries(circles.map((c) => [c.id, c.name ?? ''])) }),
+    [circles, t],
+  )
 
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('parentLabel')}</p>
       <input type="hidden" name="parentId" value={value === TOP_LEVEL ? '' : value} />
-      <Select value={value} onValueChange={(next) => setValue(next ?? TOP_LEVEL)}>
+      <Select items={items} value={value} onValueChange={(next) => setValue(next ?? TOP_LEVEL)}>
         <SelectTrigger className="w-full bg-input/40" aria-label={t('parentLabel')}>
           <SelectValue />
         </SelectTrigger>
