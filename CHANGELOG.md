@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-19
 
+- `a07f608` docs(plans): add pumping-and-reflux plan, marked implemented
 - `7aa8ed0` chore(types): regenerate database types after pumping/reflux migrations
 - `4f2c4ed` docs(tracker): document pumping and reflux
 - `eea649e` feat(tracker): pumping and reflux analytics sections
