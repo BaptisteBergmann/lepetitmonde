@@ -556,9 +556,7 @@ export type Database = {
           poop_texture:
             | Database["public"]["Enums"]["diaper_poop_texture"]
             | null
-          reflux_severity:
-            | Database["public"]["Enums"]["reflux_severity"]
-            | null
+          reflux_severity: Database["public"]["Enums"]["reflux_severity"] | null
           started_at: string
           updated_at: string
           updated_by: string | null
