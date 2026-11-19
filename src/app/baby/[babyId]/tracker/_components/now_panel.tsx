@@ -19,8 +19,10 @@ import {
   CARE_KIND_CONFIG,
   CARE_LIMITS,
   CARE_TONE_CLASSES,
+  REFLUX_SEVERITIES,
   type BreastSide,
   type CareKind,
+  type RefluxSeverity,
   type TimerKind,
 } from '@utils/care-events'
 import { suggestNextSide } from '@utils/care-time'
@@ -32,11 +34,19 @@ import { DiaperCard } from './diaper_card'
 import { Elapsed } from './elapsed'
 import { useOnline } from '@/components/use_online'
 
-type OpenAction = 'breastfeed' | 'bottle' | null
+type OpenAction = 'breastfeed' | 'bottle' | 'pumping' | 'reflux' | null
 
-// Diaper has its own card of one-tap actions, so it is not one of the timer/feed tiles.
-// Pumping and reflux get their quick actions in a later step.
-const TILE_KINDS = CARE_KINDS.filter((kind) => !['diaper', 'pump', 'reflux'].includes(CARE_KIND_CONFIG[kind].quick))
+const PANEL_ID: Record<Exclude<OpenAction, null>, string> = {
+  breastfeed: 'side-chooser',
+  bottle: 'bottle-panel',
+  pumping: 'pump-panel',
+  reflux: 'reflux-panel',
+}
+
+// Diaper has its own card of one-tap actions, so it is in neither row. Row 1 is the big
+// timer/feed tiles; row 2 is the compact, rarer pumping and reflux tiles.
+const ROW1_KINDS = CARE_KINDS.filter((kind) => ['timer', 'side-timer', 'amount'].includes(CARE_KIND_CONFIG[kind].quick))
+const ROW2_KINDS = CARE_KINDS.filter((kind) => ['pump', 'reflux'].includes(CARE_KIND_CONFIG[kind].quick))
 
 export function NowPanel({
   babyId,
@@ -59,6 +69,7 @@ export function NowPanel({
   const busy = pendingKey !== null || !online
   const suggested = suggestNextSide(state.lastBreastfeed)
   const lastBottleAmount = state.lastFeed?.kind === 'bottle' ? state.lastFeed.amount_ml : null
+  const lastPumpAmount = state.lastPumping?.amount_ml ?? null
 
   // Moves focus into a freshly opened panel (suggested side first).
   useEffect(() => {
@@ -128,6 +139,27 @@ export function NowPanel({
       onSuccess: () => setOpenAction(null),
     })
 
+  const logPump = (amountMl?: number, side?: BreastSide | null) =>
+    run(amountMl ? 'pump' : 'pump-none', () => createCareEvent(babyId, {
+      kind: 'pumping',
+      ...(amountMl ? { amountMl } : {}),
+      ...(side ? { side } : {}),
+    }), {
+      announce: t('announce.pumpLogged'),
+      errorKey: 'save',
+      onSuccess: () => setOpenAction(null),
+    })
+
+  const logReflux = (severity?: RefluxSeverity) =>
+    run(severity ? `reflux-${severity}` : 'reflux-none', () => createCareEvent(babyId, {
+      kind: 'reflux',
+      ...(severity ? { refluxSeverity: severity } : {}),
+    }), {
+      announce: t('announce.refluxLogged'),
+      errorKey: 'save',
+      onSuccess: () => setOpenAction(null),
+    })
+
   const running = (Object.entries(state.ongoing) as [TimerKind, CareEvent][])
 
   return (
@@ -164,7 +196,7 @@ export function NowPanel({
       ))}
 
       <div className="grid grid-cols-3 gap-2">
-        {TILE_KINDS.map((kind) => {
+        {ROW1_KINDS.map((kind) => {
           const config = CARE_KIND_CONFIG[kind]
           const Icon = config.icon
           const isRunning = kind in state.ongoing
@@ -181,7 +213,7 @@ export function NowPanel({
               disabled={isRunning}
               aria-disabled={busy || undefined}
               aria-expanded={expandable ? isOpen : undefined}
-              aria-controls={expandable ? (config.quick === 'amount' ? 'bottle-panel' : 'side-chooser') : undefined}
+              aria-controls={expandable ? PANEL_ID[kind as keyof typeof PANEL_ID] : undefined}
               onClick={() => onTile(kind)}
               className={cn(
                 'h-24 flex-col gap-1 whitespace-normal rounded-3xl border-landing-border bg-landing-surface text-center text-landing-foreground',
@@ -197,6 +229,46 @@ export function NowPanel({
               )}
               <span className="text-sm font-semibold">{t(`kinds.${kind}`)}</span>
               <span className="text-xs font-normal text-muted-foreground">{hint}</span>
+            </Button>
+          )
+        })}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        {ROW2_KINDS.map((kind) => {
+          const config = CARE_KIND_CONFIG[kind]
+          const Icon = config.icon
+          const isOpen = openAction === kind
+          const lastPumping = kind === 'pumping' ? state.lastPumping : null
+          return (
+            <Button
+              key={kind}
+              ref={(node) => { tileRefs.current[kind] = node }}
+              type="button"
+              variant="outline"
+              aria-disabled={busy || undefined}
+              aria-expanded={isOpen}
+              aria-controls={PANEL_ID[kind as keyof typeof PANEL_ID]}
+              onClick={() => onTile(kind)}
+              className={cn(
+                'h-auto min-h-16 flex-row justify-start gap-3 whitespace-normal rounded-3xl border-landing-border bg-landing-surface px-3 py-2 text-left text-landing-foreground',
+                isOpen && 'ring-2 ring-primary',
+              )}
+            >
+              <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-full', CARE_TONE_CLASSES[config.tone])}>
+                <Icon className="size-5" aria-hidden="true" />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="text-sm font-semibold">{t(`kinds.${kind}`)}</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  {lastPumping ? (
+                    <>
+                      <span className="sr-only">{t('lastPumping.title')} </span>
+                      <Elapsed since={lastPumping.started_at} now={state.now} format="ago" />
+                    </>
+                  ) : t('quick.log')}
+                </span>
+              </span>
             </Button>
           )
         })}
@@ -235,13 +307,39 @@ export function NowPanel({
       )}
 
       {openAction === 'bottle' && (
-        <BottlePanel
+        <AmountPanel
+          id="bottle-panel"
+          title={t('quick.bottleTitle')}
+          logLabel={t('quick.logBottle')}
+          noAmountLabel={t('quick.logBottleNoAmount')}
+          pendingKeys={{ log: 'bottle', none: 'bottle-none' }}
           initial={lastBottleAmount ?? CARE_LIMITS.bottleDefault}
           panelRef={panelRef}
           busy={busy}
           pendingKey={pendingKey}
           onClose={() => closePanel(true)}
-          onLog={logBottle}
+          onLog={(amountMl) => logBottle(amountMl)}
+        />
+      )}
+
+      {openAction === 'pumping' && (
+        <PumpPanel
+          initial={lastPumpAmount ?? CARE_LIMITS.pumpDefault}
+          panelRef={panelRef}
+          busy={busy}
+          pendingKey={pendingKey}
+          onClose={() => closePanel(true)}
+          onLog={logPump}
+        />
+      )}
+
+      {openAction === 'reflux' && (
+        <RefluxPanel
+          panelRef={panelRef}
+          busy={busy}
+          pendingKey={pendingKey}
+          onClose={() => closePanel(true)}
+          onLog={logReflux}
         />
       )}
 
@@ -254,14 +352,28 @@ export function NowPanel({
   )
 }
 
-function BottlePanel({
+// Amount stepper shared by the bottle and pumping panels. `children` renders between the
+// stepper and the Log button (pumping puts its optional side row there).
+function AmountPanel({
+  id,
+  title,
+  logLabel,
+  noAmountLabel,
+  pendingKeys,
   initial,
   panelRef,
   busy,
   pendingKey,
   onClose,
   onLog,
+  children,
 }: {
+  id: string
+  title: string
+  logLabel: string
+  noAmountLabel: string
+  pendingKeys: { log: string; none: string }
+  children?: React.ReactNode
   initial: number
   panelRef: React.RefObject<HTMLDivElement | null>
   busy: boolean
@@ -277,10 +389,10 @@ function BottlePanel({
   const step = (delta: number) => setValue(String(clamp((Number.isNaN(parsed) ? initial : parsed) + delta)))
 
   return (
-    <Card id="bottle-panel" role="group" aria-labelledby="bottle-panel-title" className="border-landing-border bg-landing-surface">
+    <Card id={id} role="group" aria-labelledby={`${id}-title`} className="border-landing-border bg-landing-surface">
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 id="bottle-panel-title" className="font-display text-base font-semibold">{t('quick.bottleTitle')}</h3>
+          <h3 id={`${id}-title`} className="font-display text-base font-semibold">{title}</h3>
           <Button type="button" variant="ghost" size="icon-lg" aria-label={t('quick.cancel')} onClick={onClose}>
             <X aria-hidden="true" />
           </Button>
@@ -289,9 +401,9 @@ function BottlePanel({
           <Button type="button" variant="outline" size="icon-lg" className="size-12 rounded-2xl" aria-label={t('quick.decrease')} onClick={() => step(-CARE_LIMITS.bottleStep)}>
             <Minus aria-hidden="true" />
           </Button>
-          <Label htmlFor="bottle-amount" className="sr-only">{t('quick.amountLabel')}</Label>
+          <Label htmlFor={`${id}-amount`} className="sr-only">{t('quick.amountLabel')}</Label>
           <Input
-            id="bottle-amount"
+            id={`${id}-amount`}
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
@@ -307,13 +419,116 @@ function BottlePanel({
             <Plus aria-hidden="true" />
           </Button>
         </div>
+        {children}
         <Button type="button" className="h-14 w-full rounded-2xl text-base" disabled={!valid} aria-disabled={busy || undefined} onClick={() => onLog(parsed)}>
-          {pendingKey === 'bottle' && <Loader2 className="animate-spin" aria-hidden="true" />}
-          {t('quick.logBottle')}
+          {pendingKey === pendingKeys.log && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {logLabel}
         </Button>
         <Button type="button" variant="ghost" className="h-11 w-full" aria-disabled={busy || undefined} onClick={() => onLog()}>
-          {pendingKey === 'bottle-none' && <Loader2 className="animate-spin" aria-hidden="true" />}
-          {t('quick.logBottleNoAmount')}
+          {pendingKey === pendingKeys.none && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {noAmountLabel}
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+function PumpPanel({
+  initial,
+  panelRef,
+  busy,
+  pendingKey,
+  onClose,
+  onLog,
+}: {
+  initial: number
+  panelRef: React.RefObject<HTMLDivElement | null>
+  busy: boolean
+  pendingKey: string | null
+  onClose: () => void
+  onLog: (amountMl?: number, side?: BreastSide | null) => void
+}) {
+  const t = useTranslations('tracker')
+  // No silent default: the side stays unset unless the parent picks one.
+  const [side, setSide] = useState<BreastSide | null>(null)
+
+  return (
+    <AmountPanel
+      id="pump-panel"
+      title={t('quick.pumpTitle')}
+      logLabel={t('quick.logPump')}
+      noAmountLabel={t('quick.logPumpNoAmount')}
+      pendingKeys={{ log: 'pump', none: 'pump-none' }}
+      initial={initial}
+      panelRef={panelRef}
+      busy={busy}
+      pendingKey={pendingKey}
+      onClose={onClose}
+      onLog={(amountMl) => onLog(amountMl, side)}
+    >
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('form.pumpSide')}</span>
+        <ChoiceGroup
+          value={side}
+          onValueChange={setSide}
+          label={t('form.pumpSide')}
+          disabled={busy}
+          options={BREAST_SIDES.map((s) => ({ value: s, label: t(`sides.${s}`) }))}
+        />
+        {side && (
+          <Button type="button" variant="ghost" className="h-11 self-start" aria-disabled={busy || undefined} onClick={() => setSide(null)}>
+            {t('form.clearSide')}
+          </Button>
+        )}
+      </div>
+    </AmountPanel>
+  )
+}
+
+function RefluxPanel({
+  panelRef,
+  busy,
+  pendingKey,
+  onClose,
+  onLog,
+}: {
+  panelRef: React.RefObject<HTMLDivElement | null>
+  busy: boolean
+  pendingKey: string | null
+  onClose: () => void
+  onLog: (severity?: RefluxSeverity) => void
+}) {
+  const t = useTranslations('tracker')
+  const ARIA = { small: 'reflux.logSmall', medium: 'reflux.logMedium', large: 'reflux.logLarge' } as const
+
+  return (
+    <Card id="reflux-panel" role="group" aria-labelledby="reflux-panel-title" className="border-landing-border bg-landing-surface">
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 id="reflux-panel-title" className="font-display text-base font-semibold">{t('quick.refluxTitle')}</h3>
+          <Button type="button" variant="ghost" size="icon-lg" aria-label={t('quick.cancel')} onClick={onClose}>
+            <X aria-hidden="true" />
+          </Button>
+        </div>
+        <div ref={panelRef} className="grid grid-cols-3 gap-2">
+          {REFLUX_SEVERITIES.map((severity, index) => (
+            <Button
+              key={severity}
+              type="button"
+              variant="outline"
+              data-autofocus={index === 0 ? '' : undefined}
+              aria-label={t(ARIA[severity])}
+              aria-disabled={busy || undefined}
+              onClick={() => onLog(severity)}
+              className="h-14 rounded-2xl text-base"
+            >
+              {pendingKey === `reflux-${severity}` ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : t(`reflux.severities.${severity}`)}
+            </Button>
+          ))}
+        </div>
+        <Button type="button" variant="ghost" className="h-11 w-full" aria-disabled={busy || undefined} onClick={() => onLog()}>
+          {pendingKey === 'reflux-none' && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {t('reflux.noDetail')}
         </Button>
       </CardContent>
     </Card>

@@ -1442,7 +1442,11 @@
       "increase": "Ajouter 10 ml",
       "logBottle": "Noter le biberon",
       "logBottleNoAmount": "Noter sans quantité",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "pumpTitle": "Séance de tire-lait",
+      "logPump": "Noter le tire-lait",
+      "logPumpNoAmount": "Noter sans quantité",
+      "refluxTitle": "Quelle quantité est remontée ?"
     },
     "running": {
       "sleepingFor": "Dort depuis {duration}",
@@ -1469,7 +1473,9 @@
       "feedStarted": "Tétée démarrée",
       "feedStopped": "Tétée terminée",
       "bottleLogged": "Biberon noté",
-      "diaperLogged": "Couche enregistrée."
+      "diaperLogged": "Couche enregistrée.",
+      "pumpLogged": "Tire-lait enregistré.",
+      "refluxLogged": "Reflux enregistré."
     },
     "errors": {
       "start": "Impossible de démarrer. Veuillez réessayer.",
@@ -1691,7 +1697,14 @@
         "medium": "Moyen",
         "large": "Gros"
       },
-      "clearSeverity": "Effacer l'intensité"
+      "clearSeverity": "Effacer l'intensité",
+      "noDetail": "Noter sans précision",
+      "logSmall": "Enregistrer un petit reflux maintenant",
+      "logMedium": "Enregistrer un reflux moyen maintenant",
+      "logLarge": "Enregistrer un gros reflux maintenant"
+    },
+    "lastPumping": {
+      "title": "Dernier tire-lait"
     }
   },
   "oauthConsent": {

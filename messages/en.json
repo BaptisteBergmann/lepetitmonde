@@ -1442,7 +1442,11 @@
       "increase": "Add 10 ml",
       "logBottle": "Log bottle",
       "logBottleNoAmount": "Log without amount",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "pumpTitle": "Pumping session",
+      "logPump": "Log pumping",
+      "logPumpNoAmount": "Log without amount",
+      "refluxTitle": "How much came up?"
     },
     "running": {
       "sleepingFor": "Sleeping for {duration}",
@@ -1469,7 +1473,9 @@
       "feedStarted": "Feed started",
       "feedStopped": "Feed stopped",
       "bottleLogged": "Bottle logged",
-      "diaperLogged": "Diaper logged."
+      "diaperLogged": "Diaper logged.",
+      "pumpLogged": "Pumping logged.",
+      "refluxLogged": "Reflux logged."
     },
     "errors": {
       "start": "Couldn't start. Please try again.",
@@ -1691,7 +1697,14 @@
         "medium": "Medium",
         "large": "Large"
       },
-      "clearSeverity": "Clear severity"
+      "clearSeverity": "Clear severity",
+      "noDetail": "Log without detail",
+      "logSmall": "Log small reflux now",
+      "logMedium": "Log medium reflux now",
+      "logLarge": "Log large reflux now"
+    },
+    "lastPumping": {
+      "title": "Last pumped"
     }
   },
   "oauthConsent": {
