@@ -1716,6 +1716,11 @@
       "logMedium": "Enregistrer un reflux moyen maintenant",
       "logLarge": "Enregistrer un gros reflux maintenant"
     },
+    "sinceLast": {
+      "awake": "Éveillé depuis {duration}",
+      "breastfeed": "Dernière tétée",
+      "bottle": "Dernier biberon"
+    },
     "lastPumping": {
       "title": "Dernier tire-lait"
     }

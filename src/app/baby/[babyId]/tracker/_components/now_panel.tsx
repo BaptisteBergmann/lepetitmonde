@@ -204,6 +204,9 @@ export function NowPanel({
           const isOpen = openAction === kind
           const isPending = pendingKey === `start-${kind}`
           const hint = isRunning ? t('quick.running') : config.quick === 'amount' ? t('quick.log') : t('quick.start')
+          // Time since the last one of this kind; sleep counts from waking up.
+          const last = isRunning ? null : kind === 'sleep' ? state.lastSleep : kind === 'breastfeed' ? state.lastBreastfeed : kind === 'bottle' ? state.lastBottle : null
+          const lastSince = kind === 'sleep' ? last?.ended_at : last?.started_at
           return (
             <Button
               key={kind}
@@ -228,7 +231,18 @@ export function NowPanel({
                 </span>
               )}
               <span className="text-sm font-semibold">{t(`kinds.${kind}`)}</span>
-              <span className="text-xs font-normal text-muted-foreground">{hint}</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {lastSince ? (
+                  kind === 'sleep' ? (
+                    t.rich('sinceLast.awake', { duration: () => <Elapsed since={lastSince} now={state.now} format="elapsed" /> })
+                  ) : (
+                    <>
+                      <span className="sr-only">{t(`sinceLast.${kind as 'breastfeed' | 'bottle'}`)} </span>
+                      <Elapsed since={lastSince} now={state.now} format="ago" />
+                    </>
+                  )
+                ) : hint}
+              </span>
             </Button>
           )
         })}

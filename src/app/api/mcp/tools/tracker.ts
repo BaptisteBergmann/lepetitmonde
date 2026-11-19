@@ -78,7 +78,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
       title: 'Get tracker status',
       description:
         "Current tracker state for a baby: the current time (now, in ISO UTC), today's date and the time zone used, running sleep/breastfeed timers, " +
-        "the last feed and last breastfeed, the last diaper change, the last pumping session (lastPumping), the breast side to suggest next, and today's totals (wetCount and dirtyCount count diapers; a pee-and-poop diaper counts in both; pumpCount and pumpMl are the parent's pumping sessions and total expressed milk, which is not a feed and never counted in feedCount or bottleMl; refluxCount is the number of reflux episodes). Call it first when a time is given relative to now.",
+        "the last feed and last breastfeed, the last diaper change, the last pumping session (lastPumping), the last finished sleep (lastSleep; its end is when the baby woke up), the breast side to suggest next, and today's totals (wetCount and dirtyCount count diapers; a pee-and-poop diaper counts in both; pumpCount and pumpMl are the parent's pumping sessions and total expressed milk, which is not a feed and never counted in feedCount or bottleMl; refluxCount is the number of reflux episodes). Call it first when a time is given relative to now.",
       inputSchema: z.object({ babyId, timeZone }),
       annotations: { readOnlyHint: true },
     },
@@ -101,6 +101,7 @@ export function registerTrackerTools(server: McpServer, ctx: ToolContext) {
         lastBreastfeed: state.lastBreastfeed ? formatEntry(state.lastBreastfeed, tz) : null,
         lastDiaper: state.lastDiaper ? formatEntry(state.lastDiaper, tz) : null,
         lastPumping: state.lastPumping ? formatEntry(state.lastPumping, tz) : null,
+        lastSleep: state.lastSleep ? formatEntry(state.lastSleep, tz) : null,
         suggestedNextSide: suggestNextSide(state.lastBreastfeed),
         totalsToday: formatTotals(totals),
       }

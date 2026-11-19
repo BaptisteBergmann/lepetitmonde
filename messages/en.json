@@ -1716,6 +1716,11 @@
       "logMedium": "Log medium reflux now",
       "logLarge": "Log large reflux now"
     },
+    "sinceLast": {
+      "awake": "Awake for {duration}",
+      "breastfeed": "Last breastfeed",
+      "bottle": "Last bottle"
+    },
     "lastPumping": {
       "title": "Last pumped"
     }
