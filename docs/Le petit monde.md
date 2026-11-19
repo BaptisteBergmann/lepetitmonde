@@ -44,6 +44,7 @@ Each baby has a set of pages that an admin can turn on or off and restrict to ad
 - [[To-do list]]
 - [[Baby tracker]] (sleep and feeds)
 - [[Diaper changes]] (pee and poop in the tracker)
+- [[Pumping and reflux]] (tire-lait and spit-up in the tracker)
 - [[Tracker analytics]] (trends and history for the tracker)
 - [[Health]] (growth charts, vaccinations)
 - [[Circles]] (nested sharing circles)

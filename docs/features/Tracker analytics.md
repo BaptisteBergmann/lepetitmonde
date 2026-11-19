@@ -6,7 +6,7 @@ tags: [lepetitmonde/feature]
 
 Up: [[Le petit monde]] · Route: `/baby/[babyId]/tracker/analytics` · Code: `tracker/analytics/`, `care-analytics.ts`, `care-analytics-chart.ts`, `getTrackerRangeCore` in `care-core.ts`
 
-Trends over days and weeks for the [[Baby tracker]]: sleep, feeds, bottles and diapers, plus a 24 h history. Opened from the "Statistiques" button in the Suivi header; the bottom nav keeps "Suivi" highlighted.
+Trends over days and weeks for the [[Baby tracker]]: sleep, feeds, bottles, diapers, pumping and reflux, plus a 24 h history. Opened from the "Statistiques" button in the Suivi header; the bottom nav keeps "Suivi" highlighted.
 
 - **Ranges**: `?range=7d|30d|90d|all` (default `7d`, anything else falls back to it). The range lives in the URL only, it is not remembered. `all` starts at the first entry and is clamped to `CARE_ANALYTICS_MAX_DAYS` (1100 days).
 - **Same access as Suivi**: `assertPageAccess(babyId, 'tracker')`, so a viewer (when the role is admin), a non-member or a disabled page is turned away exactly like on Suivi. No stats-only page.
@@ -31,4 +31,5 @@ They match the Suivi day page so the numbers agree.
 - **Not logged is not zero**: a day where nothing started has a dot on the baseline and "Rien noté", and is left out of averages. Today is shown but marked in progress and also left out of averages.
 - **Trend** compares an average with the previous period of equal length, only when that period has at least 3 logged days (never for `all`). Neutral styling: arrow plus words, no green or red.
 - **Diapers** ([[Diaper changes]]) count on the day they started, a "both" once in wet and once in dirty. They never mark a day as logged for sleep and feeds, so a diaper-only day doesn't read as a zero sleep or feed day, and a sleep-only day reads "not logged" in the diaper chart. Diaper averages use their own pool of days with at least one diaper, and the wet tile's trend needs 3 such days in the previous period. Only counts are charted: stool colour, texture and note never reach the analytics read.
+- **Pumping and reflux** ([[Pumping and reflux]]) follow the diaper rule: they count on the day they started, never mark a day as logged for sleep and feeds, and pumping is never a feed. Each has its own section (pumped ml per day with session count; reflux episodes per day, with the small / medium / large split as numbers in the readout and table) shown only when the range has entries, averaged over days with at least one entry of that kind. The 24 h history marks pumping with a hollow square and reflux with a downward triangle at the top of the track. Reflux severity is the only extra column read.
 - **Bottles without an amount** count as bottles but not in the volume, and the page says how many have an amount.
