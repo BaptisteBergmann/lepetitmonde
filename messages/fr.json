@@ -1528,7 +1528,10 @@
       },
       "diaperContents": "Contenu",
       "poopColor": "Couleur du caca (facultatif)",
-      "poopTexture": "Texture (facultatif)"
+      "poopTexture": "Texture (facultatif)",
+      "pumpSide": "Côté (facultatif)",
+      "clearSide": "Effacer le côté",
+      "refluxSeverity": "Intensité (facultatif)"
     },
     "analytics": {
       "link": "Statistiques",
@@ -1687,7 +1690,8 @@
         "small": "Petit",
         "medium": "Moyen",
         "large": "Gros"
-      }
+      },
+      "clearSeverity": "Effacer l'intensité"
     }
   },
   "oauthConsent": {

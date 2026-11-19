@@ -17,12 +17,14 @@ import {
   CARE_KINDS,
   POOP_COLORS,
   POOP_TEXTURES,
+  REFLUX_SEVERITIES,
   CARE_KIND_CONFIG,
   CARE_LIMITS,
   type BreastSide,
   type CareKind,
   type PoopColor,
   type PoopTexture,
+  type RefluxSeverity,
 } from '@utils/care-events'
 import { formatDuration } from '@utils/care-duration'
 import { cn } from '@utils/utils'
@@ -124,6 +126,7 @@ function CareEventForm({
   const [poop, setPoop] = useState(event?.poop ?? false)
   const [poopColor, setPoopColor] = useState<PoopColor | null>(event?.poop_color ?? null)
   const [poopTexture, setPoopTexture] = useState<PoopTexture | null>(event?.poop_texture ?? null)
+  const [refluxSeverity, setRefluxSeverity] = useState<RefluxSeverity | null>(event?.reflux_severity ?? null)
   const [note, setNote] = useState(event?.note ?? '')
   const detailsRef = useRef<HTMLDivElement | null>(null)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
@@ -171,6 +174,7 @@ function CareEventForm({
     setPoop(false)
     setPoopColor(null)
     setPoopTexture(null)
+    setRefluxSeverity(null)
     setTouched({})
   }
 
@@ -193,12 +197,13 @@ function CareEventForm({
         startedAt: startDate.toISOString(),
         // undefined = "leave the stored end alone" (running entries have none to edit).
         endedAt: ongoing ? undefined : endDate ? endDate.toISOString() : null,
-        side: config.fields.includes('side') ? side : null,
+        side: config.fields.includes('side') || config.fields.includes('optionalSide') ? side : null,
         amountMl: config.fields.includes('amount') ? amountNumber : null,
         pee: config.fields.includes('diaper') ? pee : null,
         poop: config.fields.includes('diaper') ? poop : null,
         poopColor: config.fields.includes('diaper') && poop ? poopColor : null,
         poopTexture: config.fields.includes('diaper') && poop ? poopTexture : null,
+        refluxSeverity: config.fields.includes('refluxSeverity') ? refluxSeverity : null,
         note: note.trim() || null,
       }
       const result = event ? await updateCareEvent(babyId, event.id, input) : await createCareEvent(babyId, input)
@@ -325,6 +330,23 @@ function CareEventForm({
           </div>
         )}
 
+        {config.fields.includes('optionalSide') && (
+          <div className="flex flex-col gap-1.5">
+            <span className={labelClass}>{t('form.pumpSide')}</span>
+            <ChoiceGroup
+              value={side}
+              onValueChange={setSide}
+              label={t('form.pumpSide')}
+              options={BREAST_SIDES.map((s) => ({ value: s, label: t(`sides.${s}`) }))}
+            />
+            {side && (
+              <Button type="button" variant="ghost" className="h-11 self-start" onClick={() => setSide(null)}>
+                {t('form.clearSide')}
+              </Button>
+            )}
+          </div>
+        )}
+
         {config.fields.includes('amount') && (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="care-amount" className={labelClass}>{t('form.amount')}</Label>
@@ -346,6 +368,23 @@ function CareEventForm({
               <span className="text-sm text-muted-foreground" aria-hidden="true">ml</span>
             </div>
             {errorText('amount')}
+          </div>
+        )}
+
+        {config.fields.includes('refluxSeverity') && (
+          <div className="flex flex-col gap-1.5">
+            <span className={labelClass}>{t('form.refluxSeverity')}</span>
+            <ChoiceGroup
+              value={refluxSeverity}
+              onValueChange={setRefluxSeverity}
+              label={t('form.refluxSeverity')}
+              options={REFLUX_SEVERITIES.map((v) => ({ value: v, label: t(`reflux.severities.${v}`) }))}
+            />
+            {refluxSeverity && (
+              <Button type="button" variant="ghost" className="h-11 self-start" onClick={() => setRefluxSeverity(null)}>
+                {t('reflux.clearSeverity')}
+              </Button>
+            )}
           </div>
         )}
 

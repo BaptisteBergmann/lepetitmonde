@@ -1528,7 +1528,10 @@
       },
       "diaperContents": "Contents",
       "poopColor": "Poop colour (optional)",
-      "poopTexture": "Texture (optional)"
+      "poopTexture": "Texture (optional)",
+      "pumpSide": "Side (optional)",
+      "clearSide": "Clear side",
+      "refluxSeverity": "Severity (optional)"
     },
     "analytics": {
       "link": "Analytics",
@@ -1687,7 +1690,8 @@
         "small": "Small",
         "medium": "Medium",
         "large": "Large"
-      }
+      },
+      "clearSeverity": "Clear severity"
     }
   },
   "oauthConsent": {
