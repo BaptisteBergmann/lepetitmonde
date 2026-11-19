@@ -5,7 +5,7 @@ import { getAuthUser } from '@utils/supabase/auth'
 import { ActionError } from '@utils/actions/errors'
 import { createCareEventCore, startCareTimerCore, stopCareTimerCore } from '@utils/care-core'
 import { CareValidationError } from '@utils/care-validation'
-import { BREAST_SIDES, CARE_KINDS, POOP_COLORS, POOP_TEXTURES, TIMER_KINDS } from '@utils/care-events'
+import { BREAST_SIDES, CARE_KINDS, POOP_COLORS, POOP_TEXTURES, REFLUX_SEVERITIES, TIMER_KINDS } from '@utils/care-events'
 import { logger } from '@/utils/logger'
 
 // Replay channel for the offline tracker queue. Mutations normally go through Server
@@ -30,6 +30,7 @@ const createPayload = z.object({
   poop: z.boolean().nullable().optional(),
   poopColor: z.enum(POOP_COLORS as [string, ...string[]]).nullable().optional(),
   poopTexture: z.enum(POOP_TEXTURES as [string, ...string[]]).nullable().optional(),
+  refluxSeverity: z.enum(REFLUX_SEVERITIES as [string, ...string[]]).nullable().optional(),
   note: z.string().max(1000).nullable().optional(),
 })
 const startPayload = z.object({

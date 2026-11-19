@@ -33,6 +33,8 @@ export type TrackerNow = {
   lastBreastfeed: CareEvent | null
   // Full event (not just a time): the details strip opens the edit modal on it.
   lastDiaper: CareEvent | null
+  // Pumping is the parent's milk, never a feed: it has its own readout (tile hint).
+  lastPumping: CareEvent | null
 }
 
 // Narrow column set for analytics: no note, created_by or updated_by, so
@@ -195,7 +197,7 @@ export async function getTrackerNowCore(supabase: SupabaseClient, userId: string
   const contextLogger = logger.child({ function: getTrackerNowCore.name, babyId })
   await assertTrackerAccessForUser(supabase, userId, babyId)
 
-  const [ongoingRes, lastFeedRes, lastBreastRes, lastDiaperRes] = await Promise.all([
+  const [ongoingRes, lastFeedRes, lastBreastRes, lastDiaperRes, lastPumpingRes] = await Promise.all([
     supabase.from('care_events').select('*').eq('baby_id', babyId).eq('ongoing', true),
     supabase.from('care_events').select('*').eq('baby_id', babyId).in('kind', [...FEED_KINDS])
       .eq('ongoing', false).order('started_at', { ascending: false }).limit(1),
@@ -203,9 +205,11 @@ export async function getTrackerNowCore(supabase: SupabaseClient, userId: string
       .eq('ongoing', false).order('started_at', { ascending: false }).limit(1),
     supabase.from('care_events').select('*').eq('baby_id', babyId).eq('kind', 'diaper')
       .order('started_at', { ascending: false }).limit(1),
+    supabase.from('care_events').select('*').eq('baby_id', babyId).eq('kind', 'pumping')
+      .order('started_at', { ascending: false }).limit(1),
   ])
 
-  for (const res of [ongoingRes, lastFeedRes, lastBreastRes, lastDiaperRes]) {
+  for (const res of [ongoingRes, lastFeedRes, lastBreastRes, lastDiaperRes, lastPumpingRes]) {
     if (res.error) { contextLogger.error(res.error, 'Error fetching tracker state'); throw res.error }
   }
 
@@ -216,6 +220,7 @@ export async function getTrackerNowCore(supabase: SupabaseClient, userId: string
     ...lastFeedRes.data!,
     ...lastBreastRes.data!,
     ...lastDiaperRes.data!,
+    ...lastPumpingRes.data!,
   ])
   const byId = new Map<string, CareEvent>()
   for (const event of named) byId.set(event.id, event)
@@ -233,6 +238,7 @@ export async function getTrackerNowCore(supabase: SupabaseClient, userId: string
     lastFeed: first(lastFeedRes.data!),
     lastBreastfeed: first(lastBreastRes.data!),
     lastDiaper: first(lastDiaperRes.data!),
+    lastPumping: first(lastPumpingRes.data!),
   }
 }
 
@@ -445,6 +451,7 @@ export async function updateCareEventCore(supabase: SupabaseClient, userId: stri
       poop: fields.poop,
       poop_color: fields.poop_color,
       poop_texture: fields.poop_texture,
+      reflux_severity: fields.reflux_severity,
       note: fields.note,
       updated_at: new Date().toISOString(),
       updated_by: userId,
