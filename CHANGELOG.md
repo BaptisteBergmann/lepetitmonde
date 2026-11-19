@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-19
 
+- `cf73b01` feat(tracker): persist and read pumping and reflux fields
 - `c8664cd` feat(tracker): kind config and validation for pumping and reflux
 - `ec52b88` feat(tracker): add pumping and reflux kinds to care_events
 
