@@ -1645,7 +1645,7 @@
         "label": "Jour après jour, sur 24 heures",
         "empty": "Rien noté",
         "today": "Auj.",
-        "summary": "{sleep} de sommeil, {feeds, plural, one {# repas} other {# repas}}, {diapers, plural, one {# couche} other {# couches}}",
+        "summary": "{sleep} de sommeil, {feeds, plural, one {# repas} other {# repas}}, {diapers, plural, one {# couche} other {# couches}}, {pumps, plural, one {# tire-lait} other {# tire-lait}}, {reflux, plural, one {# reflux} other {# reflux}}",
         "openDay": "{date} : {summary}. Ouvrir ce jour",
         "openDayEmpty": "{date} : rien noté. Ouvrir ce jour",
         "capNote": "Les {count} derniers jours sont affichés."

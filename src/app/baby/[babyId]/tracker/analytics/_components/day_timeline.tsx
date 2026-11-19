@@ -7,7 +7,7 @@ import type { Formatters } from './analytics_format'
 
 // 24h rows, newest first. Every row is one link to that day on Suivi, so there are no tiny
 // per-block targets. Shapes carry the kind (bar = sleep, circle = breastfeed, diamond =
-// bottle, triangle = diaper), color is only a second cue. The track is `isolate`, so its z-0/z-10 tiers stay
+// bottle, triangle = diaper, hollow square = pumping, downward triangle = reflux), color is only a second cue. The track is `isolate`, so its z-0/z-10 tiers stay
 // local (docs/z-index.md).
 export async function DayTimeline({
   babyId,
@@ -47,6 +47,14 @@ export async function DayTimeline({
             {t('kinds.diaper')}
           </span>
           <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block size-2.5 rounded-[2px] border-2 border-rose bg-transparent" />
+            {t('kinds.pumping')}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block size-2.5 bg-chart-5 [clip-path:polygon(0_0,100%_0,50%_100%)]" />
+            {t('kinds.reflux')}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className="inline-block h-2.5 w-4 rounded-sm bg-foreground/10" />
             {t('analytics.metrics.night')}
           </span>
@@ -78,7 +86,7 @@ export async function DayTimeline({
           const label = day.logged
             ? t('analytics.timeline.openDay', {
                 date,
-                summary: t('analytics.timeline.summary', { sleep: fmt.duration(day.sleepMs), feeds: day.feedCount, diapers: day.diaperCount }),
+                summary: t('analytics.timeline.summary', { sleep: fmt.duration(day.sleepMs), feeds: day.feedCount, diapers: day.diaperCount, pumps: day.pumpCount, reflux: day.refluxCount }),
               })
             : t('analytics.timeline.openDayEmpty', { date })
 
@@ -129,6 +137,21 @@ export async function DayTimeline({
                           key={i}
                           className="absolute bottom-0.5 z-10 size-2 -translate-x-1/2 bg-chart-1 [clip-path:polygon(50%_0,100%_100%,0_100%)]"
                           style={{ left: `${d.left}%` }}
+                        />
+                      ))}
+                      {row.pumps.map((p, i) => (
+                        <span
+                          key={i}
+                          className="absolute top-1/2 z-10 size-2 -translate-x-1/2 -translate-y-1/2 rounded-[2px] border-2 border-rose bg-transparent"
+                          style={{ left: `${p.left}%` }}
+                        />
+                      ))}
+                      {/* Top of the track so it never collides with the bottom diaper triangle or the centred feed marks. */}
+                      {row.refluxes.map((r, i) => (
+                        <span
+                          key={i}
+                          className="absolute top-0.5 z-10 size-2 -translate-x-1/2 bg-chart-5 [clip-path:polygon(0_0,100%_0,50%_100%)]"
+                          style={{ left: `${r.left}%` }}
                         />
                       ))}
                     </>

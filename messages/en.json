@@ -1645,7 +1645,7 @@
         "label": "Day by day, over 24 hours",
         "empty": "Nothing logged",
         "today": "Today",
-        "summary": "{sleep} of sleep, {feeds, plural, one {# feed} other {# feeds}}, {diapers, plural, one {# diaper} other {# diapers}}",
+        "summary": "{sleep} of sleep, {feeds, plural, one {# feed} other {# feeds}}, {diapers, plural, one {# diaper} other {# diapers}}, {pumps, plural, one {# pumping} other {# pumpings}}, {reflux, plural, one {# reflux} other {# reflux}}",
         "openDay": "{date}: {summary}. Open this day",
         "openDayEmpty": "{date}: nothing logged. Open this day",
         "capNote": "Showing the last {count} days."

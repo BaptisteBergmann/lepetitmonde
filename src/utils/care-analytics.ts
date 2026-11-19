@@ -22,6 +22,9 @@ import { overlapMs, parseZonedDateTime, zonedDayBounds, shiftDay, todayInZone, t
 //   once in dirty, and once in the total. A diaper never marks a day as logged
 //   for sleep and feeds (that would make it a zero day in their averages); diaper
 //   averages use their own pool of days with at least one diaper.
+// - Pumping and reflux follow the same rule as diapers: they count on the day they started,
+//   never mark a day as logged for sleep and feeds, and pumping is never a feed (the parent's
+//   expressed milk, not the baby's intake).
 // - A day with no entry started on it is "not logged", not zero: it is left
 //   out of every average. Today is partial and left out of averages too.
 
@@ -87,6 +90,11 @@ export type DayStats = {
   diaperCount: number
   wetCount: number
   dirtyCount: number
+  // Pumping sessions and reflux episodes started on this day (same "not part of logged" rule as diapers).
+  pumpCount: number
+  pumpMl: number
+  pumpWithAmount: number
+  refluxCount: number
   medianIntervalMs: number | null
   longestIntervalMs: number | null
   // The kept start-to-start gaps behind the two values above, so weekly buckets can take a real median.
@@ -128,6 +136,8 @@ export type RangeSummary = {
 
 export type TimelineSleep = { startMin: number; endMin: number; ongoing: boolean; continuesBefore: boolean; continuesAfter: boolean }
 export type TimelineDiaper = { startMin: number }
+export type TimelinePump = { startMin: number }
+export type TimelineReflux = { startMin: number }
 export type TimelineFeed = { kind: 'breastfeed' | 'bottle'; startMin: number; endMin: number | null }
 
 export type TimelineDay = {
@@ -142,10 +152,14 @@ export type TimelineDay = {
   sleeps: TimelineSleep[]
   feeds: TimelineFeed[]
   diapers: TimelineDiaper[]
+  pumps: TimelinePump[]
+  refluxes: TimelineReflux[]
   sleepMs: number
   feedCount: number
   bottleCount: number
   diaperCount: number
+  pumpCount: number
+  refluxCount: number
 }
 
 export type TrackerAnalytics = {
@@ -171,6 +185,11 @@ export type ComputeOptions = {
 }
 
 const FEED_SET = new Set<string>(FEED_KINDS)
+
+// Any entry started on the day, whatever the kind: what makes a day worth showing.
+export function hasEntries(s: DayStats): boolean {
+  return s.logged || s.diaperCount > 0 || s.pumpCount > 0 || s.refluxCount > 0
+}
 
 function median(values: number[]): number | null {
   if (values.length === 0) return null
@@ -231,6 +250,10 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     diaperCount: 0,
     wetCount: 0,
     dirtyCount: 0,
+    pumpCount: 0,
+    pumpMl: 0,
+    pumpWithAmount: 0,
+    refluxCount: 0,
     medianIntervalMs: null,
     longestIntervalMs: null,
     intervalsMs: [],
@@ -282,6 +305,17 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
       if (e.poop) d.dirtyCount++
       continue
     }
+    // Same: pumping and reflux are not sleep or feeds, so they can't make a zero day.
+    if (e.kind === 'pumping') {
+      const d = stats[startIdx]
+      d.pumpCount++
+      if (e.amount_ml != null) { d.pumpWithAmount++; d.pumpMl += e.amount_ml }
+      continue
+    }
+    if (e.kind === 'reflux') {
+      stats[startIdx].refluxCount++
+      continue
+    }
     const s = stats[startIdx]
     s.logged = true
     if (!FEED_SET.has(e.kind)) continue
@@ -325,7 +359,7 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     return {
       totalDays: slice.length,
       loggedDays: complete.length,
-      entryDays: slice.filter((s) => (s.logged || s.diaperCount > 0) && !s.partial).length,
+      entryDays: slice.filter((s) => hasEntries(s) && !s.partial).length,
       avgSleepMs: average(complete.map((s) => s.sleepMs)),
       avgDaySleepMs: average(complete.map((s) => s.daySleepMs)),
       avgNightSleepMs: average(complete.map((s) => s.nightSleepMs)),
@@ -374,6 +408,8 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     const sleeps: TimelineSleep[] = []
     const feeds: TimelineFeed[] = []
     const diapers: TimelineDiaper[] = []
+    const pumps: TimelinePump[] = []
+    const refluxes: TimelineReflux[] = []
     for (const e of sorted) {
       const startMs = new Date(e.started_at).getTime()
       if (startMs >= b.end.getTime()) break
@@ -389,6 +425,10 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
         })
       } else if (startMs >= bStart && e.kind === 'diaper') {
         diapers.push({ startMin: toMin(startMs) })
+      } else if (startMs >= bStart && e.kind === 'pumping') {
+        pumps.push({ startMin: toMin(startMs) })
+      } else if (startMs >= bStart && e.kind === 'reflux') {
+        refluxes.push({ startMin: toMin(startMs) })
       } else if (startMs >= bStart && (e.kind === 'breastfeed' || e.kind === 'bottle')) {
         feeds.push({ kind: e.kind, startMin: toMin(startMs), endMin: e.kind === 'breastfeed' && end !== null ? toMin(Math.min(end, b.end.getTime())) : null })
       }
@@ -396,8 +436,8 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     const s = stats[i]
     timeline.push({
       day: s.day,
-      // A diaper-only day still has something to show in the history.
-      logged: s.logged || s.diaperCount > 0,
+      // A diaper-, pumping- or reflux-only day still has something to show in the history.
+      logged: hasEntries(s),
       partial: s.partial,
       dayMin,
       dayWindowStartMin: toMin(windows[i].start.getTime()),
@@ -405,10 +445,14 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
       sleeps,
       feeds,
       diapers,
+      pumps,
+      refluxes,
       sleepMs: s.sleepMs,
       feedCount: s.feedCount,
       bottleCount: s.bottleCount,
       diaperCount: s.diaperCount,
+      pumpCount: s.pumpCount,
+      refluxCount: s.refluxCount,
     })
   }
 

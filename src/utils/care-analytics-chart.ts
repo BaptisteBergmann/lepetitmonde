@@ -359,6 +359,8 @@ export type TimelineRowBuild = {
   sleeps: { left: number; width: number; ongoing: boolean; continuesBefore: boolean; continuesAfter: boolean }[]
   feeds: { kind: 'breastfeed' | 'bottle'; left: number; width: number }[]
   diapers: { left: number }[]
+  pumps: { left: number }[]
+  refluxes: { left: number }[]
 }
 
 // Minutes -> percent of the day (the day is 1380/1440/1500 minutes on DST days).
@@ -378,5 +380,7 @@ export function buildTimelineRow(day: TimelineDay): TimelineRowBuild {
     })),
     feeds: day.feeds.map((f) => ({ kind: f.kind, ...block(f.startMin, f.endMin ?? f.startMin) })),
     diapers: day.diapers.map((d) => ({ left: pct(d.startMin) })),
+    pumps: day.pumps.map((p) => ({ left: pct(p.startMin) })),
+    refluxes: day.refluxes.map((r) => ({ left: pct(r.startMin) })),
   }
 }

@@ -5,7 +5,7 @@ import { assertPageAccess } from '@/utils/actions/page_settings'
 import { getTrackerFirstDay, getTrackerRange } from '@/utils/actions/care_events'
 import { getRequestTimeZone } from '@/utils/care-timezone'
 import { buttonVariants } from '@/components/ui/button'
-import { computeTrackerAnalytics, parseRangeParam, rangeBounds, type AnalyticsRange } from '@utils/care-analytics'
+import { computeTrackerAnalytics, hasEntries, parseRangeParam, rangeBounds, type AnalyticsRange } from '@utils/care-analytics'
 import { bucketDays } from '@utils/care-analytics-chart'
 import { todayInZone } from '@utils/care-time'
 import { CARE_TONE_CLASSES } from '@utils/care-events'
@@ -52,8 +52,8 @@ export default async function TrackerAnalyticsPage({
   const rows = firstDay ? await getTrackerRange(babyId, bounds.prevFrom ?? bounds.from, bounds.to) : []
   const analytics = computeTrackerAnalytics(rows, { from: bounds.from, to: bounds.to, prevFrom: bounds.prevFrom, tz, now })
   const { summary, previousSummary, previousDiaperSummary } = analytics
-  // A diaper-only day is data too, even though it leaves sleep and feeds unlogged.
-  const hasRangeData = analytics.days.some((d) => d.logged || d.diaperCount > 0)
+  // A diaper-, pumping- or reflux-only day is data too, even though it leaves sleep and feeds unlogged.
+  const hasRangeData = analytics.days.some(hasEntries)
   const bucketed = bucketDays(analytics.days)
   const wider = WIDER_RANGE[range]
   const prevDays = range === 'all' ? null : RANGE_DAYS[range]
