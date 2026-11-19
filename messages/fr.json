@@ -1383,7 +1383,9 @@
       "sleep": "Sommeil",
       "breastfeed": "Tétée",
       "bottle": "Biberon",
-      "diaper": "Couche"
+      "diaper": "Couche",
+      "pumping": "Tire-lait",
+      "reflux": "Reflux"
     },
     "sides": {
       "left": "Gauche",
@@ -1490,7 +1492,8 @@
         "invalidSide": "Choisissez un côté.",
         "invalidKind": "Type d'entrée invalide.",
         "noteTooLong": "La note est trop longue (500 caractères maximum).",
-        "invalidDiaper": "Une couche doit contenir du pipi, du caca ou les deux, et les détails ne concernent que le caca."
+        "invalidDiaper": "Une couche doit contenir du pipi, du caca ou les deux, et les détails ne concernent que le caca.",
+        "invalidSeverity": "Choisissez petit, moyen ou gros."
       }
     },
     "form": {
@@ -1678,6 +1681,13 @@
       "title": "Dernier change",
       "ago": "{type} · <ago></ago>",
       "none": "Aucune couche enregistrée"
+    },
+    "reflux": {
+      "severities": {
+        "small": "Petit",
+        "medium": "Moyen",
+        "large": "Gros"
+      }
     }
   },
   "oauthConsent": {

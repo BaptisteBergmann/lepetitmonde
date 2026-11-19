@@ -11,7 +11,7 @@ export function diaperContents(event: Pick<Tables<'care_events'>, 'pee' | 'poop'
 }
 
 export function describeEvent(
-  event: Pick<Tables<'care_events'>, 'kind' | 'breast_side' | 'amount_ml' | 'pee' | 'poop' | 'poop_color' | 'poop_texture'>,
+  event: Pick<Tables<'care_events'>, 'kind' | 'breast_side' | 'amount_ml' | 'pee' | 'poop' | 'poop_color' | 'poop_texture' | 'reflux_severity'>,
   t: Translate,
 ): string {
   const name = t(`kinds.${event.kind}`)
@@ -20,6 +20,15 @@ export function describeEvent(
       return event.breast_side ? `${name} · ${t(`sides.${event.breast_side}`)}` : name
     case 'bottle':
       return `${name} · ${event.amount_ml ? t('summary.amount', { amount: event.amount_ml }) : t('log.noAmount')}`
+    // Both details are optional for pumping, so no "Amount not set" like the bottle.
+    case 'pumping':
+      return [
+        name,
+        event.breast_side && t(`sides.${event.breast_side}`),
+        event.amount_ml && t('summary.amount', { amount: event.amount_ml }),
+      ].filter(Boolean).join(' · ')
+    case 'reflux':
+      return [name, event.reflux_severity && t(`reflux.severities.${event.reflux_severity}`)].filter(Boolean).join(' · ')
     case 'diaper': {
       return [
         name,

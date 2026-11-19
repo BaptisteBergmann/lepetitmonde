@@ -10,10 +10,12 @@ import {
   isCareKind,
   isPoopColor,
   isPoopTexture,
+  isRefluxSeverity,
   type BreastSide,
   type CareKind,
   type PoopColor,
   type PoopTexture,
+  type RefluxSeverity,
 } from '@utils/care-events'
 
 export type CareErrorKey =
@@ -29,6 +31,7 @@ export type CareErrorKey =
   | 'invalidSide'
   | 'invalidKind'
   | 'invalidDiaper'
+  | 'invalidSeverity'
   | 'noteTooLong'
 
 export class CareValidationError extends Error {
@@ -52,6 +55,7 @@ export type CareEventInput = {
   poop?: boolean | null
   poopColor?: PoopColor | null
   poopTexture?: PoopTexture | null
+  refluxSeverity?: RefluxSeverity | null
   note?: string | null
 }
 
@@ -66,6 +70,7 @@ export type ValidatedCareFields = {
   poop: boolean | null
   poop_color: PoopColor | null
   poop_texture: PoopTexture | null
+  reflux_severity: RefluxSeverity | null
   note: string | null
 }
 
@@ -118,6 +123,12 @@ async function assertDiaper(input: Partial<CareEventInput>) {
   return { pee, poop, poop_color: color, poop_texture: texture }
 }
 
+async function assertSeverity(value: unknown): Promise<RefluxSeverity | null> {
+  if (value === null || value === undefined) return null
+  if (!isRefluxSeverity(value)) throw new CareValidationError('invalidSeverity')
+  return value
+}
+
 async function normalizeNote(value: unknown): Promise<string | null> {
   if (value === null || value === undefined) return null
   if (typeof value !== 'string') throw new CareValidationError('noteTooLong')
@@ -158,12 +169,18 @@ export async function validateCareFields(
     ended_at = ended.toISOString()
   }
 
-  const breast_side = config.fields.includes('side') ? await assertSide(input.side) : null
+  // 'optionalSide' (pumping) accepts no side; 'side' (breastfeed) requires one.
+  const breast_side = config.fields.includes('side')
+    ? await assertSide(input.side)
+    : config.fields.includes('optionalSide') && input.side !== null && input.side !== undefined
+      ? await assertSide(input.side)
+      : null
   const amount_ml = config.fields.includes('amount') ? await assertAmount(input.amountMl) : null
   const diaper = config.fields.includes('diaper')
     ? await assertDiaper(input)
     : { pee: null, poop: null, poop_color: null, poop_texture: null }
+  const reflux_severity = config.fields.includes('refluxSeverity') ? await assertSeverity(input.refluxSeverity) : null
   const note = await normalizeNote(input.note)
 
-  return { kind, started_at: started.toISOString(), ended_at, breast_side, amount_ml, ...diaper, note }
+  return { kind, started_at: started.toISOString(), ended_at, breast_side, amount_ml, ...diaper, reflux_severity, note }
 }

@@ -35,7 +35,8 @@ import { useOnline } from '@/components/use_online'
 type OpenAction = 'breastfeed' | 'bottle' | null
 
 // Diaper has its own card of one-tap actions, so it is not one of the timer/feed tiles.
-const TILE_KINDS = CARE_KINDS.filter((kind) => CARE_KIND_CONFIG[kind].quick !== 'diaper')
+// Pumping and reflux get their quick actions in a later step.
+const TILE_KINDS = CARE_KINDS.filter((kind) => !['diaper', 'pump', 'reflux'].includes(CARE_KIND_CONFIG[kind].quick))
 
 export function NowPanel({
   babyId,

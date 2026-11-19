@@ -1383,7 +1383,9 @@
       "sleep": "Sleep",
       "breastfeed": "Breastfeed",
       "bottle": "Bottle",
-      "diaper": "Diaper"
+      "diaper": "Diaper",
+      "pumping": "Pumping",
+      "reflux": "Reflux"
     },
     "sides": {
       "left": "Left",
@@ -1490,7 +1492,8 @@
         "invalidSide": "Choose a side.",
         "invalidKind": "Invalid entry type.",
         "noteTooLong": "The note is too long (500 characters max).",
-        "invalidDiaper": "A diaper needs pee, poop or both, and details only apply to poop."
+        "invalidDiaper": "A diaper needs pee, poop or both, and details only apply to poop.",
+        "invalidSeverity": "Choose small, medium or large."
       }
     },
     "form": {
@@ -1678,6 +1681,13 @@
       "title": "Last change",
       "ago": "{type} · <ago></ago>",
       "none": "No diaper logged yet"
+    },
+    "reflux": {
+      "severities": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
+      }
     }
   },
   "oauthConsent": {
