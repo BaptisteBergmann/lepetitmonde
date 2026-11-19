@@ -1,0 +1,5 @@
+-- Pumping and reflux: new care_events kinds. See .claude/plans/pumping-and-reflux.md.
+-- Own migration file: a new enum value can't be used in the transaction that adds it.
+-- Irreversible (an enum value can't be cleanly removed).
+ALTER TYPE "public"."care_event_kind" ADD VALUE 'pumping';
+ALTER TYPE "public"."care_event_kind" ADD VALUE 'reflux';

@@ -556,6 +556,9 @@ export type Database = {
           poop_texture:
             | Database["public"]["Enums"]["diaper_poop_texture"]
             | null
+          reflux_severity:
+            | Database["public"]["Enums"]["reflux_severity"]
+            | null
           started_at: string
           updated_at: string
           updated_by: string | null
@@ -577,6 +580,9 @@ export type Database = {
           poop_texture?:
             | Database["public"]["Enums"]["diaper_poop_texture"]
             | null
+          reflux_severity?:
+            | Database["public"]["Enums"]["reflux_severity"]
+            | null
           started_at: string
           updated_at?: string
           updated_by?: string | null
@@ -597,6 +603,9 @@ export type Database = {
           poop_color?: Database["public"]["Enums"]["diaper_poop_color"] | null
           poop_texture?:
             | Database["public"]["Enums"]["diaper_poop_texture"]
+            | null
+          reflux_severity?:
+            | Database["public"]["Enums"]["reflux_severity"]
             | null
           started_at?: string
           updated_at?: string
@@ -2170,7 +2179,13 @@ export type Database = {
       baby_sex: "female" | "male"
       breast_side: "left" | "right" | "both"
       bug_report_status: "new" | "reviewed" | "fixed"
-      care_event_kind: "sleep" | "breastfeed" | "bottle" | "diaper"
+      care_event_kind:
+        | "sleep"
+        | "breastfeed"
+        | "bottle"
+        | "diaper"
+        | "pumping"
+        | "reflux"
       diaper_poop_color:
         | "black"
         | "green"
@@ -2201,6 +2216,7 @@ export type Database = {
         | "new_anecdote"
         | "new_comment_reaction"
         | "new_story_reaction"
+      reflux_severity: "small" | "medium" | "large"
       role: "admin" | "viewer"
     }
     CompositeTypes: {
@@ -2332,7 +2348,14 @@ export const Constants = {
       baby_sex: ["female", "male"],
       breast_side: ["left", "right", "both"],
       bug_report_status: ["new", "reviewed", "fixed"],
-      care_event_kind: ["sleep", "breastfeed", "bottle", "diaper"],
+      care_event_kind: [
+        "sleep",
+        "breastfeed",
+        "bottle",
+        "diaper",
+        "pumping",
+        "reflux",
+      ],
       diaper_poop_color: ["black", "green", "yellow", "brown", "red", "white"],
       diaper_poop_texture: ["liquid", "seedy", "soft", "formed", "hard"],
       event_kind: ["occasion", "life_stage", "medical"],
@@ -2359,6 +2382,7 @@ export const Constants = {
         "new_comment_reaction",
         "new_story_reaction",
       ],
+      reflux_severity: ["small", "medium", "large"],
       role: ["admin", "viewer"],
     },
   },
