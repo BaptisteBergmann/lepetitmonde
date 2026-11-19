@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-19
 
+- `c6d1de5` fix(tracker): keep pumping and reflux out of sleep and feed analytics
 - `23572eb` feat(tracker): pumping and reflux day summary tiles
 - `1bfb9b1` feat(tracker): quick log for pumping and reflux
 - `990ce54` feat(tracker): pumping and reflux in the entry modal and day log
