@@ -254,7 +254,7 @@
     "tracker": {
       "name": "Suivi",
       "eyebrow": "Page — Au quotidien",
-      "description": "Sommeil et tétées, notés par toute la famille."
+      "description": "Sommeil, tétées, couches, tire-lait et reflux, notés par toute la famille."
     },
     "health": {
       "name": "Santé",
@@ -1378,7 +1378,7 @@
   },
   "tracker": {
     "title": "Suivi",
-    "subtitle": "Sommeil et tétées, notés par toute la famille.",
+    "subtitle": "Sommeil, tétées, couches, tire-lait et reflux, notés par toute la famille.",
     "kinds": {
       "sleep": "Sommeil",
       "breastfeed": "Tétée",
@@ -1406,7 +1406,10 @@
       "amount": "{amount} ml",
       "none": "—",
       "diapers": "Couches",
-      "diapersValue": "{wet, plural, one {# mouillée} other {# mouillées}} · {dirty, plural, one {# sale} other {# sales}}"
+      "diapersValue": "{wet, plural, one {# mouillée} other {# mouillées}} · {dirty, plural, one {# sale} other {# sales}}",
+      "pumping": "Tire-lait",
+      "pumpingValue": "{count} · {amount} ml",
+      "reflux": "Reflux"
     },
     "duration": {
       "hm": "{h} h {m} min",
@@ -1418,7 +1421,7 @@
     "log": {
       "heading": "Journal du jour",
       "emptyToday": "Rien de noté pour l'instant aujourd'hui",
-      "emptyTodayHint": "Enregistrez un sommeil, une tétée ou un change pour commencer.",
+      "emptyTodayHint": "Enregistrez un sommeil, une tétée, un change, un tire-lait ou un reflux pour commencer.",
       "emptyDay": "Rien de noté ce jour-là",
       "emptyDayHint": "Utilisez Ajouter une entrée pour noter quelque chose après coup.",
       "by": "par {name}",

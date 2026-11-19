@@ -254,7 +254,7 @@
     "tracker": {
       "name": "Tracker",
       "eyebrow": "Page — Day to day",
-      "description": "Sleep and feeds, logged by the whole family."
+      "description": "Sleep, feeds, diapers, pumping and reflux, logged by the whole family."
     },
     "health": {
       "name": "Health",
@@ -1378,7 +1378,7 @@
   },
   "tracker": {
     "title": "Tracker",
-    "subtitle": "Sleep and feeds, logged by the whole family.",
+    "subtitle": "Sleep, feeds, diapers, pumping and reflux, logged by the whole family.",
     "kinds": {
       "sleep": "Sleep",
       "breastfeed": "Breastfeed",
@@ -1406,7 +1406,10 @@
       "amount": "{amount} ml",
       "none": "—",
       "diapers": "Diapers",
-      "diapersValue": "{wet} wet · {dirty} dirty"
+      "diapersValue": "{wet} wet · {dirty} dirty",
+      "pumping": "Pumping",
+      "pumpingValue": "{count} · {amount} ml",
+      "reflux": "Reflux"
     },
     "duration": {
       "hm": "{h}h {m}m",
@@ -1418,7 +1421,7 @@
     "log": {
       "heading": "Day log",
       "emptyToday": "Nothing logged yet today",
-      "emptyTodayHint": "Log a sleep, feed or diaper change to get started.",
+      "emptyTodayHint": "Log a sleep, feed, diaper change, pumping or reflux to get started.",
       "emptyDay": "Nothing logged on this day",
       "emptyDayHint": "Use Add entry to log something afterwards.",
       "by": "by {name}",

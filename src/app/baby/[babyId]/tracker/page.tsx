@@ -37,7 +37,7 @@ export default async function TrackerPage({
 
   const [events, nowState] = await Promise.all([getTrackerDay(babyId, day), getTrackerNow(babyId)]);
 
-  const { feedCount, bottleMl, sleepMs, wetCount, dirtyCount } = computeDayTotals(events, bounds, now);
+  const { feedCount, bottleMl, sleepMs, wetCount, dirtyCount, pumpCount, pumpMl, refluxCount } = computeDayTotals(events, bounds, now);
   const durationT = (key: 'hm' | 'h' | 'm', values: { h: number; m: number }) => t(`duration.${key}`, values);
 
   const stats = [
@@ -46,6 +46,9 @@ export default async function TrackerPage({
     { id: 'bottles', label: t('summary.bottles'), value: bottleMl > 0 ? t('summary.amount', { amount: bottleMl }) : t('summary.none') },
     // Zero is a real count here (no diaper that day), so no em dash.
     { id: 'diapers', label: t('summary.diapers'), value: t('summary.diapersValue', { wet: wetCount, dirty: dirtyCount }), small: true },
+    // Plain counts (0 included, like diapers); pumping adds the total only when amounts were logged.
+    { id: 'pumping', label: t('summary.pumping'), value: pumpMl > 0 ? t('summary.pumpingValue', { count: pumpCount, amount: pumpMl }) : String(pumpCount), small: true },
+    { id: 'reflux', label: t('summary.reflux'), value: String(refluxCount) },
   ];
 
   return (
