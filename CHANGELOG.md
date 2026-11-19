@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-19
+
+- `ec52b88` feat(tracker): add pumping and reflux kinds to care_events
+
 ## 2026-11-17
 
 - `e362f5f` docs(plans): add circle-hierarchy plan
