@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-19
 
+- `1bfb9b1` feat(tracker): quick log for pumping and reflux
 - `990ce54` feat(tracker): pumping and reflux in the entry modal and day log
 - `cf73b01` feat(tracker): persist and read pumping and reflux fields
 - `c8664cd` feat(tracker): kind config and validation for pumping and reflux
