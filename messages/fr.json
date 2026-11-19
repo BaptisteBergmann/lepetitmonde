@@ -1562,7 +1562,9 @@
         "feeds": "Repas",
         "bottles": "Biberons",
         "history": "Historique",
-        "diapers": "Couches"
+        "diapers": "Couches",
+        "pumping": "Tire-lait",
+        "reflux": "Reflux"
       },
       "tiles": {
         "sleep": "Sommeil par jour",
@@ -1601,7 +1603,9 @@
         "breastfeeds": "Tétées",
         "bottles": "Biberons",
         "wet": "Mouillées",
-        "dirty": "Sales"
+        "dirty": "Sales",
+        "pumpVolume": "Quantité tirée par jour",
+        "pumpSessions": "Séances"
       },
       "readout": {
         "partialToday": "en cours",
@@ -1618,7 +1622,11 @@
         "bottleCountAvg": "{count} biberons par jour",
         "missingAmountAvg": "{count} par jour sans quantité",
         "diaperCount": "{count, plural, one {# couche} other {# couches}}",
-        "diaperCountAvg": "{count} couches par jour"
+        "diaperCountAvg": "{count} couches par jour",
+        "pumpCount": "{count, plural, one {# séance} other {# séances}}",
+        "pumpCountAvg": "{count} séances par jour",
+        "refluxCount": "{count, plural, one {# épisode} other {# épisodes}}",
+        "refluxCountAvg": "{count} épisodes par jour"
       },
       "chart": {
         "showTable": "Afficher en tableau",
@@ -1638,7 +1646,9 @@
           "feedsNoTrend": "En moyenne {count} repas par jour.",
           "interval": "Le temps médian entre deux repas est de {duration}.",
           "bottle": "En moyenne {amount} de biberon par jour.",
-          "diaper": "En moyenne {wet} couches mouillées et {dirty} sales par jour."
+          "diaper": "En moyenne {wet} couches mouillées et {dirty} sales par jour.",
+          "pump": "En moyenne {amount} tirés par jour.",
+          "reflux": "En moyenne {count} épisodes de reflux par jour."
         }
       },
       "timeline": {

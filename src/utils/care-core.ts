@@ -39,7 +39,7 @@ export type TrackerNow = {
 
 // Narrow column set for analytics: no note, created_by or updated_by, so
 // stats never expose who logged what.
-export type CareAnalyticsRow = Pick<Tables<'care_events'>, 'kind' | 'started_at' | 'ended_at' | 'ongoing' | 'breast_side' | 'amount_ml' | 'pee' | 'poop'>
+export type CareAnalyticsRow = Pick<Tables<'care_events'>, 'kind' | 'started_at' | 'ended_at' | 'ongoing' | 'breast_side' | 'amount_ml' | 'pee' | 'poop' | 'reflux_severity'>
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -158,7 +158,7 @@ export async function getTrackerRangeCore(
   for (let offset = 0; ; offset += RANGE_PAGE_SIZE) {
     const { data, error } = await supabase
       .from('care_events')
-      .select('kind, started_at, ended_at, ongoing, breast_side, amount_ml, pee, poop')
+      .select('kind, started_at, ended_at, ongoing, breast_side, amount_ml, pee, poop, reflux_severity')
       .eq('baby_id', babyId)
       .gte('started_at', startIso)
       .lt('started_at', endIso)

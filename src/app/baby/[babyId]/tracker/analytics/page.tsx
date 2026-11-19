@@ -21,6 +21,8 @@ import { SleepSection } from './_components/sleep_section'
 import { FeedSection } from './_components/feed_section'
 import { BottleSection } from './_components/bottle_section'
 import { DiaperSection } from './_components/diaper_section'
+import { PumpSection } from './_components/pump_section'
+import { RefluxSection } from './_components/reflux_section'
 import { DayTimeline } from './_components/day_timeline'
 
 const WIDER_RANGE: Record<AnalyticsRange, AnalyticsRange | null> = { '7d': '30d', '30d': '90d', '90d': 'all', all: null }
@@ -132,6 +134,8 @@ export default async function TrackerAnalyticsPage({
                 )}
                 {summary.hasBottle && <BottleSection data={bucketed} summary={summary} fmt={fmt} />}
                 {summary.hasDiaper && <DiaperSection data={bucketed} summary={summary} fmt={fmt} />}
+                {summary.hasPumping && <PumpSection data={bucketed} summary={summary} fmt={fmt} />}
+                {summary.hasReflux && <RefluxSection data={bucketed} summary={summary} fmt={fmt} />}
                 <DayTimeline babyId={babyId} days={analytics.timeline} totalDays={analytics.days.length} fmt={fmt} />
               </>
             )}

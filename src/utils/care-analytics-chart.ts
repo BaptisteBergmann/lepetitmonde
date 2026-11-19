@@ -40,6 +40,16 @@ export type Bucket = {
   diaperCount: number
   wetCount: number
   dirtyCount: number
+  // Own "logged" flags like diapers: a day with only sleep reads not logged in these charts.
+  pumpLogged: boolean
+  pumpCount: number
+  pumpMl: number
+  pumpWithAmount: number
+  refluxLogged: boolean
+  refluxCount: number
+  refluxSmall: number
+  refluxMedium: number
+  refluxLarge: number
   medianIntervalMs: number | null
   longestIntervalMs: number | null
 }
@@ -85,6 +95,15 @@ function dayBucket(s: DayStats): Bucket {
     diaperCount: s.diaperCount,
     wetCount: s.wetCount,
     dirtyCount: s.dirtyCount,
+    pumpLogged: s.pumpCount > 0,
+    pumpCount: s.pumpCount,
+    pumpMl: s.pumpMl,
+    pumpWithAmount: s.pumpWithAmount,
+    refluxLogged: s.refluxCount > 0,
+    refluxCount: s.refluxCount,
+    refluxSmall: s.refluxSmall,
+    refluxMedium: s.refluxMedium,
+    refluxLarge: s.refluxLarge,
     medianIntervalMs: s.medianIntervalMs,
     longestIntervalMs: s.longestIntervalMs,
   }
@@ -102,6 +121,15 @@ function weekBucket(week: string, group: DayStats[]): Bucket {
   const diaperComplete = diaperDays.filter((s) => !s.partial)
   const diaperPool = diaperComplete.length ? diaperComplete : diaperDays
   const avgDiaper = (pick: (s: DayStats) => number) => mean(diaperPool.map(pick))
+  const poolOf = (has: (s: DayStats) => boolean) => {
+    const days = group.filter(has)
+    const complete = days.filter((s) => !s.partial)
+    return { days, pool: complete.length ? complete : days }
+  }
+  const pump = poolOf((s) => s.pumpCount > 0)
+  const reflux = poolOf((s) => s.refluxCount > 0)
+  const avgPump = (pick: (s: DayStats) => number) => mean(pump.pool.map(pick))
+  const avgReflux = (pick: (s: DayStats) => number) => mean(reflux.pool.map(pick))
   return {
     key: week,
     endDay: group[group.length - 1].day,
@@ -122,6 +150,15 @@ function weekBucket(week: string, group: DayStats[]): Bucket {
     diaperCount: avgDiaper((s) => s.diaperCount),
     wetCount: avgDiaper((s) => s.wetCount),
     dirtyCount: avgDiaper((s) => s.dirtyCount),
+    pumpLogged: pump.days.length > 0,
+    pumpCount: avgPump((s) => s.pumpCount),
+    pumpMl: avgPump((s) => s.pumpMl),
+    pumpWithAmount: avgPump((s) => s.pumpWithAmount),
+    refluxLogged: reflux.days.length > 0,
+    refluxCount: avgReflux((s) => s.refluxCount),
+    refluxSmall: avgReflux((s) => s.refluxSmall),
+    refluxMedium: avgReflux((s) => s.refluxMedium),
+    refluxLarge: avgReflux((s) => s.refluxLarge),
     medianIntervalMs: median(pool.flatMap((s) => s.intervalsMs)),
     longestIntervalMs: pool.reduce<number | null>((max, s) => (s.longestIntervalMs !== null && (max === null || s.longestIntervalMs > max) ? s.longestIntervalMs : max), null),
   }

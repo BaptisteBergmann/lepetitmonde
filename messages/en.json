@@ -1562,7 +1562,9 @@
         "feeds": "Feeds",
         "bottles": "Bottles",
         "history": "History",
-        "diapers": "Diapers"
+        "diapers": "Diapers",
+        "pumping": "Pumping",
+        "reflux": "Reflux"
       },
       "tiles": {
         "sleep": "Sleep per day",
@@ -1601,7 +1603,9 @@
         "breastfeeds": "Breastfeeds",
         "bottles": "Bottles",
         "wet": "Wet",
-        "dirty": "Dirty"
+        "dirty": "Dirty",
+        "pumpVolume": "Pumped volume per day",
+        "pumpSessions": "Sessions"
       },
       "readout": {
         "partialToday": "in progress",
@@ -1618,7 +1622,11 @@
         "bottleCountAvg": "{count} bottles per day",
         "missingAmountAvg": "{count} per day without an amount",
         "diaperCount": "{count, plural, one {# diaper} other {# diapers}}",
-        "diaperCountAvg": "{count} diapers per day"
+        "diaperCountAvg": "{count} diapers per day",
+        "pumpCount": "{count, plural, one {# session} other {# sessions}}",
+        "pumpCountAvg": "{count} sessions per day",
+        "refluxCount": "{count, plural, one {# episode} other {# episodes}}",
+        "refluxCountAvg": "{count} episodes per day"
       },
       "chart": {
         "showTable": "Show as table",
@@ -1638,7 +1646,9 @@
           "feedsNoTrend": "On average {count} feeds per day.",
           "interval": "The median time between feeds is {duration}.",
           "bottle": "On average {amount} of bottle per day.",
-          "diaper": "On average {wet} wet and {dirty} dirty diapers per day."
+          "diaper": "On average {wet} wet and {dirty} dirty diapers per day.",
+          "pump": "On average {amount} pumped per day.",
+          "reflux": "On average {count} reflux episodes per day."
         }
       },
       "timeline": {

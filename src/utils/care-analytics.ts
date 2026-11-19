@@ -68,6 +68,7 @@ export type AnalyticsRow = TimedEvent & {
   amount_ml: number | null
   pee: boolean | null
   poop: boolean | null
+  reflux_severity: 'small' | 'medium' | 'large' | null
 }
 
 export type DayStats = {
@@ -95,6 +96,10 @@ export type DayStats = {
   pumpMl: number
   pumpWithAmount: number
   refluxCount: number
+  // Reflux split by severity; episodes without one only show in refluxCount.
+  refluxSmall: number
+  refluxMedium: number
+  refluxLarge: number
   medianIntervalMs: number | null
   longestIntervalMs: number | null
   // The kept start-to-start gaps behind the two values above, so weekly buckets can take a real median.
@@ -125,6 +130,12 @@ export type RangeSummary = {
   diaperLoggedDays: number
   avgWetCount: number | null
   avgDirtyCount: number | null
+  hasPumping: boolean
+  // Complete days with at least one pumping session: the days the pumping averages are taken over.
+  avgPumpCount: number | null
+  avgPumpMl: number | null
+  hasReflux: boolean
+  avgRefluxCount: number | null
   feedTotal: number
   sides: { left: number; both: number; right: number }
   avgBreastfeedMs: number | null
@@ -254,6 +265,9 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     pumpMl: 0,
     pumpWithAmount: 0,
     refluxCount: 0,
+    refluxSmall: 0,
+    refluxMedium: 0,
+    refluxLarge: 0,
     medianIntervalMs: null,
     longestIntervalMs: null,
     intervalsMs: [],
@@ -313,7 +327,11 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
       continue
     }
     if (e.kind === 'reflux') {
-      stats[startIdx].refluxCount++
+      const d = stats[startIdx]
+      d.refluxCount++
+      if (e.reflux_severity === 'small') d.refluxSmall++
+      else if (e.reflux_severity === 'medium') d.refluxMedium++
+      else if (e.reflux_severity === 'large') d.refluxLarge++
       continue
     }
     const s = stats[startIdx]
@@ -345,6 +363,8 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
     const slice = stats.slice(fromIdx, toIdx + 1)
     const complete = slice.filter((s) => s.logged && !s.partial)
     const diaperDays = slice.filter((s) => s.diaperCount > 0 && !s.partial)
+    const pumpDays = slice.filter((s) => s.pumpCount > 0 && !s.partial)
+    const refluxDays = slice.filter((s) => s.refluxCount > 0 && !s.partial)
     const gaps = gapsByDay.slice(fromIdx, toIdx + 1).flat()
     // Totals cover every day shown (today included): they describe what was
     // logged; only the per-day averages skip today.
@@ -377,6 +397,11 @@ export function computeTrackerAnalytics(rows: AnalyticsRow[], opts: ComputeOptio
       diaperLoggedDays: diaperDays.length,
       avgWetCount: average(diaperDays.map((s) => s.wetCount)),
       avgDirtyCount: average(diaperDays.map((s) => s.dirtyCount)),
+      hasPumping: slice.some((s) => s.pumpCount > 0),
+      avgPumpCount: average(pumpDays.map((s) => s.pumpCount)),
+      avgPumpMl: average(pumpDays.map((s) => s.pumpMl)),
+      hasReflux: slice.some((s) => s.refluxCount > 0),
+      avgRefluxCount: average(refluxDays.map((s) => s.refluxCount)),
       feedTotal: slice.reduce((a, s) => a + s.feedCount, 0),
       sides,
       avgBreastfeedMs: breast.n ? breast.ms / breast.n : null,
