@@ -26,6 +26,9 @@ function totals(t: DayTotals) {
     sleepMinutes: Math.floor(t.sleepMs / 60_000),
     wetCount: t.wetCount,
     dirtyCount: t.dirtyCount,
+    pumpCount: t.pumpCount,
+    pumpMl: t.pumpMl,
+    refluxCount: t.refluxCount,
   }
 }
 
@@ -75,12 +78,15 @@ async function trackerSection(supabase: SupabaseClient, userId: string, babyId: 
       sleepMs: acc.sleepMs + d.totals.sleepMs,
       wetCount: acc.wetCount + d.totals.wetCount,
       dirtyCount: acc.dirtyCount + d.totals.dirtyCount,
-    }), { feedCount: 0, bottleMl: 0, sleepMs: 0, wetCount: 0, dirtyCount: 0 })
+      pumpCount: acc.pumpCount + d.totals.pumpCount,
+      pumpMl: acc.pumpMl + d.totals.pumpMl,
+      refluxCount: acc.refluxCount + d.totals.refluxCount,
+    }), { feedCount: 0, bottleMl: 0, sleepMs: 0, wetCount: 0, dirtyCount: 0, pumpCount: 0, pumpMl: 0, refluxCount: 0 })
     const avg = (n: number) => Math.round((n / days.length) * 10) / 10
     return {
       days: perDay.map((d) => ({ day: d.day, ...totals(d.totals) })),
       // Over all 7 days; a day still in progress counts as is.
-      averages: { feedCount: avg(sum.feedCount), bottleMl: avg(sum.bottleMl), sleepMinutes: avg(Math.floor(sum.sleepMs / 60_000)), wetCount: avg(sum.wetCount), dirtyCount: avg(sum.dirtyCount) },
+      averages: { feedCount: avg(sum.feedCount), bottleMl: avg(sum.bottleMl), sleepMinutes: avg(Math.floor(sum.sleepMs / 60_000)), wetCount: avg(sum.wetCount), dirtyCount: avg(sum.dirtyCount), pumpCount: avg(sum.pumpCount), pumpMl: avg(sum.pumpMl), refluxCount: avg(sum.refluxCount) },
     }
   }
 
