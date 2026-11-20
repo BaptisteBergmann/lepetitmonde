@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-19
 
+- `7fd8761` fix(tracker): render live durations in Now panel rich messages
 - `33439c6` feat(tracker): show live elapsed time on running timer start line
 - `7f9c77a` feat(tracker): show time since last sleep and feed on Now tiles
 - `a07f608` docs(plans): add pumping-and-reflux plan, marked implemented
