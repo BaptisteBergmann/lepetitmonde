@@ -18,9 +18,18 @@ export function Elapsed({
   const t = useTranslations('tracker.duration')
   const [clientNow, setClientNow] = useState<number | null>(null)
 
+  // Tick right away (cached page / resumed tab), every 15 s, and when the tab becomes visible
+  // again, since mobile browsers pause intervals in the background.
   useEffect(() => {
-    const id = setInterval(() => setClientNow(Date.now()), 15_000)
-    return () => clearInterval(id)
+    const tick = () => setClientNow(Date.now())
+    tick()
+    const id = setInterval(tick, 15_000)
+    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   // A fresh server `now` after router.refresh() wins over a stale tick.

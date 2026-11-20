@@ -1454,7 +1454,7 @@
     "running": {
       "sleepingFor": "Dort depuis {duration}",
       "feedingFor": "Tète depuis {duration}",
-      "startedBy": "Commencé à {time} par {name}",
+      "startedBy": "Commencé à {time} par {name} (depuis {duration})",
       "editStart": "Modifier l'heure de début",
       "side": "Côté",
       "stopSleep": "Arrêter le sommeil",

@@ -1454,7 +1454,7 @@
     "running": {
       "sleepingFor": "Sleeping for {duration}",
       "feedingFor": "Feeding for {duration}",
-      "startedBy": "Started at {time} by {name}",
+      "startedBy": "Started at {time} by {name} (for {duration})",
       "editStart": "Edit start time",
       "side": "Side",
       "stopSleep": "Stop sleep",

@@ -595,7 +595,11 @@ function RunningCard({
               <span className="size-2.5 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />
             </p>
             <p className="text-sm text-muted-foreground">
-              {t('running.startedBy', { time, name: event.created_by_name ?? tCommon('userFallback') })}
+              {t.rich('running.startedBy', {
+                time,
+                name: event.created_by_name ?? tCommon('userFallback'),
+                duration: () => <Elapsed since={event.started_at} now={now} format="elapsed" />,
+              })}
             </p>
             <Button type="button" variant="ghost" size="lg" className="-ml-3 mt-1" aria-disabled={disabled || undefined} onClick={() => { if (!disabled) setEditing(true) }}>
               {t('running.editStart')}
