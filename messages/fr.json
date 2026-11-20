@@ -1452,9 +1452,9 @@
       "refluxTitle": "Quelle quantité est remontée ?"
     },
     "running": {
-      "sleepingFor": "Dort depuis {duration}",
-      "feedingFor": "Tète depuis {duration}",
-      "startedBy": "Commencé à {time} par {name} (depuis {duration})",
+      "sleepingFor": "Dort depuis <duration></duration>",
+      "feedingFor": "Tète depuis <duration></duration>",
+      "startedBy": "Commencé à {time} par {name} (depuis <duration></duration>)",
       "editStart": "Modifier l'heure de début",
       "side": "Côté",
       "stopSleep": "Arrêter le sommeil",
@@ -1463,9 +1463,9 @@
     },
     "lastFeed": {
       "title": "Dernier repas",
-      "breast": "{ago} · {side}",
-      "bottle": "{ago} · Biberon {amount} ml",
-      "bottleNoAmount": "{ago} · Biberon",
+      "breast": "<ago></ago> · {side}",
+      "bottle": "<ago></ago> · Biberon {amount} ml",
+      "bottleNoAmount": "<ago></ago> · Biberon",
       "none": "Aucun repas noté pour l'instant",
       "nextSide": "Prochain côté : {side}"
     },
@@ -1717,7 +1717,7 @@
       "logLarge": "Enregistrer un gros reflux maintenant"
     },
     "sinceLast": {
-      "awake": "Éveillé depuis {duration}",
+      "awake": "Éveillé depuis <duration></duration>",
       "breastfeed": "Dernière tétée",
       "bottle": "Dernier biberon"
     },

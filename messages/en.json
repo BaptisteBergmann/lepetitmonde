@@ -1452,9 +1452,9 @@
       "refluxTitle": "How much came up?"
     },
     "running": {
-      "sleepingFor": "Sleeping for {duration}",
-      "feedingFor": "Feeding for {duration}",
-      "startedBy": "Started at {time} by {name} (for {duration})",
+      "sleepingFor": "Sleeping for <duration></duration>",
+      "feedingFor": "Feeding for <duration></duration>",
+      "startedBy": "Started at {time} by {name} (for <duration></duration>)",
       "editStart": "Edit start time",
       "side": "Side",
       "stopSleep": "Stop sleep",
@@ -1463,9 +1463,9 @@
     },
     "lastFeed": {
       "title": "Last feed",
-      "breast": "{ago} · {side}",
-      "bottle": "{ago} · Bottle {amount} ml",
-      "bottleNoAmount": "{ago} · Bottle",
+      "breast": "<ago></ago> · {side}",
+      "bottle": "<ago></ago> · Bottle {amount} ml",
+      "bottleNoAmount": "<ago></ago> · Bottle",
       "none": "No feed logged yet",
       "nextSide": "Next side: {side}"
     },
@@ -1717,7 +1717,7 @@
       "logLarge": "Log large reflux now"
     },
     "sinceLast": {
-      "awake": "Awake for {duration}",
+      "awake": "Awake for <duration></duration>",
       "breastfeed": "Last breastfeed",
       "bottle": "Last bottle"
     },
