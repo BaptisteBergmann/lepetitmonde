@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-22
+
+- `9c4bf09` feat(tracker): add the offline queue
+
 ## 2026-11-19
 
 - `7fd8761` fix(tracker): render live durations in Now panel rich messages
