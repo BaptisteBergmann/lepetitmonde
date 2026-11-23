@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-22
 
+- `eb7a056` fix(auth): tell the user when logout fails
 - `e481a83` fix(tracker): queue taps on any server-action failure and send plain online times
 - `9643d19` fix(tracker): leave the offline page by navigating to the tracker
 - `97be561` fix(tracker): harden offline replay against lost stops and poison ops
