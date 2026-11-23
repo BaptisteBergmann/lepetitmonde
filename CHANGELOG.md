@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-22
 
+- `5222696` docs: update offline tracker for replay hardening and server-stamped online times
 - `eb7a056` fix(auth): tell the user when logout fails
 - `e481a83` fix(tracker): queue taps on any server-action failure and send plain online times
 - `9643d19` fix(tracker): leave the offline page by navigating to the tracker
