@@ -467,10 +467,10 @@
     var c = state.confirmation;
     if (!c) return null;
     var canUndo = c.opId && Date.now() < c.undoUntil;
-    // aria-hidden: the same text is announced through #sr-status.
-    return h('div', { class: 'confirm-line', 'aria-hidden': 'true' }, [
+    // Only the text is aria-hidden (it is announced through #sr-status); the Undo button must stay reachable.
+    return h('div', { class: 'confirm-line' }, [
       icon('check'),
-      h('span', { class: 'text', text: c.text }),
+      h('span', { class: 'text', 'aria-hidden': 'true', text: c.text }),
       canUndo ? h('button', { type: 'button', class: 'btn btn-ghost', 'data-key': 'undo', onclick: function () { undo(c.opId); }, text: t('undo') }) : null,
     ]);
   }
@@ -597,7 +597,7 @@
     var onlineHint = navigator.onLine === false ? t('noConnection') + ' ' : '';
     var node;
     var checkBtn = h('button', { type: 'button', class: 'btn', 'data-key': 'check', onclick: function () { checkAgain(); }, text: t('retry') });
-    var openBtn = h('button', { type: 'button', class: 'btn', onclick: function () { location.reload(); }, text: t('openApp') });
+    var openBtn = h('button', { type: 'button', class: 'btn', onclick: goToApp, text: t('openApp') });
 
     if (kind === 'checking') {
       node = [icon('loader-circle', true), h('div', { class: 'grow' }, [h('p', { text: t('checking') })])];
@@ -665,6 +665,16 @@
     check();
   }
 
+  // Back to the live app. On /offline/* a reload would just be answered from the cache again
+  // (the service worker serves those paths cache-first), so navigate to the tracker instead.
+  function goToApp() {
+    if (location.pathname.indexOf('/offline/') === 0) {
+      location.replace(state.babyId ? '/baby/' + state.babyId + '/tracker' : '/');
+    } else {
+      location.reload();
+    }
+  }
+
   // Guards against a reload loop if the probe passes but navigations still fail: at most
   // two automatic returns per 30 s (after that the Open the app button stays).
   function returnedTooOften() {
@@ -687,7 +697,7 @@
     renderBanner();
     clearTimeout(timers.ret);
     timers.ret = setTimeout(function attempt() {
-      if (canAutoReturn()) { location.reload(); return; }
+      if (canAutoReturn()) { goToApp(); return; }
       // Editing or just tapped: never yank the page away.
       state.banner = attentionCount() ? 'syncedAttention' : label === 'returning' ? 'syncedStay' : 'reachableOnly';
       renderBanner();
@@ -752,7 +762,7 @@
     $('fallback-title').textContent = fallback.noSnapshotTitle || '';
     $('fallback-body').textContent = fallback.noSnapshot || '';
     $('open-app').textContent = fallback.tryOpening || '';
-    $('open-app').addEventListener('click', function () { location.reload(); });
+    $('open-app').addEventListener('click', goToApp);
 
     if (!Q || !Q.isAvailable()) { state.storage = false; render(); return; }
     try {
