@@ -64,7 +64,8 @@
       "continueWithMeta": "Log in with Meta",
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
-      "tagline": "The baby journal, shared with family"
+      "tagline": "The baby journal, shared with family",
+      "unsyncedNotice": "{count, plural, one {# entry is waiting on this phone. Log in with the same account to send it.} other {# entries are waiting on this phone. Log in with the same account to send them.}}"
     },
     "signup": {
       "title": "Create an account",
@@ -1469,7 +1470,9 @@
       "none": "No feed logged yet",
       "nextSide": "Next side: {side}"
     },
-    "offline": "You're offline. Reconnect to log or edit entries.",
+    "offline": "Can't reach the app right now. You can still log from the offline page.",
+    "logOffline": "Log without the app",
+    "offlineSavedToast": "Saved on this phone. Opening offline logging…",
     "offlinePage": {
       "title": "Offline logging",
       "unreachable": "Can't reach the app right now.",
@@ -1553,6 +1556,14 @@
       "durationH": "{h}h",
       "durationM": "{m} min",
       "durationNow": "just now"
+    },
+    "sync": {
+      "sending": "{count, plural, one {Sending # entry…} other {Sending # entries…}}",
+      "failed": "{count, plural, one {Couldn't send # entry yet. We'll try again on our own.} other {Couldn't send # entries yet. We'll try again on our own.}}",
+      "tryAgain": "Try again",
+      "attention": "{count, plural, one {# entry needs your attention.} other {# entries need your attention.}}",
+      "review": "Review",
+      "allSent": "All entries sent"
     },
     "announce": {
       "sleepStarted": "Sleep started",

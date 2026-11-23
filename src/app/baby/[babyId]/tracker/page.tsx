@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getTrackerDay, getTrackerNow } from "@/utils/actions/care_events";
+import { getBaby } from "@/utils/actions/baby";
+import { getAuthUser } from "@/utils/supabase/auth";
 import { getRequestTimeZone } from "@/utils/care-timezone";
 import { parseDayParam, todayInZone, computeDayTotals, zonedDayBounds } from "@/utils/care-time";
 import { formatDuration } from "@/utils/care-duration";
@@ -12,6 +14,7 @@ import { Reveal } from "@components/reveal";
 import { AddEntryButton } from "./_components/add_entry_button";
 import { CareLog } from "./_components/care_log";
 import { NowPanel } from "./_components/now_panel";
+import { OfflineRuntime } from "./_components/offline_runtime";
 import { DayNav } from "./_components/day_nav";
 import { TrackerLive } from "./_components/tracker_live";
 import { TzCookie } from "@components/tz_cookie";
@@ -35,7 +38,14 @@ export default async function TrackerPage({
   const day = parseDayParam(dayParam, tz, now);
   const bounds = zonedDayBounds(day, tz);
 
-  const [events, nowState] = await Promise.all([getTrackerDay(babyId, day), getTrackerNow(babyId)]);
+  const [events, nowState, baby, { data: { user } }] = await Promise.all([
+    getTrackerDay(babyId, day),
+    getTrackerNow(babyId),
+    getBaby(babyId),
+    getAuthUser(),
+  ]);
+  // The offline quick-log shows the baby's name, so it is saved with the snapshot (getBaby returns [] when unavailable).
+  const babyName = Array.isArray(baby) ? t('title') : baby.baby_surname;
 
   const { feedCount, bottleMl, sleepMs, wetCount, dirtyCount, pumpCount, pumpMl, refluxCount } = computeDayTotals(events, bounds, now);
   const durationT = (key: 'hm' | 'h' | 'm', values: { h: number; m: number }) => t(`duration.${key}`, values);
@@ -77,7 +87,13 @@ export default async function TrackerPage({
 
         <div className="space-y-8 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:items-start md:gap-8 md:space-y-0">
           <div className="md:sticky md:top-24">
-            <NowPanel babyId={babyId} tz={tz} state={nowState} />
+            {user ? (
+              <OfflineRuntime userId={user.id} babyId={babyId} babyName={babyName} state={nowState}>
+                <NowPanel babyId={babyId} tz={tz} state={nowState} />
+              </OfflineRuntime>
+            ) : (
+              <NowPanel babyId={babyId} tz={tz} state={nowState} />
+            )}
           </div>
 
           <div className="space-y-8">

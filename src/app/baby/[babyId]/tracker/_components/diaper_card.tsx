@@ -11,16 +11,13 @@ import type { CareEvent, TrackerNow } from '@utils/actions/care_events'
 import { formatDateAtTimeParts } from '@utils/formatting'
 import { CareEventModal } from './care_event_modal'
 import { Elapsed } from './elapsed'
+import type { RunOptions } from './now_panel'
 import { diaperContents } from './kind_ui'
 
 // The strip is only a tidy-up prompt: the same action stays in the day log.
 const STRIP_TIMEOUT_MS = 60_000
 
-type Run = (
-  key: string,
-  action: () => Promise<CareResult>,
-  options: { announce: string; errorKey: 'start' | 'stop' | 'save'; onSuccess?: () => void },
-) => Promise<void>
+type Run = (key: string, action: () => Promise<CareResult>, options: RunOptions) => Promise<void>
 
 const ACTIONS: { key: 'pee' | 'poop' | 'both'; pee: boolean; poop: boolean; icon: LucideIcon; label: 'logPee' | 'logPoop' | 'logBoth' }[] = [
   { key: 'pee', pee: true, poop: false, icon: Droplet, label: 'logPee' },
@@ -82,10 +79,15 @@ export function DiaperCard({
 
   const log = (action: (typeof ACTIONS)[number]) => {
     if (busy) return
-    return run(`diaper-${action.key}`, () => createCareEvent(babyId, { kind: 'diaper', pee: action.pee, poop: action.poop }), {
+    // Id and tap time are fixed now so a queued retry lands as the same row at the same time.
+    const id = crypto.randomUUID()
+    const startedAt = new Date().toISOString()
+    return run(`diaper-${action.key}`, () => createCareEvent(babyId, { id, kind: 'diaper', pee: action.pee, poop: action.poop, startedAt }), {
       announce: t('announce.diaperLogged'),
       errorKey: 'save',
+      offline: { type: 'create', payload: { id, kind: 'diaper', startedAt, pee: action.pee, poop: action.poop } },
       // A pee-only log clears any previous strip; a poop log waits for the refreshed state.
+      // Not called for a queued tap: the "add details" strip only makes sense for a saved row.
       onSuccess: () => setStrip(action.poop ? { phase: 'awaiting', baselineId: last?.id ?? null } : null),
     })
   }

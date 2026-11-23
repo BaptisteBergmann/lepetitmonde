@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { ArrowRight, Loader2, Minus, Plus, TriangleAlert, WifiOff, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -32,7 +32,30 @@ import { ChoiceGroup } from '@/components/choice_group'
 import { CareEventModal } from './care_event_modal'
 import { DiaperCard } from './diaper_card'
 import { Elapsed } from './elapsed'
-import { useOnline } from '@/components/use_online'
+import { useOffline, type OfflineTap } from './offline_runtime'
+
+// A tap on a diaper or sleep action that can be queued when the server doesn't answer. The id and
+// tap time are fixed before the call so the queued entry and a late-arriving original are the same row.
+export type RunOptions = {
+  announce: string
+  errorKey: 'start' | 'stop' | 'save'
+  onSuccess?: () => void
+  offline?: OfflineTap
+}
+
+// A hung Server Action would leave the tile spinning, so offline-capable taps give up after this.
+const OFFLINE_FALLBACK_MS = 8000
+class ActionTimeout extends Error {}
+
+function withTimeout<T>(promise: Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new ActionTimeout()), OFFLINE_FALLBACK_MS)
+    promise.then(
+      (value) => { clearTimeout(timer); resolve(value) },
+      (err) => { clearTimeout(timer); reject(err) },
+    )
+  })
+}
 
 type OpenAction = 'breastfeed' | 'bottle' | 'pumping' | 'reflux' | null
 
@@ -62,11 +85,11 @@ export function NowPanel({
   const [openAction, setOpenAction] = useState<OpenAction>(null)
   const [pendingKey, setPendingKey] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
-  const online = useOnline()
+  const { unreachable, saveTap } = useOffline()
   const tileRefs = useRef<Partial<Record<CareKind, HTMLButtonElement | null>>>({})
   const panelRef = useRef<HTMLDivElement | null>(null)
 
-  const busy = pendingKey !== null || !online
+  const busy = pendingKey !== null || unreachable
   const suggested = suggestNextSide(state.lastBreastfeed)
   const lastBottleAmount = state.lastFeed?.kind === 'bottle' ? state.lastFeed.amount_ml : null
   const lastPumpAmount = state.lastPumping?.amount_ml ?? null
@@ -88,12 +111,12 @@ export function NowPanel({
   async function run(
     key: string,
     action: () => Promise<CareResult>,
-    options: { announce: string; errorKey: 'start' | 'stop' | 'save'; onSuccess?: () => void },
+    options: RunOptions,
   ) {
     if (busy) return
     setPendingKey(key)
     try {
-      const result = await action()
+      const result = await (options.offline ? withTimeout(action()) : action())
       if (!result.ok) {
         if (result.error === 'alreadyRunning' || result.error === 'alreadyStopped') toast.info(t(`errors.${result.error}`))
         else toast.error(t(`errors.codes.${result.error}`))
@@ -102,6 +125,10 @@ export function NowPanel({
       setAnnouncement(options.announce)
       options.onSuccess?.()
     } catch (err) {
+      if (options.offline && (err instanceof TypeError || err instanceof ActionTimeout)) {
+        // The server didn't answer: keep the tap (with its time) and let the queue send it later.
+        if ((await saveTap(options.offline)) !== 'failed') return
+      }
       // Thrown messages are masked in production, so only translated fallbacks are shown.
       toast.error(err instanceof TypeError ? t('errors.network') : t(`errors.${options.errorKey}`))
     } finally {
@@ -116,7 +143,13 @@ export function NowPanel({
     const quick = CARE_KIND_CONFIG[kind].quick
     if (quick === 'timer') {
       setOpenAction(null)
-      void run(`start-${kind}`, () => startCareTimer(babyId, kind as TimerKind), { announce: t('announce.sleepStarted'), errorKey: 'start' })
+      const id = crypto.randomUUID()
+      const startedAt = new Date().toISOString()
+      void run(`start-${kind}`, () => startCareTimer(babyId, kind as TimerKind, { id, startedAt }), {
+        announce: t('announce.sleepStarted'),
+        errorKey: 'start',
+        offline: { type: 'startTimer', payload: { id, kind, startedAt } },
+      })
       return
     }
     setOpenAction((current) => (current === kind ? null : (kind as OpenAction)))
@@ -169,11 +202,17 @@ export function NowPanel({
     >
       <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('now.heading')}</h2>
 
-      {!online && (
-        <p role="status" className="flex items-center gap-2 rounded-2xl border border-landing-border bg-muted p-3 text-sm">
-          <WifiOff className="size-4 shrink-0" aria-hidden="true" />
-          {t('offline')}
-        </p>
+      {unreachable && (
+        <div className="space-y-2 rounded-2xl border border-landing-border bg-muted p-3">
+          <p role="status" className="flex items-center gap-2 text-sm">
+            <WifiOff className="size-4 shrink-0" aria-hidden="true" />
+            {t('offline')}
+          </p>
+          {/* Full navigation, not next/link: the service worker has to answer with the static page. */}
+          <a href="/offline/index.html" className={buttonVariants({ variant: 'outline', className: 'h-12 w-full rounded-2xl' })}>
+            {t('logOffline')}
+          </a>
+        </div>
       )}
 
       {running.map(([kind, event]) => (
@@ -186,12 +225,15 @@ export function NowPanel({
           tz={tz}
           disabled={busy}
           pending={pendingKey === `stop-${event.id}`}
-          onStop={(side) =>
-            run(`stop-${event.id}`, () => stopCareTimer(babyId, event.id, side ? { side } : {}), {
+          onStop={(side) => {
+            // Only sleep can be stopped offline (Phase 1): its stop time is the tap time, not the sync time.
+            const endedAt = kind === 'sleep' ? new Date().toISOString() : undefined
+            return run(`stop-${event.id}`, () => stopCareTimer(babyId, event.id, { ...(side ? { side } : {}), ...(endedAt ? { endedAt } : {}) }), {
               announce: t(kind === 'sleep' ? 'announce.sleepStopped' : 'announce.feedStopped'),
               errorKey: 'stop',
+              offline: endedAt ? { type: 'stopTimer', payload: { eventId: event.id, endedAt } } : undefined,
             })
-          }
+          }}
         />
       ))}
 

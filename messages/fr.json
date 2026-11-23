@@ -64,7 +64,8 @@
       "continueWithMeta": "Se connecter avec Meta",
       "noAccount": "Vous n'avez pas de compte ?",
       "signUp": "Inscrivez-vous",
-      "tagline": "Le journal de bébé, à partager en famille"
+      "tagline": "Le journal de bébé, à partager en famille",
+      "unsyncedNotice": "{count, plural, one {# entrée attend sur ce téléphone. Connectez-vous avec le même compte pour l'envoyer.} other {# entrées attendent sur ce téléphone. Connectez-vous avec le même compte pour les envoyer.}}"
     },
     "signup": {
       "title": "Créer un compte",
@@ -1469,7 +1470,9 @@
       "none": "Aucun repas noté pour l'instant",
       "nextSide": "Prochain côté : {side}"
     },
-    "offline": "Vous êtes hors ligne. Reconnectez-vous pour noter ou modifier des entrées.",
+    "offline": "Impossible de joindre l'application pour l'instant. Vous pouvez quand même noter depuis la page hors ligne.",
+    "logOffline": "Noter sans l'application",
+    "offlineSavedToast": "Gardé sur ce téléphone. Ouverture de la saisie hors ligne…",
     "offlinePage": {
       "title": "Saisie hors ligne",
       "unreachable": "Impossible de joindre l'application pour l'instant.",
@@ -1553,6 +1556,14 @@
       "durationH": "{h} h",
       "durationM": "{m} min",
       "durationNow": "à l'instant"
+    },
+    "sync": {
+      "sending": "{count, plural, one {Envoi de # entrée…} other {Envoi de # entrées…}}",
+      "failed": "{count, plural, one {Impossible d'envoyer # entrée pour l'instant. Nouvel essai automatique.} other {Impossible d'envoyer # entrées pour l'instant. Nouvel essai automatique.}}",
+      "tryAgain": "Réessayer",
+      "attention": "{count, plural, one {# entrée demande votre attention.} other {# entrées demandent votre attention.}}",
+      "review": "Vérifier",
+      "allSent": "Toutes les entrées sont envoyées"
     },
     "announce": {
       "sleepStarted": "Sommeil démarré",
