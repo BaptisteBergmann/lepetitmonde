@@ -5,7 +5,7 @@
 // every deploy gets a new cache and the worker updates itself.
 const OFFLINE_CACHE = 'offline-__SW_BUILD__';
 const OFFLINE_PAGE = '/offline/index.html';
-const OFFLINE_FILES = [OFFLINE_PAGE, '/offline/app.js', '/offline/app.css'];
+const OFFLINE_FILES = [OFFLINE_PAGE, '/offline/app.js', '/offline/app.css', '/offline/queue.js'];
 // Wait this long for the first byte before assuming the server is down.
 const NAVIGATION_TIMEOUT_MS = 6000;
 const SINGLE_SHOT_PATH = /^\/(auth|api|share)(\/|$)/;

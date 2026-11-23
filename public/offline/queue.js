@@ -122,7 +122,7 @@
   var channel = null;
 
   function isAvailable() {
-    try { return !!root.indexedDB; } catch (e) { return false; }
+    try { return !!root.indexedDB; } catch { return false; }
   }
 
   function openDb() {
@@ -151,13 +151,6 @@
     return dbPromise;
   }
 
-  function req2p(request) {
-    return new Promise(function (resolve, reject) {
-      request.onsuccess = function () { resolve(request.result); };
-      request.onerror = function () { reject(request.error); };
-    });
-  }
-
   // Runs fn(stores, tx) in one transaction. Resolves with fn's return value only on
   // tx.oncomplete, so a caller that sees success knows the data is durable.
   function withTx(storeNames, mode, fn) {
@@ -170,17 +163,17 @@
         tx.oncomplete = function () { resolve(result); };
         tx.onerror = function () { reject(tx.error); };
         tx.onabort = function () { reject(tx.error || new Error('transaction aborted')); };
-        try { result = fn(stores, tx); } catch (e) { try { tx.abort(); } catch (x) { /* already done */ } reject(e); }
+        try { result = fn(stores, tx); } catch (e) { try { tx.abort(); } catch { /* already done */ } reject(e); }
       });
     });
   }
 
   function notify() {
-    listeners.slice().forEach(function (cb) { try { cb(); } catch (e) { /* listener bug must not break the queue */ } });
+    listeners.slice().forEach(function (cb) { try { cb(); } catch { /* listener bug must not break the queue */ } });
     try {
       if (!channel && typeof root.BroadcastChannel === 'function') channel = new root.BroadcastChannel(CHANNEL_NAME);
       if (channel) channel.postMessage('changed');
-    } catch (e) { /* best effort */ }
+    } catch { /* best effort */ }
   }
 
   // cb runs after any queue change, in this context or another tab/page of the origin.
@@ -190,9 +183,9 @@
     try {
       if (typeof root.BroadcastChannel === 'function') {
         rx = new root.BroadcastChannel(CHANNEL_NAME);
-        rx.onmessage = function () { try { cb(); } catch (e) { /* ignore */ } };
+        rx.onmessage = function () { try { cb(); } catch { /* ignore */ } };
       }
-    } catch (e) { rx = null; }
+    } catch { rx = null; }
     return function () {
       listeners = listeners.filter(function (l) { return l !== cb; });
       if (rx) rx.close();
@@ -260,7 +253,7 @@
       if (root.navigator && root.navigator.storage && root.navigator.storage.persist) {
         root.navigator.storage.persist().catch(function () { /* advisory */ });
       }
-    } catch (e) { /* advisory */ }
+    } catch { /* advisory */ }
   }
 
   var persistRequested = false;
@@ -469,7 +462,7 @@
             ops: batch.map(function (o) { return { opId: o.opId, babyId: o.babyId, type: o.type, payload: o.payload }; }),
           }),
         }, SEND_TIMEOUT_MS);
-      } catch (e) {
+      } catch {
         await setStatus(ids, 'pending');
         notify();
         return { state: 'failed', sent: sent };
@@ -477,7 +470,7 @@
 
       // 401, 409, 503 and anything unexpected: keep everything and stop.
       var body = null;
-      if (res.status === 200 && isJson(res)) { try { body = await res.json(); } catch (e) { body = null; } }
+      if (res.status === 200 && isJson(res)) { try { body = await res.json(); } catch { body = null; } }
       if (!body || !Array.isArray(body.results)) {
         await setStatus(ids, 'pending');
         notify();

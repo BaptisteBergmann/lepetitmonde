@@ -5,14 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <title>Le petit monde</title>
+  <!-- Same theme logic as the app's root layout (src/app/layout.tsx), inline so there is no flash of white at night. -->
+  <script>
+    (function () {
+      var pref = null;
+      try { pref = localStorage.getItem('theme'); } catch (e) {}
+      var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.classList.toggle('light', pref === 'light');
+    })();
+  </script>
   <link rel="stylesheet" href="/offline/app.css">
+  <script src="/offline/queue.js" defer></script>
   <script src="/offline/app.js" defer></script>
 </head>
 <body>
-  <main>
-    <h1 id="title">Can't reach the app</h1>
-    <p id="body">The server can't be reached right now. Check again in a moment.</p>
-    <button id="retry" type="button">Try again</button>
-  </main>
+  <!-- Lucide icons (same set as the app), copied here because this page has no bundler. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/></symbol>
+    <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+    <symbol id="i-circle-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-droplets" viewBox="0 0 24 24"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-loader-circle" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+    <symbol id="i-triangle-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-log-in" viewBox="0 0 24 24"><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></symbol>
+  </svg>
+
+  <div class="page">
+    <!-- Persistent live regions: they exist from load so the first announcement is read. -->
+    <div id="banner" class="banner" role="status" aria-live="polite"></div>
+    <div id="alert-region" role="alert"></div>
+
+    <main id="main" aria-busy="true">
+      <!-- Shown until the script has read IndexedDB (and without script). -->
+      <section class="card">
+        <h1 id="fallback-title" class="h-serif">Can't reach the app right now.</h1>
+        <p id="fallback-body" class="muted">Open the tracker once while you're online. After that you can log diapers and sleep even when the app is down.</p>
+      </section>
+    </main>
+
+    <p id="save-error" class="error" role="alert"></p>
+    <p id="sr-status" class="sr-only" role="status"></p>
+
+    <p class="footer">
+      <button id="open-app" type="button" class="link-btn">Try opening the app</button>
+    </p>
+  </div>
+
+  <dialog id="confirm" aria-labelledby="confirm-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="confirm-title" class="h-serif"></h2>
+      <p id="confirm-body" class="muted"></p>
+      <div class="dialog-actions">
+        <button id="confirm-cancel" type="button" class="btn"></button>
+        <button id="confirm-ok" type="button" class="btn btn-destructive"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- The only strings that don't come from the snapshot (before the tracker was ever opened online). -->
+  <script type="application/json" id="fallback-strings">
+  {
+    "en": {
+      "unreachable": "Can't reach the app right now.",
+      "noSnapshotTitle": "Offline logging isn't ready yet",
+      "noSnapshot": "Open the tracker once while you're online. After that you can log diapers and sleep even when the app is down.",
+      "retry": "Check again",
+      "tryOpening": "Try opening the app",
+      "storageUnavailable": "This phone can't keep entries here. Use the app when it's back."
+    },
+    "fr": {
+      "unreachable": "Impossible de joindre l'application pour l'instant.",
+      "noSnapshotTitle": "La saisie hors ligne n'est pas encore prête",
+      "noSnapshot": "Ouvrez le suivi une fois avec une connexion. Ensuite, vous pourrez noter couches et sommeil même quand l'application est indisponible.",
+      "retry": "Vérifier à nouveau",
+      "tryOpening": "Essayer d'ouvrir l'application",
+      "storageUnavailable": "Ce téléphone ne peut pas garder d'entrées ici. Utilisez l'application dès qu'elle fonctionne."
+    }
+  }
+  </script>
 </body>
 </html>
