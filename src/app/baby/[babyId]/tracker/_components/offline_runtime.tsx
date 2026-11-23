@@ -13,17 +13,25 @@ import { useOnline } from '@/components/use_online'
 import { cn } from '@utils/utils'
 
 export type OfflineTap = { type: OfflineOpType; payload: Record<string, unknown> }
-export type SaveTapResult = 'reloading' | 'queued' | 'failed'
+// reloading: the page is going to the quick-log. queued: kept for the queue to send.
+// reachable: the server answers, so the caller should show its own error (nothing is kept).
+// failed: nothing could be saved.
+export type SaveTapResult = 'reloading' | 'queued' | 'reachable' | 'failed'
 
 type OfflineContextValue = {
   // True when the phone has no network or the last probe could not reach the server.
   unreachable: boolean
-  // Queues a tap that could not reach the server. Never throws.
-  saveTap: (tap: OfflineTap) => Promise<SaveTapResult>
+  // True when a service worker controls the page, so /offline/index.html can be served.
+  canOpenOfflinePage: boolean
+  // Queues a tap whose Server Action threw, then probes. `keepIfReachable` is for network errors and
+  // timeouts (the tap is likely fine and is sent right away); for other errors a reachable server means
+  // a real failure, so the tap is dropped again and the caller shows its error. Never throws.
+  saveTap: (tap: OfflineTap, opts?: { keepIfReachable?: boolean }) => Promise<SaveTapResult>
 }
 
 const OfflineContext = createContext<OfflineContextValue>({
   unreachable: false,
+  canOpenOfflinePage: false,
   saveTap: async () => 'failed',
 })
 
@@ -64,9 +72,19 @@ export function OfflineRuntime({
   const [queue, setQueue] = useState<OfflineQueueApi | null>(null)
   const [probeUnreachable, setProbeUnreachable] = useState(false)
   const [strip, setStrip] = useState<Strip>({ waiting: 0, attention: 0, syncing: false, failed: false })
+  const [hasController, setHasController] = useState(false)
   const sawOutage = useRef(false)
   const draining = useRef(false)
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const sw = navigator.serviceWorker
+    if (!sw) return
+    const update = () => setHasController(!!sw.controller)
+    update()
+    sw.addEventListener('controllerchange', update)
+    return () => sw.removeEventListener('controllerchange', update)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -162,10 +180,11 @@ export function OfflineRuntime({
     }
   }, [queue, drain, refreshStrip])
 
-  const saveTap = useCallback<OfflineContextValue['saveTap']>(async (tap) => {
+  const saveTap = useCallback<OfflineContextValue['saveTap']>(async (tap, opts) => {
     try {
       const q = queue ?? (await loadOfflineQueue())
-      await q.enqueue(userId, babyId, tap.type, tap.payload)
+      // attempted: the original request may have reached the server, so the queue must not merge this tap.
+      const op = await q.enqueue(userId, babyId, tap.type, tap.payload, { attempted: true })
       const probe = await q.probe()
       if (probe.state === 'unreachable') {
         sawOutage.current = true
@@ -176,18 +195,30 @@ export function OfflineRuntime({
           window.location.reload()
           return 'reloading'
         }
+        // No quick-log to go to: stay here and keep trying to send.
+        if (retryTimer.current) clearTimeout(retryTimer.current)
+        retryTimer.current = setTimeout(() => { void drain() }, RETRY_MS)
+        toast.info(t('offlinePage.savedFromTracker'))
+        void refreshStrip()
+        return 'queued'
+      }
+      if (!opts?.keepIfReachable) {
+        await q.removeOp(op.opId)
+        void refreshStrip()
+        return 'reachable'
       }
       toast.info(t('offlinePage.savedFromTracker'))
       void refreshStrip()
+      void drain()
       return 'queued'
     } catch {
       return 'failed'
     }
-  }, [queue, userId, babyId, refreshStrip, t])
+  }, [queue, userId, babyId, refreshStrip, drain, t])
 
   const value = useMemo<OfflineContextValue>(
-    () => ({ unreachable: !online || probeUnreachable, saveTap }),
-    [online, probeUnreachable, saveTap],
+    () => ({ unreachable: !online || probeUnreachable, canOpenOfflinePage: hasController, saveTap }),
+    [online, probeUnreachable, hasController, saveTap],
   )
 
   const stripCount = strip.waiting
@@ -224,9 +255,11 @@ export function OfflineRuntime({
                 <TriangleAlert className="size-4 shrink-0 text-destructive" aria-hidden="true" />
                 <span>{t('sync.attention', { count: strip.attention })}</span>
                 {/* Full navigation, not next/link: the service worker must answer this request. */}
-                <a href={OFFLINE_PAGE} className={cn(buttonVariants({ variant: 'ghost' }), 'h-11')}>
-                  {t('sync.review')}
-                </a>
+                {hasController && (
+                  <a href={OFFLINE_PAGE} className={cn(buttonVariants({ variant: 'ghost' }), 'h-11')}>
+                    {t('sync.review')}
+                  </a>
+                )}
               </p>
             )}
           </CardContent>

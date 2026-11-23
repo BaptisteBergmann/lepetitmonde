@@ -79,10 +79,11 @@ export function DiaperCard({
 
   const log = (action: (typeof ACTIONS)[number]) => {
     if (busy) return
-    // Id and tap time are fixed now so a queued retry lands as the same row at the same time.
+    // The id is fixed now so a queued retry lands as the same row. The tap time is kept only for the queued
+    // entry: online the server stamps the time.
     const id = crypto.randomUUID()
     const startedAt = new Date().toISOString()
-    return run(`diaper-${action.key}`, () => createCareEvent(babyId, { id, kind: 'diaper', pee: action.pee, poop: action.poop, startedAt }), {
+    return run(`diaper-${action.key}`, () => createCareEvent(babyId, { id, kind: 'diaper', pee: action.pee, poop: action.poop }), {
       announce: t('announce.diaperLogged'),
       errorKey: 'save',
       offline: { type: 'create', payload: { id, kind: 'diaper', startedAt, pee: action.pee, poop: action.poop } },

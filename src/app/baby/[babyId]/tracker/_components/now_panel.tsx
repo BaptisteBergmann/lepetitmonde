@@ -85,7 +85,7 @@ export function NowPanel({
   const [openAction, setOpenAction] = useState<OpenAction>(null)
   const [pendingKey, setPendingKey] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
-  const { unreachable, saveTap } = useOffline()
+  const { unreachable, canOpenOfflinePage, saveTap } = useOffline()
   const tileRefs = useRef<Partial<Record<CareKind, HTMLButtonElement | null>>>({})
   const panelRef = useRef<HTMLDivElement | null>(null)
 
@@ -125,9 +125,14 @@ export function NowPanel({
       setAnnouncement(options.announce)
       options.onSuccess?.()
     } catch (err) {
-      if (options.offline && (err instanceof TypeError || err instanceof ActionTimeout)) {
-        // The server didn't answer: keep the tap (with its time) and let the queue send it later.
-        if ((await saveTap(options.offline)) !== 'failed') return
+      if (options.offline) {
+        // Any thrown error may be an outage: during one, Next throws a plain Error for the gateway's
+        // 502/530 or the proxy's 503, not a TypeError. The tap has a fixed id, so keeping it is safe;
+        // saveTap probes, and only a reachable server (a real failure) falls through to the toast.
+        const networkLike = err instanceof TypeError || err instanceof ActionTimeout
+        const outcome = await saveTap(options.offline, { keepIfReachable: networkLike })
+        if (outcome === 'reloading' || outcome === 'queued') return
+        // 'reachable' (a real failure) or 'failed' (nothing could be saved): show the usual error.
       }
       // Thrown messages are masked in production, so only translated fallbacks are shown.
       toast.error(err instanceof TypeError ? t('errors.network') : t(`errors.${options.errorKey}`))
@@ -145,7 +150,7 @@ export function NowPanel({
       setOpenAction(null)
       const id = crypto.randomUUID()
       const startedAt = new Date().toISOString()
-      void run(`start-${kind}`, () => startCareTimer(babyId, kind as TimerKind, { id, startedAt }), {
+      void run(`start-${kind}`, () => startCareTimer(babyId, kind as TimerKind, { id }), {
         announce: t('announce.sleepStarted'),
         errorKey: 'start',
         offline: { type: 'startTimer', payload: { id, kind, startedAt } },
@@ -209,9 +214,11 @@ export function NowPanel({
             {t('offline')}
           </p>
           {/* Full navigation, not next/link: the service worker has to answer with the static page. */}
-          <a href="/offline/index.html" className={buttonVariants({ variant: 'outline', className: 'h-12 w-full rounded-2xl' })}>
-            {t('logOffline')}
-          </a>
+          {canOpenOfflinePage && (
+            <a href="/offline/index.html" className={buttonVariants({ variant: 'outline', className: 'h-12 w-full rounded-2xl' })}>
+              {t('logOffline')}
+            </a>
+          )}
         </div>
       )}
 
@@ -226,9 +233,10 @@ export function NowPanel({
           disabled={busy}
           pending={pendingKey === `stop-${event.id}`}
           onStop={(side) => {
-            // Only sleep can be stopped offline (Phase 1): its stop time is the tap time, not the sync time.
+            // Only sleep can be stopped offline (Phase 1). The tap time goes into the queued op only: online
+            // the server stamps the time, so a skewed phone clock can't make a normal tap fail.
             const endedAt = kind === 'sleep' ? new Date().toISOString() : undefined
-            return run(`stop-${event.id}`, () => stopCareTimer(babyId, event.id, { ...(side ? { side } : {}), ...(endedAt ? { endedAt } : {}) }), {
+            return run(`stop-${event.id}`, () => stopCareTimer(babyId, event.id, side ? { side } : {}), {
               announce: t(kind === 'sleep' ? 'announce.sleepStopped' : 'announce.feedStopped'),
               errorKey: 'stop',
               offline: endedAt ? { type: 'stopTimer', payload: { eventId: event.id, endedAt } } : undefined,
