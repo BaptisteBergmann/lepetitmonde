@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { useConfirm } from '@/components/confirm_provider'
 import { logout } from '@utils/actions/logout'
 import { loadOfflineQueue } from '@utils/offline/queue-client'
@@ -38,6 +39,12 @@ export function useLogout() {
     } catch {
       // Logging out matters more than a failed cleanup.
     }
-    await logout()
+    try {
+      await logout()
+    } catch (err) {
+      // A redirect is how a successful logout ends; anything else (server down) must not fail silently.
+      if ((err as { digest?: unknown } | null)?.digest?.toString().startsWith('NEXT_REDIRECT')) throw err
+      toast.error(t('logoutFailed'))
+    }
   }, [confirmAction, t])
 }
