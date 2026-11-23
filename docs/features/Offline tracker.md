@@ -18,10 +18,10 @@ When the server can't be reached (container down, Cloudflare 502/530, auth servi
 ## Behaviour
 
 - **Capturing state.** The live tracker (`offline_runtime.tsx`) saves the snapshot whenever its data changes. A device that never opened the tracker online shows "Offline logging isn't ready yet" and offers no buttons.
-- **A tap on the live page** builds the entry (id and tap time) first and passes them to the Server Action. If the action fails with a network error or doesn't answer within 8 s, the tap is queued, the server is probed, and if it is unreachable and a service worker controls the page, the page reloads into the quick-log.
-- **Without a connection** the tiles are disabled and a "Log without the app" link opens the quick-log.
-- **Quick-log page.** Baby from the URL, else the last used, else a picker. Diaper buttons with a 1.5 s "Saved" state and an 8 s Undo. Sleep start/stop with local elapsed time. A start and stop both made offline are merged into one completed sleep (end clamped to 24 h). Waiting entries can be removed. No time editing in Phase 1: undo and remove cover mistakes.
-- **Reconnection.** The page probes on load, on focus, on `online` and with a 5, 15, 30, 60 s backoff while visible. When the server answers it drains the queue, then reloads into the live tracker (not while a dialog is open or within 4 s of a tap, and never while entries need attention). The live tracker also drains on open, on foreground and when the network returns, and shows a strip for sending, failed and needs-attention entries.
+- **A tap on the live page** fixes the entry's id and tap time first. Online, only the id goes to the Server Action (the server stamps the time, so a skewed phone clock can't break a normal tap). If the action throws for any reason (Next throws a plain error for a gateway 502/530 or a proxy 503, not only for network errors) or doesn't answer within 8 s, the tap is queued with its tap time and marked `attempted`, and the server is probed. Unreachable with a service worker: the page reloads into the quick-log. Unreachable without one: the tap stays queued and a retry runs every 30 s. Reachable: a network error or timeout keeps the tap and sends it right away; any other error drops it again and shows the usual error.
+- **Without a connection** the tiles are disabled and, when a service worker controls the page, a "Log without the app" link opens the quick-log.
+- **Quick-log page.** Baby from the URL, else the last used, else a picker. Diaper buttons with a 1.5 s "Saved" state and an 8 s Undo. Sleep start/stop with local elapsed time. A start and stop both made offline are merged into one completed sleep (end clamped to 24 h), unless the start may already have reached the server (`attempted`): then the stop is sent as a normal stop, because a create for an existing id would silently drop the end time. Waiting entries can be removed. No time editing in Phase 1: undo and remove cover mistakes.
+- **Reconnection.** The page probes on load, on focus, on `online` and with a 5, 15, 30, 60 s backoff while visible. When the server answers it drains the queue, then goes to the live tracker (from `/offline/*` by replacing the location with the baby's tracker, since a reload would be served from the cache again; not while a dialog is open or within 4 s of a tap, and never while entries need attention). The live tracker also drains on open, on foreground and when the network returns, and shows a strip for sending, failed and needs-attention entries.
 - **iPhone.** Nothing can sync in the background: queued entries are sent the next time the app is opened. The page says so plainly.
 
 ## Conflicts and failures
@@ -34,10 +34,12 @@ When the server can't be reached (container down, Cloudflare 502/530, auth servi
 | Time in the future (phone clock wrong) | Needs attention, Discard |
 | Access removed during the outage | `forbidden`, needs attention, Discard |
 | Server error or timeout | Kept, batch stops, retried later |
+| An op fails 5 times | Needs attention (can be discarded), so it can't block the queue |
+| The server rejects a whole batch as malformed (400/413) | The batch goes to needs attention |
 
 ## Security and privacy
 
-- The route re-checks the session on every call (`/api` skips the proxy), requires a matching `userId` (else 409, a guard against sending one account's queue under another), validates with zod, and attributes `created_by` from the session. A viewer or a removed member gets `forbidden`.
+- The route re-checks the session on every call (`/api` skips the proxy), requires a matching `userId` (else 409, a guard against sending one account's queue under another), validates with zod, and attributes `created_by` from the session. Offline replay checks exactly what the live page checks (`assertPageAccessForUser` for the `tracker` page): a viewer can log offline when the page role lets them log online, and a removed member gets `forbidden`.
 - The auth outage case returns 503 instead of redirecting to `/login`, so the session survives a GoTrue restart.
 - IndexedDB is not encrypted at rest, so the snapshot holds the minimum. **Logout** warns when entries are waiting and, on confirm, deletes the whole offline database (`src/utils/offline/logout.ts`). An expired session is not a logout: entries are kept, and `/login` shows a note ("log in with the same account"). Another account's entries are never shown or sent, and are purged after 30 days.
 
