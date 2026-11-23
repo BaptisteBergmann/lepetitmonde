@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-22
 
+- `0064a20` feat(tracker): build the offline quick-log page
 - `9c4bf09` feat(tracker): add the offline queue
 
 ## 2026-11-19
