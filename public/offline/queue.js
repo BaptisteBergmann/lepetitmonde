@@ -24,6 +24,9 @@
   var SEND_TIMEOUT_MS = 20000;
   var DAY_MS = 24 * 60 * 60 * 1000;
   var PURGE_AFTER_MS = 30 * DAY_MS;
+  // A op the server keeps failing on (not rejecting) would otherwise retry forever and block
+  // the ones behind it: after this many sends it becomes needs_attention and can be discarded.
+  var MAX_ATTEMPTS = 5;
 
   // ---------------------------------------------------------------------------------------
   // Pure functions (no DOM, no IndexedDB): unit-tested with node.
@@ -53,7 +56,9 @@
 
   // A stop whose start is still queued (pending) becomes one completed `create`, end clamped to
   // 24 h. It never touches the one-running-timer-per-kind index on the server. A start that is
-  // already `sending` is left alone and the stop stays a normal stopTimer with the same id.
+  // already `sending`, or may have reached the server (`attempted`), is left alone and the stop
+  // stays a normal stopTimer with the same id: a create for an id the server already has is a
+  // no-op, so merging there would silently lose the stop time.
   // Returns a new list ordered by createdAt; the input is not mutated.
   function coalesce(ops) {
     var out = [];
@@ -62,7 +67,7 @@
         var idx = -1;
         for (var i = 0; i < out.length; i++) {
           var o = out[i];
-          if (o.type === 'startTimer' && o.status === 'pending' && o.userId === op.userId &&
+          if (o.type === 'startTimer' && o.status === 'pending' && !o.attempted && o.userId === op.userId &&
               o.babyId === op.babyId && o.payload.id === op.payload.eventId) { idx = i; break; }
         }
         if (idx !== -1) {
@@ -153,10 +158,10 @@
 
   // Runs fn(stores, tx) in one transaction. Resolves with fn's return value only on
   // tx.oncomplete, so a caller that sees success knows the data is durable.
-  function withTx(storeNames, mode, fn) {
+  function withTx(storeNames, mode, fn, txOptions) {
     return openDb().then(function (db) {
       return new Promise(function (resolve, reject) {
-        var tx = db.transaction(storeNames, mode);
+        var tx = txOptions ? db.transaction(storeNames, mode, txOptions) : db.transaction(storeNames, mode);
         var stores = {};
         storeNames.forEach(function (n) { stores[n] = tx.objectStore(n); });
         var result;
@@ -257,16 +262,21 @@
   }
 
   var persistRequested = false;
+  // Resolve only once the data is flushed to disk, not merely handed to the OS.
+  var STRICT = { durability: 'strict' };
 
   // Adds one op and re-coalesces the user's queue in the same transaction. Resolves with the op
   // that was stored (a stop merged into its start resolves with the merged `create`).
-  function enqueue(userId, babyId, type, payload) {
+  // opts.attempted: the same tap may already have reached the server (a request that timed out
+  // or failed after being sent), so it must never be merged into a create.
+  function enqueue(userId, babyId, type, payload, opts) {
     if (!persistRequested) { persistRequested = true; requestPersistence(); }
     var op = {
       opId: type === 'stopTimer' ? newId() : payload.id,
       userId: userId, babyId: babyId, type: type, payload: payload,
       createdAt: new Date().toISOString(), status: 'pending',
     };
+    if (opts && opts.attempted) op.attempted = true;
     return withTx(['ops'], 'readwrite', function (s) {
       var holder = { op: op };
       var all = s.ops.index('userId').getAll(userId);
@@ -282,7 +292,7 @@
         }
       };
       return holder;
-    }).then(function (h) { notify(); return h.op; });
+    }, STRICT).then(function (h) { notify(); return h.op; });
   }
 
   // Undo, Remove and Discard. A queued stop that targets the removed start goes with it.
@@ -302,7 +312,7 @@
           };
         }
       };
-    }).then(notify);
+    }, STRICT).then(notify);
   }
 
   function setStatus(opIds, status, error) {
@@ -320,6 +330,67 @@
     });
   }
 
+  // Back to pending after a send that didn't settle. A failed attempt counts toward
+  // MAX_ATTEMPTS; past it the op becomes needs_attention instead of blocking the queue forever.
+  function release(op, penalize) {
+    if (!penalize) op.attempts = Math.max(0, (op.attempts || 1) - 1);
+    if (penalize && (op.attempts || 0) >= MAX_ATTEMPTS) {
+      op.status = 'needs_attention';
+      op.error = { status: 'rejected', code: 'tooManyAttempts' };
+    } else {
+      op.status = 'pending';
+      delete op.error;
+    }
+  }
+
+  function releaseBatch(opIds) {
+    return withTx(['ops'], 'readwrite', function (s) {
+      opIds.forEach(function (id) {
+        var get = s.ops.get(id);
+        get.onsuccess = function () { if (get.result) { release(get.result, true); s.ops.put(get.result); } };
+      });
+    });
+  }
+
+  // The server refused the whole batch as malformed: retrying the same bytes can't help.
+  function quarantineBatch(opIds) {
+    return withTx(['ops'], 'readwrite', function (s) {
+      opIds.forEach(function (id) {
+        var get = s.ops.get(id);
+        get.onsuccess = function () {
+          var op = get.result;
+          if (!op) return;
+          op.status = 'needs_attention';
+          op.error = { status: 'rejected', code: 'malformed' };
+          s.ops.put(op);
+        };
+      });
+    });
+  }
+
+  // Picks the next pending ops and marks them sending in one transaction, so the batch that is
+  // sent is exactly the batch that was claimed. `attempted` records that the server may now
+  // have them even if the response is lost.
+  function claimBatch(userId) {
+    return withTx(['ops'], 'readwrite', function (s) {
+      var holder = { batch: [] };
+      var all = s.ops.index('userId').getAll(userId);
+      all.onsuccess = function () {
+        holder.batch = all.result
+          .filter(function (o) { return o.status === 'pending'; })
+          .sort(byCreatedAt)
+          .slice(0, BATCH_SIZE);
+        holder.batch.forEach(function (o) {
+          o.status = 'sending';
+          o.attempted = true;
+          o.attempts = (o.attempts || 0) + 1;
+          s.ops.put(o);
+        });
+      };
+      return holder;
+    }).then(function (h) { return h.batch; });
+  }
+
   function applyResults(batch, results) {
     var byId = {};
     results.forEach(function (r) { byId[r.opId] = r; });
@@ -335,8 +406,8 @@
             cur.status = 'needs_attention';
             cur.error = { status: r.status, code: r.error || null };
           } else {
-            cur.status = 'pending';
-            delete cur.error;
+            // 'retry' counts as a failed attempt; an op with no result was never processed.
+            release(cur, !!r);
           }
           s.ops.put(cur);
         };
@@ -441,11 +512,9 @@
 
     var sent = 0;
     for (;;) {
-      var pending = (await listOps(userId)).filter(function (o) { return o.status === 'pending'; });
-      if (!pending.length) break;
-      var batch = pending.slice(0, BATCH_SIZE);
+      var batch = await claimBatch(userId);
+      if (!batch.length) break;
       var ids = batch.map(function (o) { return o.opId; });
-      await setStatus(ids, 'sending');
       notify();
 
       var res;
@@ -463,7 +532,7 @@
           }),
         }, SEND_TIMEOUT_MS);
       } catch {
-        await setStatus(ids, 'pending');
+        await releaseBatch(ids);
         notify();
         return { state: 'failed', sent: sent };
       }
@@ -472,7 +541,13 @@
       var body = null;
       if (res.status === 200 && isJson(res)) { try { body = await res.json(); } catch { body = null; } }
       if (!body || !Array.isArray(body.results)) {
-        await setStatus(ids, 'pending');
+        // 400/413: the batch itself is unacceptable, so quarantine it and carry on with the rest.
+        if (res.status === 400 || res.status === 413) {
+          await quarantineBatch(ids);
+          notify();
+          continue;
+        }
+        await releaseBatch(ids);
         notify();
         var state = res.status === 401 ? 'sessionExpired' : res.status === 409 ? 'userMismatch' : 'failed';
         return { state: state, sent: sent };
@@ -505,7 +580,7 @@
   root.OfflineQueue = {
     DB_NAME: DB_NAME,
     // pure
-    newId: newId, coalesce: coalesce, clampEnd: clampEnd, deriveTimers: deriveTimers, countEntries: countEntries,
+    release: release, newId: newId, coalesce: coalesce, clampEnd: clampEnd, deriveTimers: deriveTimers, countEntries: countEntries,
     // storage
     isAvailable: isAvailable, openDb: openDb, getMeta: getMeta, getSnapshots: getSnapshots, listOps: listOps,
     pendingCount: pendingCount, enqueue: enqueue, removeOp: removeOp, saveSnapshot: saveSnapshot,

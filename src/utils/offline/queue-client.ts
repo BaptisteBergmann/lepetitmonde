@@ -13,6 +13,9 @@ export type OfflineOp = {
   payload: Record<string, unknown>
   createdAt: string
   status: OfflineOpStatus
+  // The server may already have this op (a send that timed out or lost its response).
+  attempted?: boolean
+  attempts?: number
   error?: { status: 'conflict' | 'rejected' | 'forbidden'; code: string | null }
 }
 
@@ -47,7 +50,13 @@ export type OfflineQueueApi = {
   getSnapshots(userId: string): Promise<OfflineSnapshot[]>
   listOps(userId: string): Promise<OfflineOp[]>
   pendingCount(opts?: { userId?: string; all?: boolean }): Promise<number>
-  enqueue(userId: string, babyId: string, type: OfflineOpType, payload: Record<string, unknown>): Promise<OfflineOp>
+  enqueue(
+    userId: string,
+    babyId: string,
+    type: OfflineOpType,
+    payload: Record<string, unknown>,
+    opts?: { attempted?: boolean },
+  ): Promise<OfflineOp>
   removeOp(opId: string): Promise<void>
   // snapshot fields userId, babyId and savedAt are set by the queue
   saveSnapshot(userId: string, babyId: string, snapshot: Omit<OfflineSnapshot, 'userId' | 'babyId' | 'savedAt'>): Promise<void>

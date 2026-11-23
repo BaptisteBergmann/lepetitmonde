@@ -112,3 +112,32 @@ test('countEntries counts a start+stop pair as one', () => {
   assert.equal(Q.countEntries(ops), 2)
   assert.equal(Q.countEntries([]), 0)
 })
+
+test('a start that may have reached the server is not merged with its stop', () => {
+  const out = Q.coalesce([start({ attempted: true }), stop('2026-11-22T03:05:00.000Z')])
+  assert.deepEqual(plain(out.map((o) => o.type)), ['startTimer', 'stopTimer'])
+  // The stop keeps pointing at the same id so the server applies it after the start.
+  assert.equal(out[1].payload.eventId, ID)
+})
+
+test('an attempted start is still reported as the running timer until the stop is queued', () => {
+  assert.equal(Q.deriveTimers(null, [start({ attempted: true })], B).sleep.source, 'queue')
+  assert.deepEqual(plain(Q.deriveTimers(null, [start({ attempted: true }), stop('2026-11-22T03:05:00.000Z')], B)), {})
+})
+
+test('release: a failed attempt goes back to pending until the attempt limit', () => {
+  const op = { status: 'sending', attempts: 4 }
+  Q.release(op, true)
+  assert.equal(op.status, 'pending')
+  const last = { status: 'sending', attempts: 5, error: undefined }
+  Q.release(last, true)
+  assert.equal(last.status, 'needs_attention')
+  assert.equal(last.error.code, 'tooManyAttempts')
+})
+
+test('release: an op the server never processed is not penalised', () => {
+  const op = { status: 'sending', attempts: 5 }
+  Q.release(op, false)
+  assert.equal(op.status, 'pending')
+  assert.equal(op.attempts, 4)
+})
