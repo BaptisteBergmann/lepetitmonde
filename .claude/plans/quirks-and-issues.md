@@ -67,11 +67,11 @@ The self-referencing FK for circle hierarchy exists in the baseline migration bu
 
 ## Minor / cosmetic
 
-### 11. Duplicate service worker registration
-`src/app/settings/pwaRegistry.tsx` and `usePushSubscription()` both call `navigator.serviceWorker.register('/sw.js')` independently. Harmless (registration is idempotent) but worth consolidating into one call site to avoid confusion later.
+### 11. Duplicate service worker registration: resolved
+The worker is now registered once, by `PwaRegistry` (`src/app/settings/pwaRegistry.tsx`, `updateViaCache: 'none'`); `usePushSubscription()` only waits for it. Done with the offline fallback, see [[Offline tracker]].
 
-### 12. `public/sw.js` and `src/worker/index.ts` must be kept manually in sync
-They're byte-identical today with no build step enforcing it (confirmed via diff). A future edit to one and not the other will silently desync. Consider a `pnpm build`-time copy step or a comment at the top of each file pointing at the other.
+### 12. `public/sw.js` and `src/worker/index.ts` must be kept manually in sync: resolved
+`src/worker/index.ts` was deleted. `public/sw.js` is the only source, with no build step. Done with the offline fallback.
 
 ### 13. No automated tests
 No test framework is configured anywhere in `package.json`/the app (only unrelated `docker/tests/*.yml` fixtures for the separate self-hosted Supabase bundle). Not necessarily wrong for a small self-hosted family project, but worth an explicit decision rather than an accidental gap — at minimum the visibility-filtering logic (`withVisibility()` in posts/events) and the guess-approval state machine are exactly the kind of pure logic that regresses silently without tests.

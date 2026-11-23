@@ -10,7 +10,7 @@ Log a diaper change in one tap and see the counts for the day and the time since
 
 ## Behaviour
 
-- **Diaper card** in the "now" panel (under the timer tiles): three buttons, **Pee**, **Poop**, **Both**. A tap creates an entry at now, with no dialog and no toast. All three are inert while a request is in flight, which also makes a double tap create one entry. Offline, they do nothing (no queued writes).
+- **Diaper card** in the "now" panel (under the timer tiles): three buttons, **Pee**, **Poop**, **Both**. A tap creates an entry at now, with no dialog and no toast. All three are inert while a request is in flight, which also makes a double tap create one entry. If the server can't be reached, the tap is queued with its time and sent later, see [[Offline tracker]]; the details strip only appears for entries that were saved.
 - **Last change** readout in the card ("Poop · 2 h ago"), or "No diaper logged yet".
 - **Details strip**: after a Poop or Both log, a quiet strip offers "Add colour and texture", which opens the edit modal on that entry. It goes away after 60 s (paused while it has focus), on the next log, or on dismiss.
 - **Entry modal**: Pee and Poop are independent toggles and at least one is required (no dry diapers). Colour (black, green, yellow, brown, red, white / pale) and texture (liquid, seedy, soft, formed, hard) are optional, only shown with Poop, and cleared when Poop is turned off.

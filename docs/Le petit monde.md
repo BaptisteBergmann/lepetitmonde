@@ -27,7 +27,7 @@ This note is the entry point of the documentation. Every note links back here, s
 - [[Security model]]: headers, rate limits, tokens, validation.
 - [[Internationalization]]: French and English with next-intl.
 - [[Logging]]: Pino child loggers.
-- [[PWA and service worker]]: install, push display.
+- [[PWA and service worker]]: install, push display, offline fallback.
 - [[UI system]]: Tailwind, Shadcn, Base UI, and the [[z-index]] scale.
 - [[Build and deploy]]: CI, GHCR, Portainer, `:latest` vs `:prod`.
 
@@ -44,6 +44,7 @@ Each baby has a set of pages that an admin can turn on or off and restrict to ad
 - [[To-do list]]
 - [[Baby tracker]] (sleep and feeds)
 - [[Diaper changes]] (pee and poop in the tracker)
+- [[Offline tracker]] (diaper and sleep logging when the server is unreachable)
 - [[Pumping and reflux]] (tire-lait and spit-up in the tracker)
 - [[Tracker analytics]] (trends and history for the tracker)
 - [[Health]] (growth charts, vaccinations)
