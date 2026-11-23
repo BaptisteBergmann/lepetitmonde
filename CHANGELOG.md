@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-22
 
+- `b2ca6c1` docs: document offline tracker logging
 - `9e3bb73` feat(auth): clear offline data on logout
 - `2cba90b` feat(tracker): capture offline state and drain from the tracker
 - `0064a20` feat(tracker): build the offline quick-log page
