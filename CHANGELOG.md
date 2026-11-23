@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-22
 
+- `9643d19` fix(tracker): leave the offline page by navigating to the tracker
 - `97be561` fix(tracker): harden offline replay against lost stops and poison ops
 - `b2ca6c1` docs: document offline tracker logging
 - `9e3bb73` feat(auth): clear offline data on logout
