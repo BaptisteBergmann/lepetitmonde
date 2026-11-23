@@ -1,6 +1,6 @@
 "use client"
 
-import { logout } from '@utils/actions/logout'
+import { useLogout } from '@utils/offline/logout'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,9 +23,7 @@ export default function MobileMenu({ initials, fullName, email }: MobileMenuProp
   const t = useTranslations('nav')
   const tA11y = useTranslations('a11y')
 
-  const handleLogout = async () => {
-    await logout()
-  }
+  const handleLogout = useLogout()
 
   return (
     <DropdownMenu>

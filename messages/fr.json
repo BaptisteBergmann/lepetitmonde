@@ -129,6 +129,9 @@
     "unknownUser": "Utilisateur",
     "settings": "Paramètres",
     "logout": "Se déconnecter",
+    "logoutUnsyncedTitle": "Se déconnecter et supprimer les entrées non envoyées ?",
+    "logoutUnsynced": "{count, plural, one {# entrée n'a pas encore été envoyée. Elle n'existe que sur ce téléphone et ne pourra pas être récupérée après la déconnexion.} other {# entrées n'ont pas encore été envoyées. Elles n'existent que sur ce téléphone et ne pourront pas être récupérées après la déconnexion.}}",
+    "logoutUnsyncedConfirm": "Se déconnecter et supprimer",
     "navigation": "Navigation",
     "more": "Plus"
   },

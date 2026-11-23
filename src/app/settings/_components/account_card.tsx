@@ -4,7 +4,7 @@ import { INPUT_LIMITS } from '@/utils/input-limits'
 import { useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import { logout } from '@utils/actions/logout'
+import { useLogout } from '@utils/offline/logout'
 import { updateProfile, requestEmailChange } from '@utils/actions/users'
 import { changePassword } from '@utils/actions/reset-password'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,7 @@ export default function AccountCard({ initials, fullName, email, firstName, last
   const [isSavingEmail, startEmailTransition] = useTransition()
   const [isSavingPassword, startPasswordTransition] = useTransition()
   const tAuth = useTranslations('auth')
+  const handleLogout = useLogout()
   const [currentPasswordError, setCurrentPasswordError] = useState(false)
   const currentPasswordRef = useRef<HTMLInputElement>(null)
 
@@ -194,12 +195,12 @@ export default function AccountCard({ initials, fullName, email, firstName, last
           </FieldGroup>
         </form>
 
-        <form action={logout} className="border-t border-landing-border pt-4">
-          <Button type="submit" variant="destructive" className="w-full gap-2 cursor-pointer">
+        <div className="border-t border-landing-border pt-4">
+          <Button type="button" variant="destructive" className="w-full gap-2 cursor-pointer" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             <span>{t('logout')}</span>
           </Button>
-        </form>
+        </div>
       </CardContent>
     </Card>
   )

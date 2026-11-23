@@ -129,6 +129,9 @@
     "unknownUser": "User",
     "settings": "Settings",
     "logout": "Log out",
+    "logoutUnsyncedTitle": "Log out and delete unsent entries?",
+    "logoutUnsynced": "{count, plural, one {# entry has not been sent yet. It is only on this phone and can't be recovered after you log out.} other {# entries have not been sent yet. They are only on this phone and can't be recovered after you log out.}}",
+    "logoutUnsyncedConfirm": "Log out and delete",
     "navigation": "Navigation",
     "more": "More"
   },
