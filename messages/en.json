@@ -888,7 +888,13 @@
     "itemLabelDone": "Mark \"{title}\" as not done",
     "saveError": "Couldn't save. Try again.",
     "pasteTruncated": "Only the first 100 lines were added.",
-    "offline": "You're offline. Changes aren't saved."
+    "offline": "You're offline. Changes aren't saved.",
+    "doneSection": "Done ({count})",
+    "clearDone": "Clear",
+    "clearDoneAria": "Clear the {count} done items",
+    "clearDoneConfirm": "Delete the {count} done items?",
+    "clearDoneError": "Couldn't clear done items.",
+    "movedToDone": "\"{title}\" moved to Done"
   },
   "anecdotes": {
     "eyebrow": "Page — What they said, what they did",

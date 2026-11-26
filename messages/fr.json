@@ -888,7 +888,13 @@
     "itemLabelDone": "Marquer « {title} » comme à faire",
     "saveError": "Impossible d'enregistrer. Réessayez.",
     "pasteTruncated": "Seules les 100 premières lignes ont été ajoutées.",
-    "offline": "Vous êtes hors ligne. Les modifications ne sont pas enregistrées."
+    "offline": "Vous êtes hors ligne. Les modifications ne sont pas enregistrées.",
+    "doneSection": "Terminé ({count})",
+    "clearDone": "Effacer",
+    "clearDoneAria": "Effacer les {count} éléments terminés",
+    "clearDoneConfirm": "Supprimer les {count} éléments terminés ?",
+    "clearDoneError": "Impossible d'effacer les éléments terminés.",
+    "movedToDone": "« {title} » déplacé dans Terminé"
   },
   "anecdotes": {
     "eyebrow": "Page — Ce qu'il a dit, ce qu'il a fait",

@@ -17,6 +17,8 @@ type Props = {
   row: ChecklistRowData
   // The empty row that always ends the unchecked items.
   isDraft: boolean
+  // Checked row collapsing out of the unchecked list on its way to Done.
+  leaving?: boolean
   onToggle: (id: string) => void
   onChange: (id: string, title: string) => void
   onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>, row: ChecklistRowData) => void
@@ -28,7 +30,7 @@ type Props = {
 // Circle (44px hit area) + auto-growing textarea. A textarea rather than an input so
 // long titles wrap on a phone; Enter is intercepted by the parent so it never inserts
 // a newline.
-export default function ChecklistRow({ row, isDraft, onToggle, onChange, onKeyDown, onPaste, onBlur, register }: Props) {
+export default function ChecklistRow({ row, isDraft, leaving = false, onToggle, onChange, onKeyDown, onPaste, onBlur, register }: Props) {
   const t = useTranslations('todo')
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
@@ -40,7 +42,14 @@ export default function ChecklistRow({ row, isDraft, onToggle, onChange, onKeyDo
   }, [row.title])
 
   return (
-    <div className="flex min-h-11 items-start gap-1 border-b border-landing-border px-3 last:border-b-0">
+    // grid 1fr -> 0fr animates the height without measuring it.
+    <div
+      className={cn(
+        'grid motion-safe:transition-[grid-template-rows,opacity] motion-safe:duration-200',
+        leaving ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
+      )}
+    >
+    <div className="flex min-h-0 items-start gap-1 overflow-hidden border-b border-landing-border px-3 [div:last-child>&]:border-b-0">
       <button
         type="button"
         role="checkbox"
@@ -85,6 +94,7 @@ export default function ChecklistRow({ row, isDraft, onToggle, onChange, onKeyDo
           row.done ? 'text-landing-muted line-through' : 'text-landing-foreground',
         )}
       />
+    </div>
     </div>
   )
 }

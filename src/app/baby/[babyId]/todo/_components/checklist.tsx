@@ -1,15 +1,23 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
+import { useConfirm } from '@/components/confirm_provider'
+import { cn } from '@utils/utils'
 import type { Tables } from '@utils/supabase/database.types'
 import { INPUT_LIMITS } from '@/utils/input-limits'
-import { createTodoItems, deleteTodoItem, toggleTodoItem, updateTodoItem } from '@/utils/actions/todo'
+import { clearDoneTodoItems, createTodoItems, deleteTodoItem, toggleTodoItem, updateTodoItem } from '@/utils/actions/todo'
 import ChecklistRow, { type ChecklistRowData } from './checklist_row'
 
 const SAVE_DEBOUNCE_MS = 400
+// Undo window: a checked item stays in place this long before sinking into Done.
+const SINK_DELAY_MS = 600
+const LEAVE_MS = 200
+const doneOpenKey = (listId: string) => `todo-done-open:${listId}`
 // Same cap as the server's MAX_TODO_BATCH (that module is server-only).
 const MAX_PASTE_LINES = 100
 
@@ -63,6 +71,12 @@ function parsePaste(text: string): string[] {
     .map((line) => line.slice(0, INPUT_LIMITS.todoTitle))
 }
 
+const doneOpenListeners = new Set<() => void>()
+const subscribeDoneOpen = (callback: () => void) => {
+  doneOpenListeners.add(callback)
+  return () => { doneOpenListeners.delete(callback) }
+}
+
 const subscribeOnline = (callback: () => void) => {
   window.addEventListener('online', callback)
   window.addEventListener('offline', callback)
@@ -74,7 +88,18 @@ const subscribeOnline = (callback: () => void) => {
 
 export default function Checklist({ babyId, listId, items }: { babyId: string; listId: string; items: Tables<'todo_items'>[] }) {
   const t = useTranslations('todo')
+  const router = useRouter()
+  const confirmAction = useConfirm()
+  const doneListId = useId()
   const [rows, dispatch] = useReducer(reducer, items, (initial) => withDraft(fromServer(initial), crypto.randomUUID()))
+  // Checked rows still shown among the unchecked ones (undo window), and the subset
+  // already collapsing.
+  const [sinking, setSinking] = useState<ReadonlySet<string>>(new Set())
+  const [leaving, setLeaving] = useState<ReadonlySet<string>>(new Set())
+  // Per list, remembered on this device. Server snapshot is closed, so hydration matches.
+  const doneOpen = useSyncExternalStore(subscribeDoneOpen, () => localStorage.getItem(doneOpenKey(listId)) === '1', () => false)
+  const [announcement, setAnnouncement] = useState('')
+  const sinkTimers = useRef(new Map<string, ReturnType<typeof setTimeout>[]>())
   const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -95,6 +120,47 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   useLayoutEffect(() => {
     rowsRef.current = rows
   }, [rows])
+
+  const toggleDoneOpen = () => {
+    localStorage.setItem(doneOpenKey(listId), doneOpen ? '0' : '1')
+    doneOpenListeners.forEach((listener) => listener())
+  }
+
+  const stopSinking = useCallback((id: string) => {
+    sinkTimers.current.get(id)?.forEach(clearTimeout)
+    sinkTimers.current.delete(id)
+    const without = (set: ReadonlySet<string>) => {
+      const next = new Set(set)
+      next.delete(id)
+      return next
+    }
+    setSinking(without)
+    setLeaving(without)
+  }, [])
+
+  const startSinking = useCallback((id: string, title: string) => {
+    setSinking((set) => new Set(set).add(id))
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const leave = setTimeout(() => {
+      if (reduceMotion) {
+        stopSinking(id)
+        setAnnouncement(t('movedToDone', { title }))
+        return
+      }
+      setLeaving((set) => new Set(set).add(id))
+      const settle = setTimeout(() => {
+        stopSinking(id)
+        setAnnouncement(t('movedToDone', { title }))
+      }, LEAVE_MS)
+      sinkTimers.current.set(id, [settle])
+    }, SINK_DELAY_MS)
+    sinkTimers.current.set(id, [leave])
+  }, [stopSinking, t])
+
+  useEffect(() => {
+    const timersByRow = sinkTimers.current
+    return () => timersByRow.forEach((list) => list.forEach(clearTimeout))
+  }, [])
 
   // Re-sync from the server only when idle: the refresh after each write would
   // otherwise overwrite what the user is typing.
@@ -227,6 +293,8 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     if (!row || isBlank(row)) return
     const done = !row.done
     dispatch({ type: 'toggle', id, done, doneAt: done ? new Date().toISOString() : null, spareId: crypto.randomUUID() })
+    if (done) startSinking(id, row.title)
+    else stopSinking(id)
     // The row may still be waiting for its debounced create.
     flushSave(id)
     enqueue([id], async () => {
@@ -236,6 +304,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       } catch (err) {
         console.error(err)
         dispatch({ type: 'toggle', id, done: !done, doneAt: null, spareId: crypto.randomUUID() })
+        if (done) stopSinking(id)
         fail()
       }
     })
@@ -330,6 +399,33 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     }, row.id)
   }
 
+  const handleClearDone = async () => {
+    const doneRows = rowsRef.current.filter((row) => row.done)
+    if (doneRows.length === 0) return
+    const confirmed = await confirmAction({
+      title: t('clearDoneConfirm', { count: doneRows.length }),
+      confirmLabel: t('clearDone'),
+      destructive: true,
+    })
+    if (!confirmed) return
+
+    const ids = doneRows.map((row) => row.id)
+    ids.forEach((id) => { stopSinking(id); known.current.delete(id) })
+    dispatch({ type: 'remove', ids, spareId: crypto.randomUUID() })
+    const draft = rowsRef.current.findLast((row) => !row.done)
+    if (draft) focusRow(draft.id)
+    enqueue(ids, async () => {
+      try {
+        await clearDoneTodoItems(babyId, listId)
+      } catch (err) {
+        console.error(err)
+        toast.error(t('clearDoneError'))
+        // Local state dropped rows the server still has: re-read them.
+        router.refresh()
+      }
+    })
+  }
+
   const handleBlur = (id: string) => {
     flushSave(id)
     const unchecked = rowsRef.current.filter((r) => !r.done)
@@ -343,9 +439,11 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     else inputs.current.delete(id)
   }, [])
 
-  const unchecked = rows.filter((row) => !row.done)
-  const done = rows.filter((row) => row.done).sort((a, b) => (b.doneAt ?? '').localeCompare(a.doneAt ?? ''))
-  const draftId = unchecked[unchecked.length - 1]?.id
+  const unchecked = rows.filter((row) => !row.done || sinking.has(row.id))
+  const done = rows
+    .filter((row) => row.done && !sinking.has(row.id))
+    .sort((a, b) => (b.doneAt ?? '').localeCompare(a.doneAt ?? ''))
+  const draftId = rows.findLast((row) => !row.done)?.id
   const hasItems = rows.some((row) => !isBlank(row))
 
   const renderRow = (row: ChecklistRowData) => (
@@ -353,6 +451,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       key={row.id}
       row={row}
       isDraft={row.id === draftId}
+      leaving={leaving.has(row.id)}
       onToggle={handleToggle}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
@@ -372,10 +471,40 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       </div>
       {!hasItems && <p className="text-sm text-landing-muted">{t('emptyHint')}</p>}
       {done.length > 0 && (
-        <div className="overflow-hidden rounded-2xl border border-landing-border bg-landing-surface">
-          {done.map(renderRow)}
+        <div>
+          <div className="flex min-h-11 items-center justify-between">
+            <button
+              type="button"
+              aria-expanded={doneOpen}
+              aria-controls={doneListId}
+              onClick={toggleDoneOpen}
+              className="flex min-h-11 cursor-pointer items-center gap-1 text-sm font-medium text-landing-foreground"
+            >
+              <ChevronRight
+                aria-hidden
+                className={cn('size-4 motion-safe:transition-transform motion-safe:duration-200', doneOpen && 'rotate-90')}
+              />
+              {t('doneSection', { count: done.length })}
+            </button>
+            <button
+              type="button"
+              onClick={handleClearDone}
+              aria-label={t('clearDoneAria', { count: done.length })}
+              className="min-h-11 cursor-pointer px-2 text-sm text-landing-muted hover:text-landing-foreground"
+            >
+              {t('clearDone')}
+            </button>
+          </div>
+          <div
+            id={doneListId}
+            hidden={!doneOpen}
+            className="overflow-hidden rounded-2xl border border-landing-border bg-landing-surface"
+          >
+            {done.map(renderRow)}
+          </div>
         </div>
       )}
+      <div aria-live="polite" className="sr-only">{announcement}</div>
     </div>
   )
 }
