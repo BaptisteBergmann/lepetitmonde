@@ -1,5 +1,9 @@
 # To-do lists (Notes-style checklists, several lists per baby)
 
+## Status: implemented
+
+Shipped 2026-11-26 (migration `20261126120000_todo_lists.sql` applied, deployed to `:latest`): multiple lists per baby (index → list detail with chip switcher), Notes-style inline editor, checked items sink into a collapsed "Terminé" section, list-aware MCP tools and digest. Deviations: no emoji anywhere; up/down reorder removed from the UI (`move_todo` stays in MCP); digest and MCP `list_todo_lists` never create the default list; best-effort de-dup of concurrent default lists (no DB constraint). Follow-ups in `todo-lists-later.md`.
+
 Status: approved (2026-11-26)
 Approved by: user, with the suggested defaults (see Decisions)
 
