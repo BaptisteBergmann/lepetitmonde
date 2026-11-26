@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `91ce130` feat(todo): inline checklist editor
 - `fa39a39` feat(todo): list-aware server actions
 - `e074756` refactor(todo): list-aware core
 - `414b25f` feat(db): add todo_lists and list/done_at on todo_items
