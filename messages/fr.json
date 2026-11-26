@@ -855,7 +855,7 @@
   },
   "todo": {
     "title": "À faire",
-    "emptyHint": "Écrivez un élément, puis Entrée pour ajouter le suivant.",
+    "emptyHint": "Écrivez un élément, puis appuyez sur Entrée pour ajouter le suivant.",
     "lists": {
       "defaultName": "À faire",
       "back": "Listes",
@@ -881,8 +881,8 @@
     "offline": "Vous êtes hors ligne. Les modifications ne sont pas enregistrées.",
     "doneSection": "Terminé ({count})",
     "clearDone": "Effacer",
-    "clearDoneAria": "Effacer les {count} éléments terminés",
-    "clearDoneConfirm": "Supprimer les {count} éléments terminés ?",
+    "clearDoneAria": "{count, plural, one {Effacer l'élément terminé} other {Effacer les # éléments terminés}}",
+    "clearDoneConfirm": "{count, plural, one {Supprimer l'élément terminé ?} other {Supprimer les # éléments terminés ?}}",
     "clearDoneError": "Impossible d'effacer les éléments terminés.",
     "movedToDone": "« {title} » déplacé dans Terminé",
     "allDone": "Tout est fait",
