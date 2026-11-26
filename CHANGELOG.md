@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `00abfe0` fix(todo): refit checked rows when the Done section opens
 - `8306bea` fix(todo): keep the chip strip mounted when switching lists
 - `d2407df` fix(todo): scroll only the chip strip to the active list
 - `bfd3d40` docs(todo): add the live sync plan
