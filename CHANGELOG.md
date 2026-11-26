@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `25d0705` feat(todo): tell the user when the open list was deleted elsewhere
 - `c94fa6d` fix(todo): keep the list title editor across remote renames
 - `b9211b9` feat(todo): merge remote changes into the open list
 - `4439869` feat(todo): live refresh of the lists index
