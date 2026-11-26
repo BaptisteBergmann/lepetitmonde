@@ -4,6 +4,7 @@ Status: backlog. Not scheduled. Each section is a separate piece of work; pick o
 Depends on: `todo-lists.md` being shipped.
 
 ## 1. Live sync between devices
+- **Planned and implemented in `todo-live-sync.md`** (merge rules there are reused by section 4).
 - **Why:** two parents editing the same list only see each other's changes after a reload; last write wins per field.
 - **Idea:** add `todo_lists` and `todo_items` bindings to the SSE realtime relay (`src/utils/supabase/realtime-relay.ts`), the way the buy list did (`buy-list.md`). The relay fans out to every member of the baby, so it must filter to admins only (todo is admin-only).
 - **Care:** merge remote events into the editor's local `useReducer` state without stealing focus or overwriting a title being typed; skip echoes of our own writes (client-generated ids help).
