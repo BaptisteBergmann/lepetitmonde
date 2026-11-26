@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `d2407df` fix(todo): scroll only the chip strip to the active list
 - `bfd3d40` docs(todo): add the live sync plan
 - `699ca76` docs(realtime): fix the todo table cross-reference
 - `3bb78ae` fix(db): quote the publication statement the plain way in the todo realtime migration
