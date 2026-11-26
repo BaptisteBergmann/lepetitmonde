@@ -5,12 +5,12 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { actionError, ActionError } from './actions/errors'
 import { getTrackerDayCore, getTrackerNowCore, type CareEvent } from './care-core'
-import { computeDayTotals, formatInZone, shiftDay, zonedDayBounds, type DayTotals } from './care-time'
+import { computeDayTotals, formatInZone, shiftDay, todayInZone, zonedDayBounds, type DayTotals } from './care-time'
 import { listEventsCore } from './events-core'
 import { logger } from './logger'
 import { assertPageAccessForUser, getMemberAccess } from './member-access'
 import type { PageId } from './page_registry'
-import { listTodos } from './todo-core'
+import { listTodoLists, listTodos } from './todo-core'
 
 export type DigestPeriod = 'day' | 'week'
 export type DigestSection = 'tracker' | 'todo' | 'calendar'
@@ -102,11 +102,30 @@ async function trackerSection(supabase: SupabaseClient, userId: string, babyId: 
   }
 }
 
-async function todoSection(supabase: SupabaseClient, userId: string, babyId: string, period: DigestPeriod) {
-  const open = (await listTodos(supabase, userId, babyId, { throwOnError: true })).filter((item) => !item.done)
-  // todo_items has no completion date, so "done this week" can't be reported.
-  if (period === 'week') return { openCount: open.length }
-  return { openCount: open.length, titles: open.slice(0, TODO_TITLES).map((item) => item.title) }
+async function todoSection(supabase: SupabaseClient, userId: string, babyId: string, period: DigestPeriod, date: string, tz: string) {
+  const lists = await listTodoLists(supabase, userId, babyId)
+  const items = await listTodos(supabase, userId, babyId, { throwOnError: true })
+  const open = items.filter((item) => !item.done)
+
+  // done_at is a timestamp; the period is in calendar days of the family time zone.
+  // Items done before done_at existed carry their creation date (see the migration).
+  const from = period === 'day' ? date : shiftDay(date, -6)
+  const doneCount = items.filter((item) => {
+    if (!item.done || !item.done_at) return false
+    const day = todayInZone(tz, new Date(item.done_at))
+    return day >= from && day <= date
+  }).length
+
+  if (period === 'week') return { openCount: open.length, doneCount }
+
+  // Titles carry their list name only when there is more than one list to tell apart.
+  const names = new Map(lists.map((list) => [list.id, list.name]))
+  const prefix = lists.length > 1
+  return {
+    openCount: open.length,
+    doneCount,
+    titles: open.slice(0, TODO_TITLES).map((item) => (prefix ? `${names.get(item.list_id) ?? ''}: ${item.title}` : item.title)),
+  }
 }
 
 async function calendarSection(supabase: SupabaseClient, userId: string, babyId: string, period: DigestPeriod, date: string) {
@@ -143,7 +162,7 @@ export async function getDigest(
 
   const plan: { name: DigestSection; page: PageId; adminOnly?: boolean; load: () => Promise<unknown> }[] = [
     { name: 'tracker', page: 'tracker', load: () => trackerSection(supabase, userId, babyId, period, date, tz) },
-    { name: 'todo', page: 'todo', adminOnly: true, load: () => todoSection(supabase, userId, babyId, period) },
+    { name: 'todo', page: 'todo', adminOnly: true, load: () => todoSection(supabase, userId, babyId, period, date, tz) },
     { name: 'calendar', page: 'calendar', load: () => calendarSection(supabase, userId, babyId, period, date) },
   ]
 
