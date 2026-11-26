@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `de5a776` fix(todo): keep digest and MCP list reads from creating rows
 - `a4f5272` docs(todo): lists and Notes-style editor
 - `f37c267` feat(mcp): list-aware todo tools and digest
 - `6e00241` feat(todo): multiple lists
