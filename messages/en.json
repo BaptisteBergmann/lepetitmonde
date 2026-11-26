@@ -869,6 +869,7 @@
       "deleteConfirm": "Delete “{name}” and its {count, plural, one {# item} other {# items}}?",
       "deleteConfirmEmpty": "Delete “{name}”?",
       "deleted": "List deleted",
+      "gone": "This list was deleted.",
       "saveError": "Couldn't save the list. Try again.",
       "switcherLabel": "Your lists",
       "chipRemaining": "{count} remaining"

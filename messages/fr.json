@@ -869,6 +869,7 @@
       "deleteConfirm": "Supprimer « {name} » et {count, plural, one {son # élément} other {ses # éléments}} ?",
       "deleteConfirmEmpty": "Supprimer « {name} » ?",
       "deleted": "Liste supprimée",
+      "gone": "Cette liste a été supprimée.",
       "saveError": "Impossible d'enregistrer la liste. Réessayez.",
       "switcherLabel": "Vos listes",
       "chipRemaining": "{count, plural, one {# restant} other {# restants}}"

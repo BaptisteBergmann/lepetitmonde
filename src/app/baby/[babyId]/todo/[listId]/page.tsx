@@ -20,8 +20,9 @@ export default async function TodoListPage({
 
   const lists = await getTodoLists(babyId);
   const list = lists.find((candidate) => candidate.id === listId);
-  // Unknown or another baby's list: back to the index, never a 404 that says it exists.
-  if (!list) redirect(`/baby/${babyId}/todo`);
+  // Unknown, deleted or another baby's list: back to the index with the same answer for
+  // all three, never a 404 that says it exists.
+  if (!list) redirect(`/baby/${babyId}/todo?gone=1`);
 
   const allItems = await getTodoItems(babyId);
   const items = allItems.filter((item) => item.list_id === list.id);

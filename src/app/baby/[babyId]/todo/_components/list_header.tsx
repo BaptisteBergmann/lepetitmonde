@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { INPUT_LIMITS } from '@/utils/input-limits'
 import { deleteTodoList, updateTodoList } from '@/utils/actions/todo'
+import { localListDeletes } from './local_list_deletes'
 import { useConfirm } from '@/components/confirm_provider'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
@@ -95,6 +96,9 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
       destructive: true,
     })
     if (!confirmed) return
+    // Our own delete must not trigger the "deleted elsewhere" notice on the index.
+    localListDeletes.add(listId)
+    setTimeout(() => localListDeletes.delete(listId), 10_000)
     try {
       await deleteTodoList(babyId, listId)
       toast.success(t('deleted'))
@@ -102,6 +106,7 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
       focusIndexHeading()
     } catch (err) {
       console.error(err)
+      localListDeletes.delete(listId)
       toast.error(t('saveError'))
     }
   }

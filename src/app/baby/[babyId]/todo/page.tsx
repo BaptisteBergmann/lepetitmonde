@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getTodoItems, getTodoLists } from "@/utils/actions/todo";
 import { Reveal } from "@components/reveal";
+import GoneNotice from "./_components/gone_notice";
 import ListCard from "./_components/list_card";
 import ListForm from "./_components/list_form";
 import TodoLive from "./_components/todo_live";
@@ -10,10 +11,13 @@ import TodoLive from "./_components/todo_live";
 // at least one card.
 export default async function TodoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ babyId: string }>;
+  searchParams: Promise<{ gone?: string }>;
 }) {
   const { babyId } = await params;
+  const { gone } = await searchParams;
   const t = await getTranslations('todo');
 
   await assertPageAccess(babyId, 'todo');
@@ -25,6 +29,7 @@ export default async function TodoPage({
   return (
     <div className="text-landing-foreground">
       <TodoLive babyId={babyId} />
+      {gone === "1" && <GoneNotice babyId={babyId} />}
       <div className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
         <Reveal className="mb-6">
           <h1 tabIndex={-1} data-todo-index-heading className="font-display text-3xl font-semibold outline-none">
