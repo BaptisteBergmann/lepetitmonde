@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `bfd3d40` docs(todo): add the live sync plan
 - `699ca76` docs(realtime): fix the todo table cross-reference
 - `3bb78ae` fix(db): quote the publication statement the plain way in the todo realtime migration
 - `368a198` fix(todo): do not re-apply a stale remote list name over a local rename
