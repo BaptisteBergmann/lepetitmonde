@@ -61,6 +61,7 @@ async function fetchLists(supabase: Client, babyId: string): Promise<Tables<'tod
     .eq('baby_id', babyId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
+    .order('id', { ascending: true })
   if (error) throw error
   return data
 }
@@ -97,9 +98,19 @@ export async function listTodoLists(
 
     // No unique constraint stops two first loads from both inserting: the later
     // one backs out so a single default list remains.
-    const current = await fetchLists(supabase, babyId)
+    // fetchLists is a total order (position, created_at, id), so concurrent
+    // requests agree on which row wins and never both back out.
+    const current = await fetchLists(supabase, babyId).catch((error) => {
+      contextLogger.error(error, "Error re-fetching todo lists after default insert")
+      throw error
+    })
     if (current.length > 1 && current[0].id !== data.id) {
-      await supabase.from('todo_lists').delete().eq('id', data.id).eq('baby_id', babyId)
+      const { error: deleteError } = await supabase.from('todo_lists').delete().eq('id', data.id).eq('baby_id', babyId)
+      if (deleteError) {
+        contextLogger.warn({ err: deleteError, listId: data.id }, "Could not remove duplicate default todo list")
+      } else {
+        contextLogger.info({ listId: data.id, keptListId: current[0].id }, "Duplicate default todo list removed")
+      }
       lists = current.filter((list) => list.id !== data.id)
     }
   }
@@ -198,7 +209,7 @@ export async function listTodos(
   const { data, error } = await query
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
-    .order('created_at', { ascending: true })
+    .order('id', { ascending: true })
 
   if (error) {
     contextLogger.error(error, "Error fetching todo items")
