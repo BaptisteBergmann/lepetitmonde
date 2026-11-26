@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `e51fb5b` fix(todo): fix lint dependency in checklist sink settle
 - `49d3d18` fix(todo): keep focus when a checked item sinks and tighten checklist edge cases
 - `81dd21c` fix(todo): ICU plurals for clear-done strings and French empty hint
 - `e3d4bc2` fix(todo): validate item ids, handle position lookup error, stable ordering
