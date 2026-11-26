@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import { cn } from '@utils/utils'
@@ -10,9 +11,11 @@ import ListNameDialog from './list_name_dialog'
 export type ListChip = { id: string; name: string; openCount: number }
 
 // Switcher between lists: plain Links (prefetchable, no back trip), scrolled so the
-// active chip is visible on mount. Only the strip scrolls: scrollIntoView would also
-// scroll the page sideways and vertically.
-export default function ListChips({ babyId, lists, activeId }: { babyId: string; lists: ListChip[]; activeId: string }) {
+// active chip is visible whenever it changes (the active list comes from the URL).
+// Only the strip scrolls: scrollIntoView would also scroll the page sideways and
+// vertically.
+export default function ListChips({ babyId, lists }: { babyId: string; lists: ListChip[] }) {
+  const { listId: activeId } = useParams<{ listId: string }>()
   const t = useTranslations('todo.lists')
   const [dialogOpen, setDialogOpen] = useState(false)
   const activeRef = useRef<HTMLAnchorElement>(null)

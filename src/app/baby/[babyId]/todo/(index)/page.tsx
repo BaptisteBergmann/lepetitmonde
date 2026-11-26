@@ -2,10 +2,10 @@ import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getTodoItems, getTodoLists } from "@/utils/actions/todo";
 import { Reveal } from "@components/reveal";
-import GoneNotice from "./_components/gone_notice";
-import ListCard from "./_components/list_card";
-import ListForm from "./_components/list_form";
-import TodoLive from "./_components/todo_live";
+import GoneNotice from "../_components/gone_notice";
+import ListCard from "../_components/list_card";
+import ListForm from "../_components/list_form";
+import TodoLive from "../_components/todo_live";
 
 // Lists index. The first load of a baby creates its default list, so there is always
 // at least one card.

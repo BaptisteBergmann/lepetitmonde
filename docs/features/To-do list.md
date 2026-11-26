@@ -13,7 +13,7 @@ Tables: `todo_lists` (one row per list) and `todo_items` (each item belongs to o
 ## Lists
 
 - The index shows one card per list (name, open count, one-line preview of the open items). "New list" turns into a name field in place; Enter creates the list and opens it.
-- The list page has a chip switcher (plain links), a "..." menu (rename in place in the title, delete with a confirmation that says how many items go with it) and the checklist.
+- The list page has a chip switcher (plain links), a "..." menu (rename in place in the title, delete with a confirmation that says how many items go with it) and the checklist. The back link and chips live in the `todo/(list)/layout.tsx` route-group layout, so switching lists only reloads the list below them (the chips stay put; their counts stream in behind a skeleton on first load). The index lives in `todo/(index)/`.
 - A baby with no list gets a default one (`À faire` in French) the first time the page loads. The last list can be deleted; the default comes back on the next load.
 - An unknown or foreign `listId` redirects to the index, never a 404.
 
