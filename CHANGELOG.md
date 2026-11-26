@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `d887f93` fix(todo): re-create a row whose save found it deleted elsewhere
 - `85d266d` docs(todo): live sync between devices
 - `25d0705` feat(todo): tell the user when the open list was deleted elsewhere
 - `c94fa6d` fix(todo): keep the list title editor across remote renames
