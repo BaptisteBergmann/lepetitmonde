@@ -19,6 +19,7 @@ RLS is on from creation for the tables added since October 2026:
 | `api_tokens` | See [[MCP server]]. |
 | `oauth_clients`, `oauth_grants` | See [[OAuth authorization server]]. |
 | `baby_health_profiles`, `growth_measurements`, `vaccinations` | See [[Health]]. |
+| `todo_lists` | Admin-only: `is_baby_admin(baby_id)` on select, insert, update, delete. See [[To-do list]]. |
 
 New tables must enable RLS **and** revoke the default `anon` grants explicitly (the baseline's default privileges grant `anon` on new tables).
 

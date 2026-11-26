@@ -71,7 +71,7 @@ erDiagram
 | Tables | Feature |
 |---|---|
 | `inventory_items` | [[Inventory]] and [[Buy list]] (`quantity_owned`, `quantity_target`) |
-| `todo_items` | [[To-do list]] |
+| `todo_lists`, `todo_items` | [[To-do list]]. `todo_items.list_id` is NOT NULL and, with `baby_id`, a composite FK to `todo_lists (id, baby_id)` (an item can't point at another baby's list); `done = (done_at IS NOT NULL)` is a CHECK. `todo_lists` has RLS (admin-only: `is_baby_admin(baby_id)` for select, insert, update, delete; column-level `UPDATE (name, position)`); `todo_items` is still waiting for the RLS rollout |
 | `care_events` | [[Baby tracker]] (one polymorphic table: sleep, breastfeed, bottle, pumping, diaper, reflux) |
 | `baby_health_profiles`, `growth_measurements`, `vaccinations` | [[Health]] |
 

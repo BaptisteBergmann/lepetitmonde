@@ -4,10 +4,44 @@ tags: [lepetitmonde/feature]
 
 # To-do list
 
-Up: [[Le petit monde]] · Route: `/baby/[babyId]/todo` · Code: `todo/`, `actions/todo.ts`, `todo-core.ts`
+Up: [[Le petit monde]] · Routes: `/baby/[babyId]/todo` (lists index), `/baby/[babyId]/todo/[listId]` (one list) · Code: `todo/`, `actions/todo.ts`, `todo-core.ts`
 
-A simple admin-only to-do list per baby: create, edit, tick done, delete and reorder items.
+An admin-only set of checklists per baby ("Groceries", "Thursday"...), edited like an iPhone Notes checklist. Plan: `.claude/plans/todo-lists.md`.
 
-It was the first feature exposed through the [[MCP server]] (`list_todos`, `add_todo`, `set_todo_done`, `delete_todo`, `move_todo`), which is why its rules live in a [[Core modules|core module]].
+Tables: `todo_lists` (one row per list) and `todo_items` (each item belongs to one list through `list_id`). See [[Data model]].
 
-Table: `todo_items`.
+## Lists
+
+- The index shows one card per list (name, open count, one-line preview of the open items). "New list" turns into a name field in place; Enter creates the list and opens it.
+- The list page has a chip switcher (plain links), a "..." menu (rename in place in the title, delete with a confirmation that says how many items go with it) and the checklist.
+- A baby with no list gets a default one (`À faire` in French) the first time the page loads. The last list can be deleted; the default comes back on the next load.
+- An unknown or foreign `listId` redirects to the index, never a 404.
+
+## Editing
+
+- One auto-growing text row per item, plus an empty "New item" row that always ends the unchecked items.
+- **Enter** adds a row right after the current one and focuses it (text after the caret moves into it). On the last item it just moves to the empty row.
+- **Backspace** on an empty row deletes it and focuses the end of the previous row. An emptied item is deleted on blur.
+- **Paste** of several lines splits them into items: bullets (`-`, `*`, `•`, `[ ]`, `[x]`, `☐`) are stripped, empty lines dropped, at most 100 lines.
+- Writes are optimistic and queued per item (create, rename, delete run in order). Titles save 400 ms after the last keystroke, and on blur, Enter and when the page is hidden. A failed write shows a toast and rolls that row back. Offline, a banner says changes are not saved (nothing is queued).
+- Item ids are generated on the client (`crypto.randomUUID()`) so a row has a stable key before it is saved; the server validates them as UUIDs.
+- Focus moves synchronously inside the key event: after an `await`, iOS Safari closes the keyboard.
+- Not live: another device sees changes on its next load of the page.
+
+## Done section
+
+Checking an item shows it checked in place for about 600 ms (a mis-tap can be undone), then it collapses into "Done (n)" under the list, collapsed by default (open state kept per list in `localStorage`). Items keep their `position`, so unchecking puts one back in its old slot. "Clear" deletes the list's done items after a confirmation.
+
+## Rules
+
+- Admin only, and the page must be enabled in [[Page settings]]. Both are re-checked in `todo-core` by every action and MCP tool.
+- `position` is a `double precision`: an item is inserted between two others at the midpoint, and the list is renumbered 1..n if the gap drops below 1e-6.
+- Up/down buttons are gone from the UI; `moveTodo` (swap among a list's unchecked items) stays for the MCP `move_todo`.
+
+## MCP
+
+Through the [[MCP server]]: `list_todo_lists`, `create_todo_list`, `list_todos` (optional `listId`; items carry `listId` and `doneAt`), `add_todo` (optional `listId`, default the first list), `set_todo_done`, `delete_todo`, `move_todo`. The digest prefixes open titles with the list name when the baby has several lists and reports `doneCount` for the period. Its rules live in a [[Core modules|core module]].
+
+## Not the buy list
+
+The [[Buy list]] is a view of `inventory_items` every member can see, with targets and owned quantities. A "Groceries" to-do list is free text, admin-only. They are separate on purpose.

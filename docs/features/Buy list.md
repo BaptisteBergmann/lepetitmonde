@@ -12,3 +12,4 @@ A family-facing view of the [[Inventory]]: every item where `quantity_target > q
 - "Mark bought" is one atomic, clamped SQL update, so two people shopping at once can't lose an update.
 - Everyone's list updates live through the [[Realtime]] relay.
 - [[MCP server]] tools: `list_buy_list`, `mark_bought`, `add_buy_list_item`, `remove_from_buy_list`.
+- Not the same as a free-text, admin-only "Groceries" list in the [[To-do list]].
