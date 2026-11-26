@@ -12,17 +12,22 @@ import type { Tables } from '@utils/supabase/database.types'
 import { INPUT_LIMITS } from '@/utils/input-limits'
 import { clearDoneTodoItems, createTodoItems, deleteTodoItem, toggleTodoItem, updateTodoItem } from '@/utils/actions/todo'
 import ChecklistRow, { type ChecklistRowData } from './checklist_row'
+import { mergeRows } from './merge_rows'
+import { useTodoLive } from './use_todo_live'
 
 const SAVE_DEBOUNCE_MS = 400
 // Undo window: a checked item stays in place this long before sinking into Done.
 const SINK_DELAY_MS = 600
 const LEAVE_MS = 200
+// A row stays protected from server snapshots this long after our last write to it
+// settled: a refresh that started before the write can land after it.
+const GRACE_MS = 2000
 const doneOpenKey = (listId: string) => `todo-done-open:${listId}`
 // Same cap as the server's MAX_TODO_BATCH (that module is server-only).
 const MAX_PASTE_LINES = 100
 
 type Action =
-  | { type: 'reset'; rows: ChecklistRowData[]; spareId: string }
+  | { type: 'merge'; rows: ChecklistRowData[]; spareId: string }
   | { type: 'edit'; id: string; title: string; spareId: string }
   | { type: 'insert'; afterId: string | null; rows: ChecklistRowData[]; spareId: string }
   | { type: 'remove'; ids: string[]; spareId: string }
@@ -40,7 +45,7 @@ function withDraft(rows: ChecklistRowData[], spareId: string): ChecklistRowData[
 
 function reducer(rows: ChecklistRowData[], action: Action): ChecklistRowData[] {
   switch (action.type) {
-    case 'reset':
+    case 'merge':
       return withDraft(action.rows, action.spareId)
     case 'edit':
       return withDraft(rows.map((row) => (row.id === action.id ? { ...row, title: action.title } : row)), action.spareId)
@@ -124,6 +129,18 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   const chains = useRef(new Map<string, Promise<void>>())
   const pending = useRef(0)
   const firstSync = useRef(true)
+  // Ops in flight per id, and when each id's last write settled (see GRACE_MS).
+  const inflight = useRef(new Map<string, number>())
+  const graceUntil = useRef(new Map<string, number>())
+  // Focused rows another device deleted: kept on screen until blur.
+  const remoteDeleted = useRef(new Set<string>())
+  // Rows the last merge held back, and the latest server snapshot to retry against.
+  const deferredIds = useRef<ReadonlySet<string>>(new Set())
+  const itemsRef = useRef(items)
+
+  const scheduleRefresh = useTodoLive(babyId, {
+    isBusy: () => pending.current > 0 || timers.current.size > 0,
+  })
 
   useLayoutEffect(() => {
     rowsRef.current = rows
@@ -156,12 +173,12 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
 
   // Once the row leaves the unchecked list its checkbox unmounts (or hides), which would
   // drop keyboard focus to <body>: hand it to the next unchecked row, or the trailing row.
-  const settleSink = useCallback((id: string, title: string) => {
+  const settleSink = useCallback((id: string, title: string, announce: boolean) => {
     const hadFocus = (document.activeElement as HTMLElement | null)?.dataset.checkboxId === id
     const current = rowsRef.current
     const target = current.slice(current.findIndex((row) => row.id === id) + 1).find((row) => !row.done && row.title.trim())
     flushSync(() => stopSinking(id))
-    setAnnouncement(t('movedToDone', { title }))
+    if (announce) setAnnouncement(t('movedToDone', { title }))
     if (!hadFocus) return
     const draft = current.findLast((row) => !row.done)
     if (target && target.id !== draft?.id) {
@@ -171,16 +188,17 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     }
   }, [stopSinking, focusRow, t])
 
-  const startSinking = useCallback((id: string, title: string) => {
+  // Remote ticks play the same animation but stay silent for screen readers.
+  const startSinking = useCallback((id: string, title: string, announce = true) => {
     setSinking((set) => new Set(set).add(id))
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const leave = setTimeout(() => {
       if (reduceMotion) {
-        settleSink(id, title)
+        settleSink(id, title, announce)
         return
       }
       setLeaving((set) => new Set(set).add(id))
-      const settle = setTimeout(() => settleSink(id, title), LEAVE_MS)
+      const settle = setTimeout(() => settleSink(id, title, announce), LEAVE_MS)
       sinkTimers.current.set(id, [settle])
     }, SINK_DELAY_MS)
     sinkTimers.current.set(id, [leave])
@@ -191,26 +209,81 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     return () => timersByRow.forEach((list) => list.forEach(clearTimeout))
   }, [])
 
-  // Re-sync from the server only when idle: the refresh after each write would
-  // otherwise overwrite what the user is typing.
-  useEffect(() => {
-    if (firstSync.current) { firstSync.current = false; return }
-    if (pending.current > 0 || timers.current.size > 0) return
-    if (containerRef.current?.contains(document.activeElement)) return
+  // Reconciles the screen with the latest server snapshot row by row: protected rows
+  // (focused, unsaved, in flight, recently written) keep their local state.
+  const runMerge = useCallback(() => {
+    const now = Date.now()
+    const active = document.activeElement
+    let focusedId: string | null = null
+    for (const [id, element] of inputs.current) {
+      if (element === active) { focusedId = id; break }
+    }
+    const lockedIds = new Set<string>([...timers.current.keys(), ...inflight.current.keys()])
+    for (const [id, until] of graceUntil.current) {
+      if (until > now) lockedIds.add(id)
+      else graceUntil.current.delete(id)
+    }
 
-    known.current = new Set(items.map((item) => item.id))
-    saved.current = new Map(items.map((item) => [item.id, item.title]))
-    queued.current = new Map(saved.current)
+    const result = mergeRows(rowsRef.current, fromServer(itemsRef.current), {
+      known: known.current,
+      lockedIds,
+      focusedId,
+      focusInside: !!containerRef.current?.contains(active),
+    })
+
+    for (const [id, title] of result.adopted) {
+      known.current.add(id)
+      saved.current.set(id, title)
+      queued.current.set(id, title)
+    }
+    for (const id of result.dropped) {
+      known.current.delete(id)
+      saved.current.delete(id)
+      queued.current.delete(id)
+      stopSinking(id)
+    }
+    for (const id of result.remoteDeleted) {
+      known.current.delete(id)
+      remoteDeleted.current.add(id)
+    }
+    deferredIds.current = result.deferred
+    if (!result.changed) return
+
+    const titles = new Map(result.rows.map((row) => [row.id, row.title]))
+    result.remoteChecked.forEach((id) => startSinking(id, titles.get(id) ?? '', false))
+    result.remoteUnchecked.forEach(stopSinking)
     const draft = rowsRef.current.findLast((row) => !row.done && isBlank(row))
-    dispatch({ type: 'reset', rows: fromServer(items), spareId: draft?.id ?? crypto.randomUUID() })
-  }, [items])
+    dispatch({ type: 'merge', rows: result.rows, spareId: draft?.id ?? crypto.randomUUID() })
+  }, [stopSinking, startSinking])
+
+  useEffect(() => {
+    itemsRef.current = items
+    if (firstSync.current) { firstSync.current = false; return }
+    runMerge()
+  }, [items, runMerge])
 
   const enqueue = useCallback((ids: string[], op: () => Promise<void>, afterId?: string) => {
     pending.current++
+    ids.forEach((id) => inflight.current.set(id, (inflight.current.get(id) ?? 0) + 1))
     const previous = Promise.all([...ids.map((id) => chains.current.get(id)), afterId ? chains.current.get(afterId) : undefined])
-    const next = previous.then(op).catch(() => {}).finally(() => { pending.current-- })
+    const next = previous.then(op).catch(() => {}).finally(() => {
+      pending.current--
+      const settledAt = Date.now()
+      for (const id of ids) {
+        const left = (inflight.current.get(id) ?? 1) - 1
+        if (left > 0) inflight.current.set(id, left)
+        else inflight.current.delete(id)
+        graceUntil.current.set(id, settledAt + GRACE_MS)
+      }
+      // Rows held back only because of the grace window are re-read once it ends: that
+      // snapshot is newer than our write, so the state converges. Merging the stale
+      // one again here could undo the write.
+      setTimeout(() => {
+        if (ids.some((id) => deferredIds.current.has(id))) scheduleRefresh()
+      }, GRACE_MS + 50)
+    })
     ids.forEach((id) => chains.current.set(id, next))
-  }, [])
+  }, [scheduleRefresh])
 
   const fail = useCallback((message = t('saveError')) => toast.error(message), [t])
 
@@ -229,6 +302,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       // Placed after the nearest row the server already has (or will have).
       const afterId = current.slice(0, index).findLast((row) => known.current.has(row.id))?.id
       known.current.add(id)
+      remoteDeleted.current.delete(id)
       queued.current.set(id, title)
       enqueue([id], async () => {
         try {
@@ -449,7 +523,21 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   }
 
   const handleBlur = (id: string) => {
+    if (remoteDeleted.current.has(id)) {
+      const gone = rowsRef.current.find((r) => r.id === id)
+      // Untouched: just let it go, no write. Edited: the create path below brings it
+      // back under the same id (the user's edit wins).
+      if (gone && gone.title.trim() === saved.current.get(id)) {
+        remoteDeleted.current.delete(id)
+        saved.current.delete(id)
+        queued.current.delete(id)
+        removeRow(id)
+        return
+      }
+    }
     flushSave(id)
+    // Deferred remote changes to this row can apply now that focus has left it.
+    setTimeout(runMerge, 0)
     const unchecked = rowsRef.current.filter((r) => !r.done)
     const row = rowsRef.current.find((r) => r.id === id)
     // An emptied item goes away, except the trailing row that always stays.
