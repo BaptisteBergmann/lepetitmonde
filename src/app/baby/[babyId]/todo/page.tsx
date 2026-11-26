@@ -1,9 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
 import { getTodoItems, getTodoLists } from "@/utils/actions/todo";
-import Checklist from "./_components/checklist";
 import { Reveal } from "@components/reveal";
+import ListCard from "./_components/list_card";
+import ListForm from "./_components/list_form";
 
+// Lists index. The first load of a baby creates its default list, so there is always
+// at least one card.
 export default async function TodoPage({
   params,
 }: {
@@ -14,33 +17,33 @@ export default async function TodoPage({
 
   await assertPageAccess(babyId, 'todo');
 
-  // Until the lists index lands, the page edits the first list.
-  const [list] = await getTodoLists(babyId);
-  const items = await getTodoItems(babyId, list.id);
-  const doneCount = items.filter((item) => item.done).length;
+  const lists = await getTodoLists(babyId);
+  const items = await getTodoItems(babyId);
+  const openCount = items.filter((item) => !item.done).length;
 
   return (
     <div className="text-landing-foreground">
-      <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-16">
-        <Reveal className="border-b border-landing-border pb-6 mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="font-display text-3xl font-semibold">
-                {t('title')}
-              </h1>
-              <p className="mt-2 max-w-xl text-sm text-landing-muted sm:text-base">
-                {t('subtitle')}
-              </p>
-              {items.length > 0 && (
-                <p className="mt-2 text-sm font-semibold text-landing-foreground">
-                  {t('progress', { done: doneCount, total: items.length })}
-                </p>
-              )}
-            </div>
-          </div>
+      <div className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
+        <Reveal className="mb-6">
+          <h1 tabIndex={-1} className="font-display text-3xl font-semibold outline-none">
+            {t('title')}
+          </h1>
+          <p className="mt-2 text-sm text-landing-muted">
+            {openCount === 0 ? t('allDone') : t('summary', { open: openCount, lists: lists.length })}
+          </p>
         </Reveal>
 
-        <Checklist babyId={babyId} listId={list.id} items={items} />
+        <div className="flex flex-col gap-3">
+          {lists.map((list) => (
+            <ListCard
+              key={list.id}
+              babyId={babyId}
+              list={list}
+              items={items.filter((item) => item.list_id === list.id)}
+            />
+          ))}
+          <ListForm babyId={babyId} />
+        </div>
       </div>
     </div>
   );

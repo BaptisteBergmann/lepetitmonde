@@ -4,8 +4,8 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@utils/supabase/server'
 import { actionError } from './errors'
 import {
-  addTodo, addTodos, clearDoneTodos, createTodoList as createTodoListCore, deleteTodo,
-  deleteTodoList as deleteTodoListCore, listTodoLists, listTodos, moveTodo, renameTodo,
+  addTodos, clearDoneTodos, createTodoList as createTodoListCore, deleteTodo,
+  deleteTodoList as deleteTodoListCore, listTodoLists, listTodos, renameTodo,
   renameTodoList, setTodoDone,
 } from '../todo-core'
 
@@ -56,17 +56,6 @@ export async function clearDoneTodoItems(babyId: string, listId: string) {
   await clearDoneTodos(supabase, userId, babyId, listId)
 }
 
-// Only the picked fields are forwarded: spreading the client's object would
-// let it set created_by, position, done or even baby_id.
-export async function createTodoItem(payload: { baby_id: string; title: string }) {
-  const babyId = payload?.baby_id
-  if (typeof babyId !== 'string') throw await actionError('invalidInput')
-
-  const { supabase, userId } = await getSessionClient()
-  const t = await getTranslations('todo.lists')
-  await addTodo(supabase, userId, babyId, payload.title, { defaultName: t('defaultName') })
-}
-
 export async function updateTodoItem(babyId: string, itemId: string, fields: { title: string }) {
   const { supabase, userId } = await getSessionClient()
   await renameTodo(supabase, userId, babyId, itemId, fields?.title)
@@ -80,9 +69,4 @@ export async function toggleTodoItem(babyId: string, itemId: string, done: boole
 export async function deleteTodoItem(babyId: string, itemId: string) {
   const { supabase, userId } = await getSessionClient()
   await deleteTodo(supabase, userId, babyId, itemId)
-}
-
-export async function moveTodoItem(babyId: string, itemId: string, direction: 'up' | 'down') {
-  const { supabase, userId } = await getSessionClient()
-  await moveTodo(supabase, userId, babyId, itemId, direction)
 }
