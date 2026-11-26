@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `46c4ac9` feat(db): publish todo tables to realtime
 - `5c3a5a2` docs(todo): mark to-do lists plan implemented
 - `2e36bcb` fix(todo): focus index heading after delete, only refocus title after key rename
 - `761f508` fix(todo): clear-done matches server and sink focus skips blank rows
