@@ -36,10 +36,24 @@ export default function ChecklistRow({ row, isDraft, leaving = false, onToggle, 
 
   useLayoutEffect(() => {
     const element = textareaRef.current
-    if (!element) return
-    element.style.height = 'auto'
-    element.style.height = `${element.scrollHeight}px`
+    if (element) fitHeight(element)
   }, [row.title])
+
+  // A row measured while hidden (the collapsed Done section) gets a 0 scrollHeight and
+  // stays clipped once shown; a rotation rewraps the text too. Refit
+  // whenever the width changes; our own height writes leave the width alone.
+  useLayoutEffect(() => {
+    const element = textareaRef.current
+    if (!element) return
+    let width = element.clientWidth
+    const observer = new ResizeObserver(() => {
+      if (element.clientWidth === width) return
+      width = element.clientWidth
+      fitHeight(element)
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     // grid 1fr -> 0fr animates the height without measuring it.
@@ -100,4 +114,9 @@ export default function ChecklistRow({ row, isDraft, leaving = false, onToggle, 
     </div>
     </div>
   )
+}
+
+function fitHeight(element: HTMLTextAreaElement) {
+  element.style.height = 'auto'
+  element.style.height = `${element.scrollHeight}px`
 }
