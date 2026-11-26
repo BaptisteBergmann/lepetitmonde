@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `368a198` fix(todo): do not re-apply a stale remote list name over a local rename
 - `1c09549` fix(todo): clear grace timers on unmount and keep focus when a focused checkbox row is removed remotely
 - `d887f93` fix(todo): re-create a row whose save found it deleted elsewhere
 - `85d266d` docs(todo): live sync between devices
