@@ -17,6 +17,12 @@ export default function ListNameDialog({ babyId, open, onOpenChange }: { babyId:
   const [name, setName] = useState('')
   const [pending, startTransition] = useTransition()
 
+  // Cancel, Escape and outside click all land here: start the next open from scratch.
+  const handleOpenChange = (next: boolean) => {
+    if (!next) setName('')
+    onOpenChange(next)
+  }
+
   const submit = () => {
     const trimmed = name.trim()
     if (!trimmed || pending) return
@@ -35,7 +41,7 @@ export default function ListNameDialog({ babyId, open, onOpenChange }: { babyId:
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{t('new')}</DialogTitle>
@@ -51,7 +57,7 @@ export default function ListNameDialog({ babyId, open, onOpenChange }: { babyId:
             className="h-11"
           />
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="cursor-pointer rounded-2xl">
+            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)} className="cursor-pointer rounded-2xl">
               {t('cancel')}
             </Button>
             <Button type="submit" disabled={!name.trim() || pending} className="cursor-pointer rounded-2xl">

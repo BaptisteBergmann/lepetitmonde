@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -9,6 +9,17 @@ import { INPUT_LIMITS } from '@/utils/input-limits'
 import { deleteTodoList, updateTodoList } from '@/utils/actions/todo'
 import { useConfirm } from '@/components/confirm_provider'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+
+// The page remounts the header when the name changes, which would drop the focus
+// we just gave the title: the new instance picks it up again.
+let restoreTitleFocus = false
+
+// After a delete the list page is gone; hand focus to the index heading once it renders.
+function focusIndexHeading(attemptsLeft = 40) {
+  const heading = document.querySelector<HTMLElement>('h1[tabindex="-1"]')
+  if (heading) heading.focus()
+  else if (attemptsLeft > 0) setTimeout(() => focusIndexHeading(attemptsLeft - 1), 50)
+}
 
 // List title with its "..." menu. Rename happens in place in the title; delete asks
 // first and says how many items go with the list. The page remounts this component
@@ -24,6 +35,17 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
   const cancelled = useRef(false)
   // The menu would hand focus back to its trigger on close and blur the rename field.
   const renaming = useRef(false)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const refocusTitle = useRef(false)
+
+  useEffect(() => {
+    if (restoreTitleFocus) { restoreTitleFocus = false; titleRef.current?.focus() }
+  }, [])
+
+  // Back to the heading once the input is gone, so keyboard users aren't dropped on <body>.
+  useEffect(() => {
+    if (!editing && refocusTitle.current) { refocusTitle.current = false; titleRef.current?.focus() }
+  }, [editing])
 
   const startEditing = () => {
     cancelled.current = false
@@ -35,17 +57,24 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
   const commit = async () => {
     setEditing(false)
     renaming.current = false
+    refocusTitle.current = true
     const next = draft.trim()
     if (cancelled.current || !next || next === shownName) return
     const previous = shownName
     setShownName(next)
     try {
       await updateTodoList(babyId, listId, { name: next })
+      restoreTitleFocus = true
+      setTimeout(() => { restoreTitleFocus = false }, 3000)
       router.refresh()
     } catch (err) {
       console.error(err)
       setShownName(previous)
       toast.error(t('saveError'))
+      // Keep the field open with what was typed so it can be retried.
+      refocusTitle.current = false
+      renaming.current = true
+      setEditing(true)
     }
   }
 
@@ -60,6 +89,7 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
       await deleteTodoList(babyId, listId)
       toast.success(t('deleted'))
       router.push(`/baby/${babyId}/todo`)
+      focusIndexHeading()
     } catch (err) {
       console.error(err)
       toast.error(t('saveError'))
@@ -84,7 +114,7 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
           className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none"
         />
       ) : (
-        <h1 className="min-w-0 flex-1 break-words font-display text-2xl font-semibold">{shownName}</h1>
+        <h1 ref={titleRef} tabIndex={-1} className="min-w-0 flex-1 break-words font-display text-2xl font-semibold outline-none">{shownName}</h1>
       )}
       <DropdownMenu>
         <DropdownMenuTrigger
