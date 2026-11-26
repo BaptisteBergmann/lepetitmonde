@@ -32,4 +32,4 @@ flowchart LR
 | `stories`, `story_highlights`, `story_highlight_items` | [[Stories]] tray |
 | `inventory_items` | [[Buy list]] |
 | `care_events` | [[Baby tracker]] (running timers across parents' phones) |
-| `todo_lists`, `todo_items` | [[To-do list]] (admins only, see below) |
+| `todo_lists`, `todo_items` | [[To-do list]] (admins only, see above) |
