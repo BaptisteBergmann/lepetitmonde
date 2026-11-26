@@ -137,6 +137,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   // Rows the last merge held back, and the latest server snapshot to retry against.
   const deferredIds = useRef<ReadonlySet<string>>(new Set())
   const itemsRef = useRef(items)
+  const graceTimers = useRef(new Set<ReturnType<typeof setTimeout>>())
 
   const scheduleRefresh = useTodoLive(babyId, {
     isBusy: () => pending.current > 0 || timers.current.size > 0,
@@ -237,6 +238,20 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       queued.current.set(id, title)
     }
     for (const id of result.dropped) {
+      // A checkbox with keyboard focus would vanish with its row and drop focus to
+      // <body>: hand it to the next unchecked row, as settleSink does.
+      if ((active as HTMLElement | null)?.dataset?.checkboxId === id) {
+        const rowsNow = rowsRef.current
+        const after = rowsNow.slice(rowsNow.findIndex((row) => row.id === id) + 1)
+        const target = after.find((row) => !row.done && row.title.trim() && !result.dropped.includes(row.id))
+          ?? rowsNow.findLast((row) => !row.done && !result.dropped.includes(row.id))
+        if (target) {
+          setTimeout(() => {
+            if (isBlank(target)) focusRow(target.id)
+            else containerRef.current?.querySelector<HTMLElement>(`[data-checkbox-id="${target.id}"]`)?.focus()
+          }, 0)
+        }
+      }
       known.current.delete(id)
       saved.current.delete(id)
       queued.current.delete(id)
@@ -254,7 +269,12 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     result.remoteUnchecked.forEach(stopSinking)
     const draft = rowsRef.current.findLast((row) => !row.done && isBlank(row))
     dispatch({ type: 'merge', rows: result.rows, spareId: draft?.id ?? crypto.randomUUID() })
-  }, [stopSinking, startSinking])
+  }, [stopSinking, startSinking, focusRow])
+
+  useEffect(() => {
+    const timersToClear = graceTimers.current
+    return () => timersToClear.forEach(clearTimeout)
+  }, [])
 
   useEffect(() => {
     itemsRef.current = items
@@ -278,9 +298,11 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       // Rows held back only because of the grace window are re-read once it ends: that
       // snapshot is newer than our write, so the state converges. Merging the stale
       // one again here could undo the write.
-      setTimeout(() => {
+      const graceTimer = setTimeout(() => {
+        graceTimers.current.delete(graceTimer)
         if (ids.some((id) => deferredIds.current.has(id))) scheduleRefresh()
       }, GRACE_MS + 50)
+      graceTimers.current.add(graceTimer)
     })
     ids.forEach((id) => chains.current.set(id, next))
   }, [scheduleRefresh])
