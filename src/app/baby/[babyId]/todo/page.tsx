@@ -4,6 +4,7 @@ import { getTodoItems, getTodoLists } from "@/utils/actions/todo";
 import { Reveal } from "@components/reveal";
 import ListCard from "./_components/list_card";
 import ListForm from "./_components/list_form";
+import TodoLive from "./_components/todo_live";
 
 // Lists index. The first load of a baby creates its default list, so there is always
 // at least one card.
@@ -23,6 +24,7 @@ export default async function TodoPage({
 
   return (
     <div className="text-landing-foreground">
+      <TodoLive babyId={babyId} />
       <div className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
         <Reveal className="mb-6">
           <h1 tabIndex={-1} data-todo-index-heading className="font-display text-3xl font-semibold outline-none">
