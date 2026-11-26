@@ -49,6 +49,8 @@
   --landing-foreground: oklch(0.325 0.027 255.1);
   --landing-muted: oklch(0.509 0.021 70);
   --landing-camel: oklch(0.736 0.037 63);
+  /* Darker than camel: checkbox outlines need 3:1 on landing-surface. */
+  --todo-check: oklch(0.57 0.05 65);
   --landing-dusk: oklch(0.838 0.018 234.5);
   --landing-border: oklch(0.325 0.027 255.1 / 12%);
   --landing-night-bg: oklch(0.25 0.022 257.3);
@@ -100,6 +102,7 @@
   --color-landing-foreground: var(--landing-foreground);
   --color-landing-muted: var(--landing-muted);
   --color-landing-camel: var(--landing-camel);
+  --color-todo-check: var(--todo-check);
   --color-landing-dusk: var(--landing-dusk);
   --color-landing-border: var(--landing-border);
   --color-landing-night-bg: var(--landing-night-bg);
@@ -167,6 +170,7 @@ body {
   --landing-foreground: oklch(0.932 0.02 74.7);
   --landing-muted: oklch(0.751 0.027 73.1);
   --landing-camel: oklch(0.784 0.039 64.6);
+  --todo-check: oklch(0.784 0.039 64.6);
   --landing-dusk: oklch(0.75 0.026 237);
   --landing-border: oklch(0.932 0.02 74.7 / 12%);
   /* night-* stays fixed across themes on purpose — it's a deliberate dark

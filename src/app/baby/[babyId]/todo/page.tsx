@@ -1,8 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { assertPageAccess } from "@/utils/actions/page_settings";
-import { getTodoItems } from "@/utils/actions/todo";
-import TodoModal from "./_components/todo_modal";
-import TodoList from "./_components/todo_list";
+import { getTodoItems, getTodoLists } from "@/utils/actions/todo";
+import Checklist from "./_components/checklist";
 import { Reveal } from "@components/reveal";
 
 export default async function TodoPage({
@@ -15,7 +14,9 @@ export default async function TodoPage({
 
   await assertPageAccess(babyId, 'todo');
 
-  const items = await getTodoItems(babyId);
+  // Until the lists index lands, the page edits the first list.
+  const [list] = await getTodoLists(babyId);
+  const items = await getTodoItems(babyId, list.id);
   const doneCount = items.filter((item) => item.done).length;
 
   return (
@@ -36,13 +37,10 @@ export default async function TodoPage({
                 </p>
               )}
             </div>
-            <div className="flex shrink-0">
-              <TodoModal babyId={babyId} />
-            </div>
           </div>
         </Reveal>
 
-        <TodoList babyId={babyId} items={items} />
+        <Checklist babyId={babyId} listId={list.id} items={items} />
       </div>
     </div>
   );

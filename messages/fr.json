@@ -857,7 +857,7 @@
     "title": "À faire",
     "subtitle": "Ce qu'il reste à préparer, à réserver, à ne pas oublier.",
     "empty": "Rien à faire pour le moment",
-    "emptyHint": "Ajoutez une première tâche pour commencer la liste.",
+    "emptyHint": "Écrivez un élément, puis Entrée pour ajouter le suivant.",
     "progress": "{done} sur {total} terminées",
     "add": "Ajouter",
     "edit": "Modifier",
@@ -882,7 +882,13 @@
     },
     "lists": {
       "defaultName": "À faire"
-    }
+    },
+    "newItemPlaceholder": "Nouvel élément",
+    "itemLabel": "Marquer « {title} » comme fait",
+    "itemLabelDone": "Marquer « {title} » comme à faire",
+    "saveError": "Impossible d'enregistrer. Réessayez.",
+    "pasteTruncated": "Seules les 100 premières lignes ont été ajoutées.",
+    "offline": "Vous êtes hors ligne. Les modifications ne sont pas enregistrées."
   },
   "anecdotes": {
     "eyebrow": "Page — Ce qu'il a dit, ce qu'il a fait",

@@ -857,7 +857,7 @@
     "title": "To-do",
     "subtitle": "What's left to prepare, to book, to not forget.",
     "empty": "Nothing to do for now",
-    "emptyHint": "Add a first task to start the list.",
+    "emptyHint": "Type an item, then press Enter to add the next one.",
     "progress": "{done} of {total} done",
     "add": "Add",
     "edit": "Edit",
@@ -882,7 +882,13 @@
     },
     "lists": {
       "defaultName": "To-do"
-    }
+    },
+    "newItemPlaceholder": "New item",
+    "itemLabel": "Mark \"{title}\" as done",
+    "itemLabelDone": "Mark \"{title}\" as not done",
+    "saveError": "Couldn't save. Try again.",
+    "pasteTruncated": "Only the first 100 lines were added.",
+    "offline": "You're offline. Changes aren't saved."
   },
   "anecdotes": {
     "eyebrow": "Page — What they said, what they did",
