@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `81dd21c` fix(todo): ICU plurals for clear-done strings and French empty hint
 - `e3d4bc2` fix(todo): validate item ids, handle position lookup error, stable ordering
 - `de5a776` fix(todo): keep digest and MCP list reads from creating rows
 - `a4f5272` docs(todo): lists and Notes-style editor
