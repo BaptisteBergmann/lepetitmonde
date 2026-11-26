@@ -105,7 +105,11 @@ async function trackerSection(supabase: SupabaseClient, userId: string, babyId: 
 async function todoSection(supabase: SupabaseClient, userId: string, babyId: string, period: DigestPeriod, date: string, tz: string) {
   const lists = await listTodoLists(supabase, userId, babyId, { createDefault: false })
   const items = await listTodos(supabase, userId, babyId, { throwOnError: true })
-  const open = items.filter((item) => !item.done)
+  // Items come back ordered per list; titles must follow list order, then item order.
+  const listPosition = new Map(lists.map((list) => [list.id, list.position]))
+  const open = items
+    .filter((item) => !item.done)
+    .sort((a, b) => (listPosition.get(a.list_id) ?? 0) - (listPosition.get(b.list_id) ?? 0) || a.position - b.position)
 
   // done_at is a timestamp; the period is in calendar days of the family time zone.
   // Items done before done_at existed carry their creation date (see the migration).

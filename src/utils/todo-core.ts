@@ -114,13 +114,14 @@ export async function createTodoList(supabase: Client, userId: string, babyId: s
 
   const name = await normalizeText(rawName, INPUT_LIMITS.todoListName, { requiredKey: 'textRequired' })
 
-  const { data: last } = await supabase
+  const { data: last, error: lastError } = await supabase
     .from('todo_lists')
     .select('position')
     .eq('baby_id', babyId)
     .order('position', { ascending: false })
     .limit(1)
     .maybeSingle()
+  if (lastError) { contextLogger.error(lastError, "Error fetching last todo list position"); throw lastError }
 
   const { data, error } = await supabase
     .from('todo_lists')
@@ -194,7 +195,10 @@ export async function listTodos(
     .eq('baby_id', babyId)
   if (listId) query = query.eq('list_id', listId)
 
-  const { data, error } = await query.order('position', { ascending: true })
+  const { data, error } = await query
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: true })
 
   if (error) {
     contextLogger.error(error, "Error fetching todo items")
@@ -311,8 +315,9 @@ export async function addTodo(
   await addTodos(supabase, userId, babyId, targetListId, [{ title: rawTitle }])
 }
 
-export async function renameTodo(supabase: Client, userId: string, babyId: string, itemId: string, rawTitle: unknown) {
+export async function renameTodo(supabase: Client, userId: string, babyId: string, rawItemId: string, rawTitle: unknown) {
   await assertTodoAccess(supabase, userId, babyId)
+  const itemId = await assertUuid(rawItemId)
 
   const contextLogger = logger.child({ function: renameTodo.name, babyId, itemId })
 
@@ -333,8 +338,9 @@ export async function renameTodo(supabase: Client, userId: string, babyId: strin
 // Sets rather than flips the flag, so concurrent taps from two admins can't
 // race into a lost update the way an increment would (cf. adjustInventoryOwned).
 // The item keeps its position: unchecking puts it back in its old slot.
-export async function setTodoDone(supabase: Client, userId: string, babyId: string, itemId: string, done: boolean) {
+export async function setTodoDone(supabase: Client, userId: string, babyId: string, rawItemId: string, done: boolean) {
   await assertTodoAccess(supabase, userId, babyId)
+  const itemId = await assertUuid(rawItemId)
 
   const contextLogger = logger.child({ function: setTodoDone.name, babyId, itemId, done })
 
@@ -350,8 +356,9 @@ export async function setTodoDone(supabase: Client, userId: string, babyId: stri
   revalidatePath(`/baby/${babyId}/todo`, 'layout')
 }
 
-export async function deleteTodo(supabase: Client, userId: string, babyId: string, itemId: string) {
+export async function deleteTodo(supabase: Client, userId: string, babyId: string, rawItemId: string) {
   await assertTodoAccess(supabase, userId, babyId)
+  const itemId = await assertUuid(rawItemId)
 
   const contextLogger = logger.child({ function: deleteTodo.name, babyId, itemId })
 
@@ -387,8 +394,9 @@ export async function clearDoneTodos(supabase: Client, userId: string, babyId: s
 }
 
 // Same two-update swap as moveQuestion, among the unchecked items of the item's own list.
-export async function moveTodo(supabase: Client, userId: string, babyId: string, itemId: string, direction: 'up' | 'down') {
+export async function moveTodo(supabase: Client, userId: string, babyId: string, rawItemId: string, direction: 'up' | 'down') {
   await assertTodoAccess(supabase, userId, babyId)
+  const itemId = await assertUuid(rawItemId)
 
   const contextLogger = logger.child({ function: moveTodo.name, babyId, itemId, direction })
 
