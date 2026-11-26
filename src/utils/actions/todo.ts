@@ -58,12 +58,12 @@ export async function clearDoneTodoItems(babyId: string, listId: string) {
 
 export async function updateTodoItem(babyId: string, itemId: string, fields: { title: string }) {
   const { supabase, userId } = await getSessionClient()
-  await renameTodo(supabase, userId, babyId, itemId, fields?.title)
+  return renameTodo(supabase, userId, babyId, itemId, fields?.title)
 }
 
 export async function toggleTodoItem(babyId: string, itemId: string, done: boolean) {
   const { supabase, userId } = await getSessionClient()
-  await setTodoDone(supabase, userId, babyId, itemId, done)
+  return setTodoDone(supabase, userId, babyId, itemId, done)
 }
 
 export async function deleteTodoItem(babyId: string, itemId: string) {

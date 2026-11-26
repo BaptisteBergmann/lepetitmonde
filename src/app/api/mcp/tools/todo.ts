@@ -79,7 +79,7 @@ export function registerTodoTools(server: McpServer, ctx: ToolContext) {
       inputSchema: z.object({ babyId, itemId, done: z.boolean() }),
       annotations: { destructiveHint: false, idempotentHint: true },
     },
-    ({ babyId, itemId, done }) => run('set_todo_done', { ...ctx, babyId }, () => setTodoDone(admin, userId, babyId, itemId, done)),
+    ({ babyId, itemId, done }) => run('set_todo_done', { ...ctx, babyId }, () => setTodoDone(admin, userId, babyId, itemId, done).then(() => undefined)),
   )
 
   server.registerTool(

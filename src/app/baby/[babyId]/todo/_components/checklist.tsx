@@ -287,6 +287,25 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
 
   const fail = useCallback((message = t('saveError')) => toast.error(message), [t])
 
+  // The server no longer has the row (another device deleted it while we edited): bring
+  // it back under the same id, so the user's edit wins over the remote delete.
+  const recreateRow = useCallback(async (id: string, title: string, done: boolean) => {
+    const current = rowsRef.current
+    const index = current.findIndex((row) => row.id === id)
+    const afterId = current.slice(0, Math.max(index, 0)).findLast((row) => row.id !== id && known.current.has(row.id))?.id
+    known.current.add(id)
+    remoteDeleted.current.delete(id)
+    try {
+      await createTodoItems(babyId, listId, [{ id, title }], afterId)
+      saved.current.set(id, title)
+      queued.current.set(id, title)
+      if (done) await toggleTodoItem(babyId, id, true)
+    } catch (err) {
+      known.current.delete(id)
+      throw err
+    }
+  }, [babyId, listId])
+
   const flushSave = useCallback((id: string) => {
     const timer = timers.current.get(id)
     if (timer) clearTimeout(timer)
@@ -323,8 +342,9 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     enqueue([id], async () => {
       if (!known.current.has(id)) return
       try {
-        await updateTodoItem(babyId, id, { title })
-        saved.current.set(id, title)
+        const matched = await updateTodoItem(babyId, id, { title })
+        if (matched) saved.current.set(id, title)
+        else await recreateRow(id, title, rowsRef.current.find((row) => row.id === id)?.done ?? false)
       } catch (err) {
         console.error(err)
         const previous = saved.current.get(id) ?? title
@@ -333,7 +353,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
         fail()
       }
     })
-  }, [babyId, listId, enqueue, fail])
+  }, [babyId, listId, enqueue, fail, recreateRow])
 
   const scheduleSave = useCallback((id: string) => {
     const timer = timers.current.get(id)
@@ -396,7 +416,8 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     enqueue([id], async () => {
       if (!known.current.has(id)) return
       try {
-        await toggleTodoItem(babyId, id, done)
+        const matched = await toggleTodoItem(babyId, id, done)
+        if (!matched) await recreateRow(id, row.title.trim(), done)
       } catch (err) {
         console.error(err)
         dispatch({ type: 'toggle', id, done: !done, doneAt: previousDoneAt, spareId: crypto.randomUUID() })

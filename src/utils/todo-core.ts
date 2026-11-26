@@ -336,16 +336,19 @@ export async function renameTodo(supabase: Client, userId: string, babyId: strin
 
   const title = await normalizeText(rawTitle, INPUT_LIMITS.todoTitle, { requiredKey: 'textRequired' })
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('todo_items')
     .update({ title })
     .eq('id', itemId)
     .eq('baby_id', babyId)
+    .select('id')
 
   if (error) { contextLogger.error(error, "Error updating todo item"); throw error }
   contextLogger.info("Todo item updated")
 
   revalidatePath(`/baby/${babyId}/todo`, 'layout')
+  // False when the item is gone (deleted from another device): callers re-create it.
+  return (data?.length ?? 0) > 0
 }
 
 // Sets rather than flips the flag, so concurrent taps from two admins can't
@@ -357,16 +360,19 @@ export async function setTodoDone(supabase: Client, userId: string, babyId: stri
 
   const contextLogger = logger.child({ function: setTodoDone.name, babyId, itemId, done })
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('todo_items')
     .update({ done, done_at: done ? new Date().toISOString() : null })
     .eq('id', itemId)
     .eq('baby_id', babyId)
+    .select('id')
 
   if (error) { contextLogger.error(error, "Error toggling todo item"); throw error }
   contextLogger.info("Todo item toggled")
 
   revalidatePath(`/baby/${babyId}/todo`, 'layout')
+  // False when the item is gone (deleted from another device): callers re-create it.
+  return (data?.length ?? 0) > 0
 }
 
 export async function deleteTodo(supabase: Client, userId: string, babyId: string, rawItemId: string) {
