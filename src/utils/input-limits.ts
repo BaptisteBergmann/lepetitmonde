@@ -3,6 +3,7 @@
 // enforces them via normalizeText / input-validation.ts.
 export const INPUT_LIMITS = {
   todoTitle: 200,
+  todoListName: 60,
   inventoryKind: 50,
   inventoryName: 200,
   inventorySize: 50,
