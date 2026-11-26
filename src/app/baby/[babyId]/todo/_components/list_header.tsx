@@ -10,12 +10,6 @@ import { deleteTodoList, updateTodoList } from '@/utils/actions/todo'
 import { useConfirm } from '@/components/confirm_provider'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
-// The page remounts the header when the name changes, which would drop the focus
-// we just gave the title: the new instance for the same list picks it up again,
-// but only shortly after the rename and only if focus is not elsewhere already.
-let restoreTitleFocus: { listId: string; at: number } | null = null
-const RESTORE_WINDOW_MS = 3000
-
 const focusIsFree = () => !document.activeElement || document.activeElement === document.body
 
 // After a delete the list page is gone; hand focus to the index heading once it renders.
@@ -26,15 +20,23 @@ function focusIndexHeading(attemptsLeft = 40) {
 }
 
 // List title with its "..." menu. Rename happens in place in the title; delete asks
-// first and says how many items go with the list. The page remounts this component
-// when the name changes (key), so local state never lingers on a stale name.
+// first and says how many items go with the list. The page keys this
+// component by list id only, so a rename from another device updates `name` in place
+// and never throws away a rename being typed here.
 export default function ListHeader({ babyId, listId, name, itemCount }: { babyId: string; listId: string; name: string; itemCount: number }) {
   const t = useTranslations('todo.lists')
   const router = useRouter()
   const confirmAction = useConfirm()
   const [shownName, setShownName] = useState(name)
+  const [seenName, setSeenName] = useState(name)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(name)
+  // Adjusting state while rendering (not an effect) when the prop changes. While the
+  // field is open the draft is kept and the new name is taken once it closes.
+  if (name !== seenName && !editing) {
+    setSeenName(name)
+    setShownName(name)
+  }
   // Escape cancels, but the blur that follows must not save.
   const cancelled = useRef(false)
   // The menu would hand focus back to its trigger on close and blur the rename field.
@@ -45,13 +47,6 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
   // Set when Enter or Escape ends the rename (not a tap elsewhere), so only then
   // do we move focus back to the title.
   const endedByKey = useRef(false)
-
-  useEffect(() => {
-    const pending = restoreTitleFocus
-    if (!pending || pending.listId !== listId) return
-    restoreTitleFocus = null
-    if (Date.now() - pending.at < RESTORE_WINDOW_MS && focusIsFree()) titleRef.current?.focus()
-  }, [listId])
 
   // Back to the heading once the input is gone, so keyboard users aren't dropped on <body>.
   useEffect(() => {
@@ -81,7 +76,6 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
     setShownName(next)
     try {
       await updateTodoList(babyId, listId, { name: next })
-      restoreTitleFocus = byKey ? { listId, at: Date.now() } : null
       router.refresh()
     } catch (err) {
       console.error(err)

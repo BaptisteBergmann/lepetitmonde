@@ -44,7 +44,7 @@ export default async function TodoListPage({
         </Link>
         <ListChips babyId={babyId} lists={chips} activeId={list.id} />
         <ListHeader
-          key={`${list.id}:${list.name}`}
+          key={list.id}
           babyId={babyId}
           listId={list.id}
           name={list.name}
