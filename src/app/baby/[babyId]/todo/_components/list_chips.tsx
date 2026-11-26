@@ -10,19 +10,24 @@ import ListNameDialog from './list_name_dialog'
 export type ListChip = { id: string; name: string; openCount: number }
 
 // Switcher between lists: plain Links (prefetchable, no back trip), scrolled so the
-// active chip is visible on mount.
+// active chip is visible on mount. Only the strip scrolls: scrollIntoView would also
+// scroll the page sideways and vertically.
 export default function ListChips({ babyId, lists, activeId }: { babyId: string; lists: ListChip[]; activeId: string }) {
   const t = useTranslations('todo.lists')
   const [dialogOpen, setDialogOpen] = useState(false)
   const activeRef = useRef<HTMLAnchorElement>(null)
+  const stripRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
+    const strip = stripRef.current
+    const chip = activeRef.current
+    if (!strip || !chip) return
+    strip.scrollLeft = chip.offsetLeft - (strip.clientWidth - chip.offsetWidth) / 2
   }, [activeId])
 
   return (
     <nav aria-label={t('switcherLabel')}>
-      <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
+      <div ref={stripRef} className="relative -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
         {lists.map((list) => {
           const active = list.id === activeId
           return (
