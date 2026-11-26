@@ -159,7 +159,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   const settleSink = useCallback((id: string, title: string) => {
     const hadFocus = (document.activeElement as HTMLElement | null)?.dataset.checkboxId === id
     const current = rowsRef.current
-    const target = current.slice(current.findIndex((row) => row.id === id) + 1).find((row) => !row.done)
+    const target = current.slice(current.findIndex((row) => row.id === id) + 1).find((row) => !row.done && row.title.trim())
     flushSync(() => stopSinking(id))
     setAnnouncement(t('movedToDone', { title }))
     if (!hadFocus) return
@@ -422,7 +422,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   }
 
   const handleClearDone = async () => {
-    const doneRows = rowsRef.current.filter((row) => row.done && !sinking.has(row.id))
+    const doneRows = rowsRef.current.filter((row) => row.done)
     if (doneRows.length === 0) return
     const confirmed = await confirmAction({
       title: t('clearDoneConfirm', { count: doneRows.length }),
