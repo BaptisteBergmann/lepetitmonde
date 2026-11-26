@@ -3,11 +3,15 @@ import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { logger } from '@/utils/logger'
 
 type RealtimeEvent = {
-  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories' | 'story_highlights' | 'care_events'
+  table: 'users' | 'baby_access' | 'circles' | 'circles_access' | 'inventory_items' | 'stories' | 'story_highlights' | 'care_events' | 'todo_lists' | 'todo_items'
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: unknown
   old: unknown
 }
+
+// Tables whose signals only admins may receive (the to-do page is admin-only).
+// Enforced by the SSE route so a consumer can't forget it.
+export const ADMIN_ONLY_TABLES: ReadonlySet<RealtimeEvent['table']> = new Set(['todo_lists', 'todo_items'])
 
 type Listener = (event: RealtimeEvent) => void
 
@@ -175,6 +179,68 @@ function openChannel(babyId: string): Entry {
       () => {
         for (const listener of listeners) {
           listener({ table: 'care_events', eventType: 'DELETE', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // To-do rows are admin-only (the route drops these events for other members) and
+      // forwarded as bare signals: the page refresh re-checks access and re-reads the data.
+      // DELETE can't be filtered by baby_id, so it has its own binding below.
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'todo_lists', filter: `baby_id=eq.${babyId}` },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'todo_lists', eventType: 'INSERT', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'todo_lists', filter: `baby_id=eq.${babyId}` },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'todo_lists', eventType: 'UPDATE', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // Unfiltered, so it fans out to every baby's channel (same tradeoff as `care_events`
+      // DELETE). No data in the signal; at worst another baby's admin refreshes once.
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'todo_lists' },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'todo_lists', eventType: 'DELETE', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // Same as `todo_lists` above: bare signal, admin-only.
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'todo_items', filter: `baby_id=eq.${babyId}` },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'todo_items', eventType: 'INSERT', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'todo_items', filter: `baby_id=eq.${babyId}` },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'todo_items', eventType: 'UPDATE', new: null, old: null })
+        }
+      }
+    )
+    .on(
+      // Unfiltered, so it fans out to every baby's channel (same tradeoff as `care_events`
+      // DELETE). No data in the signal; at worst another baby's admin refreshes once.
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'todo_items' },
+      () => {
+        for (const listener of listeners) {
+          listener({ table: 'todo_items', eventType: 'DELETE', new: null, old: null })
         }
       }
     )

@@ -1,6 +1,6 @@
 import { getAuthUser } from '@/utils/supabase/auth'
 import { getUserAccess } from '@/utils/actions/users'
-import { subscribe } from '@/utils/supabase/realtime-relay'
+import { ADMIN_ONLY_TABLES, subscribe } from '@/utils/supabase/realtime-relay'
 import { logger } from '@/utils/logger'
 
 export const dynamic = 'force-dynamic'
@@ -32,6 +32,10 @@ export async function GET(
     return new Response('Forbidden', { status: 403 })
   }
 
+  // Computed once per stream; a demotion takes effect at the next recycle.
+  const isAdmin = access.access_level === 'admin'
+  contextLogger.debug({ isAdmin }, 'Realtime stream opened')
+
   const encoder = new TextEncoder()
   let heartbeat: ReturnType<typeof setInterval>
   let maxLifetime: ReturnType<typeof setTimeout>
@@ -52,6 +56,7 @@ export async function GET(
       controller.enqueue(encoder.encode(`retry: ${RECONNECT_DELAY_MS}\n\n`))
 
       unsubscribe = subscribe(babyId, (event) => {
+        if (!isAdmin && ADMIN_ONLY_TABLES.has(event.table)) return
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
       })
 
