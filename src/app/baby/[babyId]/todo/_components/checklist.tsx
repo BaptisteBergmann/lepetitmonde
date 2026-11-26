@@ -62,13 +62,21 @@ function fromServer(items: Tables<'todo_items'>[]): ChecklistRowData[] {
   return items.map((item) => ({ id: item.id, title: item.title, done: item.done, doneAt: item.done_at }))
 }
 
+// The server caps titles in UTF-16 units, so clip to that without cutting an emoji
+// (surrogate pair) in half and leaving a lone surrogate behind.
+function clip(text: string): string {
+  const clipped = text.slice(0, INPUT_LIMITS.todoTitle)
+  const last = clipped.charCodeAt(clipped.length - 1)
+  return last >= 0xd800 && last <= 0xdbff ? clipped.slice(0, -1) : clipped
+}
+
 // Strips list markers people paste from other apps: "- ", "* ", "• ", "[ ]", "[x]", "☐".
 function parsePaste(text: string): string[] {
   return text
     .split(/\r?\n/)
     .map((line) => line.trim().replace(/^(?:[-*•☐☑✓]|\[[ xX]?\])\s*/, '').trim())
     .filter(Boolean)
-    .map((line) => line.slice(0, INPUT_LIMITS.todoTitle))
+    .map(clip)
 }
 
 const doneOpenListeners = new Set<() => void>()
@@ -126,6 +134,14 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     doneOpenListeners.forEach((listener) => listener())
   }
 
+  const focusRow = useCallback((id: string, caret: 'start' | 'end' = 'end') => {
+    const element = inputs.current.get(id)
+    if (!element) return
+    element.focus()
+    const position = caret === 'end' ? element.value.length : 0
+    element.setSelectionRange(position, position)
+  }, [])
+
   const stopSinking = useCallback((id: string) => {
     sinkTimers.current.get(id)?.forEach(clearTimeout)
     sinkTimers.current.delete(id)
@@ -138,24 +154,37 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     setLeaving(without)
   }, [])
 
+  // Once the row leaves the unchecked list its checkbox unmounts (or hides), which would
+  // drop keyboard focus to <body>: hand it to the next unchecked row, or the trailing row.
+  const settleSink = useCallback((id: string, title: string) => {
+    const hadFocus = (document.activeElement as HTMLElement | null)?.dataset.checkboxId === id
+    const current = rowsRef.current
+    const target = current.slice(current.findIndex((row) => row.id === id) + 1).find((row) => !row.done)
+    flushSync(() => stopSinking(id))
+    setAnnouncement(t('movedToDone', { title }))
+    if (!hadFocus) return
+    const draft = current.findLast((row) => !row.done)
+    if (target && target.id !== draft?.id) {
+      containerRef.current?.querySelector<HTMLElement>(`[data-checkbox-id="${target.id}"]`)?.focus()
+    } else if (draft) {
+      focusRow(draft.id)
+    }
+  }, [stopSinking, focusRow, t])
+
   const startSinking = useCallback((id: string, title: string) => {
     setSinking((set) => new Set(set).add(id))
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const leave = setTimeout(() => {
       if (reduceMotion) {
-        stopSinking(id)
-        setAnnouncement(t('movedToDone', { title }))
+        settleSink(id, title)
         return
       }
       setLeaving((set) => new Set(set).add(id))
-      const settle = setTimeout(() => {
-        stopSinking(id)
-        setAnnouncement(t('movedToDone', { title }))
-      }, LEAVE_MS)
+      const settle = setTimeout(() => settleSink(id, title), LEAVE_MS)
       sinkTimers.current.set(id, [settle])
     }, SINK_DELAY_MS)
     sinkTimers.current.set(id, [leave])
-  }, [stopSinking, t])
+  }, [stopSinking, settleSink])
 
   useEffect(() => {
     const timersByRow = sinkTimers.current
@@ -184,14 +213,6 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   }, [])
 
   const fail = useCallback((message = t('saveError')) => toast.error(message), [t])
-
-  const focusRow = useCallback((id: string, caret: 'start' | 'end' = 'end') => {
-    const element = inputs.current.get(id)
-    if (!element) return
-    element.focus()
-    const position = caret === 'end' ? element.value.length : 0
-    element.setSelectionRange(position, position)
-  }, [])
 
   const flushSave = useCallback((id: string) => {
     const timer = timers.current.get(id)
@@ -292,6 +313,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     const row = rowsRef.current.find((r) => r.id === id)
     if (!row || isBlank(row)) return
     const done = !row.done
+    const previousDoneAt = row.doneAt
     dispatch({ type: 'toggle', id, done, doneAt: done ? new Date().toISOString() : null, spareId: crypto.randomUUID() })
     if (done) startSinking(id, row.title)
     else stopSinking(id)
@@ -303,7 +325,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
         await toggleTodoItem(babyId, id, done)
       } catch (err) {
         console.error(err)
-        dispatch({ type: 'toggle', id, done: !done, doneAt: null, spareId: crypto.randomUUID() })
+        dispatch({ type: 'toggle', id, done: !done, doneAt: previousDoneAt, spareId: crypto.randomUUID() })
         if (done) stopSinking(id)
         fail()
       }
@@ -311,7 +333,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>, row: ChecklistRowData) => {
-    if (event.nativeEvent.isComposing) return
+    if (event.nativeEvent.isComposing || row.done) return
     const unchecked = rowsRef.current.filter((r) => !r.done)
     const index = unchecked.findIndex((r) => r.id === row.id)
 
@@ -360,6 +382,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   }
 
   const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>, row: ChecklistRowData) => {
+    if (row.done) return
     const text = event.clipboardData.getData('text')
     if (!/\r?\n/.test(text)) return
     event.preventDefault()
@@ -372,8 +395,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
     }
 
     const element = event.currentTarget
-    const merged = (element.value.slice(0, element.selectionStart) + lines[0] + element.value.slice(element.selectionEnd))
-      .slice(0, INPUT_LIMITS.todoTitle)
+    const merged = clip(element.value.slice(0, element.selectionStart) + lines[0] + element.value.slice(element.selectionEnd))
     const created = lines.slice(1).map((title) => ({ id: crypto.randomUUID(), title, done: false, doneAt: null }))
 
     flushSync(() => {
@@ -400,7 +422,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
   }
 
   const handleClearDone = async () => {
-    const doneRows = rowsRef.current.filter((row) => row.done)
+    const doneRows = rowsRef.current.filter((row) => row.done && !sinking.has(row.id))
     if (doneRows.length === 0) return
     const confirmed = await confirmAction({
       title: t('clearDoneConfirm', { count: doneRows.length }),

@@ -53,6 +53,7 @@ export default function ChecklistRow({ row, isDraft, leaving = false, onToggle, 
       <button
         type="button"
         role="checkbox"
+        data-checkbox-id={row.id}
         aria-checked={row.done}
         aria-label={isDraft ? t('newItemPlaceholder') : t(row.done ? 'itemLabelDone' : 'itemLabel', { title: row.title })}
         disabled={isDraft || !row.title.trim()}
@@ -83,7 +84,9 @@ export default function ChecklistRow({ row, isDraft, leaving = false, onToggle, 
         maxLength={INPUT_LIMITS.todoTitle}
         enterKeyHint="next"
         placeholder={t('newItemPlaceholder')}
-        aria-label={row.title.trim() ? row.title : t('newItemPlaceholder')}
+        // The value names the row; only the empty trailing row needs a label (its placeholder).
+        aria-label={isDraft ? t('newItemPlaceholder') : undefined}
+        readOnly={row.done}
         onChange={(event) => onChange(row.id, event.target.value)}
         onKeyDown={(event) => onKeyDown(event, row)}
         onPaste={(event) => onPaste(event, row)}
