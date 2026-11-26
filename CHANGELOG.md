@@ -2,6 +2,10 @@
 
 Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
+## 2026-11-26
+
+- `723ad08` docs(todo): plan Notes-style multiple to-do lists and later follow-ups
+
 ## 2026-11-22
 
 - `5222696` docs: update offline tracker for replay hardening and server-stamped online times
