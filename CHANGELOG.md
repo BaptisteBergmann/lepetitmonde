@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `5f55a98` fix(todo): total order and logged de-dup for default lists
 - `2da5cdb` fix(todo): list header and name dialog focus and reset handling
 - `e51fb5b` fix(todo): fix lint dependency in checklist sink settle
 - `49d3d18` fix(todo): keep focus when a checked item sinks and tighten checklist edge cases
