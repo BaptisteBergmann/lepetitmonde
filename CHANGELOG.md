@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `a4f5272` docs(todo): lists and Notes-style editor
 - `f37c267` feat(mcp): list-aware todo tools and digest
 - `6e00241` feat(todo): multiple lists
 - `a20c710` feat(todo): sink checked items into a Done section
