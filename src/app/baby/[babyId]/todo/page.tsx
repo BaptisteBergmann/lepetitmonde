@@ -25,7 +25,7 @@ export default async function TodoPage({
     <div className="text-landing-foreground">
       <div className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
         <Reveal className="mb-6">
-          <h1 tabIndex={-1} className="font-display text-3xl font-semibold outline-none">
+          <h1 tabIndex={-1} data-todo-index-heading className="font-display text-3xl font-semibold outline-none">
             {t('title')}
           </h1>
           <p className="mt-2 text-sm text-landing-muted">

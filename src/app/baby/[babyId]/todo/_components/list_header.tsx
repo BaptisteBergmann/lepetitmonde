@@ -11,12 +11,16 @@ import { useConfirm } from '@/components/confirm_provider'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 // The page remounts the header when the name changes, which would drop the focus
-// we just gave the title: the new instance picks it up again.
-let restoreTitleFocus = false
+// we just gave the title: the new instance for the same list picks it up again,
+// but only shortly after the rename and only if focus is not elsewhere already.
+let restoreTitleFocus: { listId: string; at: number } | null = null
+const RESTORE_WINDOW_MS = 3000
+
+const focusIsFree = () => !document.activeElement || document.activeElement === document.body
 
 // After a delete the list page is gone; hand focus to the index heading once it renders.
 function focusIndexHeading(attemptsLeft = 40) {
-  const heading = document.querySelector<HTMLElement>('h1[tabindex="-1"]')
+  const heading = document.querySelector<HTMLElement>('h1[data-todo-index-heading]')
   if (heading) heading.focus()
   else if (attemptsLeft > 0) setTimeout(() => focusIndexHeading(attemptsLeft - 1), 50)
 }
@@ -38,17 +42,28 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
   const titleRef = useRef<HTMLHeadingElement>(null)
   const refocusTitle = useRef(false)
 
+  // Set when Enter or Escape ends the rename (not a tap elsewhere), so only then
+  // do we move focus back to the title.
+  const endedByKey = useRef(false)
+
   useEffect(() => {
-    if (restoreTitleFocus) { restoreTitleFocus = false; titleRef.current?.focus() }
-  }, [])
+    const pending = restoreTitleFocus
+    if (!pending || pending.listId !== listId) return
+    restoreTitleFocus = null
+    if (Date.now() - pending.at < RESTORE_WINDOW_MS && focusIsFree()) titleRef.current?.focus()
+  }, [listId])
 
   // Back to the heading once the input is gone, so keyboard users aren't dropped on <body>.
   useEffect(() => {
-    if (!editing && refocusTitle.current) { refocusTitle.current = false; titleRef.current?.focus() }
+    if (!editing && refocusTitle.current) {
+      refocusTitle.current = false
+      if (focusIsFree()) titleRef.current?.focus()
+    }
   }, [editing])
 
   const startEditing = () => {
     cancelled.current = false
+    endedByKey.current = false
     renaming.current = true
     setDraft(shownName)
     setEditing(true)
@@ -57,15 +72,16 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
   const commit = async () => {
     setEditing(false)
     renaming.current = false
-    refocusTitle.current = true
+    const byKey = endedByKey.current
+    endedByKey.current = false
+    refocusTitle.current = byKey
     const next = draft.trim()
     if (cancelled.current || !next || next === shownName) return
     const previous = shownName
     setShownName(next)
     try {
       await updateTodoList(babyId, listId, { name: next })
-      restoreTitleFocus = true
-      setTimeout(() => { restoreTitleFocus = false }, 3000)
+      restoreTitleFocus = byKey ? { listId, at: Date.now() } : null
       router.refresh()
     } catch (err) {
       console.error(err)
@@ -108,8 +124,8 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') event.currentTarget.blur()
-            if (event.key === 'Escape') { cancelled.current = true; event.currentTarget.blur() }
+            if (event.key === 'Enter') { endedByKey.current = true; event.currentTarget.blur() }
+            if (event.key === 'Escape') { cancelled.current = true; endedByKey.current = true; event.currentTarget.blur() }
           }}
           className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold outline-none"
         />
