@@ -103,7 +103,7 @@ async function trackerSection(supabase: SupabaseClient, userId: string, babyId: 
 }
 
 async function todoSection(supabase: SupabaseClient, userId: string, babyId: string, period: DigestPeriod, date: string, tz: string) {
-  const lists = await listTodoLists(supabase, userId, babyId)
+  const lists = await listTodoLists(supabase, userId, babyId, { createDefault: false })
   const items = await listTodos(supabase, userId, babyId, { throwOnError: true })
   const open = items.filter((item) => !item.done)
 

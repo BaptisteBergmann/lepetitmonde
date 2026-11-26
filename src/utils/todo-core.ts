@@ -65,14 +65,16 @@ async function fetchLists(supabase: Client, babyId: string): Promise<Tables<'tod
   return data
 }
 
-// Lists by position. A baby with none (new, or its last list was deleted) gets a
-// default one, so the page always has somewhere to type. `defaultName` is passed in
-// by the caller to keep this module locale-free.
+// Lists by position. With `createDefault` (web pages, addTodo), a baby with none
+// (new, or its last list was deleted) gets a default one so the page always has
+// somewhere to type. Read-only callers (digest, MCP) pass `createDefault: false`
+// and may get an empty array. `defaultName` is passed in by the caller to keep
+// this module locale-free.
 export async function listTodoLists(
   supabase: Client,
   userId: string,
   babyId: string,
-  { defaultName = DEFAULT_TODO_LIST_NAME }: { defaultName?: string } = {},
+  { defaultName = DEFAULT_TODO_LIST_NAME, createDefault = true }: { defaultName?: string; createDefault?: boolean } = {},
 ): Promise<Tables<'todo_lists'>[]> {
   await assertTodoAccess(supabase, userId, babyId)
 
@@ -83,7 +85,7 @@ export async function listTodoLists(
     throw error
   })
 
-  if (lists.length === 0) {
+  if (lists.length === 0 && createDefault) {
     const { data, error } = await supabase
       .from('todo_lists')
       .insert({ baby_id: babyId, name: defaultName, position: 1, created_by: userId })
@@ -92,6 +94,14 @@ export async function listTodoLists(
     if (error) { contextLogger.error(error, "Error creating default todo list"); throw error }
     contextLogger.info({ listId: data.id }, "Default todo list created")
     lists = [data]
+
+    // No unique constraint stops two first loads from both inserting: the later
+    // one backs out so a single default list remains.
+    const current = await fetchLists(supabase, babyId)
+    if (current.length > 1 && current[0].id !== data.id) {
+      await supabase.from('todo_lists').delete().eq('id', data.id).eq('baby_id', babyId)
+      lists = current.filter((list) => list.id !== data.id)
+    }
   }
 
   return lists

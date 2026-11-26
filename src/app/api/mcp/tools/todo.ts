@@ -14,13 +14,13 @@ export function registerTodoTools(server: McpServer, ctx: ToolContext) {
     'list_todo_lists',
     {
       title: 'List to-do lists',
-      description: "Lists a baby's to-do lists in display order, with the number of open items in each. A baby with no list gets a default one.",
+      description: "Lists a baby's to-do lists in display order, with the number of open items in each.",
       inputSchema: z.object({ babyId }),
       annotations: { readOnlyHint: true },
     },
     ({ babyId }) => run('list_todo_lists', { ...ctx, babyId }, async () => {
       const [lists, items] = await Promise.all([
-        listTodoLists(admin, userId, babyId),
+        listTodoLists(admin, userId, babyId, { createDefault: false }),
         listTodos(admin, userId, babyId, { throwOnError: true }),
       ])
       return lists.map(({ id, name, position }) => ({
