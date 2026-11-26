@@ -264,12 +264,14 @@ export async function addTodos(
   const rows = existing as { id: string; position: number; done: boolean }[]
   let lower: number
   let upper: number | undefined
-  if (afterId) {
-    const after = rows.find((row) => row.id === afterId)
-    if (!after) throw await actionError('todoNotFound')
+  const after = afterId ? rows.find((row) => row.id === afterId) : undefined
+  if (after) {
     lower = after.position
     upper = rows.find((row) => !row.done && row.position > lower)?.position
   } else {
+    // The anchor can vanish when another device deletes it between keystrokes;
+    // appending beats rolling back what the user just typed.
+    if (afterId) contextLogger.warn({ afterId }, "Anchor todo item gone, appending at the end")
     lower = rows.length ? rows[rows.length - 1].position : 0
   }
 
