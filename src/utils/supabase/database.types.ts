@@ -1998,7 +1998,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           done: boolean
+          done_at: string | null
           id: string
+          list_id: string
           position: number
           title: string
         }
@@ -2007,7 +2009,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           done?: boolean
+          done_at?: string | null
           id?: string
+          list_id: string
           position: number
           title: string
         }
@@ -2016,7 +2020,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           done?: boolean
+          done_at?: string | null
           id?: string
+          list_id?: string
           position?: number
           title?: string
         }
@@ -2030,6 +2036,55 @@ export type Database = {
           },
           {
             foreignKeyName: "todo_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todo_items_list_fkey"
+            columns: ["list_id", "baby_id"]
+            isOneToOne: false
+            referencedRelation: "todo_lists"
+            referencedColumns: ["id", "baby_id"]
+          },
+        ]
+      }
+      todo_lists: {
+        Row: {
+          baby_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          position: number
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todo_lists_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "babies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todo_lists_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"

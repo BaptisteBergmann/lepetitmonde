@@ -57,6 +57,24 @@ export async function addTodo(supabase: SupabaseClient, userId: string, babyId: 
 
   const title = await normalizeText(rawTitle, INPUT_LIMITS.todoTitle, { requiredKey: 'textRequired' })
 
+  // list_id is required now; until the list-aware UI lands, everything goes to the first list.
+  let { data: list } = await supabase
+    .from('todo_lists')
+    .select('id')
+    .eq('baby_id', babyId)
+    .order('position', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  if (!list) {
+    const { data: created, error: listError } = await supabase
+      .from('todo_lists')
+      .insert({ baby_id: babyId, name: 'À faire', position: 1, created_by: userId })
+      .select('id')
+      .single()
+    if (listError) { contextLogger.error(listError, "Error creating default todo list"); throw listError }
+    list = created
+  }
+
   const { data: lastItem } = await supabase
     .from('todo_items')
     .select('position')
@@ -69,6 +87,7 @@ export async function addTodo(supabase: SupabaseClient, userId: string, babyId: 
     .from('todo_items')
     .insert({
       baby_id: babyId,
+      list_id: list.id,
       title,
       created_by: userId,
       position: (lastItem?.position ?? 0) + 1,
@@ -108,7 +127,7 @@ export async function setTodoDone(supabase: SupabaseClient, userId: string, baby
 
   const { error } = await supabase
     .from('todo_items')
-    .update({ done })
+    .update({ done, done_at: done ? new Date().toISOString() : null })
     .eq('id', itemId)
     .eq('baby_id', babyId)
 
