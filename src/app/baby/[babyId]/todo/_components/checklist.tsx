@@ -184,7 +184,7 @@ export default function Checklist({ babyId, listId, items }: { babyId: string; l
       sinkTimers.current.set(id, [settle])
     }, SINK_DELAY_MS)
     sinkTimers.current.set(id, [leave])
-  }, [stopSinking, settleSink])
+  }, [settleSink])
 
   useEffect(() => {
     const timersByRow = sinkTimers.current
