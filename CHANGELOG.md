@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `2e36bcb` fix(todo): focus index heading after delete, only refocus title after key rename
 - `761f508` fix(todo): clear-done matches server and sink focus skips blank rows
 - `5f55a98` fix(todo): total order and logged de-dup for default lists
 - `2da5cdb` fix(todo): list header and name dialog focus and reset handling
