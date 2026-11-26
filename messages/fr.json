@@ -879,6 +879,9 @@
       "save": "Enregistrer",
       "saving": "Enregistrement…",
       "saveError": "Une erreur est survenue lors de l'enregistrement."
+    },
+    "lists": {
+      "defaultName": "À faire"
     }
   },
   "anecdotes": {

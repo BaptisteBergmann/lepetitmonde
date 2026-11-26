@@ -879,6 +879,9 @@
       "save": "Save",
       "saving": "Saving…",
       "saveError": "Something went wrong while saving."
+    },
+    "lists": {
+      "defaultName": "To-do"
     }
   },
   "anecdotes": {
