@@ -72,6 +72,9 @@ export default function ListHeader({ babyId, listId, name, itemCount }: { babyId
     endedByKey.current = false
     refocusTitle.current = byKey
     const next = draft.trim()
+    // Whatever the prop says now was seen: a stale remote name must not be re-applied
+    // over this save once editing ends.
+    setSeenName(name)
     if (cancelled.current || !next || next === shownName) return
     const previous = shownName
     setShownName(next)
