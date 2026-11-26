@@ -4,6 +4,7 @@ Every commit on `main`, newest first, grouped by date. Generated from `git log`.
 
 ## 2026-11-26
 
+- `be58f11` fix(todo): append new items when the anchor item is gone
 - `6192b4f` feat(realtime): admin-only todo bindings in the relay
 - `46c4ac9` feat(db): publish todo tables to realtime
 - `5c3a5a2` docs(todo): mark to-do lists plan implemented
